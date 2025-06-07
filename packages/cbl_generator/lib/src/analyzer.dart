@@ -75,7 +75,6 @@ final class TypedDataAnalyzer {
       libraryUri: element.librarySource.uri,
       declaringClassName: element.displayName,
       types: [
-        // ignore: deprecated_member_use
         for (final type in types) await buildTypedDataClassModel(type.element!),
       ],
     );
@@ -443,12 +442,12 @@ final class TypedDataAnalyzer {
     return true;
   }
 
-  String? _resolveMetaDataFieldName<Annotation, Type>(
+  String? _resolveMetaDataFieldName<Annotation, T>(
     ClassElement clazz, {
     bool nullable = false,
   }) {
     final annotationTypeChecker = TypeChecker.fromRuntime(Annotation);
-    final typeTypeChecker = TypeChecker.fromRuntime(Type);
+    final typeTypeChecker = TypeChecker.fromRuntime(T);
     final nullabilitySuffix = nullable
         ? NullabilitySuffix.question
         : NullabilitySuffix.none;
@@ -463,7 +462,7 @@ final class TypedDataAnalyzer {
       if (!typeTypeChecker.isExactlyType(element.returnType) ||
           element.returnType.nullabilitySuffix != nullabilitySuffix) {
         throw InvalidGenerationSourceError(
-          '@$Annotation must be used on a getter which returns a $Type'
+          '@$Annotation must be used on a getter which returns a $T'
           '${nullable ? '?' : ''}.',
           element: element,
         );
@@ -508,10 +507,7 @@ final class TypedDataAnalyzer {
           return BuiltinScalarType(dartType: typeName, isNullable: isNullable);
         }
 
-        // TODO(blaugold): Remove this ignore once the analyzer dependency is
-        // upgraded
-        // ignore: deprecated_member_use
-        if (type.element2 is EnumElement) {
+        if (type.element is EnumElement) {
           return CustomScalarType(
             dartType: typeName,
             isNullable: isNullable,
@@ -570,10 +566,8 @@ final class TypedDataAnalyzer {
 
 bool _isTypedDataObject(DartType type) {
   if (type is InterfaceType) {
-    // ignore: deprecated_member_use
-    return _typedDictionaryType.hasAnnotationOfExact(type.element2) ||
-        // ignore: deprecated_member_use
-        _typedDocumentType.hasAnnotationOfExact(type.element2);
+    return _typedDictionaryType.hasAnnotationOfExact(type.element) ||
+        _typedDocumentType.hasAnnotationOfExact(type.element);
   }
 
   return false;

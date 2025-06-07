@@ -36,12 +36,12 @@ class A extends $A {
     String name, [
     DatabaseConfiguration? config,
   ]) =>
-  // ignore: invalid_use_of_internal_member
-  AsyncDatabase.openInternal(name, config, _adapter);
+      // ignore: invalid_use_of_internal_member
+      AsyncDatabase.openInternal(name, config, _adapter);
 
   static SyncDatabase openSync(String name, [DatabaseConfiguration? config]) =>
-  // ignore: invalid_use_of_internal_member
-  SyncDatabase.internal(name, config, _adapter);
+      // ignore: invalid_use_of_internal_member
+      SyncDatabase.internal(name, config, _adapter);
 
   static final _adapter = TypedDataRegistry(types: []);
 }
