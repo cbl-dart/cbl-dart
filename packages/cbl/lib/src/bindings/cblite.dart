@@ -2010,14 +2010,14 @@ class cblite {
   ffi.Pointer<CBLTLSIdentity> CBLTLSIdentity_CreateIdentity(
     int keyUsages,
     FLDict attributes,
-    int expiration,
+    int validityInMilliseconds,
     FLString label,
     ffi.Pointer<CBLError> outError,
   ) {
     return _CBLTLSIdentity_CreateIdentity(
       keyUsages,
       attributes,
-      expiration,
+      validityInMilliseconds,
       label,
       outError,
     );
@@ -2036,14 +2036,14 @@ class cblite {
     int keyUsages,
     ffi.Pointer<CBLKeyPair> keypair,
     FLDict attributes,
-    int expiration,
+    int validityInMilliseconds,
     ffi.Pointer<CBLError> outError,
   ) {
     return _CBLTLSIdentity_CreateIdentityWithKeyPair(
       keyUsages,
       keypair,
       attributes,
-      expiration,
+      validityInMilliseconds,
       outError,
     );
   }
@@ -3448,6 +3448,21 @@ class cblite {
   late final _CBLURLEndpointListener_Port =
       _CBLURLEndpointListener_PortPtr.asFunction<
         DartCBLURLEndpointListener_Port
+      >();
+
+  ffi.Pointer<CBLTLSIdentity> CBLURLEndpointListener_TLSIdentity(
+    ffi.Pointer<CBLURLEndpointListener> arg0,
+  ) {
+    return _CBLURLEndpointListener_TLSIdentity(arg0);
+  }
+
+  late final _CBLURLEndpointListener_TLSIdentityPtr =
+      _lookup<ffi.NativeFunction<NativeCBLURLEndpointListener_TLSIdentity>>(
+        'CBLURLEndpointListener_TLSIdentity',
+      );
+  late final _CBLURLEndpointListener_TLSIdentity =
+      _CBLURLEndpointListener_TLSIdentityPtr.asFunction<
+        DartCBLURLEndpointListener_TLSIdentity
       >();
 
   FLMutableArray CBLURLEndpointListener_Urls(
@@ -6992,7 +7007,7 @@ typedef NativeCBLTLSIdentity_CreateIdentity =
     ffi.Pointer<CBLTLSIdentity> Function(
       CBLKeyUsages keyUsages,
       FLDict attributes,
-      CBLTimestamp expiration,
+      ffi.Int64 validityInMilliseconds,
       FLString label,
       ffi.Pointer<CBLError> outError,
     );
@@ -7000,7 +7015,7 @@ typedef DartCBLTLSIdentity_CreateIdentity =
     ffi.Pointer<CBLTLSIdentity> Function(
       int keyUsages,
       FLDict attributes,
-      int expiration,
+      int validityInMilliseconds,
       FLString label,
       ffi.Pointer<CBLError> outError,
     );
@@ -7009,7 +7024,7 @@ typedef NativeCBLTLSIdentity_CreateIdentityWithKeyPair =
       CBLKeyUsages keyUsages,
       ffi.Pointer<CBLKeyPair> keypair,
       FLDict attributes,
-      CBLTimestamp expiration,
+      ffi.Int64 validityInMilliseconds,
       ffi.Pointer<CBLError> outError,
     );
 typedef DartCBLTLSIdentity_CreateIdentityWithKeyPair =
@@ -7017,7 +7032,7 @@ typedef DartCBLTLSIdentity_CreateIdentityWithKeyPair =
       int keyUsages,
       ffi.Pointer<CBLKeyPair> keypair,
       FLDict attributes,
-      int expiration,
+      int validityInMilliseconds,
       ffi.Pointer<CBLError> outError,
     );
 typedef NativeCBLTLSIdentity_DeleteIdentityWithLabel =
@@ -7969,6 +7984,14 @@ typedef NativeCBLURLEndpointListener_Port =
     ffi.Uint16 Function(ffi.Pointer<CBLURLEndpointListener> arg0);
 typedef DartCBLURLEndpointListener_Port =
     int Function(ffi.Pointer<CBLURLEndpointListener> arg0);
+typedef NativeCBLURLEndpointListener_TLSIdentity =
+    ffi.Pointer<CBLTLSIdentity> Function(
+      ffi.Pointer<CBLURLEndpointListener> arg0,
+    );
+typedef DartCBLURLEndpointListener_TLSIdentity =
+    ffi.Pointer<CBLTLSIdentity> Function(
+      ffi.Pointer<CBLURLEndpointListener> arg0,
+    );
 typedef NativeCBLURLEndpointListener_Urls =
     FLMutableArray Function(ffi.Pointer<CBLURLEndpointListener> arg0);
 typedef DartCBLURLEndpointListener_Urls =
@@ -8893,6 +8916,8 @@ const int kCBLNetworkDomain = 5;
 
 const int kCBLWebSocketDomain = 6;
 
+const int kCBLMbedTLSDomain = 7;
+
 const int kCBLErrorAssertionFailed = 1;
 
 const int kCBLErrorUnimplemented = 2;
@@ -9103,15 +9128,15 @@ const int kCBLLogDomainMaskListener = 16;
 
 const int kCBLLogDomainMaskAll = 255;
 
-const String CBLITE_VERSION = '3.2.3';
+const String CBLITE_VERSION = '3.2.4';
 
-const int CBLITE_VERSION_NUMBER = 3002003;
+const int CBLITE_VERSION_NUMBER = 3002004;
 
-const int CBLITE_BUILD_NUMBER = 30;
+const int CBLITE_BUILD_NUMBER = 9;
 
-const String CBLITE_SOURCE_ID = 'f1d63ea+b3b6dc0';
+const String CBLITE_SOURCE_ID = '01ea1ce+664eff6';
 
-const String CBLITE_BUILD_TIMESTAMP = '2025-04-29T06:37:13Z';
+const String CBLITE_BUILD_TIMESTAMP = '2025-06-04T20:46:23Z';
 
 const String HOTLEVEL = 'Ofast';
 

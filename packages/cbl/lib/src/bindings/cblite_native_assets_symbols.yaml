@@ -86,6 +86,8 @@ files:
         name: kCBLDomain
       c:@Ea@kCBLDomain@kCBLFleeceDomain:
         name: kCBLFleeceDomain
+      c:@Ea@kCBLDomain@kCBLMbedTLSDomain:
+        name: kCBLMbedTLSDomain
       c:@Ea@kCBLDomain@kCBLNetworkDomain:
         name: kCBLNetworkDomain
       c:@Ea@kCBLDomain@kCBLPOSIXDomain:

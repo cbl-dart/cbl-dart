@@ -104,8 +104,13 @@ const CBLURLEndpointListenerConfiguration* CBLURLEndpointListener_Config(const C
 /** The listening port of the listener. If the listener is not started, the port will be zero. */
 uint16_t CBLURLEndpointListener_Port(const CBLURLEndpointListener*) CBLAPI;
 
+/** The TLS identity used by the listener for TLS communication. The value will be nullptr if the listener is not started, or if the TLS is disabled.
+    @note The returned identity remains valid until the listener is stopped or released.
+          If you want to keep it longer, retain it with `CBLTLSIdentity_Retain`. */
+CBLTLSIdentity* CBLURLEndpointListener_TLSIdentity(const CBLURLEndpointListener*) CBLAPI;
+
 /** The possible URLs of the listener. If the listener is not started, NULL will be returned.
- @note You are responsible for releasing the returned reference. */
+    @note You are responsible for releasing the returned reference. */
 FLMutableArray CBLURLEndpointListener_Urls(const CBLURLEndpointListener*) CBLAPI;
 
 /** The connection status of the listener */

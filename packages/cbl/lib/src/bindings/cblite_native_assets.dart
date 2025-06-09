@@ -808,7 +808,7 @@ external imp$1.DartCBLTimestamp CBLTLSIdentity_Expiration(
 external ffi.Pointer<CBLTLSIdentity> CBLTLSIdentity_CreateIdentity(
   imp$1.DartCBLKeyUsages keyUsages,
   imp$1.FLDict attributes,
-  imp$1.DartCBLTimestamp expiration,
+  int validityInMilliseconds,
   imp$1.FLString label,
   ffi.Pointer<CBLError> outError,
 );
@@ -818,7 +818,7 @@ external ffi.Pointer<CBLTLSIdentity> CBLTLSIdentity_CreateIdentityWithKeyPair(
   imp$1.DartCBLKeyUsages keyUsages,
   ffi.Pointer<CBLKeyPair> keypair,
   imp$1.FLDict attributes,
-  imp$1.DartCBLTimestamp expiration,
+  int validityInMilliseconds,
   ffi.Pointer<CBLError> outError,
 );
 
@@ -1361,6 +1361,11 @@ CBLURLEndpointListener_Config(ffi.Pointer<CBLURLEndpointListener> arg0);
 
 @ffi.Native<NativeCBLURLEndpointListener_Port>()
 external int CBLURLEndpointListener_Port(
+  ffi.Pointer<CBLURLEndpointListener> arg0,
+);
+
+@ffi.Native<NativeCBLURLEndpointListener_TLSIdentity>()
+external ffi.Pointer<CBLTLSIdentity> CBLURLEndpointListener_TLSIdentity(
   ffi.Pointer<CBLURLEndpointListener> arg0,
 );
 
@@ -3275,7 +3280,7 @@ typedef NativeCBLTLSIdentity_CreateIdentity =
     ffi.Pointer<CBLTLSIdentity> Function(
       imp$1.CBLKeyUsages keyUsages,
       imp$1.FLDict attributes,
-      imp$1.CBLTimestamp expiration,
+      ffi.Int64 validityInMilliseconds,
       imp$1.FLString label,
       ffi.Pointer<CBLError> outError,
     );
@@ -3283,7 +3288,7 @@ typedef DartCBLTLSIdentity_CreateIdentity =
     ffi.Pointer<CBLTLSIdentity> Function(
       imp$1.DartCBLKeyUsages keyUsages,
       imp$1.FLDict attributes,
-      imp$1.DartCBLTimestamp expiration,
+      int validityInMilliseconds,
       imp$1.FLString label,
       ffi.Pointer<CBLError> outError,
     );
@@ -3292,7 +3297,7 @@ typedef NativeCBLTLSIdentity_CreateIdentityWithKeyPair =
       imp$1.CBLKeyUsages keyUsages,
       ffi.Pointer<CBLKeyPair> keypair,
       imp$1.FLDict attributes,
-      imp$1.CBLTimestamp expiration,
+      ffi.Int64 validityInMilliseconds,
       ffi.Pointer<CBLError> outError,
     );
 typedef DartCBLTLSIdentity_CreateIdentityWithKeyPair =
@@ -3300,7 +3305,7 @@ typedef DartCBLTLSIdentity_CreateIdentityWithKeyPair =
       imp$1.DartCBLKeyUsages keyUsages,
       ffi.Pointer<CBLKeyPair> keypair,
       imp$1.FLDict attributes,
-      imp$1.DartCBLTimestamp expiration,
+      int validityInMilliseconds,
       ffi.Pointer<CBLError> outError,
     );
 typedef NativeCBLTLSIdentity_DeleteIdentityWithLabel =
@@ -3890,6 +3895,14 @@ typedef NativeCBLURLEndpointListener_Port =
     ffi.Uint16 Function(ffi.Pointer<CBLURLEndpointListener> arg0);
 typedef DartCBLURLEndpointListener_Port =
     int Function(ffi.Pointer<CBLURLEndpointListener> arg0);
+typedef NativeCBLURLEndpointListener_TLSIdentity =
+    ffi.Pointer<CBLTLSIdentity> Function(
+      ffi.Pointer<CBLURLEndpointListener> arg0,
+    );
+typedef DartCBLURLEndpointListener_TLSIdentity =
+    ffi.Pointer<CBLTLSIdentity> Function(
+      ffi.Pointer<CBLURLEndpointListener> arg0,
+    );
 typedef NativeCBLURLEndpointListener_Urls =
     imp$1.FLMutableArray Function(ffi.Pointer<CBLURLEndpointListener> arg0);
 typedef DartCBLURLEndpointListener_Urls =
@@ -4740,15 +4753,15 @@ typedef DartFLDumpData = ffi.Pointer<ffi.Char> Function(FLSlice data);
 typedef NativeFLData_Dump = imp$1.FLStringResult Function(FLSlice data);
 typedef DartFLData_Dump = imp$1.FLStringResult Function(FLSlice data);
 
-const String CBLITE_VERSION = '3.2.3';
+const String CBLITE_VERSION = '3.2.4';
 
-const int CBLITE_VERSION_NUMBER = 3002003;
+const int CBLITE_VERSION_NUMBER = 3002004;
 
-const int CBLITE_BUILD_NUMBER = 30;
+const int CBLITE_BUILD_NUMBER = 9;
 
-const String CBLITE_SOURCE_ID = 'f1d63ea+b3b6dc0';
+const String CBLITE_SOURCE_ID = '01ea1ce+664eff6';
 
-const String CBLITE_BUILD_TIMESTAMP = '2025-04-29T06:37:13Z';
+const String CBLITE_BUILD_TIMESTAMP = '2025-06-04T20:46:23Z';
 
 const String HOTLEVEL = 'Ofast';
 

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
@@ -398,12 +399,27 @@ b17aolOOq/6xfP6QIc9I6pOoPhEFY18mCqVCKrF3YCQjVC3P7Ac1m2x5iMXL+fXF
   group('KeyPair', () {
     group('fromExternal', () {
       group('failures', () {
-        test('public key unavailable', skip: true, () async {
-          final keyPair = await KeyPair.fromExternal(
-            ExceptionExternalKeyPairDelegate(),
+        test('public key unavailable', () async {
+          var uncaughtError = false;
+          await runZonedGuarded(
+            () async {
+              final keyPair = await KeyPair.fromExternal(
+                ExceptionExternalKeyPairDelegate(),
+              );
+              expect(await keyPair.publicKeyDigest, isNull);
+            },
+            (error, stackTrace) {
+              if (error case UnimplementedError(
+                message: 'ExceptionExternalKeyPairDelegate.publicKeyData',
+              )) {
+                uncaughtError = true;
+              } else {
+                // ignore: only_throw_errors
+                throw error;
+              }
+            },
           );
-          expect(await keyPair.publicKeyDigest, isNull);
-          expect(await keyPair.publicKeyData, isNull);
+          expect(uncaughtError, isTrue);
         });
       });
 
@@ -557,55 +573,47 @@ b17aolOOq/6xfP6QIc9I6pOoPhEFY18mCqVCKrF3YCQjVC3P7Ac1m2x5iMXL+fXF
       expect(identity.certificates.single.attributes.commonName, 'Test');
     });
 
-    test(
-      'create, retrieve and delete persisted identity',
-      skip: Platform.isMacOS || Platform.isIOS
-          ? 'TODO(blaugold): fix @autoreleasepool issue'
-          : null,
-      () async {
-        final label = base64Encode(randomBytes(16, random: Random()));
-        final identityFuture = Future(
-          () => TlsIdentity.createIdentity(
-            keyUsages: {KeyUsage.serverAuth},
-            attributes: const CertificateAttributes(
-              commonName: 'CBL Dart Test',
-            ),
-            expiration: futureExpiration,
-            label: label,
-          ),
-        );
+    test('create, retrieve and delete persisted identity', () async {
+      final label = base64Encode(randomBytes(16, random: Random()));
+      final identityFuture = Future(
+        () => TlsIdentity.createIdentity(
+          keyUsages: {KeyUsage.serverAuth},
+          attributes: const CertificateAttributes(commonName: 'CBL Dart Test'),
+          expiration: futureExpiration,
+          label: label,
+        ),
+      );
 
-        if (await expectPersistedIdentityUnsupported(identityFuture)) {
-          return;
-        }
+      if (await expectPersistedIdentityUnsupported(identityFuture)) {
+        return;
+      }
 
-        final identity = await identityFuture;
+      final identity = await identityFuture;
 
-        final certificate = identity.certificates.single;
-        expect(certificate.attributes.commonName, 'CBL Dart Test');
+      final certificate = identity.certificates.single;
+      expect(certificate.attributes.commonName, 'CBL Dart Test');
 
-        var retrievedIdentity = await TlsIdentity.identity(label);
-        expect(retrievedIdentity, isNotNull);
-        expect(retrievedIdentity!.expires, identity.expires);
-        expect(
-          retrievedIdentity.certificates.single.attributes,
-          certificate.attributes,
-        );
+      var retrievedIdentity = await TlsIdentity.identity(label);
+      expect(retrievedIdentity, isNotNull);
+      expect(retrievedIdentity!.expires, identity.expires);
+      expect(
+        retrievedIdentity.certificates.single.attributes,
+        certificate.attributes,
+      );
 
-        retrievedIdentity = await TlsIdentity.identityWithCertificates([
-          certificate,
-        ]);
-        expect(retrievedIdentity, isNotNull);
-        expect(retrievedIdentity.expires, identity.expires);
-        expect(
-          retrievedIdentity.certificates.single.attributes,
-          certificate.attributes,
-        );
+      retrievedIdentity = await TlsIdentity.identityWithCertificates([
+        certificate,
+      ]);
+      expect(retrievedIdentity, isNotNull);
+      expect(retrievedIdentity.expires, identity.expires);
+      expect(
+        retrievedIdentity.certificates.single.attributes,
+        certificate.attributes,
+      );
 
-        await TlsIdentity.deleteIdentity(label);
-        await expectLater(TlsIdentity.identity(label), completion(isNull));
-      },
-    );
+      await TlsIdentity.deleteIdentity(label);
+      await expectLater(TlsIdentity.identity(label), completion(isNull));
+    });
 
     test('retrieve non-persisted identity by label', () async {
       final label = base64Encode(randomBytes(16, random: Random()));
@@ -680,17 +688,17 @@ final class ExceptionExternalKeyPairDelegate extends ExternalKeyPairDelegate {
 
   @override
   Future<DerData?> publicKeyData() {
-    throw UnimplementedError();
+    throw UnimplementedError('ExceptionExternalKeyPairDelegate.publicKeyData');
   }
 
   @override
   Future<Uint8List?> decrypt(Uint8List data) {
-    throw UnimplementedError();
+    throw UnimplementedError('ExceptionExternalKeyPairDelegate.decrypt');
   }
 
   @override
   Future<Uint8List?> sign(SignatureDigestAlgorithm? algorithm, Uint8List data) {
-    throw UnimplementedError();
+    throw UnimplementedError('ExceptionExternalKeyPairDelegate.sign');
   }
 }
 
