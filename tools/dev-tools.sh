@@ -196,18 +196,47 @@ function prepareNativeLibraries() {
     esac
 }
 
+function packPrefetchedPackages() {
+    local PREFETCHED_PACKAGES_PASSWORD="$1"
+    if [[ -z "$PREFETCHED_PACKAGES_PASSWORD" ]]; then
+        echo "PREFETCHED_PACKAGES_PASSWORD is not set"
+        exit 1
+    fi
+
+    echo "Archiving pre-fetched packages"
+    (cd "$vendorDir" && zip -r "$prefetchedPackagesDir.zip" "$(basename "$prefetchedPackagesDir")")
+
+    echo "Encrypting pre-fetched packages"
+    echo "$PREFETCHED_PACKAGES_PASSWORD" >"$prefetchedPackagesPasswordFile"
+    openssl enc -aes-256-cbc -pbkdf2 -salt -pass "file:$prefetchedPackagesPasswordFile" \
+        -in "$prefetchedPackagesDir.zip" \
+        -out "$prefetchedPackagesDir.zip.enc"
+    rm "$prefetchedPackagesPasswordFile"
+    rm "$prefetchedPackagesDir.zip"
+}
+
+function unpackPrefetchedPackages() {
+    local PREFETCHED_PACKAGES_PASSWORD="$1"
+    if [[ -z "$PREFETCHED_PACKAGES_PASSWORD" ]]; then
+        echo "PREFETCHED_PACKAGES_PASSWORD is not set"
+        exit 1
+    fi
+
+    echo "Decrypting pre-fetched packages"
+    echo "$PREFETCHED_PACKAGES_PASSWORD" >"$prefetchedPackagesPasswordFile"
+    openssl enc -aes-256-cbc -pbkdf2 -d -pass "file:$prefetchedPackagesPasswordFile" \
+        -in "$prefetchedPackagesDir.zip.enc" \
+        -out "$prefetchedPackagesDir.zip"
+    rm "$prefetchedPackagesPasswordFile"
+
+    echo "Unpacking pre-fetched packages"
+    unzip "$prefetchedPackagesDir.zip" -d "$vendorDir"
+    rm "$prefetchedPackagesDir.zip"
+}
+
 function bootstrap() {
-    # Unpack pre-fetched packages.
     if [[ -f "$prefetchedPackagesDir.zip.enc" && -n "$PREFETCHED_PACKAGES_PASSWORD" && ! -d "$prefetchedPackagesDir" ]]; then
-        echo "Unpacking pre-fetched packages"
-        echo "$PREFETCHED_PACKAGES_PASSWORD" >"$prefetchedPackagesPasswordFile"
-        openssl enc -aes-256-cbc -pbkdf2 -d -pass "file:$prefetchedPackagesPasswordFile" \
-            -in "$prefetchedPackagesDir.zip.enc" \
-            -out "$prefetchedPackagesDir.zip"
-        rm "$prefetchedPackagesPasswordFile"
-        unzip "$prefetchedPackagesDir.zip" -d "$vendorDir"
-        rm "$prefetchedPackagesDir.zip"
-        rm "$prefetchedPackagesDir.zip.enc"
+        unpackPrefetchedPackages "$PREFETCHED_PACKAGES_PASSWORD"
     fi
 
     $melosBin bootstrap

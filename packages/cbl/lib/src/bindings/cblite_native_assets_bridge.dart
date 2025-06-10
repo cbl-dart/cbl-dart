@@ -915,13 +915,13 @@ class cbliteNativeAssetsBridge implements cblite {
   ffi.Pointer<CBLTLSIdentity> CBLTLSIdentity_CreateIdentity(
     int keyUsages,
     FLDict attributes,
-    int expiration,
+    int validityInMilliseconds,
     FLString label,
     ffi.Pointer<CBLError> outError,
   ) => native.CBLTLSIdentity_CreateIdentity(
     keyUsages,
     attributes,
-    expiration,
+    validityInMilliseconds,
     label,
     outError,
   );
@@ -931,13 +931,13 @@ class cbliteNativeAssetsBridge implements cblite {
     int keyUsages,
     ffi.Pointer<CBLKeyPair> keypair,
     FLDict attributes,
-    int expiration,
+    int validityInMilliseconds,
     ffi.Pointer<CBLError> outError,
   ) => native.CBLTLSIdentity_CreateIdentityWithKeyPair(
     keyUsages,
     keypair,
     attributes,
-    expiration,
+    validityInMilliseconds,
     outError,
   );
 
@@ -1531,6 +1531,11 @@ class cbliteNativeAssetsBridge implements cblite {
   @override
   int CBLURLEndpointListener_Port(ffi.Pointer<CBLURLEndpointListener> arg0) =>
       native.CBLURLEndpointListener_Port(arg0);
+
+  @override
+  ffi.Pointer<CBLTLSIdentity> CBLURLEndpointListener_TLSIdentity(
+    ffi.Pointer<CBLURLEndpointListener> arg0,
+  ) => native.CBLURLEndpointListener_TLSIdentity(arg0);
 
   @override
   FLMutableArray CBLURLEndpointListener_Urls(

@@ -149,6 +149,8 @@ void main() {
         disableTls: false,
       );
       final listener = await UrlEndpointListener.create(config);
+      await listener.start();
+      addTearDown(listener.stop);
       expect(listener.tlsIdentity, isNotNull);
     });
 
@@ -182,7 +184,6 @@ void main() {
         listener.toString(),
         'UrlEndpointListener('
         'config: ${listener.config}, '
-        'tlsIdentity: ${listener.config.tlsIdentity}, '
         'connectionStatus: ${listener.connectionStatus}'
         ')',
       );

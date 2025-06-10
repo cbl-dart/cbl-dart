@@ -41,6 +41,7 @@ typedef CBL_ENUM(uint8_t, CBLErrorDomain) {
     kCBLFleeceDomain,       ///< code is a Fleece error; see "FleeceException.h"
     kCBLNetworkDomain,      ///< code is a network error; see \ref CBLNetworkErrorCode
     kCBLWebSocketDomain,    ///< code is a WebSocket close code (1000...1015) or HTTP error (300..599)
+    kCBLMbedTLSDomain       ///< code is an mbedTLS error.
 };
 
 /** Couchbase Lite error codes, in the CBLDomain. */

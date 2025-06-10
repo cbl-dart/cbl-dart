@@ -101,7 +101,7 @@ enum CBLErrorDomain {
   fleece(cblite_lib.kCBLFleeceDomain),
   network(cblite_lib.kCBLNetworkDomain),
   webSocket(cblite_lib.kCBLWebSocketDomain),
-  mbedTls(cblite_lib.kCBLWebSocketDomain);
+  mbedTls(cblite_lib.kCBLMbedTLSDomain);
 
   const CBLErrorDomain(this.value);
 
@@ -112,8 +112,7 @@ enum CBLErrorDomain {
     cblite_lib.kCBLFleeceDomain => fleece,
     cblite_lib.kCBLNetworkDomain => network,
     cblite_lib.kCBLWebSocketDomain => webSocket,
-    // TODO(blaugold): use constant from library once fixed in CBL C SDK
-    7 => mbedTls,
+    cblite_lib.kCBLMbedTLSDomain => mbedTls,
     _ => throw ArgumentError('Unknown error domain: $value'),
   };
 

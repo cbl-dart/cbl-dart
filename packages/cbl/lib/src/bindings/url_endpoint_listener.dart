@@ -40,11 +40,6 @@ final class UrlEndpointListenerBindings extends Bindings {
   createCertificateAuthenticatorWithRoots(Pointer<cblite_lib.CBLCert> roots) =>
       cblite.CBLListenerAuth_CreateCertificateWithRootCerts(roots);
 
-  int? port(Pointer<cblite_lib.CBLURLEndpointListener> pointer) {
-    final port = cblite.CBLURLEndpointListener_Port(pointer);
-    return port == 0 ? null : port;
-  }
-
   Pointer<cblite_lib.CBLURLEndpointListener> create({
     required List<Pointer<CBLCollection>> collections,
     int? port,
@@ -81,6 +76,11 @@ final class UrlEndpointListenerBindings extends Bindings {
     ).checkError();
   });
 
+  int? port(Pointer<cblite_lib.CBLURLEndpointListener> pointer) {
+    final port = cblite.CBLURLEndpointListener_Port(pointer);
+    return port == 0 ? null : port;
+  }
+
   List<Uri>? urls(Pointer<cblite_lib.CBLURLEndpointListener> pointer) =>
       cblite.CBLURLEndpointListener_Urls(pointer)
           .toNullable()
@@ -89,6 +89,10 @@ final class UrlEndpointListenerBindings extends Bindings {
             (array) =>
                 array.map((value) => Uri.parse(value.asString!)).toList(),
           );
+
+  Pointer<cblite_lib.CBLTLSIdentity>? tlsIdentity(
+    Pointer<cblite_lib.CBLURLEndpointListener> pointer,
+  ) => cblite.CBLURLEndpointListener_TLSIdentity(pointer).toNullable();
 
   cblite_lib.CBLConnectionStatus connectionStatus(
     Pointer<cblite_lib.CBLURLEndpointListener> pointer,
