@@ -11,6 +11,7 @@ import '../errors.dart';
 import '../support/edition.dart';
 import '../support/isolate.dart';
 import '../support/native_object.dart';
+import '../support/utils.dart';
 import 'authenticator.dart';
 import 'endpoint.dart';
 import 'replicator.dart';
@@ -432,6 +433,9 @@ abstract final class UrlEndpointListener {
   List<Uri>? get urls;
 
   /// The [TlsIdentity] used for TLS communication by this listener.
+  ///
+  /// If this listener has not been started yet or is not using TLS, this will
+  /// be `null`.
   TlsIdentity? get tlsIdentity;
 
   /// The current [ConnectionStatus] of this listener.
@@ -448,7 +452,6 @@ final class FfiUrlEndpointListener implements UrlEndpointListener, Finalizable {
   FfiUrlEndpointListener.fromPointer(
     this._pointer, {
     required UrlEndpointListenerConfiguration config,
-    required this.tlsIdentity,
     required bool adopt,
   }) : _config = UrlEndpointListenerConfiguration.from(config) {
     bindCBLRefCountedToDartObject(this, pointer: _pointer, adopt: adopt);
@@ -458,15 +461,6 @@ final class FfiUrlEndpointListener implements UrlEndpointListener, Finalizable {
     UrlEndpointListenerConfiguration config,
   ) async {
     useEnterpriseFeature(EnterpriseFeature.peerToPeerSync);
-
-    var tlsIdentity = config.tlsIdentity as FfiTlsIdentity?;
-    if (tlsIdentity == null && !config.disableTls) {
-      tlsIdentity = await FfiTlsIdentity.createIdentity(
-        keyUsages: {KeyUsage.serverAuth},
-        attributes: const CertificateAttributes(commonName: 'anonymous'),
-        expiration: DateTime.now().add(const Duration(days: 30)),
-      );
-    }
 
     final pointer = await _create(
       collections: config.collections
@@ -481,7 +475,7 @@ final class FfiUrlEndpointListener implements UrlEndpointListener, Finalizable {
       port: config.port,
       networkInterface: config.networkInterface,
       disableTls: config.disableTls,
-      tlsIdentityPointer: tlsIdentity?.pointer,
+      tlsIdentityPointer: (config.tlsIdentity as FfiTlsIdentity?)?.pointer,
       authenticatorPointer:
           (config.authenticator as FfiListenAuthenticator?)?.pointer,
       enableDeltaSync: config.enableDeltaSync,
@@ -491,7 +485,6 @@ final class FfiUrlEndpointListener implements UrlEndpointListener, Finalizable {
     return FfiUrlEndpointListener.fromPointer(
       pointer,
       config: config,
-      tlsIdentity: tlsIdentity,
       adopt: true,
     );
   }
@@ -521,9 +514,6 @@ final class FfiUrlEndpointListener implements UrlEndpointListener, Finalizable {
   final Pointer<CBLURLEndpointListener> _pointer;
   final UrlEndpointListenerConfiguration _config;
 
-  @override
-  final TlsIdentity? tlsIdentity;
-
   FfiListenAuthenticator? get _authenticator =>
       _config.authenticator as FfiListenAuthenticator?;
 
@@ -536,6 +526,11 @@ final class FfiUrlEndpointListener implements UrlEndpointListener, Finalizable {
 
   @override
   List<Uri>? get urls => _bindings.urls(_pointer);
+
+  @override
+  TlsIdentity? get tlsIdentity => _bindings
+      .tlsIdentity(_pointer)
+      ?.let((pointer) => FfiTlsIdentity.fromPointer(pointer, adopt: false));
 
   @override
   ConnectionStatus get connectionStatus {

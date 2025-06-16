@@ -186,7 +186,7 @@ final class TlsIdentityBindings extends Bindings {
   Pointer<cblite_lib.CBLTLSIdentity> create(
     Set<CBLKeyUsages> keyUsages,
     Map<String, String> attributes,
-    Duration expiration,
+    Duration validityDuration,
     String? label,
   ) {
     final attributesDict = MutableDict(attributes);
@@ -195,7 +195,7 @@ final class TlsIdentityBindings extends Bindings {
       (flLabel) => cblite.CBLTLSIdentity_CreateIdentity(
         keyUsages.fold(0, (value, usage) => value | usage.value),
         attributesDict.pointer.cast(),
-        expiration.inMilliseconds,
+        validityDuration.inMilliseconds,
         flLabel,
         globalCBLError..ref.reset(),
       ).checkError(),

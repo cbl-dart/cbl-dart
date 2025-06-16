@@ -14,6 +14,7 @@ import '../utils/database_utils.dart';
 import '../utils/matchers.dart';
 import '../utils/replicator_utils.dart';
 import '../utils/test_document.dart';
+import 'url_endpoint_listener_test.dart';
 
 void main() {
   setupTestBinding();
@@ -610,7 +611,7 @@ void main() {
 
     apiTest(
       'serverCertificate returns server certificate',
-      skip: 'CBLReplicator_ServerCertificate is not implemented',
+      skip: skipPeerSyncTest,
       () async {
         final serverIdentity = await TlsIdentity.createIdentity(
           keyUsages: {KeyUsage.serverAuth},
@@ -639,8 +640,8 @@ void main() {
         final receivedCertificate = await clientRepl.serverCertificate;
         expect(receivedCertificate!.attributes, serverCertificate.attributes);
         expect(
-          (await receivedCertificate.publicKey).publicKeyDigest,
-          (await serverCertificate.publicKey).publicKeyDigest,
+          await (await receivedCertificate.publicKey).publicKeyDigest,
+          await (await serverCertificate.publicKey).publicKeyDigest,
         );
       },
     );

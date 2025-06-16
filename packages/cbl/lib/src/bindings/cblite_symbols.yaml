@@ -88,6 +88,8 @@ files:
         name: kCBLDomain
       c:@Ea@kCBLDomain@kCBLFleeceDomain:
         name: kCBLFleeceDomain
+      c:@Ea@kCBLDomain@kCBLMbedTLSDomain:
+        name: kCBLMbedTLSDomain
       c:@Ea@kCBLDomain@kCBLNetworkDomain:
         name: kCBLNetworkDomain
       c:@Ea@kCBLDomain@kCBLPOSIXDomain:
@@ -696,6 +698,8 @@ files:
         name: CBLURLEndpointListener_Status
       c:@F@CBLURLEndpointListener_Stop:
         name: CBLURLEndpointListener_Stop
+      c:@F@CBLURLEndpointListener_TLSIdentity:
+        name: CBLURLEndpointListener_TLSIdentity
       c:@F@CBLURLEndpointListener_Urls:
         name: CBLURLEndpointListener_Urls
       c:@F@CBLVectorEncoding_CreateNone:

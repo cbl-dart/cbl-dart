@@ -467,12 +467,7 @@ final class _FfiCertificateAttributes extends CertificateAttributes {
 
   @override
   String? get locality =>
-      // TODO(blaugold): Use kCBLCertAttrKeyLocality once it is fixed in the
-      // C SDK.
-      // kCBLCertAttrKeyLocality does not work for reading, only for
-      // passing the attribute when creating a certificate.
-      // _bindings.kCBLCertAttrKeyLocality,
-      _certificate.attribute('L');
+      _certificate.attribute(_bindings.kCBLCertAttrKeyLocality);
 
   @override
   String? get postalCode =>
@@ -1221,7 +1216,7 @@ final class FfiTlsIdentity implements TlsIdentity, Finalizable {
 
     final cblKeyUsages = keyUsages.map((usage) => usage._toCbl()).toSet();
     final attributesMap = attributes._toAttributesMap();
-    final expirationDuration = expiration.toUtc().difference(
+    final validityDuration = expiration.toUtc().difference(
       DateTime.now().toUtc(),
     );
     final keyPairPointer = (keyPair as FfiKeyPair?)?.pointer;
@@ -1232,13 +1227,13 @@ final class FfiTlsIdentity implements TlsIdentity, Finalizable {
             ? _bindings.createWithKeyPair(
                 cblKeyUsages,
                 attributesMap,
-                expirationDuration,
+                validityDuration,
                 keyPairPointer,
               )
             : _bindings.create(
                 cblKeyUsages,
                 attributesMap,
-                expirationDuration,
+                validityDuration,
                 label,
               ),
       ),

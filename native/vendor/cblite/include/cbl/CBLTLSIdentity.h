@@ -69,7 +69,7 @@ CBL_PUBLIC extern const FLString kCBLCertAttrKeySurname;           // "SN",     
 CBL_PUBLIC extern const FLString kCBLCertAttrKeyOrganization;      // "O",               e.g. "Example Corp."
 CBL_PUBLIC extern const FLString kCBLCertAttrKeyOrganizationUnit;  // "OU",              e.g. "Marketing"
 CBL_PUBLIC extern const FLString kCBLCertAttrKeyPostalAddress;     // "postalAddress",   e.g. "123 Example Blvd #2A"
-CBL_PUBLIC extern const FLString kCBLCertAttrKeyLocality;          // "locality",        e.g. "Boston"
+CBL_PUBLIC extern const FLString kCBLCertAttrKeyLocality;          // "L",               e.g. "Boston"
 CBL_PUBLIC extern const FLString kCBLCertAttrKeyPostalCode;        // "postalCode",      e.g. "02134"
 CBL_PUBLIC extern const FLString kCBLCertAttrKeyStateOrProvince;   // "ST",              e.g. "Massachusetts" (or "Quebec", ...)
 CBL_PUBLIC extern const FLString kCBLCertAttrKeyCountry;           // "C",               e.g. "us" (2-letter ISO country code)
@@ -79,7 +79,7 @@ CBL_PUBLIC extern const FLString kCBLCertAttrKeyEmailAddress;      // "rfc822Nam
 CBL_PUBLIC extern const FLString kCBLCertAttrKeyHostname;          // "dNSName",         e.g. "www.example.com"
 CBL_PUBLIC extern const FLString kCBLCertAttrKeyURL;               // "uniformResourceIdentifier", e.g. "https://example.com/jane"
 CBL_PUBLIC extern const FLString kCBLCertAttrKeyIPAddress;         // "iPAddress",       e.g. An IP Address in binary format e.g. "\x0A\x00\x01\x01"
-CBL_PUBLIC extern const FLString kCBLCertAttrKeyRegisteredID;      // "registeredID",    e.g. A domain specific identifier.
+CBL_PUBLIC extern const FLString kCBLCertAttrKeyRegisteredID;      // "registeredID",    e.g. A domain-specific identifier encoded as an ASN.1 Object Identifier (OID) in DER format.
 
 /** An opaque object representing the X.509 Certifcate. */
 typedef struct CBLCert CBLCert;
@@ -168,7 +168,8 @@ typedef CBL_ENUM(int, CBLSignatureDigestAlgorithm) {
     The core idea is that all private key operations are delegated to the application's secure key storage,
     ensuring that the private key is never exposed outside the key storage. */
 typedef struct CBLExternalKeyCallbacks {
-    /** Provides the public key's raw data, as an ASN.1 DER sequence of [modulus, exponent].
+    /** Provides the public key data as an ASN.1 DER-encoded SubjectPublicKeyInfo structure.
+        For more information, see RFC 5280: https://datatracker.ietf.org/doc/html/rfc5280
         @param externalKey  The external key pointer given to CBLKeyPair_CreateWithExternalKey.
         @param output  Where to copy the key data.
         @param outputMaxLen  Maximum length of output that can be written.
@@ -237,6 +238,7 @@ CBLKeyPair* _cbl_nullable CBLKeyPair_CreateWithPrivateKeyData(FLSlice privateKey
 /** Returns a hex-encoded digest of the public key.
     @param keyPair The key pair from which to extract the public key digest.
     @return A hex-encoded digest of the public key.
+    @note Returns empty result if the public key digest cannot be retrieved.
     @note You are responsible for releasing the returned data. */
 _cbl_warn_unused
 FLSliceResult CBLKeyPair_PublicKeyDigest(CBLKeyPair* keyPair) CBLAPI;
@@ -244,11 +246,12 @@ FLSliceResult CBLKeyPair_PublicKeyDigest(CBLKeyPair* keyPair) CBLAPI;
 /** Returns the public key data.
     @param keyPair The key pair from which to retrieve the public key.
     @return The public key data.
+    @note Returns empty result if the public key data cannot be retrieved.
     @note You are responsible for releasing the returned data. */
 _cbl_warn_unused
 FLSliceResult CBLKeyPair_PublicKeyData(CBLKeyPair* keyPair) CBLAPI;
 
-/** Returns the private key data, if the private key is known and its data is accessible.
+/** Returns the private key data in DER format, if the private key is known and its data is accessible.
     @param keyPair The key pair containing the private key.
     @return The private key data, or an empty slice if the key is not accessible.
     @note Persistent private keys in the secure key store generally don't have accessible data.
@@ -293,7 +296,7 @@ typedef CBL_OPTIONS(uint16_t, CBLKeyUsages) {
     the platform's secure key store (Keychain on Apple platforms or CNG Key Storage Provider on Windows).
     @param keyUsages The key usages for the generated identity.
     @param attributes A dictionary containing the certificate attributes.
-    @param expiration The expiration date/time of the certificate in the identity.
+    @param validityInMilliseconds Certificate validity duration in milliseconds.
     @param label The label used for persisting the identity in the platform's secure storage. If `kFLSliceNull` is passed, the identity will not be persisted.
     @param outError On failure, the error will be written here.
     @return A CBLTLSIdentity instance on success, or NULL on failure.
@@ -303,7 +306,7 @@ typedef CBL_OPTIONS(uint16_t, CBLKeyUsages) {
 _cbl_warn_unused
 CBLTLSIdentity* _cbl_nullable CBLTLSIdentity_CreateIdentity(CBLKeyUsages keyUsages,
                                                             FLDict attributes,
-                                                            CBLTimestamp expiration,
+                                                            int64_t validityInMilliseconds,
                                                             FLString label,
                                                             CBLError* _cbl_nullable outError) CBLAPI;
 
@@ -311,7 +314,7 @@ CBLTLSIdentity* _cbl_nullable CBLTLSIdentity_CreateIdentity(CBLKeyUsages keyUsag
     @param keyUsages The key usages for the generated identity.
     @param keypair The RSA key pair to be used for generating the TLS identity.
     @param attributes A dictionary containing the certificate attributes.
-    @param expiration The expiration date/time of the certificate in the identity.
+    @param validityInMilliseconds Certificate validity duration in milliseconds.
     @param outError On failure, the error will be written here.
     @return A CBLTLSIdentity instance on success, or NULL on failure.
     @Note The Common Name (kCBLCertAttrKeyCommonName) attribute is required.
@@ -320,7 +323,7 @@ _cbl_warn_unused
 CBLTLSIdentity* _cbl_nullable CBLTLSIdentity_CreateIdentityWithKeyPair(CBLKeyUsages keyUsages,
                                                                        CBLKeyPair* keypair,
                                                                        FLDict attributes,
-                                                                       CBLTimestamp expiration,
+                                                                       int64_t validityInMilliseconds,
                                                                        CBLError* _cbl_nullable outError) CBLAPI;
 
 #if !defined(__linux__) && !defined(__ANDROID__)
@@ -348,10 +351,10 @@ CBLTLSIdentity* _cbl_nullable CBLTLSIdentity_IdentityWithLabel(FLString label,
 
 #endif //#if !defined(__linux__) && !defined(__ANDROID__)
 
-/** Returns a TLS identity from an existing identity using the provided RSA keypair and certificate.
- *  The certificate will not be resigned with the new keypair; it will be used as is.
+/** Returns a TLS identity from an existing identity using the provided RSA keypair and certificate chain.
+ *  The certificate chain is used as-is; the leaf certificate is not re-signed.
  *  @param keypair A CBLKeyPair instance representing the RSA keypair to be associated with the identity.
- *  @param cert A CBLCert instance representing the certificate associated with the identity.
+ *  @param cert A CBLCert instance representing the certificate chain.
  *  @param outError On failure, the error will be written here.
  *  @return A CBLTLSIdentity instance on success, or `NULL` if an error occurs.
     @note You are responsible for releasing the returned reference. */
