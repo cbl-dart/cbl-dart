@@ -1,3 +1,7 @@
+## 3.2.4
+
+ - Bump "cbl_libcblite_api" to `3.2.4`.
+
 ## 3.2.3
 
  - Bump "cbl_libcblite_api" to `3.2.3`.
