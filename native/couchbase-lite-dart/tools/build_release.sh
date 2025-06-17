@@ -124,11 +124,13 @@ windows*)
     ;;
 esac
 
-"$cbdBin" install-packages \
-    --library cblite \
-    --edition "$edition" \
-    --release "$couchbaseLiteCRelease" \
-    --os "$os"
+for edition in ${editions[@]}; do
+    "$cbdBin" install-packages \
+        --library cblite \
+        --edition "$edition" \
+        --release "$couchbaseLiteCRelease" \
+        --os "$os"
+done
 
 echo "Building Couchbase Lite Dart release $release for $target"
 
