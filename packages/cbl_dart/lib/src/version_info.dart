@@ -2,7 +2,4 @@
 // ignore: implementation_imports
 import 'package:cbl/src/install.dart';
 
-const latestReleases = {
-  Library.cblite: '3.2.4',
-  Library.cblitedart: '9.0.0',
-};
+const latestReleases = {Library.cblite: '3.2.4', Library.cblitedart: '9.0.0'};
