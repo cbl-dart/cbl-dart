@@ -29,44 +29,31 @@ jobs:
           echo "::set-output name=tag::${GITHUB_REF/refs\/tags\//}"
           echo "::set-output name=release::${GITHUB_REF/refs\/tags\/libcblitedart-v/}"
 
-  linux:
+  build:
     needs: create-release
-    name: Linux
-    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - iOS
+          - macOS
+          - Android
+          - Ubuntu
+          - Windows
+    runs-on: >-
+      ${{ fromJSON('{
+        "iOS":"macos-14",
+        "macOS":"macos-14",
+        "Android":"ubuntu-22.04",
+        "Ubuntu":"ubuntu-22.04",
+        "Windows":"windows-2022"
+      }')[matrix.os] }}
+
     steps:
       - uses: actions/checkout@v4
 
       - name: Get CMake and Ninja
         uses: lukka/get-cmake@latest
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-
-      - name: Setup Melos
-        run: dart pub global activate melos
-
-      - name: Setup CBL Dart dev tools
-        run: melos run activate:cbd
-
-      - name: Build release
-        run: |
-          ./native/couchbase-lite-dart/tools/build_release.sh \
-            ${{ needs.create-release.outputs.release }} \
-            linux-x86_64
-
-      - name: Upload archives
-        uses: alexellis/upload-assets@0.2.2
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        with:
-          asset_paths: '["./native/couchbase-lite-dart/build/release/*"]'
-
-  android:
-    needs: create-release
-    name: Android
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -78,107 +65,35 @@ jobs:
         run: melos run activate:cbd
 
       - name: Install Android Native Toolchain
+        if: ${{ matrix.os == 'Android' }}
         run: ./native/tools/android-sdk.sh installNativeToolchain
-
-      - name: Build release
-        run: |
-          ./native/couchbase-lite-dart/tools/build_release.sh \
-            ${{ needs.create-release.outputs.release }} \
-            android
-
-      - name: Upload archives
-        uses: alexellis/upload-assets@0.2.2
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        with:
-          asset_paths: '["./native/couchbase-lite-dart/build/release/*"]'
-
-  ios:
-    needs: create-release
-    name: iOS
-    runs-on: macos-14
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-
-      - name: Setup Melos
-        run: dart pub global activate melos
-
-      - name: Setup CBL Dart dev tools
-        run: melos run activate:cbd
-
-      - name: Build release
-        run: |
-          ./native/couchbase-lite-dart/tools/build_release.sh \
-            ${{ needs.create-release.outputs.release }} \
-            ios
-
-      - name: Upload archives
-        uses: alexellis/upload-assets@0.2.2
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        with:
-          asset_paths: '["./native/couchbase-lite-dart/build/release/*"]'
-
-  macos:
-    needs: create-release
-    name: macOS
-    runs-on: macos-14
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-
-      - name: Setup Melos
-        run: dart pub global activate melos
-
-      - name: Setup CBL Dart dev tools
-        run: melos run activate:cbd
-
-      - name: Get CMake and Ninja
-        uses: lukka/get-cmake@latest
-
-      - name: Build release
-        run: |
-          ./native/couchbase-lite-dart/tools/build_release.sh \
-            ${{ needs.create-release.outputs.release }} \
-            macos
-
-      - name: Upload archives
-        uses: alexellis/upload-assets@0.2.2
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        with:
-          asset_paths: '["./native/couchbase-lite-dart/build/release/*"]'
-
-  windows:
-    needs: create-release
-    name: Windows
-    runs-on: windows-2022
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-
-      - name: Setup Melos
-        run: dart pub global activate melos
-
-      - name: Setup CBL Dart dev tools
-        run: melos run activate:cbd
-
-      - name: Get CMake
-        uses: lukka/get-cmake@latest
 
       - name: Build release
         shell: bash
         run: |
+          TARGET=""
+
+          case ${{ matrix.os }} in
+            iOS)
+              TARGET="ios"
+              ;;
+            macOS)
+              TARGET="macos"
+              ;;
+            Android)
+              TARGET="android"
+              ;;
+            Ubuntu)
+              TARGET="linux-x86_64"
+              ;;
+            Windows)
+              TARGET="windows-x86_64"
+              ;;
+          esac
+
           ./native/couchbase-lite-dart/tools/build_release.sh \
             ${{ needs.create-release.outputs.release }} \
-            windows-x86_64
+            $TARGET
 
       - name: Upload archives
         uses: alexellis/upload-assets@0.2.2

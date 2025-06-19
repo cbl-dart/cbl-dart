@@ -301,7 +301,7 @@ CBLDART_EXPORT bool CBLDart_ListenerCertAuthCallbackTrampoline(void *context,
 // enterprise and community edition. They are never accessed when using
 // the community edition.
 
-CBLDART_EXPORT bool CBLDartKeyPair_CreateWithExternalKey();
+CBLDART_EXPORT void CBLDartKeyPair_CreateWithExternalKey();
 CBLDART_EXPORT void CBLDart_ListenerPasswordAuthCallbackTrampoline();
 CBLDART_EXPORT void CBLDart_ListenerCertAuthCallbackTrampoline();
 
