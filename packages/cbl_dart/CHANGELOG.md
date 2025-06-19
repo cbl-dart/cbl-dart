@@ -1,3 +1,9 @@
+## 3.4.0
+
+ - **REFACTOR**: make `Bindings` fields final ([#766](https://github.com/cbl-dart/cbl-dart/issues/766)). ([c9a9adb0](https://github.com/cbl-dart/cbl-dart/commit/c9a9adb00d7dba3a1273d0a2c1d0b54d54966c68))
+ - **FEAT**: upgrade to CBL C SDK 3.2.3 ([#757](https://github.com/cbl-dart/cbl-dart/issues/757)). ([2f3af72e](https://github.com/cbl-dart/cbl-dart/commit/2f3af72e9ca96d804b45a9fa164c3bb42a5e3a8d))
+ - **FEAT**: update to CBL C SDK 3.2.2 ([#755](https://github.com/cbl-dart/cbl-dart/issues/755)). ([12ea21fe](https://github.com/cbl-dart/cbl-dart/commit/12ea21fe0778f5043dc11be708dab94d9aa4a311))
+
 ## 3.3.1
 
  - Update a dependency to the latest release.

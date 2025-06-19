@@ -3,6 +3,75 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2025-06-19
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`cbl` - `v3.5.0`](#cbl---v350)
+ - [`cbl_dart` - `v3.4.0`](#cbl_dart---v340)
+ - [`cbl_flutter_ce` - `v3.4.0`](#cbl_flutter_ce---v340)
+ - [`cbl_flutter_ee` - `v3.4.0`](#cbl_flutter_ee---v340)
+ - [`cbl_generator` - `v0.3.1+4`](#cbl_generator---v0314)
+ - [`cbl_flutter` - `v3.3.2`](#cbl_flutter---v332)
+ - [`cbl_flutter_install` - `v0.1.0+3`](#cbl_flutter_install---v0103)
+ - [`cbl_flutter_platform_interface` - `v3.1.3`](#cbl_flutter_platform_interface---v313)
+ - [`cbl_sentry` - `v2.1.5`](#cbl_sentry---v215)
+
+Packages with dependency updates only:
+
+> Packages listed below depend on other packages in this workspace that have had changes. Their versions have been incremented to bump the minimum dependency versions of the packages they depend upon in this project.
+
+ - `cbl_flutter` - `v3.3.2`
+ - `cbl_flutter_install` - `v0.1.0+3`
+ - `cbl_flutter_platform_interface` - `v3.1.3`
+ - `cbl_sentry` - `v2.1.5`
+
+---
+
+#### `cbl` - `v3.5.0`
+
+ - **REFACTOR**: move native assets bridge to `cbl` ([#797](https://github.com/cbl-dart/cbl-dart/issues/797)). ([5ccaeff5](https://github.com/cbl-dart/cbl-dart/commit/5ccaeff552897cdba80508d8ce87ec886811c0f0))
+ - **REFACTOR**: make imports of FFI library bindings consistent ([#796](https://github.com/cbl-dart/cbl-dart/issues/796)). ([872c4721](https://github.com/cbl-dart/cbl-dart/commit/872c4721fd07ab8296feecbee297cfcd9ce72c79))
+ - **REFACTOR**: make `Bindings` fields final ([#766](https://github.com/cbl-dart/cbl-dart/issues/766)). ([c9a9adb0](https://github.com/cbl-dart/cbl-dart/commit/c9a9adb00d7dba3a1273d0a2c1d0b54d54966c68))
+ - **REFACTOR**: remove JSON serialization support in service layer ([#758](https://github.com/cbl-dart/cbl-dart/issues/758)). ([53b5e02a](https://github.com/cbl-dart/cbl-dart/commit/53b5e02a951167f3f35957c7badb2050cea3d022))
+ - **REFACTOR**: rename `encodeQueryParameter` to `encodeUnsavedBlobWithData` ([#749](https://github.com/cbl-dart/cbl-dart/issues/749)). ([a4041c96](https://github.com/cbl-dart/cbl-dart/commit/a4041c96440cb9c7776e43bed2f3f88185237036))
+ - **FIX**: add `MbedTlsException` ([#788](https://github.com/cbl-dart/cbl-dart/issues/788)). ([ad212254](https://github.com/cbl-dart/cbl-dart/commit/ad2122548e0b3ecde13c1a8fbe7d1d19dcc5dba4))
+ - **FEAT**: add `KeyPair.fromExternal` ([#789](https://github.com/cbl-dart/cbl-dart/issues/789)). ([c281ece8](https://github.com/cbl-dart/cbl-dart/commit/c281ece819cc2a5eb153f82b6afa4aaf1110d21e))
+ - **FEAT**: add `UrlEndpointListener` and related APIs ([#785](https://github.com/cbl-dart/cbl-dart/issues/785)). ([8914d1d5](https://github.com/cbl-dart/cbl-dart/commit/8914d1d57b053c280c537de75258cb7f8a8ccffb))
+ - **FEAT**: add `TlsIdentity` and related APIs ([#774](https://github.com/cbl-dart/cbl-dart/issues/774)). ([8699d364](https://github.com/cbl-dart/cbl-dart/commit/8699d364c9693ea8a08b5b51d36793a62b736950))
+ - **FEAT**: upgrade to CBL C SDK 3.2.3 ([#757](https://github.com/cbl-dart/cbl-dart/issues/757)). ([2f3af72e](https://github.com/cbl-dart/cbl-dart/commit/2f3af72e9ca96d804b45a9fa164c3bb42a5e3a8d))
+ - **FEAT**: update to CBL C SDK 3.2.2 ([#755](https://github.com/cbl-dart/cbl-dart/issues/755)). ([12ea21fe](https://github.com/cbl-dart/cbl-dart/commit/12ea21fe0778f5043dc11be708dab94d9aa4a311))
+ - **FEAT**: make Fleece encoding synchronous ([#438](https://github.com/cbl-dart/cbl-dart/issues/438)). ([d4cb1aea](https://github.com/cbl-dart/cbl-dart/commit/d4cb1aeaf96cdda3edcf1fd3a385e1b279b40ddd))
+
+#### `cbl_dart` - `v3.4.0`
+
+ - **REFACTOR**: make `Bindings` fields final ([#766](https://github.com/cbl-dart/cbl-dart/issues/766)). ([c9a9adb0](https://github.com/cbl-dart/cbl-dart/commit/c9a9adb00d7dba3a1273d0a2c1d0b54d54966c68))
+ - **FEAT**: upgrade to CBL C SDK 3.2.3 ([#757](https://github.com/cbl-dart/cbl-dart/issues/757)). ([2f3af72e](https://github.com/cbl-dart/cbl-dart/commit/2f3af72e9ca96d804b45a9fa164c3bb42a5e3a8d))
+ - **FEAT**: update to CBL C SDK 3.2.2 ([#755](https://github.com/cbl-dart/cbl-dart/issues/755)). ([12ea21fe](https://github.com/cbl-dart/cbl-dart/commit/12ea21fe0778f5043dc11be708dab94d9aa4a311))
+
+#### `cbl_flutter_ce` - `v3.4.0`
+
+ - **FEAT**: upgrade to CBL C SDK 3.2.3 ([#757](https://github.com/cbl-dart/cbl-dart/issues/757)). ([2f3af72e](https://github.com/cbl-dart/cbl-dart/commit/2f3af72e9ca96d804b45a9fa164c3bb42a5e3a8d))
+ - **FEAT**: update to CBL C SDK 3.2.2 ([#755](https://github.com/cbl-dart/cbl-dart/issues/755)). ([12ea21fe](https://github.com/cbl-dart/cbl-dart/commit/12ea21fe0778f5043dc11be708dab94d9aa4a311))
+
+#### `cbl_flutter_ee` - `v3.4.0`
+
+ - **FEAT**: upgrade to CBL C SDK 3.2.3 ([#757](https://github.com/cbl-dart/cbl-dart/issues/757)). ([2f3af72e](https://github.com/cbl-dart/cbl-dart/commit/2f3af72e9ca96d804b45a9fa164c3bb42a5e3a8d))
+ - **FEAT**: update to CBL C SDK 3.2.2 ([#755](https://github.com/cbl-dart/cbl-dart/issues/755)). ([12ea21fe](https://github.com/cbl-dart/cbl-dart/commit/12ea21fe0778f5043dc11be708dab94d9aa4a311))
+
+#### `cbl_generator` - `v0.3.1+4`
+
+ - **FIX**(cbl_generator): constrain `build` dependency to <2.5.0 ([#800](https://github.com/cbl-dart/cbl-dart/issues/800)). ([969ead35](https://github.com/cbl-dart/cbl-dart/commit/969ead35f77d636323fbc512c2175639c1413536))
+
+
 ## 2025-03-22
 
 ### Changes

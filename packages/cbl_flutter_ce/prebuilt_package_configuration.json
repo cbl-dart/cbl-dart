@@ -1,18 +1,18 @@
 {
   "name": "cbl_flutter_ce",
-  "version": "3.3.2",
-  "cblFlutterInstallVersion": "0.1.0+2",
+  "version": "3.4.0",
+  "cblFlutterInstallVersion": "0.1.0+3",
   "edition": "community",
   "libraries": [
     {
       "library": "cblite",
-      "version": "3.2.3",
-      "release": "3.2.3"
+      "version": "3.2.4",
+      "release": "3.2.4"
     },
     {
       "library": "cblitedart",
-      "version": "8.1.1",
-      "release": "8.1.1"
+      "version": "9.0.0",
+      "release": "9.0.0"
     }
   ]
 }

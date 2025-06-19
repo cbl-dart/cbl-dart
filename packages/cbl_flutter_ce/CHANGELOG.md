@@ -1,3 +1,8 @@
+## 3.4.0
+
+ - **FEAT**: upgrade to CBL C SDK 3.2.3 ([#757](https://github.com/cbl-dart/cbl-dart/issues/757)). ([2f3af72e](https://github.com/cbl-dart/cbl-dart/commit/2f3af72e9ca96d804b45a9fa164c3bb42a5e3a8d))
+ - **FEAT**: update to CBL C SDK 3.2.2 ([#755](https://github.com/cbl-dart/cbl-dart/issues/755)). ([12ea21fe](https://github.com/cbl-dart/cbl-dart/commit/12ea21fe0778f5043dc11be708dab94d9aa4a311))
+
 ## 3.3.2
 
  - **FIX**: resolve absolute path to dart executable Flutter plugin ([#722](https://github.com/cbl-dart/cbl-dart/issues/722)). ([81d78764](https://github.com/cbl-dart/cbl-dart/commit/81d78764fdafb5d8c9e5cdb7961b006130e3922b))
