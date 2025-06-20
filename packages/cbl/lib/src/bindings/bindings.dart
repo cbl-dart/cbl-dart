@@ -3,7 +3,9 @@ import 'async_callback.dart';
 import 'base.dart';
 import 'blob.dart';
 import 'cblite.dart' as cblite_lib;
+import 'cblite_native_assets_bridge.dart';
 import 'cblitedart.dart' as cblitedart_lib;
+import 'cblitedart_native_assets_bridge.dart';
 import 'collection.dart';
 import 'database.dart';
 import 'document.dart';
@@ -27,8 +29,8 @@ class BindingsLibraries {
   BindingsLibraries.fromDynamicLibraries(DynamicLibraries dynamicLibraries)
     : enterpriseEdition = dynamicLibraries.enterpriseEdition,
       vectorSearchLibraryPath = dynamicLibraries.vectorSearchLibraryPath,
-      cblite = cblite_lib.cblite(dynamicLibraries.cbl),
-      cblitedart = cblitedart_lib.cblitedart(dynamicLibraries.cblDart);
+      cblite = const cbliteNativeAssetsBridge(),
+      cblitedart = const cblitedartNativeAssetsBridge();
 
   final bool enterpriseEdition;
   final String? vectorSearchLibraryPath;
