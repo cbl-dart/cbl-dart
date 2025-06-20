@@ -1,0 +1,389 @@
+---
+title: Data Sync Peer-to-Peer
+description:
+  Couchbase Lite database Peer-to-Peer Synchronization concepts using websockets
+related_content:
+  - name: Passive Peer
+    url: /data-sync/peer-to-peer/passive-peer
+  - name: Active Peer
+    url: /data-sync/peer-to-peer/active-peer
+---
+
+# Data Sync Peer-to-Peer
+
+<EnterpriseFeatureCallout />
+
+## Introduction
+
+Couchbase Lite's Peer-to-Peer synchronization solution offers secure storage and
+bidirectional data synchronization between edge devices without needing a
+centralized cloud-based control point.
+
+Couchbase Lite's Peer-to-Peer data synchronization provides:
+
+- Instant WebSocket-based listener for use in Peer-to-Peer applications
+  communicating over IP-based networks.
+
+- Simple application development, enabling sync with a short amount of code.
+
+- Optimized network bandwidth usage and reduced data transfer costs with Delta
+  Sync support.
+
+- Securely sync data with built-in support for Transport Layer Security (TLS)
+  encryption and authentication support.
+
+- Document management. Reducing conflicts in concurrent writes with built-in
+  conflict management support.
+
+- Built-in network resiliency.
+
+## Overview
+
+Peer-to-Peer synchronization requires one Peer to act as the Listener to the
+other Peer's replicator.
+
+![Listener Diagram](/img/docs-listener-diagram.png)
+
+Peer-to-Peer synchronization requires one Peer to act as the Listener to the
+other Peer's replicator. Therefore, to use Peer-to-Peer synchronization in your
+application, you must configure one Peer to act as a Listener using the
+Couchbase Listener API, the most important of which include
+`api|UrlEndpointListener` and `api|UrlEndpointListenerConfiguration`.
+
+<CodeExample id={1} title="Simple Workflow">
+
+1. Configure the Listener (_passive peer_, or _server_).
+2. Initialize the Listener, which listens for incoming WebSocket connections (on
+   a user-defined, or auto-selected, port).
+3. Configure a replicator (_active peer_, or _client_).
+4. Use some form of discovery phase, perhaps with a zero-config protocol such as
+   [Bonjour](https://developer.apple.com/bonjour/), or use known URL endpoints,
+   to identify a Listener.
+5. Point the replicator at the Listener.
+6. Initialize the replicator.
+7. Replicator and Listener engage in the configured security protocol exchanges
+   to confirm connection.
+8. If connection is confirmed then replication will commence, synchronizing the
+   two data stores.
+
+</CodeExample>
+
+Here you can see configuration involves a
+[Passive Peer](/data-sync/peer-to-peer/passive-peer) and an
+[Active Peer](/data-sync/peer-to-peer/active-peer) and a user-friendly Listener
+configuration in [Basic Setup](#basic-setup).
+
+## Features
+
+Couchbase Lite for Dart's Peer-to-Peer synchronization solution provides support
+for cross-platform synchronization, for example, between Android and iOS
+devices.
+
+Each listener instance serves a single Couchbase Lite database, enabling
+synchronization for documents within specified collections of that database.
+
+Having a Listener on a database still allows you to open replications to the
+other clients. For example, a Listener can actively begin replicating to other
+Listeners while listening for connections. These replications can be for the
+same or a different database.
+
+The Listener will automatically select a port to use or a user-specified port.
+It will also listen on all available networks, unless you specify a specific
+network.
+
+### Security
+
+Couchbase Lite's Peer-to-Peer synchronization supports encryption and
+authentication over TLS with multiple modes, including:
+
+- No encryption, for example, clear text.
+- CA Cert
+- Self-signed Cert
+- Anonymous Self-signed — an auto-generated anonymous TLS identity is generated
+  if no identity is specified. This TLS identity provides encryption but **not**
+  authentication.
+
+The replicator (client) can handle certificates pinned by the Listener for
+authentication purposes.
+
+Support is also provided for basic authentication using username and password
+credentials. Whilst this can be used in clear text mode, developers are strongly
+advised to use TLS encryption.
+
+For testing and development purposes, support is provided for the client
+(active, replicator) to skip verification of self-signed certificates; this mode
+should not be used in production.
+
+### Error Handling
+
+When a Listener is stopped, then all connected replicators are notified by a
+WebSocket error. Your application should distinguish between transient and
+permanent connectivity errors.
+
+#### Passive peers
+
+A Passive Peer losing connectivity with an Active Peer will clean up any
+associated endpoint connections to that Peer. The Active Peer may attempt to
+reconnect to the Passive Peer.
+
+#### Active peers
+
+An Active Peer permanently losing connectivity with a Passive Peer will cease
+replicating.
+
+An Active Peer temporarily losing connectivity with a passive Peer will use
+exponential backoff functionality to attempt reconnection.
+
+### Delta Sync
+
+Optional delta-sync support is provided but is inactive by default.
+
+Delta-sync can be enabled on a per-replication basis provided that the databases
+involved are also configured to permit it.
+
+### Conflict Resolution
+
+Conflict resolution for Peer-to-Peer synchronization works in the same way as it
+does for Sync Gateway replication, with both custom and automatic resolution
+available.
+
+## Constraints
+
+- Requires at least iOS 10 (dependency on keychains)
+- Persisted `api|TlsIdentity`s are not supported yet on Android
+  ([#779](https://github.com/cbl-dart/cbl-dart/issues/779)) and Linux. You can
+  use `api|KeyPair.fromExternal` to implement your own solution for secure
+  storage of private keys.
+
+## Basic Setup
+
+You can configure a Peer-to-Peer synchronization with just a short amount of
+code as shown here in [Example 2](#) and [Example 3](#).
+
+<CodeExample id={2} title="Simple Listener">
+
+This simple listener configuration will give you a listener ready to participate
+in an encrypted synchronization with a replicator providing a valid user name
+and password.
+
+```dart
+// 1.
+final config = UrlEndpointListenerConfiguration(collections: [collection]);
+
+// 2.
+config.authenticator = ListenerPasswordAuthenticator((username, password) {
+  return username == "valid.user" && password == "valid.pass";
+});
+
+// 3.
+final listener = await UrlEndpointListener.create(config);
+
+// 4.
+await listener.start();
+```
+
+1. Initialize the Listener configuration.
+2. Configure the client authenticator to require basic authentication.
+3. Initialize the Listener.
+4. Start the Listener.
+
+</CodeExample>
+
+<CodeExample id={3} title="Simple Replicator">
+
+This simple replicator configuration will give you an encrypted, bi-directional
+Peer-to-Peer synchronization with automatic conflict resolution.
+
+```dart
+// 1.
+final targetEndpoint = UrlEndpoint(Uri.parse("wss://10.1.1.12:8092/otherDB"));
+
+// 2.
+final config = ReplicatorConfiguration(target: targetEndpoint)
+  ..addCollection(collection);
+
+// 3.
+config.acceptOnlySelfSignedServerCertificate = true;
+
+// 4.
+config.authenticator = BasicAuthenticator(
+  username: "valid.user",
+  password: "valid.pass",
+);
+
+// 5
+final replicator = await Replicator.create(config);
+
+// 6.
+await replicator.start();
+```
+
+1. Get the Listener's endpoint. Here we use a known URL, but it could be a URL
+   established dynamically in a discovery phase.
+2. Initialize the replicator configuration with the collection to be
+   synchronized and the endpoint of the Listener it is to be synchronize with.
+3. Configure the replicator to expect a self-signed certificate from the
+   Listener.
+4. Configure the replicator to present basic authentication credentials if the
+   Listener prompts for them (client authentication is optional).
+5. Initialize the replicator.
+6. Start the replicator.
+
+</CodeExample>
+
+## API Highlights
+
+### `UrlEndpointListener`
+
+The `api|UrlEndpointListener` is the listener for peer-to-peer synchronization.
+It acts like a passive replicator, in the same way that Sync Gateway does in a
+'standard' replication. On the client side, the listener's endpoint is used to
+point the replicator to the listener.
+
+Core functionalities of the listener are:
+
+- Users can initialize the class using a `api|UrlEndpointListenerConfiguration`
+  object.
+- The listener can be started, or can be stopped.
+- Once the listener is started, a total number of connections or active
+  connections can be checked.
+
+### `UrlEndpointListenerConfiguration`
+
+Use this to create a configuration object you can then use to initialize the
+listener.
+
+#### `port`
+
+This is the port that the listener will listen to.
+
+If the port is null or zero, the listener will auto-assign an available port to
+listen on.
+
+Default value is null.
+
+#### `networkInterface`
+
+Use this to select a specific Network Interface to use, in the form of the IP
+Address or network interface name.
+
+If the network interface is specified, only that interface will be used.
+
+If the network interface is not specified, all available network interfaces will
+be used.
+
+#### `disableTls`
+
+You can use `api|UrlEndpointListenerConfiguration`'s `disableTls` property to
+disable TLS communication if necessary.
+
+The `disableTls` setting must be `false` when _Client Cert Authentication_ is
+required.
+
+Basic Authentication can be used with, or without, TLS.
+
+`disableTls` works in conjunction with `tlsIdentity`, to enable developers to
+define the key and certificate to be used.
+
+- If `disableTls` is true — TLS communication is disabled and TLS identity is
+  ignored. Active peers will use the `ws://` URL scheme used to connect to the
+  listener.
+- If `disableTls` is false or not specified — TLS communication is enabled.
+
+Active peers will use the `wss://` URL scheme to connect to the listener.
+
+#### `tlsIdentity`
+
+Use `api|UrlEndpointListenerConfiguration`'s `tlsIdentity` property to configure
+the TLS Identity used in TLS communication.
+
+If `api|TlsIdentity` is not set, then the listener uses an auto-generated
+anonymous self-signed identity (unless `disableTls = true`). Whilst the client
+cannot use this to authenticate the server, it will use it to encrypt
+communication, giving a more secure option than non-TLS communication.
+
+When the listener is not started, the identity is null. When TLS is disabled,
+the identity is always null.
+
+#### `authenticator`
+
+Use this to specify the authenticator the listener uses to authenticate the
+client's connection request. This should be set to one of the following:
+
+- `api|ListenerPasswordAuthenticator`
+- `api|ListenerCertificateAuthenticator`
+- `null` — there is no authentication.
+
+#### `readOnly`
+
+Use this to allow only pull replication. Default value is false.
+
+#### `enableDeltaSync`
+
+The option to enable Delta Sync and replicate only changed data also depends on
+the delta sync settings at database level. The default value is false.
+
+## Security
+
+Couchbase Lite's Peer-to-Peer synchronization ensures secure communication
+through TLS and supports multiple authentication mechanisms.
+
+### TLS Identity
+
+The `api|UrlEndpointListener` uses a TLS identity to establish secure
+connections. (A TLS identity is an RSA public/private key pair and certificate.)
+The identity can include either a certificate signed by a trusted Certificate
+Authority (CA), or a self-signed certificate. If no identity is specified, the
+listener automatically generates an anonymous, self-signed certificate, which is
+primarily used for encryption, but not for authentication.
+
+When replicating with a listener that uses a self-signed certificate, the
+replicator (client) can be configured to skip certificate validation. This
+option is useful for development or testing, but not recommended for production.
+
+:::note
+
+The minimum supported version of TLS is TLS 1.2.
+
+:::
+
+### Authentication Mechanisms
+
+The `api|UrlEndpointListener` supports two authentication mechanisms:
+
+- Basic Authentication, using a username and password.
+- Certificate Authentication, which authenticates clients using client
+  certificates, and is only available when TLS is enabled.
+
+### Using Secure Storage
+
+TLS and its associated keys and certificates might require using secure storage
+to minimize the chances of a security breach. The implementation of this storage
+differs from platform to platform. This table summarizes the secure storage used
+to store keys and certificates.
+
+#### iOS
+
+| Field                   | Value                                                                                     |
+| ----------------------- | ----------------------------------------------------------------------------------------- |
+| **Key Storage**         | KeyChain                                                                                  |
+| **Certificate Storage** | KeyChain                                                                                  |
+| **Notes**               | Use kSecAttrLabel of the SecCertificate to store the TLSIdentity's label                  |
+| **Reference**           | [Keychain services](https://developer.apple.com/documentation/security/keychain_services) |
+
+#### macOS
+
+| Field                   | Value                                                                                     |
+| ----------------------- | ----------------------------------------------------------------------------------------- |
+| **Key Storage**         | KeyChain                                                                                  |
+| **Certificate Storage** | KeyChain                                                                                  |
+| **Notes**               | Use kSecAttrLabel of the SecCertificate to store the TLSIdentity's label                  |
+| **Reference**           | [Keychain services](https://developer.apple.com/documentation/security/keychain_services) |
+
+#### Windows
+
+| Field                   | Value                                                                               |
+| ----------------------- | ----------------------------------------------------------------------------------- |
+| **Key Storage**         | Windows CNG Key Storage Provider                                                    |
+| **Certificate Storage** | Windows Certificate Store                                                           |
+| **Reference**           | [CNG Key Storage](https://docs.microsoft.com/en-us/windows/win32/seccng/cng-portal) |

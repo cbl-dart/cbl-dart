@@ -96,6 +96,21 @@ export default {
       id: 'indexing',
     },
     {
+      type: 'category',
+      label: 'Data Sync',
+      items: [
+        {
+          type: 'category',
+          label: 'Peer-to-Peer',
+          link: { type: 'doc', id: 'data-sync/peer-to-peer/websocket' },
+          items: [
+            { type: 'doc', id: 'data-sync/peer-to-peer/passive-peer' },
+            { type: 'doc', id: 'data-sync/peer-to-peer/active-peer' },
+          ],
+        },
+      ],
+    },
+    {
       type: 'doc',
       id: 'typed-data',
     },
