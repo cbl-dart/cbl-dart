@@ -86,11 +86,11 @@ jobs:
             --threshold-test t_test \
             --threshold-max-sample-size 64 \
             --threshold-lower-boundary _ \
-            --threshold-upper-boundary 0.95 \
+            --threshold-upper-boundary 0.90 \
             --threshold-measure throughput \
             --threshold-test t_test \
             --threshold-max-sample-size 64 \
-            --threshold-lower-boundary 0.95 \
+            --threshold-lower-boundary 0.90 \
             --threshold-upper-boundary _ \
             --thresholds-reset \
             --err \
