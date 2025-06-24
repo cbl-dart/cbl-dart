@@ -1,9 +1,16 @@
 import 'package:build_test/build_test.dart';
 import 'package:cbl_generator/src/builder.dart';
-import 'package:source_gen/source_gen.dart';
+import 'package:logging/logging.dart';
 import 'package:test/test.dart';
 
+late TestReaderWriter readerWriter;
+
 void main() {
+  setUp(() async {
+    readerWriter = TestReaderWriter(rootPackage: _testPkg);
+    await readerWriter.testing.loadIsolateSources();
+  });
+
   test('annotated element is not a class', () async {
     await _expectBadSource('''
 @TypedDictionary()
@@ -70,6 +77,7 @@ abstract class A with _$A {
 }
 '''),
       },
+      readerWriter: readerWriter,
       outputs: {
         _genPartId: _typedDictionaryGeneratorContent(r'''
 mixin _$A implements TypedDictionaryObject<MutableA> {}
@@ -114,7 +122,6 @@ class MutableA extends _AImplBase<MutableDictionary>
 }
 '''),
       },
-      reader: await PackageAssetReader.currentIsolate(),
     );
   });
 
@@ -138,6 +145,7 @@ abstract class A with _$A {
 }
 '''),
       },
+      readerWriter: readerWriter,
       outputs: {
         _genPartId: _typedDictionaryGeneratorContent(r'''
 mixin _$A implements TypedDictionaryObject<MutableA> {
@@ -207,7 +215,6 @@ class MutableA extends _AImplBase<MutableDictionary>
 }
 '''),
       },
-      reader: await PackageAssetReader.currentIsolate(),
     );
   });
 
@@ -349,16 +356,27 @@ $_genPartHeader
 $content''';
 
 Future<void> _expectBadSource(String source, [Object? messageMatcher]) async {
-  await expectLater(
-    testBuilder(TypedDataBuilder(), {
-      _testLibId: _testLibContent(source),
-    }, reader: await PackageAssetReader.currentIsolate()),
-    throwsA(
-      isA<InvalidGenerationSourceError>().having(
-        (error) => error.message,
-        'message',
-        messageMatcher ?? anything,
-      ),
-    ),
+  if (messageMatcher is String) {
+    messageMatcher = contains(messageMatcher);
+  }
+
+  String? errorMessage;
+
+  void captureError(LogRecord record) {
+    if (record.level >= Level.SEVERE) {
+      if (errorMessage != null) {
+        throw StateError('Expected only one error.');
+      }
+      errorMessage = record.message;
+    }
+  }
+
+  await testBuilder(
+    TypedDataBuilder(),
+    {_testLibId: _testLibContent(source)},
+    onLog: captureError,
+    readerWriter: readerWriter,
   );
+
+  await expectLater(errorMessage, messageMatcher ?? isNotNull);
 }
