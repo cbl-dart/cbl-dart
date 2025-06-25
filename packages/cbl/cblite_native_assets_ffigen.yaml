@@ -34,6 +34,64 @@ functions:
       - FLEncoder_Free
       - FLSharedKeys_Release
       - FLValue_Release
+  leaf:
+    include:
+      - CBLDatabase_SaveDocument
+      - CBLDatabase_SaveDocumentWithConcurrencyControl
+      - CBLDatabase_DeleteDocument
+      - CBLDatabase_DeleteDocumentWithConcurrencyControl
+      - CBLDatabase_PurgeDocument
+      - CBLDatabase_PurgeDocumentByID
+      - CBLDatabase_GetMutableDocument
+      - CBLDatabase_GetDocumentExpiration
+      - CBLDatabase_SetDocumentExpiration
+      - CBLDatabase_ScopeNames
+      - CBLDatabase_CollectionNames
+      - CBLDatabase_Scope
+      - CBLDatabase_Collection
+      - CBLDatabase_CreateCollection
+      - CBLDatabase_DeleteCollection
+      - CBLDatabase_DefaultScope
+      - CBLDatabase_DefaultCollection
+      - CBLDatabase_Open
+      - CBLDatabase_Close
+      - CBLDatabase_Delete
+      - CBLDatabase_BeginTransaction
+      - CBLDatabase_EndTransaction
+      - CBLDatabase_ChangeEncryptionKey
+      - CBLDatabase_PerformMaintenance
+      - CBLDatabase_Name
+      - CBLDatabase_Path
+      - CBLDatabase_Count
+      - CBLDatabase_Config
+      - CBLDatabase_CreateValueIndex
+      - CBLDatabase_CreateFullTextIndex
+      - CBLDatabase_DeleteIndex
+      - CBLDatabase_GetIndexNames
+      - CBLCollection_Scope
+      - CBLCollection_Name
+      - CBLCollection_FullName
+      - CBLCollection_Database
+      - CBLCollection_Count
+      - CBLCollection_GetDocument
+      - CBLCollection_SaveDocument
+      - CBLCollection_SaveDocumentWithConcurrencyControl
+      - CBLCollection_DeleteDocument
+      - CBLCollection_DeleteDocumentWithConcurrencyControl
+      - CBLCollection_PurgeDocument
+      - CBLCollection_PurgeDocumentByID
+      - CBLCollection_GetDocumentExpiration
+      - CBLCollection_SetDocumentExpiration
+      - CBLCollection_GetMutableDocument
+      - CBLCollection_CreateValueIndex
+      - CBLCollection_CreateFullTextIndex
+      - CBLCollection_CreateArrayIndex
+      - CBLCollection_CreateVectorIndex
+      - CBLCollection_DeleteIndex
+      - CBLCollection_GetIndexNames
+      - CBLCollection_GetIndex
+      - CBLCollection_AddChangeListener
+      - CBLCollection_AddDocumentChangeListener
 structs:
   member-rename:
     FLDictKey:

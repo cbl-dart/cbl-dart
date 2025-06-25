@@ -158,14 +158,14 @@ external ffi.Pointer<CBLDocument> CBLDatabase_GetDocument(
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_SaveDocument>()
+@ffi.Native<NativeCBLDatabase_SaveDocument>(isLeaf: true)
 external bool CBLDatabase_SaveDocument(
   ffi.Pointer<CBLDatabase> db,
   ffi.Pointer<CBLDocument> doc,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_SaveDocumentWithConcurrencyControl>()
+@ffi.Native<NativeCBLDatabase_SaveDocumentWithConcurrencyControl>(isLeaf: true)
 external bool CBLDatabase_SaveDocumentWithConcurrencyControl(
   ffi.Pointer<CBLDatabase> db,
   ffi.Pointer<CBLDocument> doc,
@@ -182,14 +182,16 @@ external bool CBLDatabase_SaveDocumentWithConflictHandler(
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_DeleteDocument>()
+@ffi.Native<NativeCBLDatabase_DeleteDocument>(isLeaf: true)
 external bool CBLDatabase_DeleteDocument(
   ffi.Pointer<CBLDatabase> db,
   ffi.Pointer<CBLDocument> document,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_DeleteDocumentWithConcurrencyControl>()
+@ffi.Native<NativeCBLDatabase_DeleteDocumentWithConcurrencyControl>(
+  isLeaf: true,
+)
 external bool CBLDatabase_DeleteDocumentWithConcurrencyControl(
   ffi.Pointer<CBLDatabase> db,
   ffi.Pointer<CBLDocument> document,
@@ -197,21 +199,21 @@ external bool CBLDatabase_DeleteDocumentWithConcurrencyControl(
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_PurgeDocument>()
+@ffi.Native<NativeCBLDatabase_PurgeDocument>(isLeaf: true)
 external bool CBLDatabase_PurgeDocument(
   ffi.Pointer<CBLDatabase> db,
   ffi.Pointer<CBLDocument> document,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_PurgeDocumentByID>()
+@ffi.Native<NativeCBLDatabase_PurgeDocumentByID>(isLeaf: true)
 external bool CBLDatabase_PurgeDocumentByID(
   ffi.Pointer<CBLDatabase> database,
   imp$1.FLString docID,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_GetMutableDocument>()
+@ffi.Native<NativeCBLDatabase_GetMutableDocument>(isLeaf: true)
 external ffi.Pointer<CBLDocument> CBLDatabase_GetMutableDocument(
   ffi.Pointer<CBLDatabase> database,
   imp$1.FLString docID,
@@ -269,14 +271,14 @@ external bool CBLDocument_SetJSON(
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_GetDocumentExpiration>()
+@ffi.Native<NativeCBLDatabase_GetDocumentExpiration>(isLeaf: true)
 external imp$1.DartCBLTimestamp CBLDatabase_GetDocumentExpiration(
   ffi.Pointer<CBLDatabase> db,
   FLSlice docID,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_SetDocumentExpiration>()
+@ffi.Native<NativeCBLDatabase_SetDocumentExpiration>(isLeaf: true)
 external bool CBLDatabase_SetDocumentExpiration(
   ffi.Pointer<CBLDatabase> db,
   FLSlice docID,
@@ -310,27 +312,27 @@ external void CBLVectorEncoding_Free(ffi.Pointer<CBLVectorEncoding> arg0);
 @ffi.Native<imp$1.FLString>()
 external final imp$1.FLString kCBLDefaultCollectionName;
 
-@ffi.Native<NativeCBLDatabase_ScopeNames>()
+@ffi.Native<NativeCBLDatabase_ScopeNames>(isLeaf: true)
 external imp$1.FLMutableArray CBLDatabase_ScopeNames(
   ffi.Pointer<CBLDatabase> db,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_CollectionNames>()
+@ffi.Native<NativeCBLDatabase_CollectionNames>(isLeaf: true)
 external imp$1.FLMutableArray CBLDatabase_CollectionNames(
   ffi.Pointer<CBLDatabase> db,
   imp$1.FLString scopeName,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_Scope>()
+@ffi.Native<NativeCBLDatabase_Scope>(isLeaf: true)
 external ffi.Pointer<CBLScope> CBLDatabase_Scope(
   ffi.Pointer<CBLDatabase> db,
   imp$1.FLString scopeName,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_Collection>()
+@ffi.Native<NativeCBLDatabase_Collection>(isLeaf: true)
 external ffi.Pointer<CBLCollection> CBLDatabase_Collection(
   ffi.Pointer<CBLDatabase> db,
   imp$1.FLString collectionName,
@@ -338,7 +340,7 @@ external ffi.Pointer<CBLCollection> CBLDatabase_Collection(
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_CreateCollection>()
+@ffi.Native<NativeCBLDatabase_CreateCollection>(isLeaf: true)
 external ffi.Pointer<CBLCollection> CBLDatabase_CreateCollection(
   ffi.Pointer<CBLDatabase> db,
   imp$1.FLString collectionName,
@@ -346,7 +348,7 @@ external ffi.Pointer<CBLCollection> CBLDatabase_CreateCollection(
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_DeleteCollection>()
+@ffi.Native<NativeCBLDatabase_DeleteCollection>(isLeaf: true)
 external bool CBLDatabase_DeleteCollection(
   ffi.Pointer<CBLDatabase> db,
   imp$1.FLString collectionName,
@@ -354,56 +356,58 @@ external bool CBLDatabase_DeleteCollection(
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_DefaultScope>()
+@ffi.Native<NativeCBLDatabase_DefaultScope>(isLeaf: true)
 external ffi.Pointer<CBLScope> CBLDatabase_DefaultScope(
   ffi.Pointer<CBLDatabase> db,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_DefaultCollection>()
+@ffi.Native<NativeCBLDatabase_DefaultCollection>(isLeaf: true)
 external ffi.Pointer<CBLCollection> CBLDatabase_DefaultCollection(
   ffi.Pointer<CBLDatabase> db,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLCollection_Scope>()
+@ffi.Native<NativeCBLCollection_Scope>(isLeaf: true)
 external ffi.Pointer<CBLScope> CBLCollection_Scope(
   ffi.Pointer<CBLCollection> collection,
 );
 
-@ffi.Native<NativeCBLCollection_Name>()
+@ffi.Native<NativeCBLCollection_Name>(isLeaf: true)
 external imp$1.FLString CBLCollection_Name(
   ffi.Pointer<CBLCollection> collection,
 );
 
-@ffi.Native<NativeCBLCollection_FullName>()
+@ffi.Native<NativeCBLCollection_FullName>(isLeaf: true)
 external imp$1.FLString CBLCollection_FullName(
   ffi.Pointer<CBLCollection> collection,
 );
 
-@ffi.Native<NativeCBLCollection_Database>()
+@ffi.Native<NativeCBLCollection_Database>(isLeaf: true)
 external ffi.Pointer<CBLDatabase> CBLCollection_Database(
   ffi.Pointer<CBLCollection> collection,
 );
 
-@ffi.Native<NativeCBLCollection_Count>()
+@ffi.Native<NativeCBLCollection_Count>(isLeaf: true)
 external int CBLCollection_Count(ffi.Pointer<CBLCollection> collection);
 
-@ffi.Native<NativeCBLCollection_GetDocument>()
+@ffi.Native<NativeCBLCollection_GetDocument>(isLeaf: true)
 external ffi.Pointer<CBLDocument> CBLCollection_GetDocument(
   ffi.Pointer<CBLCollection> collection,
   imp$1.FLString docID,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLCollection_SaveDocument>()
+@ffi.Native<NativeCBLCollection_SaveDocument>(isLeaf: true)
 external bool CBLCollection_SaveDocument(
   ffi.Pointer<CBLCollection> collection,
   ffi.Pointer<CBLDocument> doc,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLCollection_SaveDocumentWithConcurrencyControl>()
+@ffi.Native<NativeCBLCollection_SaveDocumentWithConcurrencyControl>(
+  isLeaf: true,
+)
 external bool CBLCollection_SaveDocumentWithConcurrencyControl(
   ffi.Pointer<CBLCollection> collection,
   ffi.Pointer<CBLDocument> doc,
@@ -420,14 +424,16 @@ external bool CBLCollection_SaveDocumentWithConflictHandler(
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLCollection_DeleteDocument>()
+@ffi.Native<NativeCBLCollection_DeleteDocument>(isLeaf: true)
 external bool CBLCollection_DeleteDocument(
   ffi.Pointer<CBLCollection> collection,
   ffi.Pointer<CBLDocument> document,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLCollection_DeleteDocumentWithConcurrencyControl>()
+@ffi.Native<NativeCBLCollection_DeleteDocumentWithConcurrencyControl>(
+  isLeaf: true,
+)
 external bool CBLCollection_DeleteDocumentWithConcurrencyControl(
   ffi.Pointer<CBLCollection> collection,
   ffi.Pointer<CBLDocument> document,
@@ -435,28 +441,28 @@ external bool CBLCollection_DeleteDocumentWithConcurrencyControl(
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLCollection_PurgeDocument>()
+@ffi.Native<NativeCBLCollection_PurgeDocument>(isLeaf: true)
 external bool CBLCollection_PurgeDocument(
   ffi.Pointer<CBLCollection> collection,
   ffi.Pointer<CBLDocument> document,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLCollection_PurgeDocumentByID>()
+@ffi.Native<NativeCBLCollection_PurgeDocumentByID>(isLeaf: true)
 external bool CBLCollection_PurgeDocumentByID(
   ffi.Pointer<CBLCollection> collection,
   imp$1.FLString docID,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLCollection_GetDocumentExpiration>()
+@ffi.Native<NativeCBLCollection_GetDocumentExpiration>(isLeaf: true)
 external imp$1.DartCBLTimestamp CBLCollection_GetDocumentExpiration(
   ffi.Pointer<CBLCollection> collection,
   FLSlice docID,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLCollection_SetDocumentExpiration>()
+@ffi.Native<NativeCBLCollection_SetDocumentExpiration>(isLeaf: true)
 external bool CBLCollection_SetDocumentExpiration(
   ffi.Pointer<CBLCollection> collection,
   FLSlice docID,
@@ -464,14 +470,14 @@ external bool CBLCollection_SetDocumentExpiration(
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLCollection_GetMutableDocument>()
+@ffi.Native<NativeCBLCollection_GetMutableDocument>(isLeaf: true)
 external ffi.Pointer<CBLDocument> CBLCollection_GetMutableDocument(
   ffi.Pointer<CBLCollection> collection,
   imp$1.FLString docID,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLCollection_CreateValueIndex>()
+@ffi.Native<NativeCBLCollection_CreateValueIndex>(isLeaf: true)
 external bool CBLCollection_CreateValueIndex(
   ffi.Pointer<CBLCollection> collection,
   imp$1.FLString name,
@@ -479,7 +485,7 @@ external bool CBLCollection_CreateValueIndex(
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLCollection_CreateFullTextIndex>()
+@ffi.Native<NativeCBLCollection_CreateFullTextIndex>(isLeaf: true)
 external bool CBLCollection_CreateFullTextIndex(
   ffi.Pointer<CBLCollection> collection,
   imp$1.FLString name,
@@ -487,7 +493,7 @@ external bool CBLCollection_CreateFullTextIndex(
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLCollection_CreateArrayIndex>()
+@ffi.Native<NativeCBLCollection_CreateArrayIndex>(isLeaf: true)
 external bool CBLCollection_CreateArrayIndex(
   ffi.Pointer<CBLCollection> collection,
   imp$1.FLString name,
@@ -495,7 +501,7 @@ external bool CBLCollection_CreateArrayIndex(
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLCollection_CreateVectorIndex>()
+@ffi.Native<NativeCBLCollection_CreateVectorIndex>(isLeaf: true)
 external bool CBLCollection_CreateVectorIndex(
   ffi.Pointer<CBLCollection> collection,
   imp$1.FLString name,
@@ -503,34 +509,34 @@ external bool CBLCollection_CreateVectorIndex(
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLCollection_DeleteIndex>()
+@ffi.Native<NativeCBLCollection_DeleteIndex>(isLeaf: true)
 external bool CBLCollection_DeleteIndex(
   ffi.Pointer<CBLCollection> collection,
   imp$1.FLString name,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLCollection_GetIndexNames>()
+@ffi.Native<NativeCBLCollection_GetIndexNames>(isLeaf: true)
 external imp$1.FLMutableArray CBLCollection_GetIndexNames(
   ffi.Pointer<CBLCollection> collection,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLCollection_GetIndex>()
+@ffi.Native<NativeCBLCollection_GetIndex>(isLeaf: true)
 external ffi.Pointer<CBLQueryIndex> CBLCollection_GetIndex(
   ffi.Pointer<CBLCollection> collection,
   imp$1.FLString name,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLCollection_AddChangeListener>()
+@ffi.Native<NativeCBLCollection_AddChangeListener>(isLeaf: true)
 external ffi.Pointer<CBLListenerToken> CBLCollection_AddChangeListener(
   ffi.Pointer<CBLCollection> collection,
   imp$1.CBLCollectionChangeListener listener,
   ffi.Pointer<ffi.Void> context,
 );
 
-@ffi.Native<NativeCBLCollection_AddDocumentChangeListener>()
+@ffi.Native<NativeCBLCollection_AddDocumentChangeListener>(isLeaf: true)
 external ffi.Pointer<CBLListenerToken> CBLCollection_AddDocumentChangeListener(
   ffi.Pointer<CBLCollection> collection,
   imp$1.FLString docID,
@@ -580,67 +586,67 @@ external bool CBL_DeleteDatabase(
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_Open>()
+@ffi.Native<NativeCBLDatabase_Open>(isLeaf: true)
 external ffi.Pointer<CBLDatabase> CBLDatabase_Open(
   FLSlice name,
   ffi.Pointer<CBLDatabaseConfiguration> config,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_Close>()
+@ffi.Native<NativeCBLDatabase_Close>(isLeaf: true)
 external bool CBLDatabase_Close(
   ffi.Pointer<CBLDatabase> arg0,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_Delete>()
+@ffi.Native<NativeCBLDatabase_Delete>(isLeaf: true)
 external bool CBLDatabase_Delete(
   ffi.Pointer<CBLDatabase> arg0,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_BeginTransaction>()
+@ffi.Native<NativeCBLDatabase_BeginTransaction>(isLeaf: true)
 external bool CBLDatabase_BeginTransaction(
   ffi.Pointer<CBLDatabase> arg0,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_EndTransaction>()
+@ffi.Native<NativeCBLDatabase_EndTransaction>(isLeaf: true)
 external bool CBLDatabase_EndTransaction(
   ffi.Pointer<CBLDatabase> arg0,
   bool commit,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_ChangeEncryptionKey>()
+@ffi.Native<NativeCBLDatabase_ChangeEncryptionKey>(isLeaf: true)
 external bool CBLDatabase_ChangeEncryptionKey(
   ffi.Pointer<CBLDatabase> arg0,
   ffi.Pointer<CBLEncryptionKey> newKey,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_PerformMaintenance>()
+@ffi.Native<NativeCBLDatabase_PerformMaintenance>(isLeaf: true)
 external bool CBLDatabase_PerformMaintenance(
   ffi.Pointer<CBLDatabase> db,
   imp$1.DartCBLMaintenanceType type,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_Name>()
+@ffi.Native<NativeCBLDatabase_Name>(isLeaf: true)
 external imp$1.FLString CBLDatabase_Name(ffi.Pointer<CBLDatabase> arg0);
 
-@ffi.Native<NativeCBLDatabase_Path>()
+@ffi.Native<NativeCBLDatabase_Path>(isLeaf: true)
 external imp$1.FLStringResult CBLDatabase_Path(ffi.Pointer<CBLDatabase> arg0);
 
-@ffi.Native<NativeCBLDatabase_Count>()
+@ffi.Native<NativeCBLDatabase_Count>(isLeaf: true)
 external int CBLDatabase_Count(ffi.Pointer<CBLDatabase> arg0);
 
-@ffi.Native<NativeCBLDatabase_Config>()
+@ffi.Native<NativeCBLDatabase_Config>(isLeaf: true)
 external CBLDatabaseConfiguration CBLDatabase_Config(
   ffi.Pointer<CBLDatabase> arg0,
 );
 
-@ffi.Native<NativeCBLDatabase_CreateValueIndex>()
+@ffi.Native<NativeCBLDatabase_CreateValueIndex>(isLeaf: true)
 external bool CBLDatabase_CreateValueIndex(
   ffi.Pointer<CBLDatabase> db,
   imp$1.FLString name,
@@ -648,7 +654,7 @@ external bool CBLDatabase_CreateValueIndex(
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_CreateFullTextIndex>()
+@ffi.Native<NativeCBLDatabase_CreateFullTextIndex>(isLeaf: true)
 external bool CBLDatabase_CreateFullTextIndex(
   ffi.Pointer<CBLDatabase> db,
   imp$1.FLString name,
@@ -656,14 +662,14 @@ external bool CBLDatabase_CreateFullTextIndex(
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_DeleteIndex>()
+@ffi.Native<NativeCBLDatabase_DeleteIndex>(isLeaf: true)
 external bool CBLDatabase_DeleteIndex(
   ffi.Pointer<CBLDatabase> db,
   imp$1.FLString name,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_GetIndexNames>()
+@ffi.Native<NativeCBLDatabase_GetIndexNames>(isLeaf: true)
 external imp$1.FLArray CBLDatabase_GetIndexNames(ffi.Pointer<CBLDatabase> db);
 
 @ffi.Native<NativeCBLDatabase_AddChangeListener>()
