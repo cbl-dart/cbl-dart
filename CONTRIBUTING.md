@@ -61,7 +61,7 @@ Two native libraries are required to enable Couchbase Lite for Dart.
 
 **Dependencies**:
 
-- Android SDK with NDK `23.1.7779620` and CMake `3.18.1`
+- Android SDK with NDK `27.0.12077973` and CMake `3.18.1`
 
 ### iOS + macOS
 

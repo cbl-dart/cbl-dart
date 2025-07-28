@@ -4,7 +4,7 @@
 
 set -e
 
-ndkVersion="23.1.7779620"
+ndkVersion="27.0.12077973"
 cmakeVersion="3.18.1"
 defaultSdkLocation=("$HOME/Android/Sdk" "$HOME/Library/Android/sdk")
 sdkHome="$ANDROID_HOME"
