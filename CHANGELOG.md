@@ -3,6 +3,48 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2025-07-28
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`cbl` - `v3.6.0`](#cbl---v360)
+ - [`cbl_flutter` - `v3.3.3`](#cbl_flutter---v333)
+ - [`cbl_flutter_install` - `v0.1.0+4`](#cbl_flutter_install---v0104)
+ - [`cbl_flutter_platform_interface` - `v3.1.4`](#cbl_flutter_platform_interface---v314)
+ - [`cbl_dart` - `v3.4.1`](#cbl_dart---v341)
+ - [`cbl_generator` - `v0.3.1+5`](#cbl_generator---v0315)
+ - [`cbl_sentry` - `v2.1.6`](#cbl_sentry---v216)
+ - [`cbl_flutter_ce` - `v3.4.1`](#cbl_flutter_ce---v341)
+ - [`cbl_flutter_ee` - `v3.4.1`](#cbl_flutter_ee---v341)
+
+Packages with dependency updates only:
+
+> Packages listed below depend on other packages in this workspace that have had changes. Their versions have been incremented to bump the minimum dependency versions of the packages they depend upon in this project.
+
+ - `cbl_flutter` - `v3.3.3`
+ - `cbl_flutter_install` - `v0.1.0+4`
+ - `cbl_flutter_platform_interface` - `v3.1.4`
+ - `cbl_dart` - `v3.4.1`
+ - `cbl_generator` - `v0.3.1+5`
+ - `cbl_sentry` - `v2.1.6`
+ - `cbl_flutter_ce` - `v3.4.1`
+ - `cbl_flutter_ee` - `v3.4.1`
+
+---
+
+#### `cbl` - `v3.6.0`
+
+ - **FEAT**: add IFMISSINGORNULL function to QueryBuilder ([#815](https://github.com/cbl-dart/cbl-dart/issues/815)). ([2b716e6a](https://github.com/cbl-dart/cbl-dart/commit/2b716e6ab3a39a0f9d91c5d0423b99c87ed5ee5e))
+
+
 ## 2025-06-19
 
 ### Changes

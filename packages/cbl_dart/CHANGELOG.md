@@ -1,3 +1,7 @@
+## 3.4.1
+
+ - Update a dependency to the latest release.
+
 ## 3.4.0
 
  - **REFACTOR**: make `Bindings` fields final ([#766](https://github.com/cbl-dart/cbl-dart/issues/766)). ([c9a9adb0](https://github.com/cbl-dart/cbl-dart/commit/c9a9adb00d7dba3a1273d0a2c1d0b54d54966c68))

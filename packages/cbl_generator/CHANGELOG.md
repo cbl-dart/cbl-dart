@@ -1,3 +1,7 @@
+## 0.3.1+5
+
+ - Update a dependency to the latest release.
+
 ## 0.3.1+4
 
  - **FIX**(cbl_generator): constrain `build` dependency to <2.5.0 ([#800](https://github.com/cbl-dart/cbl-dart/issues/800)). ([969ead35](https://github.com/cbl-dart/cbl-dart/commit/969ead35f77d636323fbc512c2175639c1413536))

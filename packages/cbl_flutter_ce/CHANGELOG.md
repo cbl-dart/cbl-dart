@@ -1,3 +1,7 @@
+## 3.4.1
+
+ - Update a dependency to the latest release.
+
 ## 3.4.0
 
  - **FEAT**: upgrade to CBL C SDK 3.2.3 ([#757](https://github.com/cbl-dart/cbl-dart/issues/757)). ([2f3af72e](https://github.com/cbl-dart/cbl-dart/commit/2f3af72e9ca96d804b45a9fa164c3bb42a5e3a8d))
