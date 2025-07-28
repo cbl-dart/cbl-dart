@@ -1057,6 +1057,65 @@ void main() {
           'A',
         );
       });
+
+      apiTest('ifMissingOrNull', () async {
+        // Test with NULL and non-NULL values
+        expect(
+          await evalExpr(
+            Function_.ifMissingOrNull(valExpr(null), valExpr('a')),
+          ),
+          'a',
+        );
+
+        // Test with non-NULL value first
+        expect(
+          await evalExpr(Function_.ifMissingOrNull(valExpr('a'), valExpr('b'))),
+          'a',
+        );
+
+        // Test with all NULL values
+        expect(
+          await evalExpr(
+            Function_.ifMissingOrNull(valExpr(null), valExpr(null)),
+          ),
+          null,
+        );
+
+        // Test with MISSING value (non-existent property)
+        expect(
+          await evalExpr(
+            Function_.ifMissingOrNull(
+              Expression.property('nonexistent'),
+              valExpr('fallback'),
+            ),
+          ),
+          'fallback',
+        );
+
+        // Test with multiple expressions
+        expect(
+          await evalExpr(
+            Function_.ifMissingOrNull(
+              valExpr(null),
+              Expression.property('nonexistent'),
+              valExpr('result'),
+            ),
+          ),
+          'result',
+        );
+
+        // Test ifMissingOrNullAll with list
+        expect(
+          await evalExpr(
+            Function_.ifMissingOrNullAll([
+              valExpr(null),
+              Expression.property('nonexistent'),
+              valExpr('list_result'),
+            ]),
+          ),
+          'list_result',
+        );
+      });
     });
 
     group('ArrayFunction', () {

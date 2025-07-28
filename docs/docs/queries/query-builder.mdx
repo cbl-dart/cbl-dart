@@ -658,3 +658,38 @@ comparisons.
   Unix epoch. The end result will be an expression (with string content
   representing the date and time as a UTC ISO 8601 string) that can be further
   input into the query builder.
+
+## Conditional Functions
+
+Couchbase Lite's `api|QueryBuilder` API includes conditional functions for
+handling NULL and MISSING values.
+
+- `api|Function_.ifMissingOrNull`
+
+  Returns the first non-NULL and non-MISSING value from the provided
+  expressions, or NULL if all values are NULL or MISSING. This function is
+  equivalent to the SQL++ IFMISSINGORNULL function. It requires at least 2
+  expressions.
+
+  <CodeExample id={18} title="Using Function_.ifMissingOrNull()">
+
+  This example shows how to use `ifMissingOrNull` to provide fallback values
+  when properties might be missing or null.
+
+  ```dart
+  final query = const QueryBuilder()
+    .select(
+      SelectResult.expression(Meta.id),
+      SelectResult.expression(
+        Function_.ifMissingOrNull(
+          Expression.property('preferredName'),
+          Expression.property('name'),
+          Expression.string('Unknown'),
+        ).as('displayName'),
+      ),
+    )
+    .from(DataSource.collection(collection))
+    .where(Expression.property('type').equalTo(Expression.string('user')));
+  ```
+
+  </CodeExample>
