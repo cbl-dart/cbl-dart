@@ -70,7 +70,7 @@ packages:
       path: "packages/cbl"
       relative: true
     source: path
-    version: "3.4.2+0"
+    version: "3.6.0"
   cbl_libcblite_api:
     dependency: transitive
     description:
@@ -83,10 +83,10 @@ packages:
     dependency: transitive
     description:
       name: cbl_libcblitedart_api
-      sha256: "64151c15822fc2d14e57e33d076ff53ece951a62c61b62ef198dcb2900538b66"
+      sha256: "424609be6e2cb4a7eaf3b84c311c21881776630ef7bebc5d41659a020290a342"
       url: "https://pub.dev"
     source: hosted
-    version: "9.0.0"
+    version: "10.0.0"
   characters:
     dependency: transitive
     description:
