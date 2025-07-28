@@ -249,6 +249,59 @@ abstract final class Function_ {
     String model,
     ExpressionInterface input,
   ) => PredictionFunctionImpl(model, input);
+
+  /// Creates a function expression which returns the first non-NULL,
+  /// non-MISSING value from the given expressions.
+  ///
+  /// Returns NULL if all values are MISSING or NULL.
+  ///
+  /// This is equivalent to the SQL++ IFMISSINGORNULL function.
+  ///
+  /// Requires at least 2 expressions.
+  static ExpressionInterface ifMissingOrNull(
+    ExpressionInterface expression1,
+    ExpressionInterface expression2, [
+    ExpressionInterface? expression3,
+    ExpressionInterface? expression4,
+    ExpressionInterface? expression5,
+    ExpressionInterface? expression6,
+    ExpressionInterface? expression7,
+    ExpressionInterface? expression8,
+    ExpressionInterface? expression9,
+  ]) => ifMissingOrNullAll(
+    [
+      expression1,
+      expression2,
+      expression3,
+      expression4,
+      expression5,
+      expression6,
+      expression7,
+      expression8,
+      expression9,
+    ].whereType(),
+  );
+
+  /// Creates a function expression which returns the first non-NULL,
+  /// non-MISSING value from the given [expressions].
+  ///
+  /// Returns NULL if all values are MISSING or NULL.
+  ///
+  /// This is equivalent to the SQL++ IFMISSINGORNULL function.
+  ///
+  /// Requires at least 2 expressions.
+  static ExpressionInterface ifMissingOrNullAll(
+    Iterable<ExpressionInterface> expressions,
+  ) {
+    final expressionsList = expressions.toList();
+    if (expressionsList.length < 2) {
+      throw ArgumentError(
+        'ifMissingOrNull requires at least 2 expressions, '
+        'got ${expressionsList.length}',
+      );
+    }
+    return VariadicExpression('ifMissingOrNull()', expressionsList);
+  }
 }
 
 /// A prediction function expression, which represents a call to a
