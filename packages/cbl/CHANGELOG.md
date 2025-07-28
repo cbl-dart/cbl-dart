@@ -1,3 +1,5 @@
+## 3.6.0+1
+
 ## 3.6.0
 
  - **FEAT**: add IFMISSINGORNULL function to QueryBuilder ([#815](https://github.com/cbl-dart/cbl-dart/issues/815)). ([2b716e6a](https://github.com/cbl-dart/cbl-dart/commit/2b716e6ab3a39a0f9d91c5d0423b99c87ed5ee5e))

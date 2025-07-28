@@ -10,7 +10,7 @@ end
 dart_executable = "#{flutter_root}/bin/cache/dart-sdk/bin/dart"
 
 # Globally activate the cbl_flutter_install package so we can use the `cbl_flutter_install` command.
-stdout, stderr, status = Open3.capture3("#{dart_executable} pub global activate cbl_flutter_install 0.1.0+4")
+stdout, stderr, status = Open3.capture3("#{dart_executable} pub global activate cbl_flutter_install 0.1.0+5")
 
 unless status.success?
   puts "Failed to activate cbl_flutter_install:\n#{stdout}\n#{stderr}"

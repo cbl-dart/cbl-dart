@@ -1,3 +1,7 @@
+## 3.5.0
+
+ - **FEAT**: upgrade to NDK r28 for proper 16KB page size support ([#817](https://github.com/cbl-dart/cbl-dart/issues/817)). ([d2ca7a84](https://github.com/cbl-dart/cbl-dart/commit/d2ca7a84d2b57c560dc62cfe0de2b0353c3b28e1))
+
 ## 3.4.1
 
  - Update a dependency to the latest release.

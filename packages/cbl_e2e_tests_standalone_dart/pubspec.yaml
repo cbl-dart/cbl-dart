@@ -6,8 +6,8 @@ environment:
 
 dependencies:
   benchmark_harness: ^2.1.0
-  cbl: ^3.6.0
-  cbl_dart: ^3.4.1
+  cbl: ^3.6.0+1
+  cbl_dart: ^3.5.0
   collection: ^1.16.0
   crypto: ^3.0.1
   http: ^1.0.0

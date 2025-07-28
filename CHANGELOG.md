@@ -15,6 +15,55 @@ Packages with breaking changes:
 
 Packages with other changes:
 
+ - [`cbl` - `v3.6.0+1`](#cbl---v3601)
+ - [`cbl_dart` - `v3.5.0`](#cbl_dart---v350)
+ - [`cbl_flutter_ce` - `v3.5.0`](#cbl_flutter_ce---v350)
+ - [`cbl_flutter_ee` - `v3.5.0`](#cbl_flutter_ee---v350)
+ - [`cbl_flutter` - `v3.3.4`](#cbl_flutter---v334)
+ - [`cbl_flutter_install` - `v0.1.0+5`](#cbl_flutter_install---v0105)
+ - [`cbl_flutter_platform_interface` - `v3.1.5`](#cbl_flutter_platform_interface---v315)
+ - [`cbl_generator` - `v0.3.1+6`](#cbl_generator---v0316)
+ - [`cbl_sentry` - `v2.1.7`](#cbl_sentry---v217)
+
+Packages with dependency updates only:
+
+> Packages listed below depend on other packages in this workspace that have had changes. Their versions have been incremented to bump the minimum dependency versions of the packages they depend upon in this project.
+
+ - `cbl_flutter` - `v3.3.4`
+ - `cbl_flutter_install` - `v0.1.0+5`
+ - `cbl_flutter_platform_interface` - `v3.1.5`
+ - `cbl_generator` - `v0.3.1+6`
+ - `cbl_sentry` - `v2.1.7`
+
+---
+
+#### `cbl` - `v3.6.0+1`
+
+#### `cbl_dart` - `v3.5.0`
+
+ - **FEAT**: upgrade to NDK r28 for proper 16KB page size support ([#817](https://github.com/cbl-dart/cbl-dart/issues/817)). ([d2ca7a84](https://github.com/cbl-dart/cbl-dart/commit/d2ca7a84d2b57c560dc62cfe0de2b0353c3b28e1))
+
+#### `cbl_flutter_ce` - `v3.5.0`
+
+ - **FEAT**: upgrade to NDK r28 for proper 16KB page size support ([#817](https://github.com/cbl-dart/cbl-dart/issues/817)). ([d2ca7a84](https://github.com/cbl-dart/cbl-dart/commit/d2ca7a84d2b57c560dc62cfe0de2b0353c3b28e1))
+
+#### `cbl_flutter_ee` - `v3.5.0`
+
+ - **FEAT**: upgrade to NDK r28 for proper 16KB page size support ([#817](https://github.com/cbl-dart/cbl-dart/issues/817)). ([d2ca7a84](https://github.com/cbl-dart/cbl-dart/commit/d2ca7a84d2b57c560dc62cfe0de2b0353c3b28e1))
+
+
+## 2025-07-28
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
  - [`cbl` - `v3.6.0`](#cbl---v360)
  - [`cbl_flutter` - `v3.3.3`](#cbl_flutter---v333)
  - [`cbl_flutter_install` - `v0.1.0+4`](#cbl_flutter_install---v0104)
