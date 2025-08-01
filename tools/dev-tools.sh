@@ -155,8 +155,8 @@ function prepareNativeLibraries() {
         rm -rf "$cblFlutterLocalMacosLibrariesDir"
         mkdir -p "$cblFlutterLocalMacosLibrariesDir"
         mkdir -p "$cblFlutterLocalMacosFrameworksDir"
-        cp -L "$couchbaseLiteCArchiveDir/libcblite-"*"/lib/libcblite."?".dylib" "$cblFlutterLocalMacosLibrariesDir"
-        cp -L "$couchbaseLiteDartBuildDir/unix/libcblitedart-"*"/lib/libcblitedart."?".dylib" "$cblFlutterLocalMacosLibrariesDir"
+        cp -L "$couchbaseLiteCArchiveDir/libcblite-"*"/lib/libcblite."*".dylib" "$cblFlutterLocalMacosLibrariesDir"
+        cp -L "$couchbaseLiteDartBuildDir/unix/libcblitedart-"*"/lib/libcblitedart."*".dylib" "$cblFlutterLocalMacosLibrariesDir"
         cp -a "$couchbaseLiteVectorSearchArchiveDir/"* "$cblFlutterLocalMacosFrameworksDir"
         ;;
     linux-x86_64)
