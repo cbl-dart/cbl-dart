@@ -53,15 +53,20 @@ function _linkCouchbaseLiteFramework() {
     echo "Setting up to build against Couchbase Lite C $edition edition"
 
     cd "$projectDir/Xcode"
-    ln -F -s "$frameworkPath" CouchbaseLite.xcframework
+    # Remove any existing symlink to ensure clean state.
+    rm -f CouchbaseLite.xcframework
+    ln -s "$frameworkPath" CouchbaseLite.xcframework
 }
 
 function _buildFramework() {
     cd "$projectDir"
 
-    local edition="$1"
-    local buildMode="$2"
-    local platformId="$3"
+    # Note: This function does not require an edition parameter because
+    # the CouchbaseLite framework linked by _linkCouchbaseLiteFramework
+    # automatically defines the COUCHBASE_ENTERPRISE macro during compilation
+    # when building against the enterprise edition.
+    local buildMode="$1"
+    local platformId="$2"
     local platform="$(_platformFromId "$platformId")"
     local destination="generic/platform=$platform"
     local configuration="$(_configurationFromBuildMode "$buildMode")"
@@ -135,10 +140,17 @@ fi
 
 echo "Building Couchbase Lite Dart for iOS against $edition edition in $buildMode mode"
 
+# Clean up any existing build artifacts to ensure fresh build.
+echo "Cleaning existing build artifacts"
+rm -rf "$buildDir"
+rm -rf "$archivesDir"
+mkdir -p "$buildDir"
+mkdir -p "$archivesDir"
+
 _linkCouchbaseLiteFramework "$edition"
 
 for platformId in "${platformIds[@]}"; do
-    _buildFramework "$edition" "$buildMode" "$platformId"
+    _buildFramework "$buildMode" "$platformId"
 done
 
 _buildXcframework "$buildMode"
