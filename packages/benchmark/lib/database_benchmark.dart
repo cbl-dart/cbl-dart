@@ -17,10 +17,8 @@ abstract class DatabaseBenchmarkBase {
     await setup();
 
     try {
-      if (executionModeParameter.current == ExecutionMode.jit) {
-        // Warm up the JIT compiler.
-        await _run();
-      }
+      // Warm up.
+      await _run();
 
       _operationDurations.clear();
       _totalDurationStopwatch.reset();
