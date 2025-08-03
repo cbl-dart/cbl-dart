@@ -5,6 +5,7 @@ import 'package:cli_launcher/cli_launcher.dart';
 
 import 'command/generate_bindings.dart';
 import 'command/install_packages.dart';
+import 'command/release.dart';
 import 'error.dart';
 
 final class CbdRunner extends CommandRunner<void> {
@@ -12,6 +13,7 @@ final class CbdRunner extends CommandRunner<void> {
     : super('cbd', 'CBL Dart dev tools CLI') {
     addCommand(GenerateBindings());
     addCommand(InstallPackages());
+    addCommand(ReleaseCommand());
 
     argParser.addFlag('verbose', abbr: 'v', help: 'Print verbose output');
   }
