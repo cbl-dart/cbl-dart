@@ -19,6 +19,7 @@ final class CBLIndexSpec {
     required this.type,
     required this.expressionLanguage,
     required this.expressions,
+    this.where,
     this.ignoreAccents,
     this.language,
     this.dimensions,
@@ -36,6 +37,9 @@ final class CBLIndexSpec {
   final CBLDartIndexType type;
   final CBLQueryLanguage expressionLanguage;
   final String expressions;
+
+  // Partial index (applies to value and full-text indexes)
+  final String? where;
 
   // Full text index
   final bool? ignoreAccents;
@@ -263,7 +267,8 @@ final class CollectionBindings extends Bindings {
     final ref = result.ref
       ..type = spec.type.value
       ..expressionLanguage = spec.expressionLanguage.value
-      ..expressions = spec.expressions.toFLString();
+      ..expressions = spec.expressions.toFLString()
+      ..whereClause = spec.where.toFLString();
 
     switch (spec.type) {
       case CBLDartIndexType.value$:

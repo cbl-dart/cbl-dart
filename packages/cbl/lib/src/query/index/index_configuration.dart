@@ -21,8 +21,20 @@ abstract final class IndexConfiguration implements Index {
 abstract final class ValueIndexConfiguration implements IndexConfiguration {
   /// Creates a specification of a value [Index] from a list of SQL++
   /// [expressions].
-  factory ValueIndexConfiguration(List<String> expressions) =
+  ///
+  /// The optional [where] parameter allows you to specify a N1QL/SQL++ WHERE
+  /// clause to create a partial index that only includes documents matching the
+  /// specified condition.
+  factory ValueIndexConfiguration(List<String> expressions, {String? where}) =
       _ValueIndexConfiguration;
+
+  /// The N1QL/SQL++ WHERE clause for filtering documents in a partial index.
+  ///
+  /// When specified, only documents matching this condition will be included in
+  /// the index, reducing index size and improving query performance.
+  ///
+  /// Returns `null` if this is not a partial index.
+  abstract String? where;
 }
 
 /// A specification of a full text [Index] from a list of SQL++ [expressions].
@@ -31,10 +43,15 @@ abstract final class ValueIndexConfiguration implements IndexConfiguration {
 abstract final class FullTextIndexConfiguration implements IndexConfiguration {
   /// Creates a specification of a full text [Index] from a list of SQL++
   /// [expressions].
+  ///
+  /// The optional [where] parameter allows you to specify a N1QL/SQL++ WHERE
+  /// clause to create a partial index that only includes documents matching the
+  /// specified condition.
   factory FullTextIndexConfiguration(
     List<String> expressions, {
     bool? ignoreAccents,
     FullTextLanguage? language,
+    String? where,
   }) = _FullTextIndexConfiguration;
 
   /// Whether the index should ignore accents and diacritical marks.
@@ -51,6 +68,14 @@ abstract final class FullTextIndexConfiguration implements IndexConfiguration {
   /// If left `null` no language-specific behaviors such as stemming and
   /// stop-word removal occur.
   abstract FullTextLanguage? language;
+
+  /// The N1QL/SQL++ WHERE clause for filtering documents in a partial index.
+  ///
+  /// When specified, only documents matching this condition will be included in
+  /// the index, reducing index size and improving query performance.
+  ///
+  /// Returns `null` if this is not a partial index.
+  abstract String? where;
 }
 
 /// Type of a [VectorEncoding.scalarQuantizer].
@@ -337,13 +362,17 @@ abstract final class _IndexConfiguration implements IndexConfiguration {
 
 final class _ValueIndexConfiguration extends _IndexConfiguration
     implements ValueIndexConfiguration, IndexImplInterface {
-  _ValueIndexConfiguration(super.expressions);
+  _ValueIndexConfiguration(super.expressions, {this.where});
+
+  @override
+  String? where;
 
   @override
   CBLIndexSpec toCBLIndexSpec() => CBLIndexSpec(
     expressionLanguage: CBLQueryLanguage.n1ql,
     expressions: expressions.join(', '),
     type: CBLDartIndexType.value$,
+    where: where,
   );
 
   @override
@@ -351,13 +380,24 @@ final class _ValueIndexConfiguration extends _IndexConfiguration
       identical(this, other) ||
       other is _ValueIndexConfiguration &&
           runtimeType == other.runtimeType &&
-          const DeepCollectionEquality().equals(expressions, other.expressions);
+          const DeepCollectionEquality().equals(
+            expressions,
+            other.expressions,
+          ) &&
+          where == other.where;
 
   @override
-  int get hashCode => const DeepCollectionEquality().hash(expressions);
+  int get hashCode =>
+      const DeepCollectionEquality().hash(expressions) ^ where.hashCode;
 
   @override
-  String toString() => 'ValueIndexConfiguration(${expressions.join(', ')})';
+  String toString() {
+    final parts = [expressions.join(', ')];
+    if (where != null) {
+      parts.add('WHERE: $where');
+    }
+    return 'ValueIndexConfiguration(${parts.join(' | ')})';
+  }
 }
 
 final class _FullTextIndexConfiguration extends _IndexConfiguration
@@ -366,6 +406,7 @@ final class _FullTextIndexConfiguration extends _IndexConfiguration
     super.expressions, {
     bool? ignoreAccents,
     this.language,
+    this.where,
   }) : ignoreAccents = ignoreAccents ?? false;
 
   @override
@@ -375,10 +416,14 @@ final class _FullTextIndexConfiguration extends _IndexConfiguration
   FullTextLanguage? language;
 
   @override
+  String? where;
+
+  @override
   CBLIndexSpec toCBLIndexSpec() => CBLIndexSpec(
     expressionLanguage: CBLQueryLanguage.n1ql,
     expressions: expressions.join(', '),
     type: CBLDartIndexType.fullText,
+    where: where,
     ignoreAccents: ignoreAccents,
     language: language?.name,
   );
@@ -393,19 +438,22 @@ final class _FullTextIndexConfiguration extends _IndexConfiguration
             other.expressions,
           ) &&
           ignoreAccents == other.ignoreAccents &&
-          language == other.language;
+          language == other.language &&
+          where == other.where;
 
   @override
   int get hashCode =>
       const DeepCollectionEquality().hash(expressions) ^
       ignoreAccents.hashCode ^
-      language.hashCode;
+      language.hashCode ^
+      where.hashCode;
 
   @override
   String toString() {
     final properties = [
       if (ignoreAccents) 'IGNORE-ACCENTS',
       if (language != null) 'language: ${language!.name}',
+      if (where != null) 'WHERE: $where',
     ];
 
     return [

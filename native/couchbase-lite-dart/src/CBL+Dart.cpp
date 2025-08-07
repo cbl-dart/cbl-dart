@@ -637,6 +637,7 @@ bool CBLDart_CBLCollection_CreateIndex(CBLCollection* collection, FLString name,
       CBLValueIndexConfiguration config{};
       config.expressionLanguage = indexSpec.expressionLanguage;
       config.expressions = indexSpec.expressions;
+      config.where = indexSpec.whereClause;
 
       return CBLCollection_CreateValueIndex(collection, name, config, errorOut);
     }
@@ -646,6 +647,7 @@ bool CBLDart_CBLCollection_CreateIndex(CBLCollection* collection, FLString name,
       config.expressions = indexSpec.expressions;
       config.ignoreAccents = static_cast<bool>(indexSpec.ignoreAccents);
       config.language = indexSpec.language;
+      config.where = indexSpec.whereClause;
 
       return CBLCollection_CreateFullTextIndex(collection, name, config,
                                                errorOut);

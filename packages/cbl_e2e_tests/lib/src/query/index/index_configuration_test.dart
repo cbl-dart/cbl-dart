@@ -7,6 +7,11 @@ void main() {
   setupTestBinding();
 
   group('ValueIndexConfiguration', () {
+    test('default values', () {
+      final index = ValueIndexConfiguration(['a']);
+      expect(index.where, isNull);
+    });
+
     test('throws when expressions is empty', () {
       expect(() => ValueIndexConfiguration([]), throwsArgumentError);
       expect(
@@ -27,6 +32,17 @@ void main() {
 
       b = ValueIndexConfiguration(['b']);
       expect(a, isNot(b));
+
+      // Test equality with where clause
+      a = ValueIndexConfiguration(['a'], where: 'type = "hotel"');
+      b = ValueIndexConfiguration(['a'], where: 'type = "hotel"');
+      expect(a, b);
+
+      b = ValueIndexConfiguration(['a'], where: 'type = "restaurant"');
+      expect(a, isNot(b));
+
+      b = ValueIndexConfiguration(['a']);
+      expect(a, isNot(b));
     });
 
     test('hashCode', () {
@@ -41,12 +57,30 @@ void main() {
 
       b = ValueIndexConfiguration(['b']);
       expect(a.hashCode, isNot(b.hashCode));
+
+      // Test hashCode with where clause
+      a = ValueIndexConfiguration(['a'], where: 'type = "hotel"');
+      expect(a.hashCode, a.hashCode);
+
+      b = ValueIndexConfiguration(['a'], where: 'type = "hotel"');
+      expect(a.hashCode, b.hashCode);
+
+      b = ValueIndexConfiguration(['a'], where: 'type = "restaurant"');
+      expect(a.hashCode, isNot(b.hashCode));
+
+      b = ValueIndexConfiguration(['a']);
+      expect(a.hashCode, isNot(b.hashCode));
     });
 
     test('toString', () {
       expect(
         ValueIndexConfiguration(['a', 'b']).toString(),
         'ValueIndexConfiguration(a, b)',
+      );
+
+      expect(
+        ValueIndexConfiguration(['a', 'b'], where: 'type = "hotel"').toString(),
+        'ValueIndexConfiguration(a, b | WHERE: type = "hotel")',
       );
     });
   });
@@ -56,6 +90,7 @@ void main() {
       final index = FullTextIndexConfiguration(['a']);
       expect(index.ignoreAccents, isFalse);
       expect(index.language, isNull);
+      expect(index.where, isNull);
     });
 
     test('update', () {
@@ -109,6 +144,17 @@ void main() {
         language: FullTextLanguage.french,
       );
       expect(a, isNot(b));
+
+      // Test equality with where clause
+      a = FullTextIndexConfiguration(['a'], where: 'type = "hotel"');
+      b = FullTextIndexConfiguration(['a'], where: 'type = "hotel"');
+      expect(a, b);
+
+      b = FullTextIndexConfiguration(['a'], where: 'type = "restaurant"');
+      expect(a, isNot(b));
+
+      b = FullTextIndexConfiguration(['a']);
+      expect(a, isNot(b));
     });
 
     test('hashCode', () {
@@ -135,6 +181,19 @@ void main() {
         language: FullTextLanguage.french,
       );
       expect(a.hashCode, isNot(b.hashCode));
+
+      // Test hashCode with where clause
+      a = FullTextIndexConfiguration(['a'], where: 'type = "hotel"');
+      expect(a.hashCode, a.hashCode);
+
+      b = FullTextIndexConfiguration(['a'], where: 'type = "hotel"');
+      expect(a.hashCode, b.hashCode);
+
+      b = FullTextIndexConfiguration(['a'], where: 'type = "restaurant"');
+      expect(a.hashCode, isNot(b.hashCode));
+
+      b = FullTextIndexConfiguration(['a']);
+      expect(a.hashCode, isNot(b.hashCode));
     });
 
     test('toString', () {
@@ -155,6 +214,24 @@ void main() {
           language: FullTextLanguage.english,
         ).toString(),
         'FullTextIndexConfiguration(a, b | IGNORE-ACCENTS, language: english)',
+      );
+
+      expect(
+        FullTextIndexConfiguration([
+          'a',
+          'b',
+        ], where: 'type = "hotel"').toString(),
+        'FullTextIndexConfiguration(a, b | WHERE: type = "hotel")',
+      );
+
+      expect(
+        FullTextIndexConfiguration(
+          ['a', 'b'],
+          ignoreAccents: true,
+          language: FullTextLanguage.english,
+          where: 'type = "hotel"',
+        ).toString(),
+        'FullTextIndexConfiguration(a, b | IGNORE-ACCENTS, language: english, WHERE: type = "hotel")',
       );
     });
   });

@@ -160,6 +160,9 @@ struct CBLDart_CBLIndexSpec {
   CBLQueryLanguage expressionLanguage;
   FLString expressions;
 
+  // Partial index configuration (applies to value and full-text indexes)
+  FLString whereClause;
+
   // Full text index configuration
   bool ignoreAccents;
   FLString language;

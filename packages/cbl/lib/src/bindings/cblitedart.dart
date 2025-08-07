@@ -1183,6 +1183,8 @@ final class CBLDart_CBLIndexSpec extends ffi.Struct {
 
   external imp$1.FLString expressions;
 
+  external imp$1.FLString whereClause;
+
   @ffi.Bool()
   external bool ignoreAccents;
 
