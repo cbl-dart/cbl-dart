@@ -268,7 +268,7 @@ final class CollectionBindings extends Bindings {
       ..type = spec.type.value
       ..expressionLanguage = spec.expressionLanguage.value
       ..expressions = spec.expressions.toFLString()
-      ..whereClause = spec.where.toFLString();
+      ..where = spec.where.toFLString();
 
     switch (spec.type) {
       case CBLDartIndexType.value$:

@@ -161,7 +161,7 @@ struct CBLDart_CBLIndexSpec {
   FLString expressions;
 
   // Partial index configuration (applies to value and full-text indexes)
-  FLString whereClause;
+  FLString where;
 
   // Full text index configuration
   bool ignoreAccents;
