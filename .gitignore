@@ -326,3 +326,7 @@ doc/api/
 
 ## Claude Code
 CLAUDE.local.md
+
+## Agent OS
+# Ignore for now while evaluating Agent OS.
+.agent-os/
