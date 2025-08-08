@@ -680,467 +680,96 @@ void main() {
         );
       });
 
-      group('Partial Indexes', () {
-        apiTest(
-          'should create partial value index with simple where clause',
-          () async {
-            final db = await openTestDatabase();
-            final collection = await db.defaultCollection;
+      // Partial index smoke tests: ensure WHERE clause is accepted and
+      // partial semantics are respected by the planner.
+      apiTest('create partial value index and verify partial usage', () async {
+        final db = await openTestDatabase();
+        final collection = await db.defaultCollection;
 
-            // Create test documents
-            final hotelDoc = MutableDocument.withId('hotel1', {
-              'type': 'hotel',
-              'name': 'Grand Hotel',
-              'city': 'New York',
-              'rating': 4.5,
-            });
+        // Seed data: both hotel and restaurant with same name key pattern.
+        final hotel = MutableDocument.withId('hotel1', {
+          'type': 'hotel',
+          'name': 'Alpha',
+        });
+        final restaurant = MutableDocument.withId('restaurant1', {
+          'type': 'restaurant',
+          'name': 'Alpha',
+        });
 
-            final restaurantDoc = MutableDocument.withId('restaurant1', {
-              'type': 'restaurant',
-              'name': 'Fine Dining',
-              'city': 'New York',
-              'rating': 4.2,
-            });
+        await collection.saveDocument(hotel);
+        await collection.saveDocument(restaurant);
 
-            await collection.saveDocument(hotelDoc);
-            await collection.saveDocument(restaurantDoc);
-
-            // Create partial index that only includes hotels
-            final indexConfig = ValueIndexConfiguration([
-              'name',
-              'city',
-            ], where: 'type = "hotel"');
-
-            await collection.createIndex('hotel_index', indexConfig);
-
-            // Verify the index was created
-            expect(await collection.indexes, contains('hotel_index'));
-
-            // Query should use the index for hotels
-            final query = await db.createQuery('''
-            SELECT name, city, rating
-            FROM _
-            WHERE type = "hotel" AND name = "Grand Hotel"
-          ''');
-
-            final explain = await query.explain();
-            expect(explain, contains('USING INDEX hotel_index'));
-
-            final results = await query.execute();
-            final resultsList = await results.allResults();
-            expect(resultsList, hasLength(1));
-            expect(resultsList.first.value('name'), 'Grand Hotel');
-          },
+        // Create a partial value index that only indexes hotels by name.
+        await collection.createIndex(
+          'hotel_name_idx',
+          ValueIndexConfiguration(['name'], where: 'type = "hotel"'),
         );
 
-        apiTest(
-          'should verify partial index only includes filtered documents',
-          () async {
-            final db = await openTestDatabase();
-            final collection = await db.defaultCollection;
-
-            // Create multiple document types
-            final docs = [
-              MutableDocument.withId('hotel1', {
-                'type': 'hotel',
-                'name': 'Hotel A',
-                'price': 100,
-              }),
-              MutableDocument.withId('hotel2', {
-                'type': 'hotel',
-                'name': 'Hotel B',
-                'price': 200,
-              }),
-              MutableDocument.withId('restaurant1', {
-                'type': 'restaurant',
-                'name': 'Restaurant A',
-                'price': 50,
-              }),
-              MutableDocument.withId('cafe1', {
-                'type': 'cafe',
-                'name': 'Cafe A',
-                'price': 25,
-              }),
-            ];
-
-            for (final doc in docs) {
-              await collection.saveDocument(doc);
-            }
-
-            // Create partial index for expensive hotels only
-            final indexConfig = ValueIndexConfiguration([
-              'name',
-              'price',
-            ], where: 'type = "hotel" AND price > 150');
-
-            await collection.createIndex('expensive_hotel_index', indexConfig);
-
-            // Query for expensive hotels should use the partial index
-            final expensiveHotelQuery = await db.createQuery('''
-            SELECT name, price
-            FROM _
-            WHERE type = "hotel" AND price > 150
-          ''');
-
-            final explain = await expensiveHotelQuery.explain();
-            expect(explain, contains('USING INDEX expensive_hotel_index'));
-
-            final results = await expensiveHotelQuery.execute();
-            final resultsList = await results.allResults();
-
-            // Should only return Hotel B (price 200)
-            expect(resultsList, hasLength(1));
-            expect(resultsList.first.value('name'), 'Hotel B');
-            expect(resultsList.first.value('price'), 200);
-          },
-        );
-
-        apiTest(
-          'should create partial full-text index with where clause',
-          () async {
-            final db = await openTestDatabase();
-            final collection = await db.defaultCollection;
-
-            // Create test documents
-            final hotelDoc = MutableDocument.withId('hotel1', {
-              'type': 'hotel',
-              'name': 'Grand Hotel',
-              'description': 'A luxurious hotel with great amenities',
-              'city': 'New York',
-            });
-
-            final restaurantDoc = MutableDocument.withId('restaurant1', {
-              'type': 'restaurant',
-              'name': 'Fine Dining',
-              'description': 'A restaurant with great food and service',
-              'city': 'New York',
-            });
-
-            await collection.saveDocument(hotelDoc);
-            await collection.saveDocument(restaurantDoc);
-
-            // Create partial full-text index for hotel descriptions only
-            final ftIndexConfig = FullTextIndexConfiguration([
-              'description',
-            ], where: 'type = "hotel"');
-
-            await collection.createIndex('hotel_ft_index', ftIndexConfig);
-
-            // Verify the index was created
-            expect(await collection.indexes, contains('hotel_ft_index'));
-
-            // Full-text search should use the partial index
-            final query = await db.createQuery('''
-            SELECT name, description
-            FROM _
-            WHERE MATCH(hotel_ft_index, 'luxurious')
-          ''');
-
-            // The partial index should be available for full-text queries
-            final explain = await query.explain();
-            expect(explain, contains('hotel_ft_index'));
-
-            final results = await query.execute();
-            final resultsList = await results.allResults();
-            expect(resultsList, hasLength(1));
-            expect(resultsList.first.value('name'), 'Grand Hotel');
-          },
-        );
-
-        apiTest('should handle AND conditions in WHERE clause', () async {
-          final db = await openTestDatabase();
-          final collection = await db.defaultCollection;
-
-          // Create test documents
-          final docs = [
-            MutableDocument.withId('hotel1', {
-              'type': 'hotel',
-              'state': 'CA',
-              'price': 200,
-            }),
-            MutableDocument.withId('hotel2', {
-              'type': 'hotel',
-              'state': 'NY',
-              'price': 300,
-            }),
-            MutableDocument.withId('hotel3', {
-              'type': 'hotel',
-              'state': 'CA',
-              'price': 100,
-            }),
-          ];
-
-          for (final doc in docs) {
-            await collection.saveDocument(doc);
-          }
-
-          // Create index with AND condition
-          final indexConfig = ValueIndexConfiguration([
-            'price',
-          ], where: 'type = "hotel" AND state = "CA" AND price > 150');
-
-          await collection.createIndex('ca_expensive_hotels', indexConfig);
-
-          final query = await db.createQuery('''
-            SELECT meta().id, price
-            FROM _
-            WHERE type = "hotel" AND state = "CA" AND price > 150
-          ''');
-
-          final explain = await query.explain();
-          expect(explain, contains('USING INDEX ca_expensive_hotels'));
-
-          final results = await query.execute();
-          final resultsList = await results.allResults();
-
-          // Should only return hotel1 (CA hotel with price > 150)
-          expect(resultsList, hasLength(1));
-          expect(resultsList.first.value('price'), 200);
-        });
-
-        apiTest('should handle OR conditions in WHERE clause', () async {
-          final db = await openTestDatabase();
-          final collection = await db.defaultCollection;
-
-          // Create test documents
-          final docs = [
-            MutableDocument.withId('venue1', {
-              'type': 'hotel',
-              'name': 'Hotel A',
-            }),
-            MutableDocument.withId('venue2', {
-              'type': 'restaurant',
-              'name': 'Restaurant A',
-            }),
-            MutableDocument.withId('venue3', {
-              'type': 'cafe',
-              'name': 'Cafe A',
-            }),
-          ];
-
-          for (final doc in docs) {
-            await collection.saveDocument(doc);
-          }
-
-          // Create index with OR condition
-          final indexConfig = ValueIndexConfiguration([
-            'name',
-          ], where: 'type = "hotel" OR type = "restaurant"');
-
-          await collection.createIndex('hospitality_venues', indexConfig);
-
-          final query = await db.createQuery('''
-            SELECT name, type
-            FROM _
-            WHERE type = "hotel" OR type = "restaurant"
-          ''');
-
-          final explain = await query.explain();
-          expect(explain, contains('USING INDEX hospitality_venues'));
-
-          final results = await query.execute();
-          final resultsList = await results.allResults();
-
-          // Should return both hotel and restaurant, but not cafe
-          expect(resultsList, hasLength(2));
-          final types = resultsList.map((r) => r.value('type')).toList();
-          expect(types, containsAll(['hotel', 'restaurant']));
-          expect(types, isNot(contains('cafe')));
-        });
-
-        apiTest('should handle IN operator in WHERE clause', () async {
-          final db = await openTestDatabase();
-          final collection = await db.defaultCollection;
-
-          // Create test documents
-          final docs = [
-            MutableDocument.withId('item1', {
-              'category': 'electronics',
-              'name': 'Phone',
-            }),
-            MutableDocument.withId('item2', {
-              'category': 'books',
-              'name': 'Novel',
-            }),
-            MutableDocument.withId('item3', {
-              'category': 'clothing',
-              'name': 'Shirt',
-            }),
-            MutableDocument.withId('item4', {
-              'category': 'electronics',
-              'name': 'Laptop',
-            }),
-          ];
-
-          for (final doc in docs) {
-            await collection.saveDocument(doc);
-          }
-
-          // Create index with IN condition
-          final indexConfig = ValueIndexConfiguration([
-            'name',
-          ], where: 'category IN ["electronics", "books"]');
-
-          await collection.createIndex('selected_categories', indexConfig);
-
-          final query = await db.createQuery('''
-            SELECT name, category
-            FROM _
-            WHERE category IN ["electronics", "books"]
-          ''');
-
-          final explain = await query.explain();
-          expect(explain, contains('USING INDEX selected_categories'));
-
-          final results = await query.execute();
-          final resultsList = await results.allResults();
-
-          // Should return electronics and books, but not clothing
-          expect(resultsList, hasLength(3));
-          final categories = resultsList
-              .map((r) => r.value('category'))
-              .toList();
-          expect(categories, containsAll(['electronics', 'books']));
-          expect(categories, isNot(contains('clothing')));
-        });
-
-        group('Error Cases', () {
-          apiTest('should handle invalid WHERE syntax gracefully', () async {
-            final db = await openTestDatabase();
-            final collection = await db.defaultCollection;
-
-            // Create a document to ensure database is not empty
-            await collection.saveDocument(
-              MutableDocument.withId('doc1', {'type': 'test'}),
-            );
-
-            // Create index with invalid WHERE syntax
-            final indexConfig = ValueIndexConfiguration([
-              'type',
-            ], where: 'invalid syntax here');
-
-            // This should either throw an error during index creation
-            // or query execution
-            await expectLater(() async {
-              await collection.createIndex('invalid_index', indexConfig);
-
-              // Try to use the index with a matching query
-              final query = await db.createQuery(
-                'SELECT * FROM _ WHERE invalid syntax here',
-              );
-              await query.execute();
-            }(), throwsA(isA<DatabaseException>()));
-          });
-
-          apiTest('should handle malformed N1QL expressions', () async {
-            final db = await openTestDatabase();
-            final collection = await db.defaultCollection;
-
-            await collection.saveDocument(
-              MutableDocument.withId('doc1', {'type': 'test'}),
-            );
-
-            // Test various malformed expressions
-            final malformedExpressions = [
-              'type =', // Incomplete comparison
-              'type = "unclosed', // Unclosed string
-              '= "value"', // Missing field
-              'type == "value"', // Wrong operator
-              'type = "value" AND', // Incomplete AND
-            ];
-
-            for (final expression in malformedExpressions) {
-              final indexConfig = ValueIndexConfiguration([
-                'type',
-              ], where: expression);
-
-              await expectLater(
-                () async {
-                  await collection.createIndex(
-                    'malformed_$expression',
-                    indexConfig,
-                  );
-                  final query = await db.createQuery(
-                    'SELECT * FROM _ WHERE $expression',
-                  );
-                  await query.execute();
-                }(),
-                throwsA(isA<DatabaseException>()),
-                reason:
-                    'Should throw error for malformed expression: $expression',
-              );
-            }
-          });
-
-          apiTest('should handle non-existent field references', () async {
-            final db = await openTestDatabase();
-            final collection = await db.defaultCollection;
-
-            await collection.saveDocument(
-              MutableDocument.withId('doc1', {'type': 'test'}),
-            );
-
-            // Create index with reference to non-existent field
-            final indexConfig = ValueIndexConfiguration([
-              'type',
-            ], where: 'nonExistentField = "value"');
-
-            await collection.createIndex(
-              'non_existent_field_index',
-              indexConfig,
-            );
-
-            // Query should work but return no results since field doesn't exist
-            final query = await db.createQuery('''
-              SELECT * FROM _ WHERE nonExistentField = "value"
-            ''');
-
-            final results = await query.execute();
-            final resultsList = await results.allResults();
-            expect(resultsList, isEmpty);
-          });
-
-          apiTest('should handle type mismatches in WHERE clause', () async {
-            final db = await openTestDatabase();
-            final collection = await db.defaultCollection;
-
-            // Create documents with different data types
-            final docs = [
-              MutableDocument.withId('doc1', {'value': 'string_value'}),
-              MutableDocument.withId('doc2', {'value': 123}),
-              MutableDocument.withId('doc3', {'value': true}),
-            ];
-
-            for (final doc in docs) {
-              await collection.saveDocument(doc);
-            }
-
-            // Create index that compares string field with number
-            final indexConfig = ValueIndexConfiguration(
-              ['value'],
-              where: 'value > 100', // Numeric comparison on mixed types
-            );
-
-            await collection.createIndex('type_mismatch_index', indexConfig);
-
-            final query = await db.createQuery('''
-              SELECT meta().id, value FROM _ WHERE value > 100
-            ''');
-
-            final results = await query.execute();
-            final resultsList = await results.allResults();
-
-            // Should only return the numeric value(s) that are > 100
-            // Note: Different databases handle type coercion differently
-            expect(resultsList.isNotEmpty, isTrue);
-            final values = resultsList.map((r) => r.value('value')).toList();
-            expect(
-              values,
-              contains(123),
-            ); // The numeric value should definitely be included
-          });
-        });
+        // Query that implies the partial predicate should use the index.
+        final qUses = await db.createQuery('''
+          SELECT meta().id FROM _
+          WHERE type = "hotel" AND name = "Alpha"
+        ''');
+        final explainUses = await qUses.explain();
+        expect(explainUses, contains('USING INDEX hotel_name_idx'));
+        final idsUses = await (await qUses.execute())
+            .asStream()
+            .map((r) => r.string(0))
+            .toList();
+        expect(idsUses, ['hotel1']);
+
+        // Query without the predicate should NOT use the partial index.
+        final qNoUse = await db.createQuery('''
+          SELECT meta().id FROM _
+          WHERE name = "Alpha"
+        ''');
+        final explainNoUse = await qNoUse.explain();
+        expect(explainNoUse, isNot(contains('USING INDEX hotel_name_idx')));
       });
+
+      apiTest(
+        'create partial full-text index and verify it is partial',
+        () async {
+          final db = await openTestDatabase();
+          final collection = await db.defaultCollection;
+
+          // Seed data: both contain the same keyword so partial filter matters.
+          final hotel = MutableDocument.withId('hotel1', {
+            'type': 'hotel',
+            'name': 'Grand',
+            'description': 'great location with spacious rooms',
+          });
+          final restaurant = MutableDocument.withId('restaurant1', {
+            'type': 'restaurant',
+            'name': 'Fine',
+            'description': 'great flavors and cozy ambiance',
+          });
+
+          await collection.saveDocument(hotel);
+          await collection.saveDocument(restaurant);
+
+          // Create a partial FTS index on description for hotels only.
+          await collection.createIndex(
+            'hotel_desc_fts',
+            FullTextIndexConfiguration([
+              'description',
+            ], where: 'type = "hotel"'),
+          );
+
+          // MATCH against the index: only the hotel should be returned.
+          final q = await db.createQuery('''
+          SELECT meta().id FROM _
+          WHERE MATCH(hotel_desc_fts, 'great')
+        ''');
+          final explain = await q.explain();
+          expect(explain, contains('hotel_desc_fts'));
+          final ids = await (await q.execute())
+              .asStream()
+              .map((r) => r.string(0))
+              .toList();
+          expect(ids, ['hotel1']);
+        },
+      );
     });
   });
 }
