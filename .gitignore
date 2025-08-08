@@ -330,3 +330,4 @@ CLAUDE.local.md
 ## Agent OS
 # Ignore for now while evaluating Agent OS.
 .agent-os/
+.claude/
