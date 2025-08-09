@@ -26,6 +26,18 @@ final class ReleaseCommand extends BaseCommand {
 }
 
 abstract class ApiPackageReleaseCommand extends BaseCommand {
+  ApiPackageReleaseCommand() {
+    argParser.addFlag(
+      'publish',
+      defaultsTo: true,
+      help:
+          'After creating the release commit, publish the package to pub.dev '
+          'and push the changes.',
+    );
+  }
+
+  bool get publish => argResults!['publish'] as bool;
+
   String get packageName => name;
 
   String get packageDir =>
@@ -63,11 +75,15 @@ abstract class ApiPackageReleaseCommand extends BaseCommand {
     await _verifyRepoState();
     await _updateVersionFile();
     await _updatePubspecVersion();
+    await _updateDependentsAndBuild();
     await _addChangelogEntry();
+    await _updateRepoPubspecLock();
     await _commitChanges();
     await _tagRelease();
-    await _publishPackage();
-    await _pushToRemote();
+    if (publish) {
+      await _publishPackage();
+      await _pushToRemote();
+    }
 
     logger.stdout('Successfully released $packageName v$version');
   }
@@ -147,6 +163,93 @@ abstract class ApiPackageReleaseCommand extends BaseCommand {
     logger.stdout('Updated pubspec.yaml version to $version ✓');
   }
 
+  Future<void> _updateDependentsAndBuild() async {
+    logger.stdout('Updating dependent packages and running builds...');
+
+    // Dependent packages that reference this API package in their pubspecs.
+    const dependents = ['cbl', 'cbl_dart', 'cbl_flutter_ce', 'cbl_flutter_ee'];
+
+    // Update dependency version in each dependent's pubspec.yaml
+    for (final pkg in dependents) {
+      final depPubspecPath = path.join(
+        projectLayout.rootDir,
+        'packages',
+        pkg,
+        'pubspec.yaml',
+      );
+      final file = File(depPubspecPath);
+      if (!file.existsSync()) {
+        throw ToolException('pubspec.yaml not found for $pkg: $depPubspecPath');
+      }
+
+      final content = await file.readAsString();
+      final lines = content.split('\n');
+      final updatedLines = <String>[];
+      var replaced = false;
+
+      for (final line in lines) {
+        final trimmed = line.trimLeft();
+        if (trimmed.startsWith('$packageName:')) {
+          final indentLen = line.length - trimmed.length;
+          final indent = line.substring(0, indentLen);
+          updatedLines.add('$indent$packageName: $version');
+          replaced = true;
+        } else {
+          updatedLines.add(line);
+        }
+      }
+
+      if (!replaced) {
+        throw ToolException(
+          'Did not find dependency "$packageName" in $depPubspecPath',
+        );
+      }
+
+      await file.writeAsString(updatedLines.join('\n'));
+      logger.stdout('Updated $pkg/pubspec.yaml to $packageName: $version ✓');
+    }
+
+    // Run melos build scripts in the repository root.
+    final versionInfoResult = await Process.run('melos', [
+      'build:cbl_dart:version_info',
+    ], workingDirectory: projectLayout.rootDir);
+    if (versionInfoResult.exitCode != 0) {
+      throw ToolException(
+        'Failed to run melos build:cbl_dart:version_info',
+        exitCode: versionInfoResult.exitCode,
+      );
+    }
+    logger.stdout('Built cbl_dart version_info ✓');
+
+    final prebuiltResult = await Process.run('melos', [
+      'build:cbl_flutter_prebuilt',
+    ], workingDirectory: projectLayout.rootDir);
+    if (prebuiltResult.exitCode != 0) {
+      throw ToolException(
+        'Failed to run melos build:cbl_flutter_prebuilt',
+        exitCode: prebuiltResult.exitCode,
+      );
+    }
+    logger.stdout('Built cbl_flutter prebuilt packages ✓');
+
+    // Stage all changes in the dependent packages so they are included in the
+    // release commit. The repo was verified clean earlier, so this is safe.
+    for (final pkg in dependents) {
+      final addResult = await Process.run('git', [
+        'add',
+        path.join(projectLayout.rootDir, 'packages', pkg),
+      ]);
+      if (addResult.exitCode != 0) {
+        throw ToolException(
+          'Failed to stage changes for $pkg',
+          exitCode: addResult.exitCode,
+        );
+      }
+    }
+
+    logger.stdout('Staged changes in dependent packages ✓');
+  }
+
   Future<void> _addChangelogEntry() async {
     logger.stdout('Adding changelog entry...');
 
@@ -167,6 +270,24 @@ abstract class ApiPackageReleaseCommand extends BaseCommand {
     logger.stdout('Added changelog entry for $version ✓');
   }
 
+  Future<void> _updateRepoPubspecLock() async {
+    logger.stdout('Updating repo pubspec.lock...');
+
+    // Run `dart pub get` to update the lock file
+    final pubGetResult = await Process.run('dart', [
+      'pub',
+      'get',
+    ], workingDirectory: projectLayout.rootDir);
+    if (pubGetResult.exitCode != 0) {
+      throw ToolException(
+        'Failed to update pubspec.lock',
+        exitCode: pubGetResult.exitCode,
+      );
+    }
+
+    logger.stdout('Updated repo pubspec.lock ✓');
+  }
+
   Future<void> _commitChanges() async {
     logger.stdout('Committing changes...');
 
@@ -174,6 +295,7 @@ abstract class ApiPackageReleaseCommand extends BaseCommand {
       versionFilePath,
       path.join(packageDir, 'pubspec.yaml'),
       path.join(packageDir, 'CHANGELOG.md'),
+      path.join(projectLayout.rootDir, 'pubspec.lock'),
     ];
 
     // Add files to git

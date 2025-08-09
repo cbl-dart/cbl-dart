@@ -31,7 +31,7 @@ final class CbdRunner extends CommandRunner<void> {
       stdout.writeln(error);
       exitCode = 64;
     } on ToolException catch (error) {
-      stderr.writeln(error);
+      stderr.writeln(error.message);
       exitCode = error.exitCode;
       // ignore: avoid_catches_without_on_clauses
     } catch (error, stackTrace) {

@@ -5,10 +5,23 @@ import 'package:path/path.dart' as p;
 import 'package:yaml/yaml.dart';
 
 void main() {
+  const versionInfoFilePath = 'lib/src/version_info.dart';
   final latestReleases = _readLatestReleasesFromPubspec();
   File(
-    p.absolute('lib/src/version_info.dart'),
+    p.absolute(versionInfoFilePath),
   ).writeAsStringSync(_generateVersionInfoFile(latestReleases));
+
+  // Format file with daco format .
+  final formatResult = Process.runSync('daco', ['format', versionInfoFilePath]);
+
+  if (formatResult.exitCode != 0) {
+    throw Exception(
+      'Failed to format $versionInfoFilePath:\n'
+      'Exit code: ${formatResult.exitCode}\n'
+      '${formatResult.stdout}\n'
+      '${formatResult.stderr}',
+    );
+  }
 }
 
 Map<Library, String> _readLatestReleasesFromPubspec() {

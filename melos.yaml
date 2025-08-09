@@ -18,13 +18,14 @@ command:
     hooks:
       preCommit:
         description:
-          Pre-commit hook for the version command to update the
-          `cbl_flutter_ce|ee` packages.
+          Update the `cbl_flutter_ce|ee` packages and the repo `pubspec.lock`.
         run: |
           melos build:cbl_flutter_prebuilt && \
           git add packages/cbl_flutter_ee packages/cbl_flutter_ce && \
           melos build:cbl_dart:version_info && \
-          git add packages/cbl_dart/lib/src/version_info.dart
+          git add packages/cbl_dart/lib/src/version_info.dart && \
+          dart pub get && \
+          git add pubspec.lock
 
 scripts:
   activate:cbd:

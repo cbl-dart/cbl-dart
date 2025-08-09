@@ -1,0 +1,10 @@
+# melos_managed_dependency_overrides: cbl,cbl_flutter_install
+dependency_overrides:
+  cbl:
+    path: ../cbl
+  cbl_flutter_install:
+    path: ../cbl_flutter_install
+  cbl_libcblite_api:
+    path: ../cbl_libcblite_api
+  cbl_libcblitedart_api:
+    path: ../cbl_libcblitedart_api

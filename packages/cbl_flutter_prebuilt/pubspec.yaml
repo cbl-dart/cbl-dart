@@ -11,3 +11,9 @@ dependencies:
   mustache_template: ^2.0.0
   path: ^1.8.0
   yaml: ^3.1.1
+
+dependency_overrides:
+  cbl_libcblite_api:
+    path: ../cbl_libcblite_api
+  cbl_libcblitedart_api:
+    path: ../cbl_libcblitedart_api

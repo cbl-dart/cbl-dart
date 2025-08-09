@@ -154,7 +154,7 @@ Future<void> _copyFilePermissions(String file, {required String from}) async {
 }
 
 Future<void> _formatDartCode({required Directory directory}) async {
-  final result = await Process.run('dart', ['format', directory.path]);
+  final result = await Process.run('daco', ['format', directory.path]);
   if (result.exitCode != 0) {
     throw StateError(
       'Could not format dart code in: $directory\n'

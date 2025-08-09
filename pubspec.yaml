@@ -14,3 +14,7 @@ dev_dependencies:
 dependency_overrides:
   cbl:
     path: packages/cbl
+  cbl_libcblite_api:
+    path: packages/cbl_libcblite_api
+  cbl_libcblitedart_api:
+    path: packages/cbl_libcblitedart_api

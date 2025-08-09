@@ -70,23 +70,21 @@ packages:
       path: "packages/cbl"
       relative: true
     source: path
-    version: "3.6.0+1"
+    version: "3.6.0+2"
   cbl_libcblite_api:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: cbl_libcblite_api
-      sha256: "71628aad89e18f732f3113827c697ef2f49a8dfc49082f2a46a75fb371ba36e6"
-      url: "https://pub.dev"
-    source: hosted
+      path: "packages/cbl_libcblite_api"
+      relative: true
+    source: path
     version: "3.2.4"
   cbl_libcblitedart_api:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: cbl_libcblitedart_api
-      sha256: "7041d07e9bd3992f5a688192d0e242d0cd5e97cb97005ea839be55bb2bb49015"
-      url: "https://pub.dev"
-    source: hosted
-    version: "11.0.0"
+      path: "packages/cbl_libcblitedart_api"
+      relative: true
+    source: path
+    version: "12.0.0"
   characters:
     dependency: transitive
     description:
