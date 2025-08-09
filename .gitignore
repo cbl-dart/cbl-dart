@@ -327,7 +327,8 @@ doc/api/
 ## Claude Code
 CLAUDE.local.md
 
-## Agent OS
-# Ignore for now while evaluating Agent OS.
+## AI Tools
+# Ignore for now while evaluating AI Tools.
 .agent-os/
 .claude/
+.serena/
