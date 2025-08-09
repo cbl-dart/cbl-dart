@@ -12,9 +12,11 @@ Future<ProcessResult> runProcess(
 }) async {
   workingDirectory ??= Directory.current.path;
 
-  logger.trace(
-    'Running "$executable" in $workingDirectory with arguments $arguments',
-  );
+  if (logger.isVerbose) {
+    logger
+      ..trace('Running process in $workingDirectory')
+      ..trace('$executable ${arguments.map((arg) => '"$arg"').join(' ')}');
+  }
 
   final process = await Process.start(
     executable,
@@ -22,11 +24,30 @@ Future<ProcessResult> runProcess(
     workingDirectory: workingDirectory,
   );
 
-  final (_, _, exitCode) = await (
-    process.stdout.transform(utf8.decoder).drain(logger.trace),
-    process.stderr.transform(utf8.decoder).drain(logger.trace),
-    process.exitCode,
-  ).wait;
+  final stdoutBuffer = StringBuffer();
+  final stderrBuffer = StringBuffer();
+
+  // Tee to logger.trace while capturing
+  final stdoutDone = process.stdout
+      .transform(utf8.decoder)
+      .transform(const LineSplitter())
+      .map((chunk) {
+        stdoutBuffer.writeln(chunk);
+        logger.trace(chunk);
+      })
+      .drain<void>();
+  final stderrDone = process.stderr
+      .transform(utf8.decoder)
+      .transform(const LineSplitter())
+      .map((chunk) {
+        stderrBuffer.writeln(chunk);
+        logger.trace(chunk);
+      })
+      .drain<void>();
+
+  final exitCode = await process.exitCode;
+  await stdoutDone;
+  await stderrDone;
 
   logger.trace('"$executable" exited with code $exitCode');
 
@@ -39,7 +60,12 @@ Future<ProcessResult> runProcess(
     );
   }
 
-  return ProcessResult(process.pid, exitCode, stdout, stderr);
+  return ProcessResult(
+    process.pid,
+    exitCode,
+    stdoutBuffer.toString(),
+    stderrBuffer.toString(),
+  );
 }
 
 extension LoggerExtension on Logger {

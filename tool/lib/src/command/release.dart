@@ -5,6 +5,7 @@ import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
 import '../error.dart';
+import '../utils.dart';
 import 'base_command.dart';
 
 final class ReleaseCommand extends BaseCommand {
@@ -92,13 +93,11 @@ abstract class ApiPackageReleaseCommand extends BaseCommand {
     logger.stdout('Verifying repository state...');
 
     // Check if on main branch
-    final branchResult = await Process.run('git', ['branch', '--show-current']);
-    if (branchResult.exitCode != 0) {
-      throw ToolException(
-        'Failed to get current branch',
-        exitCode: branchResult.exitCode,
-      );
-    }
+    final branchResult = await runProcess('git', [
+      'branch',
+      '--show-current',
+    ], logger: logger);
+
     final currentBranch = branchResult.stdout.toString().trim();
     if (currentBranch != 'main') {
       throw ToolException(
@@ -107,13 +106,11 @@ abstract class ApiPackageReleaseCommand extends BaseCommand {
     }
 
     // Check if repo is clean
-    final statusResult = await Process.run('git', ['status', '--porcelain']);
-    if (statusResult.exitCode != 0) {
-      throw ToolException(
-        'Failed to check git status',
-        exitCode: statusResult.exitCode,
-      );
-    }
+    final statusResult = await runProcess('git', [
+      'status',
+      '--porcelain',
+    ], logger: logger);
+
     if (statusResult.stdout.toString().trim().isNotEmpty) {
       throw ToolException(
         'Repository is not clean. Please commit or stash changes.',
@@ -209,42 +206,30 @@ abstract class ApiPackageReleaseCommand extends BaseCommand {
       logger.stdout('Updated $pkg/pubspec.yaml to $packageName: $version ✓');
     }
 
-    // Run melos build scripts in the repository root.
-    final versionInfoResult = await Process.run('melos', [
-      'build:cbl_dart:version_info',
-    ], workingDirectory: projectLayout.rootDir);
-    if (versionInfoResult.exitCode != 0) {
-      throw ToolException(
-        'Failed to run melos build:cbl_dart:version_info',
-        exitCode: versionInfoResult.exitCode,
-      );
-    }
+    // Run melos build scripts to update generated files.
+    await runProcess(
+      'melos',
+      ['build:cbl_dart:version_info'],
+      workingDirectory: projectLayout.rootDir,
+      logger: logger,
+    );
     logger.stdout('Built cbl_dart version_info ✓');
 
-    final prebuiltResult = await Process.run('melos', [
-      'build:cbl_flutter_prebuilt',
-    ], workingDirectory: projectLayout.rootDir);
-    if (prebuiltResult.exitCode != 0) {
-      throw ToolException(
-        'Failed to run melos build:cbl_flutter_prebuilt',
-        exitCode: prebuiltResult.exitCode,
-      );
-    }
+    await runProcess(
+      'melos',
+      ['build:cbl_flutter_prebuilt'],
+      workingDirectory: projectLayout.rootDir,
+      logger: logger,
+    );
     logger.stdout('Built cbl_flutter prebuilt packages ✓');
 
     // Stage all changes in the dependent packages so they are included in the
     // release commit. The repo was verified clean earlier, so this is safe.
     for (final pkg in dependents) {
-      final addResult = await Process.run('git', [
+      await runProcess('git', [
         'add',
         path.join(projectLayout.rootDir, 'packages', pkg),
-      ]);
-      if (addResult.exitCode != 0) {
-        throw ToolException(
-          'Failed to stage changes for $pkg',
-          exitCode: addResult.exitCode,
-        );
-      }
+      ], logger: logger);
     }
 
     logger.stdout('Staged changes in dependent packages ✓');
@@ -274,16 +259,12 @@ abstract class ApiPackageReleaseCommand extends BaseCommand {
     logger.stdout('Updating repo pubspec.lock...');
 
     // Run `dart pub get` to update the lock file
-    final pubGetResult = await Process.run('dart', [
-      'pub',
-      'get',
-    ], workingDirectory: projectLayout.rootDir);
-    if (pubGetResult.exitCode != 0) {
-      throw ToolException(
-        'Failed to update pubspec.lock',
-        exitCode: pubGetResult.exitCode,
-      );
-    }
+    await runProcess(
+      'dart',
+      ['pub', 'get'],
+      workingDirectory: projectLayout.rootDir,
+      logger: logger,
+    );
 
     logger.stdout('Updated repo pubspec.lock ✓');
   }
@@ -300,28 +281,12 @@ abstract class ApiPackageReleaseCommand extends BaseCommand {
 
     // Add files to git
     for (final file in files) {
-      final addResult = await Process.run('git', ['add', file]);
-      if (addResult.exitCode != 0) {
-        throw ToolException(
-          'Failed to add $file to git',
-          exitCode: addResult.exitCode,
-        );
-      }
+      await runProcess('git', ['add', file], logger: logger);
     }
 
     // Commit changes
     final commitMessage = 'chore($packageName): $version release';
-    final commitResult = await Process.run('git', [
-      'commit',
-      '-m',
-      commitMessage,
-    ]);
-    if (commitResult.exitCode != 0) {
-      throw ToolException(
-        'Failed to commit changes',
-        exitCode: commitResult.exitCode,
-      );
-    }
+    await runProcess('git', ['commit', '-m', commitMessage], logger: logger);
 
     logger.stdout('Committed changes ✓');
   }
@@ -331,13 +296,7 @@ abstract class ApiPackageReleaseCommand extends BaseCommand {
 
     // Create all tags
     for (final tagName in tags) {
-      final tagResult = await Process.run('git', ['tag', tagName]);
-      if (tagResult.exitCode != 0) {
-        throw ToolException(
-          'Failed to create tag $tagName',
-          exitCode: tagResult.exitCode,
-        );
-      }
+      await runProcess('git', ['tag', tagName], logger: logger);
       logger.stdout('Created tag $tagName ✓');
     }
   }
@@ -345,19 +304,12 @@ abstract class ApiPackageReleaseCommand extends BaseCommand {
   Future<void> _publishPackage() async {
     logger.stdout('Publishing package...');
 
-    final publishResult = await Process.run('dart', [
-      'pub',
-      'publish',
-      '--force',
-    ], workingDirectory: packageDir);
-
-    if (publishResult.exitCode != 0) {
-      logger.stderr('Failed to publish package:\n${publishResult.stderr}');
-      throw ToolException(
-        'Failed to publish package',
-        exitCode: publishResult.exitCode,
-      );
-    }
+    await runProcess(
+      'dart',
+      ['pub', 'publish', '--force'],
+      workingDirectory: packageDir,
+      logger: logger,
+    );
 
     logger.stdout('Package published successfully ✓');
   }
@@ -366,27 +318,11 @@ abstract class ApiPackageReleaseCommand extends BaseCommand {
     logger.stdout('Pushing to remote...');
 
     // Push commits
-    final pushResult = await Process.run('git', ['push']);
-    if (pushResult.exitCode != 0) {
-      throw ToolException(
-        'Failed to push commits',
-        exitCode: pushResult.exitCode,
-      );
-    }
+    await runProcess('git', ['push'], logger: logger);
 
     // Push all tags
     for (final tagName in tags) {
-      final pushTagResult = await Process.run('git', [
-        'push',
-        'origin',
-        tagName,
-      ]);
-      if (pushTagResult.exitCode != 0) {
-        throw ToolException(
-          'Failed to push tag $tagName',
-          exitCode: pushTagResult.exitCode,
-        );
-      }
+      await runProcess('git', ['push', 'origin', tagName], logger: logger);
     }
 
     logger.stdout('Pushed commits and tags to remote ✓');
