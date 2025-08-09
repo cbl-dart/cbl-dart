@@ -68,6 +68,18 @@ class LibraryConfiguration {
         name += _dynamicLibraryExtension(version: version);
       }
 
+      if (Platform.isLinux || Platform.isAndroid) {
+        using((arena) {
+          final library = _dlopen(
+            name.toNativeUtf8(allocator: arena).cast(),
+            _RTLD_LAZY | _RTLD_GLOBAL,
+          );
+          if (library == nullptr) {
+            throw StateError('Failed to open dynamic library: $name');
+          }
+        });
+      }
+
       return DynamicLibrary.open(name);
     }
 
@@ -251,7 +263,19 @@ String _dynamicLibraryExtension({String? version}) {
 
 // === POSIX Dynamic Linking ===================================================
 
-final _process = DynamicLibrary.process();
+@Native<Pointer<Void> Function(Pointer<Char>, Int)>(symbol: 'dlopen')
+external Pointer<Void> _dlopen(Pointer<Char> filename, int flags);
+
+const int _RTLD_LAZY = 0x00001;
+const int _RTLD_GLOBAL_rest = 0x00100;
+const int _RTLD_GLOBAL_android_lp32 = 0x00002;
+
+final int _RTLD_GLOBAL = switch (Abi.current()) {
+  Abi.androidArm || Abi.androidIA32 => _RTLD_GLOBAL_android_lp32,
+  Abi.androidArm64 || Abi.androidX64 => _RTLD_GLOBAL_rest,
+  _ when Platform.isLinux => _RTLD_GLOBAL_rest,
+  _ => throw UnimplementedError(),
+};
 
 // ignore: camel_case_types
 final class _Dl_info extends Struct {
@@ -261,11 +285,8 @@ final class _Dl_info extends Struct {
   external Pointer<Utf8> dli_saddr;
 }
 
-final _dladdr = _process
-    .lookupFunction<
-      Int Function(Pointer<Void>, Pointer<_Dl_info>),
-      int Function(Pointer<Void>, Pointer<_Dl_info>)
-    >('dladdr');
+@Native<Int Function(Pointer<Void>, Pointer<_Dl_info>)>(symbol: 'dladdr')
+external int _dladdr(Pointer<Void> addr, Pointer<_Dl_info> info);
 
 // === Windows Dynamic Linking =================================================
 
