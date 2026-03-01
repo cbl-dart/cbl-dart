@@ -7,11 +7,11 @@
 #endif
 
 // Function typedefs
-typedef sentry_value_t (*sentry_value_new_string_t)(const char *value);
-typedef int (*sentry_value_set_by_key_t)(sentry_value_t value, const char *k,
+typedef sentry_value_t (*sentry_value_new_string_t)(const char* value);
+typedef int (*sentry_value_set_by_key_t)(sentry_value_t value, const char* k,
                                          sentry_value_t v);
-typedef sentry_value_t (*sentry_value_new_breadcrumb_t)(const char *type,
-                                                        const char *message);
+typedef sentry_value_t (*sentry_value_new_breadcrumb_t)(const char* type,
+                                                        const char* message);
 typedef void (*sentry_add_breadcrumb_t)(sentry_value_t breadcrumb);
 
 // Function pointers
@@ -61,17 +61,17 @@ bool CBLDart_InitSentryAPI() {
 }
 
 // Function definitions
-sentry_value_t sentry_value_new_string(const char *value) {
+sentry_value_t sentry_value_new_string(const char* value) {
   return sentry_value_new_string_fp(value);
 }
 
-int sentry_value_set_by_key(sentry_value_t value, const char *k,
+int sentry_value_set_by_key(sentry_value_t value, const char* k,
                             sentry_value_t v) {
   return sentry_value_set_by_key_fp(value, k, v);
 }
 
-sentry_value_t sentry_value_new_breadcrumb(const char *type,
-                                           const char *message) {
+sentry_value_t sentry_value_new_breadcrumb(const char* type,
+                                           const char* message) {
   return sentry_value_new_breadcrumb_fp(type, message);
 }
 
