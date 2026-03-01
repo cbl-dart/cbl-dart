@@ -339,11 +339,10 @@ part '$_genPartFileName';
 
 $content''';
 
-// source_gen v4 inserts `// dart format width=80` after the generated code
-// header during formatting.
 final _genPartHeader =
     '''
-${TypedDataBuilder.header.replaceFirst('// GENERATED CODE - DO NOT MODIFY BY HAND\n', '// GENERATED CODE - DO NOT MODIFY BY HAND\n// dart format width=80\n\n')}
+${TypedDataBuilder.header}// dart format width=80
+
 part of '$_testLibFileName';''';
 
 String _typedDictionaryGeneratorContent(String content) =>

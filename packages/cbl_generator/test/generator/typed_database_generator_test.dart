@@ -71,11 +71,10 @@ import 'package:cbl/cbl.dart';
 
 $content''';
 
-// source_gen v4 inserts `// dart format width=80` after the generated code
-// header during formatting.
 String _typedDatabaseGeneratorContent(String content) =>
     '''
-${TypedDatabaseBuilder.header.replaceFirst('// GENERATED CODE - DO NOT MODIFY BY HAND\n', '// GENERATED CODE - DO NOT MODIFY BY HAND\n// dart format width=80\n\n')}
+${TypedDatabaseBuilder.header}// dart format width=80
+
 // **************************************************************************
 // TypedDatabaseGenerator
 // **************************************************************************
