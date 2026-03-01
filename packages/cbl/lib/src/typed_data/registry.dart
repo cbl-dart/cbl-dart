@@ -246,8 +246,7 @@ final class TypedDataRegistry implements TypedDataAdapter {
             }
 
             return (doc) {
-              final mutableDoc =
-                  doc is MutableDocument ? doc : doc.toMutable();
+              final mutableDoc = doc is MutableDocument ? doc : doc.toMutable();
               return factory(mutableDoc);
             };
           })

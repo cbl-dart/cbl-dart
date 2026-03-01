@@ -87,8 +87,9 @@ import '$_testLibFileName';
 $content''';
 
 Future<void> _expectBadSource(String source, [Object? messageMatcher]) async {
-  final effectiveMatcher =
-      messageMatcher is String ? contains(messageMatcher) : messageMatcher;
+  final effectiveMatcher = messageMatcher is String
+      ? contains(messageMatcher)
+      : messageMatcher;
 
   String? errorMessage;
 
