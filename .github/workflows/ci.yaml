@@ -24,7 +24,7 @@ env:
 jobs:
   formatting-dart:
     name: Formatting - Dart
-    runs-on: ubuntu-22.04
+    runs-on: blacksmith-4vcpu-ubuntu-2204
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -53,7 +53,7 @@ jobs:
 
   formatting-clang:
     name: Formatting - Clang
-    runs-on: ubuntu-22.04
+    runs-on: blacksmith-4vcpu-ubuntu-2204
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -66,7 +66,7 @@ jobs:
 
   analyze-dart:
     name: Analyze Dart code
-    runs-on: ubuntu-22.04
+    runs-on: blacksmith-4vcpu-ubuntu-2204
     strategy:
       fail-fast: false
       matrix:
@@ -121,7 +121,7 @@ jobs:
       TARGET_OS: ${{ matrix.os }}
       TEST_PACKAGE: ${{ matrix.package }}
     continue-on-error: ${{ matrix.dart != 'stable' }}
-    runs-on: ubuntu-22.04
+    runs-on: blacksmith-4vcpu-ubuntu-2204
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -182,7 +182,7 @@ jobs:
           - macOS
           - Android
           - Ubuntu
-          - Windows
+          - blacksmith-4vcpu-windows-2025
         exclude:
           - embedder: standalone
             os: iOS
@@ -200,7 +200,7 @@ jobs:
         "macOS":"macos-15",
         "Android":"ubuntu-22.04",
         "Ubuntu":"ubuntu-22.04",
-        "Windows":"windows-2022"
+        "blacksmith-4vcpu-windows-2025"
       }')[matrix.os] }}
     env:
       EMBEDDER: ${{ matrix.embedder }}
@@ -309,7 +309,7 @@ jobs:
           - macOS
           - Android
           - Ubuntu
-          - Windows
+          - blacksmith-4vcpu-windows-2025
         exclude:
           # TODO: Get iOS tests to launch again in CI
           - embedder: flutter
@@ -320,7 +320,7 @@ jobs:
         "macOS":"macos-15",
         "Android":"ubuntu-22.04",
         "Ubuntu":"ubuntu-22.04",
-        "Windows":"windows-2022"
+        "blacksmith-4vcpu-windows-2025"
       }')[matrix.os] }}
     env:
       EMBEDDER: ${{ matrix.embedder }}
@@ -399,7 +399,7 @@ jobs:
         package: [cbl_dart]
         dart: [stable]
         embedder: [standalone]
-        os: [macOS, Ubuntu, Windows]
+        os: [macOS, Ubuntu, blacksmith-4vcpu-windows-2025]
     env:
       EMBEDDER: ${{ matrix.embedder }}
       TARGET_OS: ${{ matrix.os }}
@@ -409,7 +409,7 @@ jobs:
       ${{ fromJSON('{
         "macOS":"macos-15",
         "Ubuntu":"ubuntu-22.04",
-        "Windows":"windows-2022"
+        "blacksmith-4vcpu-windows-2025"
       }')[matrix.os] }}
     steps:
       - name: Checkout repository
@@ -460,14 +460,14 @@ jobs:
           - macOS
           - Android
           - Ubuntu
-          - Windows
+          - blacksmith-4vcpu-windows-2025
     runs-on: >-
       ${{ fromJSON('{
         "iOS":"macos-14",
         "macOS":"macos-14",
         "Android":"ubuntu-22.04",
         "Ubuntu":"ubuntu-22.04",
-        "Windows":"windows-2022"
+        "blacksmith-4vcpu-windows-2025"
       }')[matrix.os] }}
 
     steps:
