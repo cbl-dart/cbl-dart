@@ -1,0 +1,6 @@
+{
+  "scripts": {
+    "setup": "./tools/worktree-setup.sh",
+    "archive": "./tools/worktree-teardown.sh"
+  }
+}

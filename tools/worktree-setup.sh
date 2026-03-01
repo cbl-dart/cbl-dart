@@ -19,20 +19,20 @@ projectDir="$(cd "$scriptDir/.." && pwd)"
 # Bootstraps the current worktree for development.
 #
 # Assumes the script is running inside a worktree of the cbl-dart repository
-# and prepares it by building generated packages and resolving dependencies.
+# and prepares it by resolving dependencies and building native libraries.
 #
 # Steps:
-# 1. Build the generated Flutter packages (cbl_flutter_ce|ee).
-# 2. Run melos bootstrap (resolve dependencies across all packages).
+# 1. Run melos bootstrap (resolve dependencies across all packages).
+# 2. Build native libraries for the host target.
 
 # === Bootstrap ===============================================================
 
 cd "$projectDir"
 
-echo "Building generated Flutter packages..."
-$melosBin run build:cbl_flutter_prebuilt
-
 echo "Bootstrapping packages..."
 "$scriptDir/dev-tools.sh" bootstrap
+
+echo "Building native libraries..."
+"$scriptDir/dev-tools.sh" prepareNativeLibraries
 
 echo "Worktree is ready for development"
