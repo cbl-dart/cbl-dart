@@ -10,24 +10,24 @@ import 'analysis.dart';
 import 'model.dart';
 
 // dart:core types
-const _stringType = TypeChecker.fromRuntime(String);
-const _intType = TypeChecker.fromRuntime(int);
-const _doubleType = TypeChecker.fromRuntime(double);
-const _numType = TypeChecker.fromRuntime(num);
-const _boolType = TypeChecker.fromRuntime(bool);
-const _dateTimeType = TypeChecker.fromRuntime(DateTime);
-const _listType = TypeChecker.fromRuntime(List);
+const _stringType = TypeChecker.typeNamed(String);
+const _intType = TypeChecker.typeNamed(int);
+const _doubleType = TypeChecker.typeNamed(double);
+const _numType = TypeChecker.typeNamed(num);
+const _boolType = TypeChecker.typeNamed(bool);
+const _dateTimeType = TypeChecker.typeNamed(DateTime);
+const _listType = TypeChecker.typeNamed(List);
 
 // cbl annotation types
-const _typedDictionaryType = TypeChecker.fromRuntime(TypedDictionary);
-const _typedDocumentType = TypeChecker.fromRuntime(TypedDocument);
-const _documentIdType = TypeChecker.fromRuntime(DocumentId);
-const _typedPropertyType = TypeChecker.fromRuntime(TypedProperty);
-const _valueTypeMatcherType = TypeChecker.fromRuntime(ValueTypeMatcher);
-const _typedDatabaseType = TypeChecker.fromRuntime(TypedDatabase);
+const _typedDictionaryType = TypeChecker.typeNamed(TypedDictionary);
+const _typedDocumentType = TypeChecker.typeNamed(TypedDocument);
+const _documentIdType = TypeChecker.typeNamed(DocumentId);
+const _typedPropertyType = TypeChecker.typeNamed(TypedProperty);
+const _valueTypeMatcherType = TypeChecker.typeNamed(ValueTypeMatcher);
+const _typedDatabaseType = TypeChecker.typeNamed(TypedDatabase);
 
 // cbl types
-const _blobType = TypeChecker.fromRuntime(Blob);
+const _blobType = TypeChecker.typeNamed(Blob);
 
 const _builtinSupportedTypes = [
   _stringType,
@@ -72,7 +72,7 @@ final class TypedDataAnalyzer {
     ).read('types').setValue.map((type) => type.toTypeValue()!).toList();
 
     return TypedDatabaseModel(
-      libraryUri: element.librarySource.uri,
+      libraryUri: element.library.uri,
       declaringClassName: element.displayName,
       types: [
         for (final type in types) await buildTypedDataClassModel(type.element!),
@@ -191,7 +191,7 @@ final class TypedDataAnalyzer {
     }
 
     return TypedDataObjectModel(
-      libraryUri: annotatedClass.librarySource.uri,
+      libraryUri: annotatedClass.library.uri,
       kind: kind,
       classNames: classNames,
       fields: fields,
@@ -246,7 +246,8 @@ final class TypedDataAnalyzer {
       );
     }
 
-    final annotatedClassAstNode = (await resolver.astNodeFor(clazz))!;
+    final annotatedClassAstNode =
+        (await resolver.astNodeFor(clazz.firstFragment))!;
 
     if (!classHasMixin(
       annotatedClassAstNode,
@@ -337,8 +338,8 @@ final class TypedDataAnalyzer {
     TypedDataObjectKind kind,
     LibraryElement cblLibrary,
   ) async => Future.wait(
-    clazz.unnamedConstructor!.parameters.map((parameter) async {
-      final annotations = parameter.metadata
+    clazz.unnamedConstructor!.formalParameters.map((parameter) async {
+      final annotations = parameter.metadata.annotations
           .map((annotation) => annotation.computeConstantValue())
           .map(ConstantReader.new);
 
@@ -364,7 +365,7 @@ final class TypedDataAnalyzer {
         final converterConstant = typedPropertyAnnotation.peek('converter');
         if (converterConstant != null) {
           final scalarConverterClass =
-              cblLibrary.exportNamespace.get('ScalarConverter')!
+              cblLibrary.exportNamespace.get2('ScalarConverter')!
                   as ClassElement;
           final convertedType = converterConstant.objectValue.type!
               .asInstanceOf(scalarConverterClass)!
@@ -396,15 +397,15 @@ final class TypedDataAnalyzer {
         return TypedDataMetadataField(
           kind: DocumentMetadataKind.id,
           type: (type as BuiltinScalarType).withNullability(false),
-          name: parameter.name,
+          name: parameter.name!,
           constructorParameter: constructorParameter,
         );
       }
 
       return TypedDataObjectProperty(
         type: type,
-        name: parameter.name,
-        property: customProperty ?? parameter.name,
+        name: parameter.name!,
+        property: customProperty ?? parameter.name!,
         constructorParameter: constructorParameter,
         defaultValueCode: defaultValueCode,
       );
@@ -412,7 +413,7 @@ final class TypedDataAnalyzer {
   );
 
   bool _isDocumentIdField(
-    ParameterElement parameter,
+    FormalParameterElement parameter,
     Iterable<ConstantReader> annotations,
     TypedDataObjectKind kind,
   ) {
@@ -446,16 +447,13 @@ final class TypedDataAnalyzer {
     ClassElement clazz, {
     bool nullable = false,
   }) {
-    final annotationTypeChecker = TypeChecker.fromRuntime(Annotation);
-    final typeTypeChecker = TypeChecker.fromRuntime(T);
+    final annotationTypeChecker = TypeChecker.typeNamed(Annotation);
+    final typeTypeChecker = TypeChecker.typeNamed(T);
     final nullabilitySuffix = nullable
         ? NullabilitySuffix.question
         : NullabilitySuffix.none;
 
-    return clazz.accessors.firstWhereOrNull((element) {
-      if (!element.isGetter) {
-        return false;
-      }
+    return clazz.getters.firstWhereOrNull((element) {
       if (!annotationTypeChecker.hasAnnotationOfExact(element)) {
         return false;
       }
