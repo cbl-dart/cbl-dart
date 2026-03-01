@@ -11,10 +11,10 @@
 // === Slice ==================================================================
 
 CBLDART_EXPORT
-void CBLDart_FLSliceResult_RetainByBuf(void *buf);
+void CBLDart_FLSliceResult_RetainByBuf(void* buf);
 
 CBLDART_EXPORT
-void CBLDart_FLSliceResult_ReleaseByBuf(void *buf);
+void CBLDart_FLSliceResult_ReleaseByBuf(void* buf);
 
 // === Decoder ================================================================
 
@@ -23,17 +23,17 @@ void CBLDart_FLSliceResult_ReleaseByBuf(void *buf);
 struct KnownSharedKeys;
 
 CBLDART_EXPORT
-KnownSharedKeys *CBLDart_KnownSharedKeys_New();
+KnownSharedKeys* CBLDart_KnownSharedKeys_New();
 
 CBLDART_EXPORT
-void CBLDart_KnownSharedKeys_Delete(KnownSharedKeys *keys);
+void CBLDart_KnownSharedKeys_Delete(KnownSharedKeys* keys);
 
 struct CBLDart_LoadedDictKey {
   bool isKnownSharedKey;  // Whether the key has been seen before. For shared
                           // keys, stringBuf and stringSize are only set the
                           // first time the key is seen.
   int sharedKey;  // The id of the shared key or -1 if the key is not shared.
-  const void *stringBuf;  // The pointer to the start of the key string.
+  const void* stringBuf;  // The pointer to the start of the key string.
   size_t stringSize;      // The length of the key string.
   FLValue value;          // The Fleece value of the key.
 };
@@ -46,48 +46,48 @@ struct CBLDart_LoadedFLValue {
   bool asBool;
   int64_t asInt;
   double asDouble;
-  const void *stringBuf;
+  const void* stringBuf;
   size_t stringSize;
   FLSlice asData;
   FLValue value;
 };
 
 CBLDART_EXPORT
-void CBLDart_GetLoadedFLValue(FLValue value, CBLDart_LoadedFLValue *out);
+void CBLDart_GetLoadedFLValue(FLValue value, CBLDart_LoadedFLValue* out);
 
 CBLDART_EXPORT
 void CBLDart_FLArray_GetLoadedFLValue(FLArray array, uint32_t index,
-                                      CBLDart_LoadedFLValue *out);
+                                      CBLDart_LoadedFLValue* out);
 
 CBLDART_EXPORT
 void CBLDart_FLDict_GetLoadedFLValue(FLDict dict, FLString key,
-                                     CBLDart_LoadedFLValue *out);
+                                     CBLDart_LoadedFLValue* out);
 
 struct CBLDart_FLDictIterator;
 
 CBLDART_EXPORT
-CBLDart_FLDictIterator *CBLDart_FLDictIterator_Begin(
-    FLDict dict, KnownSharedKeys *knownSharedKeys,
-    CBLDart_LoadedDictKey *keyOut, CBLDart_LoadedFLValue *valueOut,
+CBLDart_FLDictIterator* CBLDart_FLDictIterator_Begin(
+    FLDict dict, KnownSharedKeys* knownSharedKeys,
+    CBLDart_LoadedDictKey* keyOut, CBLDart_LoadedFLValue* valueOut,
     bool deleteOnDone, bool preLoad);
 
 CBLDART_EXPORT
-void CBLDart_FLDictIterator_Delete(CBLDart_FLDictIterator *iterator);
+void CBLDart_FLDictIterator_Delete(CBLDart_FLDictIterator* iterator);
 
 CBLDART_EXPORT
-bool CBLDart_FLDictIterator_Next(CBLDart_FLDictIterator *iterator);
+bool CBLDart_FLDictIterator_Next(CBLDart_FLDictIterator* iterator);
 
 struct CBLDart_FLArrayIterator;
 
 CBLDART_EXPORT
-CBLDart_FLArrayIterator *CBLDart_FLArrayIterator_Begin(
-    FLArray array, CBLDart_LoadedFLValue *valueOut, bool deleteOnDone);
+CBLDart_FLArrayIterator* CBLDart_FLArrayIterator_Begin(
+    FLArray array, CBLDart_LoadedFLValue* valueOut, bool deleteOnDone);
 
 CBLDART_EXPORT
-void CBLDart_FLArrayIterator_Delete(CBLDart_FLArrayIterator *iterator);
+void CBLDart_FLArrayIterator_Delete(CBLDart_FLArrayIterator* iterator);
 
 CBLDART_EXPORT
-bool CBLDart_FLArrayIterator_Next(CBLDart_FLArrayIterator *iterator);
+bool CBLDart_FLArrayIterator_Next(CBLDart_FLArrayIterator* iterator);
 
 // === Encoder ================================================================
 

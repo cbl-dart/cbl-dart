@@ -10,31 +10,31 @@ namespace CBLDart {
 
 AsyncCallbackRegistry AsyncCallbackRegistry::instance;
 
-void AsyncCallbackRegistry::registerCallback(const AsyncCallback &callback) {
+void AsyncCallbackRegistry::registerCallback(const AsyncCallback& callback) {
   std::scoped_lock lock(mutex_);
   callbacks_.push_back(&callback);
 }
 
-void AsyncCallbackRegistry::unregisterCallback(const AsyncCallback &callback) {
+void AsyncCallbackRegistry::unregisterCallback(const AsyncCallback& callback) {
   std::scoped_lock lock(mutex_);
   callbacks_.erase(std::remove(callbacks_.begin(), callbacks_.end(), &callback),
                    callbacks_.end());
 }
 
 bool AsyncCallbackRegistry::callbackExists(
-    const AsyncCallback &callback) const {
+    const AsyncCallback& callback) const {
   std::scoped_lock lock(mutex_);
   return std::find(callbacks_.begin(), callbacks_.end(), &callback) !=
          callbacks_.end();
 }
 
-void AsyncCallbackRegistry::addBlockingCall(AsyncCallbackCall &call) {
+void AsyncCallbackRegistry::addBlockingCall(AsyncCallbackCall& call) {
   assert(call.isBlocking());
   std::scoped_lock lock(mutex_);
   blockingCalls_.push_back(&call);
 }
 
-bool AsyncCallbackRegistry::takeBlockingCall(AsyncCallbackCall &call) {
+bool AsyncCallbackRegistry::takeBlockingCall(AsyncCallbackCall& call) {
   std::scoped_lock lock(mutex_);
   auto position =
       std::find(blockingCalls_.begin(), blockingCalls_.end(), &call);
@@ -61,7 +61,7 @@ AsyncCallback::~AsyncCallback() {
   debugLog("deleted");
 }
 
-void AsyncCallback::setFinalizer(void *context, CallbackFinalizer finalizer) {
+void AsyncCallback::setFinalizer(void* context, CallbackFinalizer finalizer) {
   debugLog("setFinalizer");
   std::scoped_lock lock(mutex_);
   assert(!closed_);
@@ -89,7 +89,7 @@ void AsyncCallback::close() {
   {
     std::scoped_lock lock(mutex_);
     // Close calls which are executing or could be executed.
-    for (auto const &call : activeCalls_) {
+    for (auto const& call : activeCalls_) {
       call->close();
     }
   }
@@ -103,7 +103,7 @@ void AsyncCallback::close() {
   debugLog("closed");
 }
 
-void AsyncCallback::registerCall(AsyncCallbackCall &call) {
+void AsyncCallback::registerCall(AsyncCallbackCall& call) {
   assert(AsyncCallbackRegistry::instance.callbackExists(*this));
 
   std::scoped_lock lock(mutex_);
@@ -111,7 +111,7 @@ void AsyncCallback::registerCall(AsyncCallbackCall &call) {
   activeCalls_.push_back(&call);
 }
 
-void AsyncCallback::unregisterCall(AsyncCallbackCall &call) {
+void AsyncCallback::unregisterCall(AsyncCallbackCall& call) {
   std::scoped_lock lock(mutex_);
   activeCalls_.erase(
       std::remove(activeCalls_.begin(), activeCalls_.end(), &call),
@@ -123,14 +123,14 @@ void AsyncCallback::unregisterCall(AsyncCallbackCall &call) {
   }
 }
 
-bool AsyncCallback::sendRequest(Dart_CObject *request) {
+bool AsyncCallback::sendRequest(Dart_CObject* request) {
   // If the send port and therefore the callback is closed before the request
   // can be sent, this call returns false. This allows us to avoid calling this
   // function under a lock.
   return Dart_PostCObject_DL(sendPort_, request);
 }
 
-inline void AsyncCallback::debugLog(const char *message) {
+inline void AsyncCallback::debugLog(const char* message) {
 #ifdef DEBUG
   if (debug_) {
     printf("AsyncCallback #%d (native) -> %s\n", id_, message);
@@ -142,7 +142,7 @@ inline void AsyncCallback::debugLog(const char *message) {
 
 static std::string failureResult = "__ASYNC_CALLBACK_FAILED__";
 
-AsyncCallbackCall::AsyncCallbackCall(AsyncCallback &callback, bool isBlocking)
+AsyncCallbackCall::AsyncCallbackCall(AsyncCallback& callback, bool isBlocking)
     : callback_(callback) {
   callback_.registerCall(*this);
 
@@ -162,7 +162,7 @@ AsyncCallbackCall::~AsyncCallbackCall() {
   }
 }
 
-void AsyncCallbackCall::execute(Dart_CObject &arguments) {
+void AsyncCallbackCall::execute(Dart_CObject& arguments) {
   std::unique_lock lock(mutex_);
 
   assert(!isExecuted_);
@@ -194,7 +194,7 @@ void AsyncCallbackCall::execute(Dart_CObject &arguments) {
   CBLDart_CObject_SetPointer(&callPointer, isBlocking() ? this : nullptr);
 
   // The request is sent as an array.
-  Dart_CObject *requestValues[] = {&responsePort, &callPointer, &arguments};
+  Dart_CObject* requestValues[] = {&responsePort, &callPointer, &arguments};
 
   Dart_CObject request{};
   request.type = Dart_CObject_kArray;
@@ -233,7 +233,7 @@ void AsyncCallbackCall::execute(Dart_CObject &arguments) {
   debugLog("finished");
 }
 
-void AsyncCallbackCall::complete(Dart_CObject *result) {
+void AsyncCallbackCall::complete(Dart_CObject* result) {
   assert(result);
 
   if (!AsyncCallbackRegistry::instance.takeBlockingCall(*this)) {
@@ -294,20 +294,20 @@ void AsyncCallbackCall::close() {
 }
 
 void AsyncCallbackCall::messageHandler(Dart_Port dest_port_id,
-                                       Dart_CObject *response) {
+                                       Dart_CObject* response) {
   assert(response->type == Dart_CObject_kArray);
   assert(response->value.as_array.length == 2);
 
   auto callPointer = response->value.as_array.values[0];
   auto result = response->value.as_array.values[1];
 
-  AsyncCallbackCall &call = *reinterpret_cast<AsyncCallbackCall *>(
+  AsyncCallbackCall& call = *reinterpret_cast<AsyncCallbackCall*>(
       CBLDart_CObject_getIntValueAsInt64(callPointer));
 
   call.complete(result);
 }
 
-void AsyncCallbackCall::waitForCompletion(std::unique_lock<std::mutex> &lock) {
+void AsyncCallbackCall::waitForCompletion(std::unique_lock<std::mutex>& lock) {
   completedCv_.wait(lock, [this] { return isCompleted_; });
 
   if (didFail_) {
@@ -316,12 +316,12 @@ void AsyncCallbackCall::waitForCompletion(std::unique_lock<std::mutex> &lock) {
   }
 }
 
-bool AsyncCallbackCall::isFailureResult(Dart_CObject *result) {
+bool AsyncCallbackCall::isFailureResult(Dart_CObject* result) {
   return result->type == Dart_CObject_kString &&
          failureResult == result->value.as_string;
 }
 
-inline void AsyncCallbackCall::debugLog(const char *message) {
+inline void AsyncCallbackCall::debugLog(const char* message) {
 #ifdef DEBUG
   if (!callback_.debug_) {
     return;

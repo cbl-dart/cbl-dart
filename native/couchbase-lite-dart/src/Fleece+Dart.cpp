@@ -7,11 +7,11 @@
 
 // === Slice
 
-void CBLDart_FLSliceResult_RetainByBuf(void *buf) {
+void CBLDart_FLSliceResult_RetainByBuf(void* buf) {
   (void)FLSliceResult_Retain({buf, 0});
 }
 
-void CBLDart_FLSliceResult_ReleaseByBuf(void *buf) {
+void CBLDart_FLSliceResult_ReleaseByBuf(void* buf) {
   (void)FLSliceResult_Release({buf, 0});
 }
 
@@ -37,13 +37,13 @@ struct KnownSharedKeys {
   std::bitset<kMaxSharedKeys> _knownKeys;
 };
 
-KnownSharedKeys *CBLDart_KnownSharedKeys_New() { return new KnownSharedKeys; }
+KnownSharedKeys* CBLDart_KnownSharedKeys_New() { return new KnownSharedKeys; }
 
-void CBLDart_KnownSharedKeys_Delete(KnownSharedKeys *keys) { delete keys; }
+void CBLDart_KnownSharedKeys_Delete(KnownSharedKeys* keys) { delete keys; }
 
-static void CBLDart_GetLoadedDictKey(KnownSharedKeys *knownSharedKeys,
-                                     FLDictIterator *iterator,
-                                     CBLDart_LoadedDictKey *out) {
+static void CBLDart_GetLoadedDictKey(KnownSharedKeys* knownSharedKeys,
+                                     FLDictIterator* iterator,
+                                     CBLDart_LoadedDictKey* out) {
   auto key = out->value = FLDictIterator_GetKey(iterator);
 
   FLString string;
@@ -71,7 +71,7 @@ static void CBLDart_GetLoadedDictKey(KnownSharedKeys *knownSharedKeys,
   out->stringSize = string.size;
 }
 
-void CBLDart_GetLoadedFLValue(FLValue value, CBLDart_LoadedFLValue *out) {
+void CBLDart_GetLoadedFLValue(FLValue value, CBLDart_LoadedFLValue* out) {
   if (value) {
     out->exists = true;
   } else {
@@ -124,29 +124,29 @@ void CBLDart_GetLoadedFLValue(FLValue value, CBLDart_LoadedFLValue *out) {
 }
 
 void CBLDart_FLArray_GetLoadedFLValue(FLArray array, uint32_t index,
-                                      CBLDart_LoadedFLValue *out) {
+                                      CBLDart_LoadedFLValue* out) {
   auto value = FLArray_Get(array, index);
   CBLDart_GetLoadedFLValue(value, out);
 }
 
 void CBLDart_FLDict_GetLoadedFLValue(FLDict dict, FLString key,
-                                     CBLDart_LoadedFLValue *out) {
+                                     CBLDart_LoadedFLValue* out) {
   CBLDart_GetLoadedFLValue(FLDict_Get(dict, key), out);
 }
 
 struct CBLDart_FLDictIterator {
-  CBLDart_LoadedDictKey *_keyOut;
-  CBLDart_LoadedFLValue *_valueOut;
-  KnownSharedKeys *_knownSharedKeys;
+  CBLDart_LoadedDictKey* _keyOut;
+  CBLDart_LoadedFLValue* _valueOut;
+  KnownSharedKeys* _knownSharedKeys;
   bool _preLoad;
   FLDictIterator _iterator;
   bool _isDone;
   bool _deleteOnDone;
 };
 
-CBLDart_FLDictIterator *CBLDart_FLDictIterator_Begin(
-    FLDict dict, KnownSharedKeys *knownSharedKeys,
-    CBLDart_LoadedDictKey *keyOut, CBLDart_LoadedFLValue *valueOut,
+CBLDart_FLDictIterator* CBLDart_FLDictIterator_Begin(
+    FLDict dict, KnownSharedKeys* knownSharedKeys,
+    CBLDart_LoadedDictKey* keyOut, CBLDart_LoadedFLValue* valueOut,
     bool deleteOnDone, bool preLoad) {
   auto iterator = new CBLDart_FLDictIterator{};
   iterator->_keyOut = keyOut;
@@ -161,11 +161,11 @@ CBLDart_FLDictIterator *CBLDart_FLDictIterator_Begin(
   return iterator;
 }
 
-void CBLDart_FLDictIterator_Delete(CBLDart_FLDictIterator *iterator) {
+void CBLDart_FLDictIterator_Delete(CBLDart_FLDictIterator* iterator) {
   delete iterator;
 }
 
-bool CBLDart_FLDictIterator_Next(CBLDart_FLDictIterator *iterator) {
+bool CBLDart_FLDictIterator_Next(CBLDart_FLDictIterator* iterator) {
   auto dictIterator = &iterator->_iterator;
   auto value = FLDictIterator_GetValue(dictIterator);
   iterator->_isDone = value == nullptr;
@@ -198,13 +198,13 @@ bool CBLDart_FLDictIterator_Next(CBLDart_FLDictIterator *iterator) {
 }
 
 struct CBLDart_FLArrayIterator {
-  CBLDart_LoadedFLValue *_valueOut;
+  CBLDart_LoadedFLValue* _valueOut;
   FLArrayIterator _iterator;
   bool _deleteOnDone;
 };
 
-CBLDart_FLArrayIterator *CBLDart_FLArrayIterator_Begin(
-    FLArray array, CBLDart_LoadedFLValue *valueOut, bool deleteOnDone) {
+CBLDart_FLArrayIterator* CBLDart_FLArrayIterator_Begin(
+    FLArray array, CBLDart_LoadedFLValue* valueOut, bool deleteOnDone) {
   auto iterator = new CBLDart_FLArrayIterator{};
   iterator->_valueOut = valueOut;
   iterator->_deleteOnDone = deleteOnDone;
@@ -214,11 +214,11 @@ CBLDart_FLArrayIterator *CBLDart_FLArrayIterator_Begin(
   return iterator;
 }
 
-void CBLDart_FLArrayIterator_Delete(CBLDart_FLArrayIterator *iterator) {
+void CBLDart_FLArrayIterator_Delete(CBLDart_FLArrayIterator* iterator) {
   delete iterator;
 }
 
-bool CBLDart_FLArrayIterator_Next(CBLDart_FLArrayIterator *iterator) {
+bool CBLDart_FLArrayIterator_Next(CBLDart_FLArrayIterator* iterator) {
   auto arrayIterator = &iterator->_iterator;
   auto value = FLArrayIterator_GetValue(arrayIterator);
   if (value) {

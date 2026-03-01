@@ -38,15 +38,15 @@ enum CBLDartInitializeResult {
  * NOOPs.
  */
 CBLDART_EXPORT
-CBLDartInitializeResult CBLDart_Initialize(void *dartInitializeDlData,
-                                           void *cblInitContext,
-                                           CBLError *errorOut);
+CBLDartInitializeResult CBLDart_Initialize(void* dartInitializeDlData,
+                                           void* cblInitContext,
+                                           CBLError* errorOut);
 
 // === Dart Native ============================================================
 
 // === Async Callbacks
 
-typedef struct _CBLDart_AsyncCallback *CBLDart_AsyncCallback;
+typedef struct _CBLDart_AsyncCallback* CBLDart_AsyncCallback;
 
 CBLDART_EXPORT
 CBLDart_AsyncCallback CBLDart_AsyncCallback_New(uint32_t id, Dart_Port sendPort,
@@ -64,7 +64,7 @@ void CBLDart_AsyncCallback_CallForTest(CBLDart_AsyncCallback callback,
 
 // === Completer
 
-typedef struct _CBLDart_Completer *CBLDart_Completer;
+typedef struct _CBLDart_Completer* CBLDart_Completer;
 
 CBLDART_EXPORT
 void CBLDart_Completer_Complete(CBLDart_Completer completer, uint64_t result);
@@ -95,11 +95,11 @@ CBLDART_EXPORT
 void CBLDart_CBLLog_SetCallbackLevel(CBLLogLevel level);
 
 CBLDART_EXPORT
-bool CBLDart_CBLLog_SetFileConfig(CBLLogFileConfiguration *config,
-                                  CBLError *errorOut);
+bool CBLDart_CBLLog_SetFileConfig(CBLLogFileConfiguration* config,
+                                  CBLError* errorOut);
 
 CBLDART_EXPORT
-CBLLogFileConfiguration *CBLDart_CBLLog_GetFileConfig();
+CBLLogFileConfiguration* CBLDart_CBLLog_GetFileConfig();
 
 CBLDART_EXPORT
 bool CBLDart_CBLLog_SetSentryBreadcrumbs(bool enabled);
@@ -122,31 +122,31 @@ CBLDart_CBLDatabaseConfiguration CBLDart_CBLDatabaseConfiguration_Default();
 
 CBLDART_EXPORT
 bool CBLDart_CBL_CopyDatabase(FLString fromPath, FLString toName,
-                              const CBLDart_CBLDatabaseConfiguration *config,
-                              CBLError *outError);
+                              const CBLDart_CBLDatabaseConfiguration* config,
+                              CBLError* outError);
 
 CBLDART_EXPORT
-CBLDatabase *CBLDart_CBLDatabase_Open(FLString name,
-                                      CBLDart_CBLDatabaseConfiguration *config,
-                                      CBLError *errorOut);
+CBLDatabase* CBLDart_CBLDatabase_Open(FLString name,
+                                      CBLDart_CBLDatabaseConfiguration* config,
+                                      CBLError* errorOut);
 
 CBLDART_EXPORT
-void CBLDart_CBLDatabase_Release(CBLDatabase *database);
+void CBLDart_CBLDatabase_Release(CBLDatabase* database);
 
 CBLDART_EXPORT
-bool CBLDart_CBLDatabase_Close(CBLDatabase *database, bool andDelete,
-                               CBLError *errorOut);
+bool CBLDart_CBLDatabase_Close(CBLDatabase* database, bool andDelete,
+                               CBLError* errorOut);
 
 // === Collection
 
 CBLDART_EXPORT
 void CBLDart_CBLCollection_AddDocumentChangeListener(
-    const CBLDatabase *db, const CBLCollection *collection,
+    const CBLDatabase* db, const CBLCollection* collection,
     const FLString docID, CBLDart_AsyncCallback listener);
 
 CBLDART_EXPORT
-void CBLDart_CBLCollection_AddChangeListener(const CBLDatabase *db,
-                                             const CBLCollection *collection,
+void CBLDart_CBLCollection_AddChangeListener(const CBLDatabase* db,
+                                             const CBLCollection* collection,
                                              CBLDart_AsyncCallback listener);
 
 typedef enum : uint8_t {
@@ -168,7 +168,7 @@ struct CBLDart_CBLIndexSpec {
   unsigned dimensions;
   unsigned centroids;
   bool isLazy;
-  void *encoding;
+  void* encoding;
   uint32_t metric;
   unsigned minTrainingSize;
   unsigned maxTrainingSize;
@@ -176,15 +176,15 @@ struct CBLDart_CBLIndexSpec {
 };
 
 CBLDART_EXPORT
-bool CBLDart_CBLCollection_CreateIndex(CBLCollection *collection, FLString name,
+bool CBLDart_CBLCollection_CreateIndex(CBLCollection* collection, FLString name,
                                        CBLDart_CBLIndexSpec indexSpec,
-                                       CBLError *errorOut);
+                                       CBLError* errorOut);
 
 // === Query
 
 CBLDART_EXPORT
-CBLListenerToken *CBLDart_CBLQuery_AddChangeListener(
-    const CBLDatabase *db, CBLQuery *query, CBLDart_AsyncCallback listener);
+CBLListenerToken* CBLDart_CBLQuery_AddChangeListener(
+    const CBLDatabase* db, CBLQuery* query, CBLDart_AsyncCallback listener);
 
 // === Prediction
 
@@ -193,7 +193,7 @@ typedef void (*CBLDart_PredictiveModel_PredictionAsync)(
     FLDict input, CBLDart_Completer completer);
 typedef void (*CBLDart_PredictiveModel_Unregistered)(void);
 
-typedef struct _CBLDart_PredictiveModel *CBLDart_PredictiveModel;
+typedef struct _CBLDart_PredictiveModel* CBLDart_PredictiveModel;
 
 CBLDART_EXPORT
 CBLDart_PredictiveModel CBLDart_PredictiveModel_New(
@@ -208,14 +208,14 @@ void CBLDart_PredictiveModel_Delete(CBLDart_PredictiveModel model);
 // === Blob
 
 CBLDART_EXPORT
-FLSliceResult CBLDart_CBLBlobReader_Read(CBLBlobReadStream *stream,
+FLSliceResult CBLDart_CBLBlobReader_Read(CBLBlobReadStream* stream,
                                          uint64_t bufferSize,
-                                         CBLError *outError);
+                                         CBLError* outError);
 
 // === Replicator
 
 struct CBLDart_ReplicationCollection {
-  CBLCollection *collection;
+  CBLCollection* collection;
   FLArray channels;
   FLArray documentIDs;
   CBLDart_AsyncCallback pushFilter;
@@ -224,39 +224,39 @@ struct CBLDart_ReplicationCollection {
 };
 
 struct CBLDart_ReplicatorConfiguration {
-  CBLDatabase *database;
-  CBLEndpoint *endpoint;
+  CBLDatabase* database;
+  CBLEndpoint* endpoint;
   CBLReplicatorType replicatorType;
   bool continuous;
   bool disableAutoPurge;
   unsigned maxAttempts;
   unsigned maxAttemptWaitTime;
   unsigned heartbeat;
-  CBLAuthenticator *authenticator;
-  CBLProxySettings *proxy;
+  CBLAuthenticator* authenticator;
+  CBLProxySettings* proxy;
   FLDict headers;
   bool acceptOnlySelfSignedServerCertificate;
-  FLSlice *pinnedServerCertificate;
-  FLSlice *trustedRootCertificates;
-  CBLDart_ReplicationCollection *collections;
+  FLSlice* pinnedServerCertificate;
+  FLSlice* trustedRootCertificates;
+  CBLDart_ReplicationCollection* collections;
   size_t collectionsCount;
 };
 
 CBLDART_EXPORT
-CBLReplicator *CBLDart_CBLReplicator_Create(
-    CBLDart_ReplicatorConfiguration *config, CBLError *errorOut);
+CBLReplicator* CBLDart_CBLReplicator_Create(
+    CBLDart_ReplicatorConfiguration* config, CBLError* errorOut);
 
 CBLDART_EXPORT
-void CBLDart_CBLReplicator_Release(CBLReplicator *replicator);
+void CBLDart_CBLReplicator_Release(CBLReplicator* replicator);
 
 CBLDART_EXPORT
-void CBLDart_CBLReplicator_AddChangeListener(const CBLDatabase *db,
-                                             CBLReplicator *replicator,
+void CBLDart_CBLReplicator_AddChangeListener(const CBLDatabase* db,
+                                             CBLReplicator* replicator,
                                              CBLDart_AsyncCallback listenerId);
 
 CBLDART_EXPORT
 void CBLDart_CBLReplicator_AddDocumentReplicationListener(
-    const CBLDatabase *db, CBLReplicator *replicator,
+    const CBLDatabase* db, CBLReplicator* replicator,
     CBLDart_AsyncCallback listenerId);
 
 // === UrlEndpointListener
@@ -264,37 +264,37 @@ void CBLDart_CBLReplicator_AddDocumentReplicationListener(
 #ifdef COUCHBASE_ENTERPRISE
 
 typedef void (*CBLDartExternalKeyPublicKeyData)(CBLDart_Completer completer,
-                                                void *output,
+                                                void* output,
                                                 size_t outputMaxLen,
-                                                size_t *outputLen);
+                                                size_t* outputLen);
 
 typedef void (*CBLDartExternalKeyDecrypt)(CBLDart_Completer completer,
-                                          FLSlice input, void *output,
+                                          FLSlice input, void* output,
                                           size_t outputMaxLen,
-                                          size_t *outputLen);
+                                          size_t* outputLen);
 
 typedef void (*CBLDartExternalKeySign)(
     CBLDart_Completer completer, CBLSignatureDigestAlgorithm digestAlgorithm,
-    FLSlice inputData, void *outSignature);
+    FLSlice inputData, void* outSignature);
 
-CBLDART_EXPORT CBLKeyPair *CBLDartKeyPair_CreateWithExternalKey(
+CBLDART_EXPORT CBLKeyPair* CBLDartKeyPair_CreateWithExternalKey(
     size_t keySizeInBits, Dart_Handle delegate,
     CBLDartExternalKeyPublicKeyData publicKeyData,
     CBLDartExternalKeyDecrypt decrypt, CBLDartExternalKeySign sign,
-    CBLError *outError);
+    CBLError* outError);
 
 typedef void (*CBLDartListenerPasswordAuthCallback)(CBLDart_Completer completer,
                                                     FLString username,
                                                     FLString password);
 
 CBLDART_EXPORT bool CBLDart_ListenerPasswordAuthCallbackTrampoline(
-    void *context, FLString username, FLString password);
+    void* context, FLString username, FLString password);
 
 typedef void (*CBLDartListenerCertAuthCallback)(CBLDart_Completer completer,
-                                                CBLCert *cert);
+                                                CBLCert* cert);
 
-CBLDART_EXPORT bool CBLDart_ListenerCertAuthCallbackTrampoline(void *context,
-                                                               CBLCert *cert);
+CBLDART_EXPORT bool CBLDart_ListenerCertAuthCallbackTrampoline(void* context,
+                                                               CBLCert* cert);
 #else
 
 // With these stubs the same symbol export files can be used for both

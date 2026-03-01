@@ -73,7 +73,7 @@ typedef union sentry_value_u sentry_value_t;
 /**
  * Creates a new null terminated string.
  */
-SENTRY_API sentry_value_t sentry_value_new_string(const char *value);
+SENTRY_API sentry_value_t sentry_value_new_string(const char* value);
 
 /**
  * Sets a key to a value in the map.
@@ -81,7 +81,7 @@ SENTRY_API sentry_value_t sentry_value_new_string(const char *value);
  * This moves the ownership of the value into the map.  The caller does not
  * have to call `sentry_value_decref` on it.
  */
-SENTRY_API int sentry_value_set_by_key(sentry_value_t value, const char *k,
+SENTRY_API int sentry_value_set_by_key(sentry_value_t value, const char* k,
                                        sentry_value_t v);
 
 /**
@@ -91,8 +91,8 @@ SENTRY_API int sentry_value_set_by_key(sentry_value_t value, const char *k,
  *
  * Either parameter can be NULL in which case no such attributes is created.
  */
-SENTRY_API sentry_value_t sentry_value_new_breadcrumb(const char *type,
-                                                      const char *message);
+SENTRY_API sentry_value_t sentry_value_new_breadcrumb(const char* type,
+                                                      const char* message);
 
 /**
  * Adds the breadcrumb to be sent in case of an event.
