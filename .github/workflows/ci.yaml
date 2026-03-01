@@ -182,7 +182,7 @@ jobs:
           - macOS
           - Android
           - Ubuntu
-          - blacksmith-4vcpu-windows-2025
+          - Windows
         exclude:
           - embedder: standalone
             os: iOS
@@ -198,9 +198,9 @@ jobs:
       ${{ fromJSON('{
         "iOS":"macos-14",
         "macOS":"macos-15",
-        "Android":"ubuntu-22.04",
-        "Ubuntu":"ubuntu-22.04",
-        "blacksmith-4vcpu-windows-2025"
+        "Android":"blacksmith-4vcpu-ubuntu-2204",
+        "Ubuntu":"blacksmith-4vcpu-ubuntu-2204",
+        "Windows":"blacksmith-4vcpu-windows-2025"
       }')[matrix.os] }}
     env:
       EMBEDDER: ${{ matrix.embedder }}
@@ -309,7 +309,7 @@ jobs:
           - macOS
           - Android
           - Ubuntu
-          - blacksmith-4vcpu-windows-2025
+          - Windows
         exclude:
           # TODO: Get iOS tests to launch again in CI
           - embedder: flutter
@@ -318,9 +318,9 @@ jobs:
       ${{ fromJSON('{
         "iOS":"macos-14",
         "macOS":"macos-15",
-        "Android":"ubuntu-22.04",
-        "Ubuntu":"ubuntu-22.04",
-        "blacksmith-4vcpu-windows-2025"
+        "Android":"blacksmith-4vcpu-ubuntu-2204",
+        "Ubuntu":"blacksmith-4vcpu-ubuntu-2204",
+        "Windows":"blacksmith-4vcpu-windows-2025"
       }')[matrix.os] }}
     env:
       EMBEDDER: ${{ matrix.embedder }}
@@ -399,7 +399,7 @@ jobs:
         package: [cbl_dart]
         dart: [stable]
         embedder: [standalone]
-        os: [macOS, Ubuntu, blacksmith-4vcpu-windows-2025]
+        os: [macOS, Ubuntu, Windows]
     env:
       EMBEDDER: ${{ matrix.embedder }}
       TARGET_OS: ${{ matrix.os }}
@@ -408,8 +408,8 @@ jobs:
     runs-on: >-
       ${{ fromJSON('{
         "macOS":"macos-15",
-        "Ubuntu":"ubuntu-22.04",
-        "blacksmith-4vcpu-windows-2025"
+        "Ubuntu":"blacksmith-4vcpu-ubuntu-2204",
+        "Windows":"blacksmith-4vcpu-windows-2025"
       }')[matrix.os] }}
     steps:
       - name: Checkout repository
@@ -460,14 +460,14 @@ jobs:
           - macOS
           - Android
           - Ubuntu
-          - blacksmith-4vcpu-windows-2025
+          - Windows
     runs-on: >-
       ${{ fromJSON('{
         "iOS":"macos-14",
         "macOS":"macos-14",
-        "Android":"ubuntu-22.04",
-        "Ubuntu":"ubuntu-22.04",
-        "blacksmith-4vcpu-windows-2025"
+        "Android":"blacksmith-4vcpu-ubuntu-2204",
+        "Ubuntu":"blacksmith-4vcpu-ubuntu-2204",
+        "Windows":"blacksmith-4vcpu-windows-2025"
       }')[matrix.os] }}
 
     steps:
