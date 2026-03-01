@@ -69,7 +69,7 @@ packages:
       path: "packages/cbl_libcblite_api"
       relative: true
     source: path
-    version: "3.2.4"
+    version: "4.0.3"
   cbl_libcblitedart_api:
     dependency: "direct overridden"
     description:
