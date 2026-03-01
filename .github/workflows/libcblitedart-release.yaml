@@ -7,7 +7,7 @@ on:
 
 jobs:
   create-release:
-    runs-on: ubuntu-22.04
+    runs-on: blacksmith-4vcpu-ubuntu-2204
     outputs:
       upload-url: ${{ steps.create-release.outputs.upload_url }}
       tag: ${{ steps.set-outputs.outputs.tag }}
@@ -39,14 +39,14 @@ jobs:
           - macOS
           - Android
           - Ubuntu
-          - Windows
+          - blacksmith-4vcpu-windows-2025
     runs-on: >-
       ${{ fromJSON('{
         "iOS":"macos-14",
         "macOS":"macos-14",
         "Android":"ubuntu-22.04",
         "Ubuntu":"ubuntu-22.04",
-        "Windows":"windows-2022"
+        "blacksmith-4vcpu-windows-2025"
       }')[matrix.os] }}
 
     steps:
