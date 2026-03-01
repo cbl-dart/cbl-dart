@@ -93,7 +93,6 @@ jobs:
             --threshold-lower-boundary 0.975 \
             --threshold-upper-boundary _ \
             --thresholds-reset \
-            --err \
             --adapter json \
             --file results.json \
             --github-actions '${{ secrets.GITHUB_TOKEN }}'
@@ -111,7 +110,6 @@ jobs:
             --start-point-clone-thresholds \
             --start-point-reset \
             --testbed ubuntu-aws-m7a \
-            --err \
             --adapter json \
             --file results.json \
             --github-actions '${{ secrets.GITHUB_TOKEN }}'
