@@ -39,7 +39,7 @@ final class TypedDocumentGenerator
 }
 
 final class TypedDatabaseGenerator extends Generator {
-  TypeChecker get typeChecker => const TypeChecker.fromRuntime(TypedDatabase);
+  TypeChecker get typeChecker => const TypeChecker.typeNamed(TypedDatabase);
 
   @override
   FutureOr<String?> generate(LibraryReader library, BuildStep buildStep) async {

@@ -1,6 +1,7 @@
 import 'package:build_test/build_test.dart';
 import 'package:cbl_generator/src/builder.dart';
 import 'package:logging/logging.dart';
+import 'package:source_gen/source_gen.dart';
 import 'package:test/test.dart';
 
 late TestReaderWriter readerWriter;
@@ -341,12 +342,15 @@ $content''';
 
 final _genPartHeader =
     '''
-${TypedDataBuilder.header}
+$defaultFileHeader
+// dart format width=80
+
+${TypedDataBuilder.ignoreForFile}
+
 part of '$_testLibFileName';''';
 
 String _typedDictionaryGeneratorContent(String content) =>
     '''
-// dart format width=80
 $_genPartHeader
 
 // **************************************************************************
@@ -356,9 +360,9 @@ $_genPartHeader
 $content''';
 
 Future<void> _expectBadSource(String source, [Object? messageMatcher]) async {
-  if (messageMatcher is String) {
-    messageMatcher = contains(messageMatcher);
-  }
+  final effectiveMatcher = messageMatcher is String
+      ? contains(messageMatcher)
+      : messageMatcher;
 
   String? errorMessage;
 
@@ -378,5 +382,5 @@ Future<void> _expectBadSource(String source, [Object? messageMatcher]) async {
     readerWriter: readerWriter,
   );
 
-  await expectLater(errorMessage, messageMatcher ?? isNotNull);
+  await expectLater(errorMessage, effectiveMatcher ?? isNotNull);
 }

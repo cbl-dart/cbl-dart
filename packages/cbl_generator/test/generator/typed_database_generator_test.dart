@@ -1,6 +1,7 @@
 import 'package:build_test/build_test.dart';
 import 'package:cbl_generator/src/builder.dart';
 import 'package:logging/logging.dart';
+import 'package:source_gen/source_gen.dart';
 import 'package:test/test.dart';
 
 late TestReaderWriter readerWriter;
@@ -73,8 +74,11 @@ $content''';
 
 String _typedDatabaseGeneratorContent(String content) =>
     '''
+$defaultFileHeader
 // dart format width=80
-${TypedDatabaseBuilder.header}
+
+${TypedDatabaseBuilder.ignoreForFile}
+
 // **************************************************************************
 // TypedDatabaseGenerator
 // **************************************************************************
@@ -86,9 +90,9 @@ import '$_testLibFileName';
 $content''';
 
 Future<void> _expectBadSource(String source, [Object? messageMatcher]) async {
-  if (messageMatcher is String) {
-    messageMatcher = contains(messageMatcher);
-  }
+  final effectiveMatcher = messageMatcher is String
+      ? contains(messageMatcher)
+      : messageMatcher;
 
   String? errorMessage;
 
@@ -108,5 +112,5 @@ Future<void> _expectBadSource(String source, [Object? messageMatcher]) async {
     readerWriter: readerWriter,
   );
 
-  await expectLater(errorMessage, messageMatcher ?? isNotNull);
+  await expectLater(errorMessage, effectiveMatcher ?? isNotNull);
 }

@@ -6,10 +6,10 @@ executables:
   cbd:
 
 environment:
-  sdk: ^3.5.0
+  sdk: ^3.9.0
 
 dependencies:
-  analyzer: ^7.0.0
+  analyzer: ^10.0.0
   args: ^2.6.0
   cbl: ^3.6.0+2
   cli_launcher: ^0.3.1

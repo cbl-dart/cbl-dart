@@ -33,7 +33,7 @@ final class _ClassHasRedirectingUnnamedConstructorVisitor
     }
     hasRedirectingConstructor =
         node.factoryKeyword != null &&
-        node.redirectedConstructor?.type.name2.lexeme == targetConstructor;
+        node.redirectedConstructor?.type.name.lexeme == targetConstructor;
   }
 }
 
@@ -52,16 +52,18 @@ final class _ClassHasMixinVisitor extends RecursiveAstVisitor<void> {
 
   @override
   void visitWithClause(WithClause node) {
-    hasMixin = node.mixinTypes.any((mixin) => mixin.name2.lexeme == mixinName);
+    hasMixin = node.mixinTypes.any((mixin) => mixin.name.lexeme == mixinName);
   }
 }
 
 bool isExactlyOneOfTypes(DartType type, Iterable<TypeChecker> typeCheckers) =>
     typeCheckers.any((typeChecker) => typeChecker.isExactlyType(type));
 
-extension ParameterElementExt on ParameterElement {
+extension ParameterElementExt on FormalParameterElement {
   Future<String?> documentationCommentValue(Resolver resolver) async =>
-      (await resolver.astNodeFor(this))!.beginToken.precedingComments?.value();
+      (await resolver.astNodeFor(
+        firstFragment,
+      ))!.beginToken.precedingComments?.value();
 }
 
 extension ConstantReaderExt on ConstantReader {

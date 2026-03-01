@@ -7,7 +7,8 @@ environment:
 dev_dependencies:
   cbd:
     path: tool
-  daco: ^0.4.0
+  # daco removed: requires analyzer ^7.0.0, incompatible with tool's ^10.0.0.
+  # Needs daco update to support analyzer 10+.
   melos: ^6.3.2
   path: ^1.9.1
 

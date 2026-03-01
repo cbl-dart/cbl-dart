@@ -296,7 +296,7 @@ class _MethodNamesCollector extends RecursiveAstVisitor {
   void visitMethodDeclaration(MethodDeclaration node) {
     final clazz = node.parent! as ClassDeclaration;
     methodsByClass
-        .putIfAbsent(clazz.name.lexeme, () => [])
+        .putIfAbsent(clazz.namePart.typeName.lexeme, () => [])
         .add(node.name.lexeme);
   }
 }
@@ -344,7 +344,7 @@ class _NativeAssetsBridgeGenerator extends RecursiveAstVisitor {
 
   @override
   void visitClassDeclaration(ClassDeclaration node) {
-    final className = node.name.lexeme;
+    final className = node.namePart.typeName.lexeme;
     final nativeClassName = '${className}NativeAssetsBridge';
 
     if (className != bindingsClassName &&
