@@ -311,10 +311,8 @@ final class Channel {
       );
     }
 
-    if (error == null) {
-      error = ChannelClosedException();
-      stackTrace = StackTrace.current;
-    }
+    final effectiveError = error ?? ChannelClosedException();
+    final effectiveStackTrace = error == null ? StackTrace.current : stackTrace;
 
     // No new requests are accepted after this point.
     _status = ChannelStatus.closing;
@@ -339,13 +337,13 @@ final class Channel {
 
     // Complete pending calls from this side.
     for (final completer in _callCompleter.values) {
-      completer.completeError(error, stackTrace);
+      completer.completeError(effectiveError, effectiveStackTrace);
     }
     _callCompleter.clear();
 
     // Close streams listening from this side.
     for (final controllers in _streamControllers.values) {
-      controllers.addError(error, stackTrace);
+      controllers.addError(effectiveError, effectiveStackTrace);
       await controllers.close();
     }
     _streamControllers.clear();
