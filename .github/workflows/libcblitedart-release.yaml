@@ -39,14 +39,14 @@ jobs:
           - macOS
           - Android
           - Ubuntu
-          - blacksmith-4vcpu-windows-2025
+          - Windows
     runs-on: >-
       ${{ fromJSON('{
         "iOS":"macos-14",
         "macOS":"macos-14",
-        "Android":"ubuntu-22.04",
-        "Ubuntu":"ubuntu-22.04",
-        "blacksmith-4vcpu-windows-2025"
+        "Android":"blacksmith-4vcpu-ubuntu-2204",
+        "Ubuntu":"blacksmith-4vcpu-ubuntu-2204",
+        "Windows":"blacksmith-4vcpu-windows-2025"
       }')[matrix.os] }}
 
     steps:
