@@ -1,6 +1,7 @@
 import 'package:build_test/build_test.dart';
 import 'package:cbl_generator/src/builder.dart';
 import 'package:logging/logging.dart';
+import 'package:source_gen/source_gen.dart';
 import 'package:test/test.dart';
 
 late TestReaderWriter readerWriter;
@@ -341,7 +342,10 @@ $content''';
 
 final _genPartHeader =
     '''
-${TypedDataBuilder.header}// dart format width=80
+$defaultFileHeader
+// dart format width=80
+
+${TypedDataBuilder.ignoreForFile}
 
 part of '$_testLibFileName';''';
 

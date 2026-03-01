@@ -24,11 +24,11 @@ final class TypedDataBuilder extends PartBuilder {
   ];
 
   @visibleForTesting
-  static final header =
-      '''
-$defaultFileHeader
-// ignore_for_file: ${_ignoredLints.join(', ')}
-''';
+  static final ignoreForFile =
+      '// ignore_for_file: ${_ignoredLints.join(', ')}';
+
+  @visibleForTesting
+  static final header = '$defaultFileHeader\n$ignoreForFile\n';
 }
 
 final class TypedDatabaseBuilder extends LibraryBuilder {
@@ -48,9 +48,9 @@ final class TypedDatabaseBuilder extends LibraryBuilder {
   ];
 
   @visibleForTesting
-  static final header =
-      '''
-$defaultFileHeader
-// ignore_for_file: ${_ignoredLints.join(', ')}
-''';
+  static final ignoreForFile =
+      '// ignore_for_file: ${_ignoredLints.join(', ')}';
+
+  @visibleForTesting
+  static final header = '$defaultFileHeader\n$ignoreForFile\n';
 }
