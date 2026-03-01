@@ -343,10 +343,7 @@ $content''';
 // header during formatting.
 final _genPartHeader =
     '''
-${TypedDataBuilder.header.replaceFirst(
-      '// GENERATED CODE - DO NOT MODIFY BY HAND\n',
-      '// GENERATED CODE - DO NOT MODIFY BY HAND\n// dart format width=80\n\n',
-    )}
+${TypedDataBuilder.header.replaceFirst('// GENERATED CODE - DO NOT MODIFY BY HAND\n', '// GENERATED CODE - DO NOT MODIFY BY HAND\n// dart format width=80\n\n')}
 part of '$_testLibFileName';''';
 
 String _typedDictionaryGeneratorContent(String content) =>

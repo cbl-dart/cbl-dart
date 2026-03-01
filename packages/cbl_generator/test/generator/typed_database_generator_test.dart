@@ -75,10 +75,7 @@ $content''';
 // header during formatting.
 String _typedDatabaseGeneratorContent(String content) =>
     '''
-${TypedDatabaseBuilder.header.replaceFirst(
-      '// GENERATED CODE - DO NOT MODIFY BY HAND\n',
-      '// GENERATED CODE - DO NOT MODIFY BY HAND\n// dart format width=80\n\n',
-    )}
+${TypedDatabaseBuilder.header.replaceFirst('// GENERATED CODE - DO NOT MODIFY BY HAND\n', '// GENERATED CODE - DO NOT MODIFY BY HAND\n// dart format width=80\n\n')}
 // **************************************************************************
 // TypedDatabaseGenerator
 // **************************************************************************

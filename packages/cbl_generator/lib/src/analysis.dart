@@ -61,10 +61,9 @@ bool isExactlyOneOfTypes(DartType type, Iterable<TypeChecker> typeCheckers) =>
 
 extension ParameterElementExt on FormalParameterElement {
   Future<String?> documentationCommentValue(Resolver resolver) async =>
-      (await resolver.astNodeFor(firstFragment))!
-          .beginToken
-          .precedingComments
-          ?.value();
+      (await resolver.astNodeFor(
+        firstFragment,
+      ))!.beginToken.precedingComments?.value();
 }
 
 extension ConstantReaderExt on ConstantReader {

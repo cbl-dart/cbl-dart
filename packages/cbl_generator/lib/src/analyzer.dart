@@ -246,8 +246,9 @@ final class TypedDataAnalyzer {
       );
     }
 
-    final annotatedClassAstNode =
-        (await resolver.astNodeFor(clazz.firstFragment))!;
+    final annotatedClassAstNode = (await resolver.astNodeFor(
+      clazz.firstFragment,
+    ))!;
 
     if (!classHasMixin(
       annotatedClassAstNode,
