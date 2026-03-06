@@ -222,7 +222,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Use fast D: drive for TEMP on Windows
+      - name: 'Use fast D: drive for TEMP on Windows'
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
@@ -383,7 +383,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Use fast D: drive for TEMP on Windows
+      - name: 'Use fast D: drive for TEMP on Windows'
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
@@ -511,7 +511,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Use fast D: drive for TEMP on Windows
+      - name: 'Use fast D: drive for TEMP on Windows'
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
@@ -577,7 +577,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Use fast D: drive for TEMP on Windows
+      - name: 'Use fast D: drive for TEMP on Windows'
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
