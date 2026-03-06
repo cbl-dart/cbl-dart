@@ -205,7 +205,7 @@ jobs:
         "macOS":"macos-15",
         "Android":"blacksmith-4vcpu-ubuntu-2204",
         "Ubuntu":"blacksmith-4vcpu-ubuntu-2204",
-        "Windows":"windows-2022"
+        "Windows":"windows-2025"
       }')[matrix.os] }}
     env:
       EMBEDDER: ${{ matrix.embedder }}
@@ -370,7 +370,7 @@ jobs:
         "macOS":"macos-15",
         "Android":"blacksmith-4vcpu-ubuntu-2204",
         "Ubuntu":"blacksmith-4vcpu-ubuntu-2204",
-        "Windows":"windows-2022"
+        "Windows":"windows-2025"
       }')[matrix.os] }}
     env:
       EMBEDDER: ${{ matrix.embedder }}
@@ -502,7 +502,7 @@ jobs:
       ${{ fromJSON('{
         "macOS":"macos-15",
         "Ubuntu":"blacksmith-4vcpu-ubuntu-2204",
-        "Windows":"windows-2022"
+        "Windows":"windows-2025"
       }')[matrix.os] }}
     steps:
       - name: Checkout repository
@@ -568,7 +568,7 @@ jobs:
         "macOS":"macos-14",
         "Android":"blacksmith-4vcpu-ubuntu-2204",
         "Ubuntu":"blacksmith-4vcpu-ubuntu-2204",
-        "Windows":"windows-2022"
+        "Windows":"windows-2025"
       }')[matrix.os] }}
 
     steps:
