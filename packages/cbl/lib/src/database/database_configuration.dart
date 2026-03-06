@@ -13,7 +13,6 @@ import '../support/edition.dart';
 import '../support/isolate.dart';
 import 'database.dart';
 
-// ignore: avoid_classes_with_only_static_members
 /// A key used to encrypt a [Database].
 ///
 /// {@template cbl.EncryptionKey.enterpriseFeature}

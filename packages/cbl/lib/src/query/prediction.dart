@@ -94,7 +94,6 @@ abstract interface class PredictiveModel {
   Dictionary? predict(Dictionary input);
 }
 
-// ignore: avoid_classes_with_only_static_members
 /// Manager for registering and unregistering [PredictiveModel]s.
 ///
 /// {@macro cbl.EncryptionKey.enterpriseFeature}

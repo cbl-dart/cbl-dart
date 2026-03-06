@@ -65,7 +65,6 @@ final class FullTextIndexItem {
   final ExpressionImpl _expression;
 }
 
-// ignore: avoid_classes_with_only_static_members
 /// Factor to create query indexes.
 ///
 /// {@category Query}

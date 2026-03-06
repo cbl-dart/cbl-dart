@@ -15,7 +15,6 @@ abstract final class DataSourceAs extends DataSourceInterface {
   DataSourceInterface as(String alias);
 }
 
-// ignore: avoid_classes_with_only_static_members
 /// Factory for creating data sources.
 ///
 /// {@category Query Builder}
