@@ -2,7 +2,6 @@ import 'array_expression_in.dart';
 import 'expression.dart';
 import 'variable_expression.dart';
 
-// ignore: avoid_classes_with_only_static_members
 /// Array expression.
 ///
 /// # Range predicates

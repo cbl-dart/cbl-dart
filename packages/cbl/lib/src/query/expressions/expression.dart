@@ -106,7 +106,6 @@ abstract interface class ExpressionInterface {
   ExpressionInterface collate(CollationInterface collation);
 }
 
-// ignore: avoid_classes_with_only_static_members
 /// Factory for creating expressions when building [Query]s through the
 /// [QueryBuilder].
 ///

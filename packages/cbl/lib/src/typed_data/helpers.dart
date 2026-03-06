@@ -6,7 +6,6 @@ import 'collection.dart';
 import 'conversion.dart';
 import 'typed_object.dart';
 
-// ignore: avoid_classes_with_only_static_members
 /// Helper functions for use by generated code.
 ///
 /// @nodoc

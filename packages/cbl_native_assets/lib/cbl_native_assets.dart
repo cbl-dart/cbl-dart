@@ -9,7 +9,6 @@ import 'package:cbl/src/bindings/cblitedart_native_assets_bridge.dart';
 import 'package:cbl/src/support/isolate.dart';
 import 'package:cbl/src/support/tracing.dart';
 
-// ignore: avoid_classes_with_only_static_members
 /// Initializes global resources and configures global settings, such as
 /// logging, for usage of Couchbase Lite..
 abstract final class CouchbaseLiteNativeAssets {

@@ -10,7 +10,6 @@ import 'package:cbl_flutter_platform_interface/cbl_flutter_platform_interface.da
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 
-// ignore: avoid_classes_with_only_static_members
 /// Initializes global resources and configures global settings, such as
 /// logging, for usage of Couchbase Lite in Flutter apps.
 abstract final class CouchbaseLiteFlutter {

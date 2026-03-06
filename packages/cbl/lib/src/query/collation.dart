@@ -8,7 +8,6 @@
 /// {@category Query Builder}
 abstract final class CollationInterface {}
 
-// ignore: avoid_classes_with_only_static_members
 /// Factory for creating collations.
 ///
 /// Couchbase Lite provides two types of collation: ASCII and Unicode. Without

@@ -9,7 +9,6 @@ abstract final class MetaExpressionInterface implements ExpressionInterface {
   ExpressionInterface from(String alias);
 }
 
-// ignore: avoid_classes_with_only_static_members
 /// Factory for creating expressions of metadata properties of a document.
 ///
 /// {@category Query Builder}

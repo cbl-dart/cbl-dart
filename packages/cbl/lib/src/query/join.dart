@@ -16,7 +16,6 @@ abstract final class JoinOnInterface {
   JoinInterface on(ExpressionInterface expression);
 }
 
-// ignore: avoid_classes_with_only_static_members
 /// Factory for creating `JOIN` clauses.
 ///
 /// {@category Query Builder}

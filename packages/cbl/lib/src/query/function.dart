@@ -1,7 +1,6 @@
 import 'expressions/expression.dart';
 import 'prediction.dart';
 
-// ignore: avoid_classes_with_only_static_members
 /// Factory for creating function expressions.
 ///
 /// {@category Query Builder}

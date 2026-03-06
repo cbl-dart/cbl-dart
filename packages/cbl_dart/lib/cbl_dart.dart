@@ -11,7 +11,6 @@ import 'src/acquire_libraries.dart';
 
 export 'package:cbl/src/install.dart' show Edition;
 
-// ignore: avoid_classes_with_only_static_members
 /// Initializes global resources and configures global settings, such as
 /// logging, for usage of Couchbase Lite in pure Dart apps.
 abstract final class CouchbaseLiteDart {

@@ -16,7 +16,6 @@ abstract final class SortOrder extends OrderingInterface {
   OrderingInterface descending();
 }
 
-// ignore: avoid_classes_with_only_static_members
 /// Factory for ordering expressions of the `ORDER BY` clause of a query.
 ///
 /// {@category Query Builder}

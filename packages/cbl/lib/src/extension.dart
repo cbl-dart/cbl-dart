@@ -3,7 +3,6 @@ import 'bindings.dart';
 
 final _binding = CBLBindings.instance.base;
 
-// ignore: avoid_classes_with_only_static_members
 /// Manage Couchbase Lite extensions.
 abstract final class Extension {
   /// Enables the vector search extension.

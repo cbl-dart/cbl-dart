@@ -23,7 +23,6 @@ abstract final class SelectResultFrom extends SelectResultInterface {
   SelectResultInterface from(String alias);
 }
 
-// ignore: avoid_classes_with_only_static_members
 /// Factory for select results.
 ///
 /// {@category Query Builder}
