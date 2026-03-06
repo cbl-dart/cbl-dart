@@ -6,6 +6,8 @@ environment:
   sdk: ^3.9.0
   flutter: '>=3.32.0'
 
+resolution: workspace
+
 dependencies:
   cbl: ^3.6.0+2
   cbl_flutter: ^3.3.5

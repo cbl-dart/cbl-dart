@@ -11,6 +11,8 @@ issue_tracker: https://github.com/cbl-dart/cbl-dart/issues
 environment:
   sdk: ^3.9.0
 
+resolution: workspace
+
 dependencies:
   cbl: ^3.6.0+2
   cbl_libcblite_api: 3.2.4

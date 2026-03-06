@@ -6,6 +6,8 @@ publish_to: none
 environment:
   sdk: ^3.9.0
 
+resolution: workspace
+
 dependencies:
   cbl: ^3.6.0+2
   cbl_dart: ^3.5.1

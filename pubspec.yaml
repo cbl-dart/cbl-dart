@@ -4,18 +4,118 @@ publish_to: none
 environment:
   sdk: ^3.9.0
 
+workspace:
+  - packages/benchmark
+  - packages/cbl
+  - packages/cbl/example
+  - packages/cbl_dart
+  - packages/cbl_dart/example
+  - packages/cbl_e2e_tests
+  - packages/cbl_e2e_tests_flutter
+  - packages/cbl_e2e_tests_standalone_dart
+  - packages/cbl_flutter
+  - packages/cbl_flutter/example
+  - packages/cbl_flutter_ce
+  - packages/cbl_flutter_ee
+  - packages/cbl_flutter_install
+  - packages/cbl_flutter_local
+  - packages/cbl_flutter_platform_interface
+  - packages/cbl_flutter_prebuilt
+  - packages/cbl_flutter_prebuilt_e2e_tests
+  - packages/cbl_generator
+  - packages/cbl_native_assets
+  - packages/cbl_sentry
+  - packages/cbl_sentry/example
+  - tool
+
 dev_dependencies:
   cbd:
     path: tool
   # daco removed: requires analyzer ^7.0.0, incompatible with tool's ^10.0.0.
   # Needs daco update to support analyzer 10+.
-  melos: ^6.3.2
+  melos: ^7.4.0
   path: ^1.9.1
 
 dependency_overrides:
-  cbl:
-    path: packages/cbl
   cbl_libcblite_api:
     path: packages/cbl_libcblite_api
   cbl_libcblitedart_api:
     path: packages/cbl_libcblitedart_api
+
+melos:
+  repository: https://github.com/cbl-dart/cbl-dart
+  ignore:
+    - packages/cbl_*_api
+
+  ide:
+    intellij: false
+
+  command:
+    bootstrap:
+      runPubGetInParallel: false
+
+    version:
+      hooks:
+        preCommit:
+          description:
+            Update the `cbl_flutter_ce|ee` packages and the repo `pubspec.lock`.
+          run: |
+            melos build:cbl_flutter_prebuilt && \
+            git add packages/cbl_flutter_ee packages/cbl_flutter_ce && \
+            melos build:cbl_dart:version_info && \
+            git add packages/cbl_dart/lib/src/version_info.dart && \
+            dart pub get && \
+            git add pubspec.lock
+
+  scripts:
+    activate:cbd:
+      description: Activates CBL Dart project dev tools CLI.
+      run: cd tool && dart pub global activate --source path .
+
+    build:cbl_flutter_prebuilt:
+      description: Builds the prebuild packages `cbl_flutter_ce|ee`.
+      run: cd packages/cbl_flutter_prebuilt && dart run
+
+    build:cbl_dart:version_info:
+      description: Builds the version_info.dart file in `cbl_dart` .
+      run: cd packages/cbl_dart && dart run tool/generate_version_info.dart
+
+    build:nativeLibraries:
+      description: Builds the native libraries for the host target.
+      run: ./tools/dev-tools.sh prepareNativeLibraries
+
+    formatting:apply:
+      description: Formats all Dart files.
+      run: daco format .
+
+    formatting:check:
+      description: Formats all Dart files. Fails when files were changed.
+      run: daco format --set-exit-if-changed .
+
+    analyze:
+      description: Analyzes all Dart files.
+      run: dart analyze --fatal-infos
+
+    test:setupCouchbaseClusterDocker:
+      description: Sets up Couchbase services for testing in docker.
+      exec: ./couchbase-services.sh setupDocker
+      packageFilters:
+        scope: cbl_e2e_tests
+
+    test:teardownCouchbaseClusterDocker:
+      description: Tears down Couchbase services for testing in docker.
+      exec: ./couchbase-services.sh teardownDocker
+      packageFilters:
+        scope: cbl_e2e_tests
+
+    test:startSyncGatewayMacOS:
+      description: Starts Sync Gateway for testing on macOS.
+      exec: ./couchbase-services.sh startSyncGatewayMacOS
+      packageFilters:
+        scope: cbl_e2e_tests
+
+    test:waitForSyncGateway:
+      description: Waits Sync Gateway for testing to become available.
+      exec: ./couchbase-services.sh waitForSyncGateway
+      packageFilters:
+        scope: cbl_e2e_tests
