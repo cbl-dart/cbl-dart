@@ -23,12 +23,19 @@ function dartToLcov() {
     local coverageDir="coverage"
     local input="$coverageDir/dart"
     local output="$coverageDir/lcov.info"
-    local packagesFile=".dart_tool/package_config.json"
-
     dart pub global activate coverage
 
     # `format_coverage` only works when executed from the root of the package.
     cd "$packageDir"
+
+    # With pub workspaces, package_config.json is at the workspace root, not
+    # in individual packages.
+    local packagesFile
+    if [ -f ".dart_tool/package_config.json" ]; then
+        packagesFile=".dart_tool/package_config.json"
+    else
+        packagesFile="$(git rev-parse --show-toplevel)/.dart_tool/package_config.json"
+    fi
 
     $formatCoverageBin \
         --check-ignore \

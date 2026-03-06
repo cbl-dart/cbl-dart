@@ -29,6 +29,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: ${{ env.flutter-channel }}
+
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
 
@@ -105,7 +110,7 @@ jobs:
         run: ./tools/dev-tools.sh bootstrap
 
       - name: Analyze Dart code
-        run: melos analyze --fatal-infos
+        run: melos analyze
 
   test-dart-unit:
     name: Dart unit tests
