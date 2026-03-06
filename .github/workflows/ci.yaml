@@ -219,12 +219,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: 'Use fast D: drive for TEMP on Windows'
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          mkdir "D:\Temp"
-          echo "TEMP=D:\Temp" >> $env:GITHUB_ENV
 
       - name: Setup CMake and Ninja
         uses: lukka/get-cmake@latest
@@ -380,12 +374,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: 'Use fast D: drive for TEMP on Windows'
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          mkdir "D:\Temp"
-          echo "TEMP=D:\Temp" >> $env:GITHUB_ENV
 
       - name: Select Java 17
         if: ${{ matrix.os == 'Android' }}
@@ -508,12 +496,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: 'Use fast D: drive for TEMP on Windows'
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          mkdir "D:\Temp"
-          echo "TEMP=D:\Temp" >> $env:GITHUB_ENV
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -574,12 +556,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: 'Use fast D: drive for TEMP on Windows'
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          mkdir "D:\Temp"
-          echo "TEMP=D:\Temp" >> $env:GITHUB_ENV
 
       - name: Get CMake and Ninja
         uses: lukka/get-cmake@latest
