@@ -15,6 +15,7 @@ sgRbacPass="sync_gateway"
 function waitForService() {
     name="$1"
     url="$2"
+    diagnostics="${3:-}"
     maxAttempts=50
     delayBetweenAttempts=5
     attempt=0
@@ -29,6 +30,9 @@ function waitForService() {
 
         if ((attempt == maxAttempts)); then
             echo "$name was not reachable after $maxAttempts"
+            if [ -n "$diagnostics" ]; then
+                "$diagnostics"
+            fi
             exit 1
         fi
 
@@ -44,8 +48,26 @@ function waitForSyncGateway() {
     waitForService "Sync Gateway" localhost:4984
 }
 
+function dumpCouchbaseServerDiagnostics() {
+    echo "::group::Couchbase Server diagnostics"
+
+    case "$(uname)" in
+    Darwin)
+        ps aux | grep -i '[c]ouchbase' || true
+        ;;
+    MINGW64* | MSYS* | CYGWIN*)
+        powershell.exe -Command "\$service = Get-Service | Where-Object { \$_.Name -like 'CouchbaseServer*' -or \$_.DisplayName -like 'Couchbase Server*' } | Select-Object -First 1; if (\$null -eq \$service) { Write-Host 'No Couchbase service found'; exit 0 }; \$service | Format-List -Property Name,DisplayName,Status,StartType" || true
+        ;;
+    esac
+
+    echo "::endgroup::"
+}
+
 function waitForCouchbaseServer() {
-    waitForService "Couchbase Server" http://localhost:8091/pools
+    waitForService \
+        "Couchbase Server" \
+        http://localhost:8091/pools \
+        dumpCouchbaseServerDiagnostics
 }
 
 function initCouchbaseServer() {
@@ -133,28 +155,33 @@ function startCouchbaseServerMacOS() {
         echo "::endgroup::"
     fi
 
-    # Start CBS headlessly to bypass the GUI license dialog that CBS 8.0
-    # shows on first launch. Run from the couchbase-core directory so CBS
-    # finds its relative paths.
-    local cbsCoreDir="$cbsAppDir/Contents/Resources/couchbase-core"
-    (cd "$cbsCoreDir" && ./bin/couchbase-server -- -noinput &)
+    # Launch the app bundle through Launch Services. This is the documented
+    # startup path on macOS and ensures the app bundle environment is set up.
+    open "$cbsAppDir"
 }
 
 function startCouchbaseServerWindows() {
     local cbsMsi="couchbase-server-enterprise_${couchbaseServerVersion}-windows_amd64.msi"
     local cbsUrl="https://packages.couchbase.com/releases/${couchbaseServerVersion}/${cbsMsi}"
+    local serviceName
 
     echo "::group::Install Couchbase Server"
 
     curl -LO "$cbsUrl"
-    # /qn for fully silent install. The CouchbaseServer Windows service
-    # starts automatically after installation.
-    powershell.exe -Command "Start-Process msiexec.exe -Wait -ArgumentList '/i $cbsMsi /qn'"
+    powershell.exe -Command "Start-Process msiexec.exe -Wait -ArgumentList '/i $cbsMsi /qn /norestart'"
     rm "$cbsMsi"
 
-    # Ensure the CouchbaseServer service is running. CBS 8.0 may not
-    # auto-start the service with fully silent (/qn) install.
-    sc.exe start CouchbaseServer || true
+    serviceName="$(
+        powershell.exe -Command "(Get-Service | Where-Object { \$_.Name -like 'CouchbaseServer*' -or \$_.DisplayName -like 'Couchbase Server*' } | Select-Object -First 1 -ExpandProperty Name)" |
+            tr -d '\r'
+    )"
+
+    if [ -z "$serviceName" ]; then
+        echo "Could not find the Couchbase Server Windows service"
+        exit 1
+    fi
+
+    powershell.exe -Command "\$service = Get-Service -Name '$serviceName'; if (\$service.Status -ne 'Running') { Start-Service -Name '$serviceName'; \$service.WaitForStatus('Running', [TimeSpan]::FromMinutes(3)) }; Get-Service -Name '$serviceName' | Format-List -Property Name,DisplayName,Status,StartType"
 
     echo "::endgroup::"
 }
