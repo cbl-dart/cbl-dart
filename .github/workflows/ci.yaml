@@ -33,6 +33,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: ${{ env.flutter-channel }}
+          cache: true
 
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
@@ -228,15 +229,41 @@ jobs:
         if: ${{ matrix.os == 'Android' }}
         run: echo "JAVA_HOME=$JAVA_HOME_17_X64" >> $GITHUB_ENV
 
+      - name: Cache Android NDK and CMake
+        if: ${{ matrix.os == 'Android' }}
+        uses: actions/cache@v4
+        with:
+          path: |
+            /usr/local/lib/android/sdk/ndk/28.0.13004108
+            /usr/local/lib/android/sdk/cmake/3.18.1
+          key: android-ndk-28.0.13004108-cmake-3.18.1-v2
+
       - name: Install Android Native Toolchain
         if: ${{ matrix.os == 'Android' }}
         run: ./native/tools/android-sdk.sh installNativeToolchain
 
-      - name: Install Fluter Linux Desktop dependencies
+      - name: Cache Gradle
+        if: ${{ matrix.os == 'Android' }}
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: gradle-
+
+      - name: Cache apt packages
+        if: matrix.os == 'Ubuntu' && matrix.embedder == 'flutter'
+        uses: actions/cache@v4
+        with:
+          path: /var/cache/apt/archives
+          key: apt-flutter-linux-desktop-${{ runner.os }}
+
+      - name: Install Flutter Linux Desktop dependencies
         if: matrix.os == 'Ubuntu' && matrix.embedder == 'flutter'
         run: |
-          sudo apt-get update
-          sudo apt-get install clang cmake ninja-build pkg-config libgtk-3-dev
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends clang cmake ninja-build pkg-config libgtk-3-dev
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -270,6 +297,14 @@ jobs:
       - name: Start Couchbase services
         shell: bash
         run: ./tools/ci-steps.sh startCouchbaseServices
+
+      - name: Cache Android emulator
+        if: matrix.os == 'Android'
+        uses: actions/cache@v4
+        with:
+          path: |
+            /usr/local/lib/android/sdk/system-images/android-27
+          key: android-system-image-27-x86_64-v2
 
       - name: Start virtual devices
         if: matrix.embedder == 'flutter'
@@ -342,11 +377,28 @@ jobs:
         if: ${{ matrix.os == 'Android' }}
         run: echo "JAVA_HOME=$JAVA_HOME_17_X64" >> $GITHUB_ENV
 
-      - name: Install Fluter Linux Desktop dependencies
+      - name: Cache Gradle
+        if: ${{ matrix.os == 'Android' }}
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: gradle-
+
+      - name: Cache apt packages
+        if: matrix.os == 'Ubuntu'
+        uses: actions/cache@v4
+        with:
+          path: /var/cache/apt/archives
+          key: apt-flutter-linux-desktop-${{ runner.os }}
+
+      - name: Install Flutter Linux Desktop dependencies
         if: matrix.os == 'Ubuntu'
         run: |
-          sudo apt-get update
-          sudo apt-get install clang cmake ninja-build pkg-config libgtk-3-dev
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends clang cmake ninja-build pkg-config libgtk-3-dev
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -366,6 +418,14 @@ jobs:
             ${{ secrets.PREFETCHED_PACKAGES_PASSWORD }}
         shell: bash
         run: ./tools/dev-tools.sh bootstrap
+
+      - name: Cache Android emulator
+        if: matrix.os == 'Android'
+        uses: actions/cache@v4
+        with:
+          path: |
+            /usr/local/lib/android/sdk/system-images/android-27
+          key: android-system-image-27-x86_64-v2
 
       - name: Start virtual devices
         shell: bash
@@ -496,6 +556,15 @@ jobs:
 
       - name: Setup CBL Dart dev tools
         run: melos run activate:cbd
+
+      - name: Cache Android NDK and CMake
+        if: ${{ matrix.os == 'Android' }}
+        uses: actions/cache@v4
+        with:
+          path: |
+            /usr/local/lib/android/sdk/ndk/28.0.13004108
+            /usr/local/lib/android/sdk/cmake/3.18.1
+          key: android-ndk-28.0.13004108-cmake-3.18.1-v2
 
       - name: Install Android Native Toolchain
         if: ${{ matrix.os == 'Android' }}
