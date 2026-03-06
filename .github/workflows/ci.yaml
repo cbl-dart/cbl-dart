@@ -229,14 +229,18 @@ jobs:
         if: ${{ matrix.os == 'Android' }}
         run: echo "JAVA_HOME=$JAVA_HOME_17_X64" >> $GITHUB_ENV
 
-      - name: Setup Android Native Toolchain
+      - name: Cache Android NDK and CMake
         if: ${{ matrix.os == 'Android' }}
-        uses: maxim-lobanov/setup-android-tools@v1
+        uses: actions/cache@v4
         with:
-          packages: |
-            ndk;28.0.13004108
-            cmake;3.18.1
-          cache: true
+          path: |
+            /usr/local/lib/android/sdk/ndk/28.0.13004108
+            /usr/local/lib/android/sdk/cmake/3.18.1
+          key: android-ndk-28.0.13004108-cmake-3.18.1
+
+      - name: Install Android Native Toolchain
+        if: ${{ matrix.os == 'Android' }}
+        run: ./native/tools/android-sdk.sh installNativeToolchain
 
       - name: Setup Gradle
         if: ${{ matrix.os == 'Android' }}
@@ -545,14 +549,18 @@ jobs:
       - name: Setup CBL Dart dev tools
         run: melos run activate:cbd
 
-      - name: Setup Android Native Toolchain
+      - name: Cache Android NDK and CMake
         if: ${{ matrix.os == 'Android' }}
-        uses: maxim-lobanov/setup-android-tools@v1
+        uses: actions/cache@v4
         with:
-          packages: |
-            ndk;28.0.13004108
-            cmake;3.18.1
-          cache: true
+          path: |
+            /usr/local/lib/android/sdk/ndk/28.0.13004108
+            /usr/local/lib/android/sdk/cmake/3.18.1
+          key: android-ndk-28.0.13004108-cmake-3.18.1
+
+      - name: Install Android Native Toolchain
+        if: ${{ matrix.os == 'Android' }}
+        run: ./native/tools/android-sdk.sh installNativeToolchain
 
       - name: Build release
         shell: bash
