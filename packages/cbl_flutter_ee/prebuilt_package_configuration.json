@@ -6,8 +6,8 @@
   "libraries": [
     {
       "library": "cblite",
-      "version": "4.0.3",
-      "release": "4.0.3"
+      "version": "3.2.4",
+      "release": "3.2.4"
     },
     {
       "library": "cblitedart",
