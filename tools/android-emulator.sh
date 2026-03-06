@@ -94,18 +94,22 @@ function createAndStart() {
 
     yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses
 
-    # Install emulator.
-    echo "Installing emulator..."
-    "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" emulator
+    # Install emulator if not already present.
+    if [[ ! -d "$ANDROID_HOME/emulator" ]]; then
+        echo "Installing emulator..."
+        "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" emulator
+    fi
 
     # Install system image.
     systemImage="system-images;android-$apiLevel;default;x86_64"
     echo "Installing system image '$systemImage' ..."
     "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "$systemImage"
 
-    # Install platform tools.
-    echo "Installing platform tools..."
-    "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" platform-tools
+    # Install platform tools if not already present.
+    if [[ ! -d "$ANDROID_HOME/platform-tools" ]]; then
+        echo "Installing platform tools..."
+        "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" platform-tools
+    fi
 
     # Create emulator.
     echo "Creating emulator..."

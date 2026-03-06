@@ -5,6 +5,7 @@
 set -e
 
 ndkVersion="28.0.13004108"
+appNdkVersion="28.2.13676358"
 cmakeVersion="3.18.1"
 defaultSdkLocation=("$HOME/Android/Sdk" "$HOME/Library/Android/sdk")
 sdkHome="$ANDROID_HOME"
@@ -27,6 +28,12 @@ fi
 function installNativeToolchain() {
     $sdkHome/cmdline-tools/latest/bin/sdkmanager --install "ndk;$ndkVersion"
     $sdkHome/cmdline-tools/latest/bin/sdkmanager --install "cmake;$cmakeVersion"
+}
+
+function installAppBuildDeps() {
+    $sdkHome/cmdline-tools/latest/bin/sdkmanager --install "ndk;$appNdkVersion"
+    $sdkHome/cmdline-tools/latest/bin/sdkmanager --install "platforms;android-33"
+    $sdkHome/cmdline-tools/latest/bin/sdkmanager --install "platforms;android-36"
 }
 
 "$@"
