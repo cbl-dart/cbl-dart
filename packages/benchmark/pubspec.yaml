@@ -1,7 +1,7 @@
 name: benchmark
 
 environment:
-  sdk: ^3.4.0
+  sdk: ^3.9.0
 
 dependencies:
   benchmark_harness: ^2.3.1
