@@ -63,10 +63,16 @@ function buildNativeLibraries() {
 function startCouchbaseServices() {
     case "$(uname)" in
     Darwin)
+        ./packages/cbl_e2e_tests/couchbase-services.sh startCouchbaseServerMacOS
+        ./packages/cbl_e2e_tests/couchbase-services.sh waitForCouchbaseServer
+        ./packages/cbl_e2e_tests/couchbase-services.sh initCouchbaseServer
         ./packages/cbl_e2e_tests/couchbase-services.sh startSyncGatewayMacOS &>/dev/null &
         ./packages/cbl_e2e_tests/couchbase-services.sh waitForSyncGateway
         ;;
     MINGW64* | MSYS* | CYGWIN*)
+        ./packages/cbl_e2e_tests/couchbase-services.sh startCouchbaseServerWindows
+        ./packages/cbl_e2e_tests/couchbase-services.sh waitForCouchbaseServer
+        ./packages/cbl_e2e_tests/couchbase-services.sh initCouchbaseServer
         ./packages/cbl_e2e_tests/couchbase-services.sh startSyncGatewayWindows &>/dev/null &
         ./packages/cbl_e2e_tests/couchbase-services.sh waitForSyncGateway
         ;;

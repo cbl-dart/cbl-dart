@@ -59,8 +59,8 @@ files:
         name: CBLDart_CBLDatabaseConfiguration
       c:@T@CBLError:
         name: CBLError
-      c:@T@CBLLogFileConfiguration:
-        name: CBLLogFileConfiguration
+      c:@T@CBLFileLogSink:
+        name: CBLFileLogSink
       c:@T@CBLProxySettings:
         name: CBLProxySettings
       c:CBL+Dart.h@T@CBLDartExternalKeyDecrypt:

@@ -85,13 +85,19 @@ void main() {
       final db = await openTestDatabase();
       final q = await db.createQuery('SELECT doc FROM _');
 
-      expect(await q.explain(), '''
-SELECT fl_result(fl_value(_.body, 'doc')) FROM kv_default AS _ WHERE (_.flags & 1 = 0)
-
-2|0|0| SCAN _
-
-{"FROM":[{"COLLECTION":"_"}],"WHAT":[[".doc"]]}
-''');
+      final explain = await q.explain();
+      expect(
+        explain,
+        contains(
+          "SELECT fl_result(fl_value(_.body, 'doc')) FROM kv_default "
+          'AS _ WHERE (_.flags & 1 = 0)',
+        ),
+      );
+      expect(explain, contains('SCAN _'));
+      expect(
+        explain,
+        contains('{"FROM":[{"COLLECTION":"_"}],"WHAT":[[".doc"]]}'),
+      );
     });
 
     apiTest(

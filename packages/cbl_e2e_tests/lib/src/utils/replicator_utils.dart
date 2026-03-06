@@ -88,10 +88,28 @@ Future<T> _withClient<T>(Future<T> Function(Client) fn) async {
 }
 
 Future<void> flushDatabaseByAdmin() async {
+  // Instead of using the _flush endpoint which triggers a 1.5s sequence
+  // allocation wait in Sync Gateway 4.x on every call, we list all documents
+  // and purge them. This achieves the same clean state for testing purposes
+  // without the database reinitialization overhead.
+  final response = await syncGatewayRequest(
+    Uri.parse('$syncGatewayDatabase/_all_docs'),
+    admin: true,
+  );
+  final allDocs = jsonDecode(response) as Map<String, Object?>;
+  final rows = allDocs['rows']! as List<Object?>;
+  if (rows.isEmpty) {
+    return;
+  }
+  final purgeBody = {
+    for (final row in rows.cast<Map<String, Object?>>())
+      row['id']! as String: ['*'],
+  };
   await syncGatewayRequest(
-    Uri.parse('$syncGatewayDatabase/_flush'),
+    Uri.parse('$syncGatewayDatabase/_purge'),
     method: 'POST',
     admin: true,
+    body: jsonEncode(purgeBody),
   );
 }
 

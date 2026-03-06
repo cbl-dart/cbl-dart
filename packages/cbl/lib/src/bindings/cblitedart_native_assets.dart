@@ -89,6 +89,9 @@ external bool CBLDart_FLEncoder_WriteArrayValue(
 @ffi.Native<NativeCBLDart_CpuSupportsAVX2>()
 external bool CBLDart_CpuSupportsAVX2();
 
+@ffi.Native<NativeCBLDart_DiagnoseClock>()
+external void CBLDart_DiagnoseClock();
+
 @ffi.Native<NativeCBLDart_Initialize>()
 external int CBLDart_Initialize(
   ffi.Pointer<ffi.Void> dartInitializeDlData,
@@ -140,15 +143,13 @@ external bool CBLDart_CBLLog_SetCallback(imp$2.CBLDart_AsyncCallback callback);
 @ffi.Native<NativeCBLDart_CBLLog_SetCallbackLevel>()
 external void CBLDart_CBLLog_SetCallbackLevel(imp$1.DartCBLLogLevel level);
 
-@ffi.Native<NativeCBLDart_CBLLog_SetFileConfig>()
-external bool CBLDart_CBLLog_SetFileConfig(
-  ffi.Pointer<imp$2.CBLLogFileConfiguration> config,
-  ffi.Pointer<imp$2.CBLError> errorOut,
+@ffi.Native<NativeCBLDart_CBLLog_SetFileSink>()
+external void CBLDart_CBLLog_SetFileSink(
+  ffi.Pointer<imp$2.CBLFileLogSink> sink,
 );
 
-@ffi.Native<NativeCBLDart_CBLLog_GetFileConfig>()
-external ffi.Pointer<imp$2.CBLLogFileConfiguration>
-CBLDart_CBLLog_GetFileConfig();
+@ffi.Native<NativeCBLDart_CBLLog_GetFileSink>()
+external ffi.Pointer<imp$2.CBLFileLogSink> CBLDart_CBLLog_GetFileSink();
 
 @ffi.Native<NativeCBLDart_CBLLog_SetSentryBreadcrumbs>()
 external bool CBLDart_CBLLog_SetSentryBreadcrumbs(bool enabled);
@@ -429,6 +430,8 @@ typedef DartCBLDart_FLEncoder_WriteArrayValue =
     bool Function(imp$1.FLEncoder encoder, imp$1.FLArray array, int index);
 typedef NativeCBLDart_CpuSupportsAVX2 = ffi.Bool Function();
 typedef DartCBLDart_CpuSupportsAVX2 = bool Function();
+typedef NativeCBLDart_DiagnoseClock = ffi.Void Function();
+typedef DartCBLDart_DiagnoseClock = void Function();
 
 sealed class CBLDartInitializeResult {
   static const CBLDartInitializeResult_kSuccess = 0;
@@ -493,20 +496,14 @@ typedef NativeCBLDart_CBLLog_SetCallbackLevel =
     ffi.Void Function(imp$1.CBLLogLevel level);
 typedef DartCBLDart_CBLLog_SetCallbackLevel =
     void Function(imp$1.DartCBLLogLevel level);
-typedef NativeCBLDart_CBLLog_SetFileConfig =
-    ffi.Bool Function(
-      ffi.Pointer<imp$2.CBLLogFileConfiguration> config,
-      ffi.Pointer<imp$2.CBLError> errorOut,
-    );
-typedef DartCBLDart_CBLLog_SetFileConfig =
-    bool Function(
-      ffi.Pointer<imp$2.CBLLogFileConfiguration> config,
-      ffi.Pointer<imp$2.CBLError> errorOut,
-    );
-typedef NativeCBLDart_CBLLog_GetFileConfig =
-    ffi.Pointer<imp$2.CBLLogFileConfiguration> Function();
-typedef DartCBLDart_CBLLog_GetFileConfig =
-    ffi.Pointer<imp$2.CBLLogFileConfiguration> Function();
+typedef NativeCBLDart_CBLLog_SetFileSink =
+    ffi.Void Function(ffi.Pointer<imp$2.CBLFileLogSink> sink);
+typedef DartCBLDart_CBLLog_SetFileSink =
+    void Function(ffi.Pointer<imp$2.CBLFileLogSink> sink);
+typedef NativeCBLDart_CBLLog_GetFileSink =
+    ffi.Pointer<imp$2.CBLFileLogSink> Function();
+typedef DartCBLDart_CBLLog_GetFileSink =
+    ffi.Pointer<imp$2.CBLFileLogSink> Function();
 typedef NativeCBLDart_CBLLog_SetSentryBreadcrumbs =
     ffi.Bool Function(ffi.Bool enabled);
 typedef DartCBLDart_CBLLog_SetSentryBreadcrumbs = bool Function(bool enabled);

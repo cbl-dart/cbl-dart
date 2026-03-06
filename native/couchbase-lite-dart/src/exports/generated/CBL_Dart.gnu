@@ -1,6 +1,7 @@
 CBL_Dart {
 	global:
 		CBLDart_CpuSupportsAVX2;
+		CBLDart_DiagnoseClock;
 		CBLDart_Initialize;
 		CBLDart_AsyncCallback_New;
 		CBLDart_AsyncCallback_Close;
@@ -12,8 +13,8 @@ CBL_Dart {
 		CBLDart_GetCurrentIsolateId;
 		CBLDart_CBLLog_SetCallback;
 		CBLDart_CBLLog_SetCallbackLevel;
-		CBLDart_CBLLog_SetFileConfig;
-		CBLDart_CBLLog_GetFileConfig;
+		CBLDart_CBLLog_SetFileSink;
+		CBLDart_CBLLog_GetFileSink;
 		CBLDart_CBLLog_SetSentryBreadcrumbs;
 		CBLDart_CBLDatabaseConfiguration_Default;
 		CBLDart_CBL_CopyDatabase;

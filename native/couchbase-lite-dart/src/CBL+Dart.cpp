@@ -1,9 +1,15 @@
+#include <chrono>
+#include <cstdio>
 #include <future>
 #include <map>
 #include <mutex>
 #include <shared_mutex>
 #include <stdexcept>
 #include <thread>
+
+#ifdef __linux__
+#include <time.h>
+#endif
 
 #include "AsyncCallback.h"
 #include "CBL+Dart.h"
@@ -13,6 +19,89 @@
 #include "dart/dart_api.h"
 
 bool CBLDart_CpuSupportsAVX2() { return CBLDart::CpuSupportsAVX2(); }
+
+void CBLDart_DiagnoseClock() {
+  fprintf(stderr, "[CBLDart_DiagnoseClock] === Clock Diagnostic Start ===\n");
+
+#ifdef __linux__
+  // Direct syscall via libc - bypasses C++ standard library entirely.
+  struct timespec ts;
+  int ret = clock_gettime(CLOCK_REALTIME, &ts);
+  fprintf(stderr,
+          "[CBLDart_DiagnoseClock] clock_gettime(CLOCK_REALTIME): ret=%d "
+          "tv_sec=%ld tv_nsec=%ld\n",
+          ret, ts.tv_sec, ts.tv_nsec);
+#else
+  fprintf(stderr,
+          "[CBLDart_DiagnoseClock] clock_gettime: skipped (not Linux)\n");
+#endif
+
+  // Through C++ standard library (libstdc++ on Linux).
+  // This is the same code path used by HybridClock / RealClockSource.
+  auto now = std::chrono::system_clock::now();
+  auto ns = std::chrono::duration_cast<std::chrono::nanoseconds>(
+                now.time_since_epoch())
+                .count();
+  fprintf(stderr,
+          "[CBLDart_DiagnoseClock] chrono::system_clock::now(): %lld ns "
+          "(0x%016llx)\n",
+          static_cast<long long>(ns), static_cast<unsigned long long>(ns));
+
+  if (ns == 0) {
+    fprintf(stderr,
+            "[CBLDart_DiagnoseClock] WARNING: chrono returned 0! This "
+            "indicates a C++ standard library ABI issue.\n");
+  }
+
+  // Test the HybridClock inside libcblite.so by creating a temporary database
+  // and saving a document. The resulting revision ID contains the version
+  // vector timestamp assigned by HybridClock::now() inside libcblite.so.
+  {
+    fprintf(
+        stderr,
+        "[CBLDart_DiagnoseClock] Testing HybridClock via libcblite.so...\n");
+
+    CBLError error{};
+    auto config = CBLDatabaseConfiguration_Default();
+    auto db = CBLDatabase_Open(FLStr("clockDiag"), &config, &error);
+    if (!db) {
+      fprintf(stderr,
+              "[CBLDart_DiagnoseClock] ERROR: Failed to open diag database "
+              "(domain=%d code=%d)\n",
+              error.domain, error.code);
+    } else {
+      auto collection = CBLDatabase_DefaultCollection(db, &error);
+      if (!collection) {
+        fprintf(stderr,
+                "[CBLDart_DiagnoseClock] ERROR: Failed to get default "
+                "collection (domain=%d code=%d)\n",
+                error.domain, error.code);
+      } else {
+        auto doc = CBLDocument_CreateWithID(FLStr("clockDiagDoc"));
+        if (CBLCollection_SaveDocument(collection, doc, &error)) {
+          auto revID = CBLDocument_RevisionID(doc);
+          fprintf(stderr,
+                  "[CBLDart_DiagnoseClock] Document revision ID: %.*s\n",
+                  static_cast<int>(revID.size),
+                  static_cast<const char*>(revID.buf));
+        } else {
+          fprintf(stderr,
+                  "[CBLDart_DiagnoseClock] ERROR: Failed to save document "
+                  "(domain=%d code=%d)\n",
+                  error.domain, error.code);
+        }
+        CBLDocument_Release(doc);
+        CBLCollection_Release(collection);
+      }
+      // Delete the diagnostic database.
+      CBLDatabase_Delete(db, &error);
+      CBLDatabase_Release(db);
+    }
+  }
+
+  fprintf(stderr, "[CBLDart_DiagnoseClock] === Clock Diagnostic End ===\n");
+  fflush(stderr);
+}
 
 static std::mutex initializeMutex;
 static bool initialized = false;
@@ -26,6 +115,9 @@ CBLDartInitializeResult CBLDart_Initialize(void* dartInitializeDlData,
     // Only initialize libraries once.
     return CBLDartInitializeResult_kSuccess;
   }
+
+  // Run clock diagnostic to help debug HybridClock issues on Linux.
+  CBLDart_DiagnoseClock();
 
 #ifdef __ANDROID__
   // Initialize the Couchbase Lite library.
@@ -232,8 +324,8 @@ static void CBLDart_CBLListenerFinalizer(void* context) {
 
 static std::shared_mutex loggingMutex;
 static CBLDart::AsyncCallback* logCallback = nullptr;
-static CBLLogLevel logCallbackLevel = CBLLog_CallbackLevel();
-static CBLLogFileConfiguration* logFileConfig = nullptr;
+static CBLLogLevel logCallbackLevel = CBLLogSinks_CustomSink().level;
+static CBLFileLogSink* logFileSink = nullptr;
 static bool logSentryBreadcrumbsEnabled = false;
 
 // Forward declarations for the logging functions.
@@ -255,20 +347,15 @@ static void CBLDart_LogCallback(CBLLogDomain domain, CBLLogLevel level,
   }
 }
 
-static void CBLDart_UpdateEffectiveLogCallback() {
+static void CBLDart_UpdateEffectiveCustomLogSink() {
+  CBLCustomLogSink sink{};
   if (logSentryBreadcrumbsEnabled || logCallback) {
-    CBLLog_SetCallback(CBLDart_LogCallback);
+    sink.callback = CBLDart_LogCallback;
+    sink.level = logSentryBreadcrumbsEnabled ? kCBLLogDebug : logCallbackLevel;
   } else {
-    CBLLog_SetCallback(nullptr);
+    sink.level = kCBLLogNone;
   }
-}
-
-static void CBLDart_UpdateEffectiveLogCallbackLevel() {
-  if (logSentryBreadcrumbsEnabled) {
-    CBLLog_SetCallbackLevel(kCBLLogDebug);
-  } else {
-    CBLLog_SetCallbackLevel(logCallbackLevel);
-  }
+  CBLLogSinks_SetCustom(sink);
 }
 
 static void CBLDart_CallDartLogCallback(CBLLogDomain domain, CBLLogLevel level,
@@ -297,8 +384,7 @@ static void CBLDart_CallDartLogCallback(CBLLogDomain domain, CBLLogLevel level,
 static void CBLDart_LogCallbackFinalizer(void* context) {
   std::unique_lock lock(loggingMutex);
   logCallback = nullptr;
-  CBLDart_UpdateEffectiveLogCallback();
-  CBLDart_UpdateEffectiveLogCallbackLevel();
+  CBLDart_UpdateEffectiveCustomLogSink();
 }
 
 bool CBLDart_CBLLog_SetCallback(CBLDart_AsyncCallback callback) {
@@ -317,7 +403,7 @@ bool CBLDart_CBLLog_SetCallback(CBLDart_AsyncCallback callback) {
     logCallback = callback_;
     callback_->setFinalizer(nullptr, CBLDart_LogCallbackFinalizer);
   }
-  CBLDart_UpdateEffectiveLogCallback();
+  CBLDart_UpdateEffectiveCustomLogSink();
 
   return true;
 }
@@ -325,64 +411,40 @@ bool CBLDart_CBLLog_SetCallback(CBLDart_AsyncCallback callback) {
 void CBLDart_CBLLog_SetCallbackLevel(CBLLogLevel level) {
   std::unique_lock lock(loggingMutex);
   logCallbackLevel = level;
-  CBLDart_UpdateEffectiveLogCallbackLevel();
+  CBLDart_UpdateEffectiveCustomLogSink();
 }
 
-bool CBLDart_CBLLog_SetFileConfig(CBLLogFileConfiguration* config,
-                                  CBLError* errorOut) {
+void CBLDart_CBLLog_SetFileSink(CBLFileLogSink* sink_) {
   std::unique_lock lock(loggingMutex);
 
-  if (!config) {
-    CBLLogFileConfiguration config_{};
-    config_.level = kCBLLogNone;
-    config_.directory = {nullptr, 0};
-    config_.maxRotateCount = 0;
-    config_.maxSize = 0;
-    config_.usePlaintext = false;
+  if (!sink_) {
+    CBLFileLogSink sink{};
+    sink.level = kCBLLogNone;
 
-    auto success = CBLLog_SetFileConfig(config_, errorOut);
-    if (success) {
-      if (logFileConfig) {
-        delete logFileConfig;
-        logFileConfig = nullptr;
-      }
-    }
-    return success;
+    CBLLogSinks_SetFile(sink);
+    delete logFileSink;
+    logFileSink = nullptr;
   } else {
-    CBLLogFileConfiguration config_{};
-    config_.level = config->level;
-    config_.directory = config->directory;
-    config_.maxRotateCount = config->maxRotateCount;
-    config_.maxSize = config->maxSize;
-    config_.usePlaintext = config->usePlaintext;
-
-    auto success = CBLLog_SetFileConfig(config_, errorOut);
-    if (success) {
-      auto config_ = CBLLog_FileConfig();
-      if (!logFileConfig) {
-        logFileConfig = new CBLLogFileConfiguration{};
-      }
-      logFileConfig->level = config_->level;
-      logFileConfig->directory = config_->directory;
-      logFileConfig->maxRotateCount = config_->maxRotateCount;
-      logFileConfig->maxSize = config_->maxSize;
-      logFileConfig->usePlaintext = config_->usePlaintext;
+    CBLLogSinks_SetFile(*sink_);
+    auto currentSink = CBLLogSinks_File();
+    if (!logFileSink) {
+      logFileSink = new CBLFileLogSink{};
     }
-    return success;
+    *logFileSink = currentSink;
   }
 }
 
-CBLLogFileConfiguration* CBLDart_CBLLog_GetFileConfig() {
+CBLFileLogSink* CBLDart_CBLLog_GetFileSink() {
   std::shared_lock lock(loggingMutex);
-  return logFileConfig;
+  return logFileSink;
 }
 
-static bool CBLDart_LogFileConfigIsSet() { return logFileConfig != nullptr; }
+static bool CBLDart_LogFileSinkIsSet() { return logFileSink != nullptr; }
 
 static void CBLDart_CheckFileLogging() {
   static std::once_flag checkFileLogging;
   std::call_once(checkFileLogging, []() {
-    if (!CBLDart_LogFileConfigIsSet()) {
+    if (!CBLDart_LogFileSinkIsSet()) {
       CBL_Log(kCBLLogDomainDatabase, kCBLLogWarning,
               "Database.log.file.config is null, meaning file logging is "
               "disabled. Log files required for product support are not being "
@@ -451,8 +513,7 @@ bool CBLDart_CBLLog_SetSentryBreadcrumbs(bool enabled) {
 
   std::unique_lock lock(loggingMutex);
   logSentryBreadcrumbsEnabled = enabled;
-  CBLDart_UpdateEffectiveLogCallback();
-  CBLDart_UpdateEffectiveLogCallbackLevel();
+  CBLDart_UpdateEffectiveCustomLogSink();
   return true;
 }
 
@@ -1023,8 +1084,9 @@ CBLReplicator* CBLDart_CBLReplicator_Create(
   config_.trustedRootCertificates = config->trustedRootCertificates == nullptr
                                         ? kFLSliceNull
                                         : *config->trustedRootCertificates;
+  config_.acceptParentDomainCookies = config->acceptParentDomainCookies;
 
-  std::vector<CBLReplicationCollection> replicationCollections(
+  std::vector<CBLCollectionConfiguration> replicationCollections(
       config->collectionsCount);
   config_.collections = replicationCollections.data();
   config_.collectionCount = config->collectionsCount;

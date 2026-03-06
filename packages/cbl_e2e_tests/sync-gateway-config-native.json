@@ -12,7 +12,7 @@
 
   "databases": {
     "db": {
-      "server": "couchbase://couchbase-server",
+      "server": "couchbase://localhost",
       "bucket": "db",
       "username": "sync_gateway",
       "password": "sync_gateway",

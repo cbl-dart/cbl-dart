@@ -169,89 +169,6 @@ class cbliteNativeAssetsBridge implements cblite {
   FLSlice get kCBLTypeProperty => native.kCBLTypeProperty;
 
   @override
-  ffi.Pointer<CBLDocument> CBLDatabase_GetDocument(
-    ffi.Pointer<CBLDatabase> database,
-    FLString docID,
-    ffi.Pointer<CBLError> outError,
-  ) => native.CBLDatabase_GetDocument(database, docID, outError);
-
-  @override
-  bool CBLDatabase_SaveDocument(
-    ffi.Pointer<CBLDatabase> db,
-    ffi.Pointer<CBLDocument> doc,
-    ffi.Pointer<CBLError> outError,
-  ) => native.CBLDatabase_SaveDocument(db, doc, outError);
-
-  @override
-  bool CBLDatabase_SaveDocumentWithConcurrencyControl(
-    ffi.Pointer<CBLDatabase> db,
-    ffi.Pointer<CBLDocument> doc,
-    int concurrency,
-    ffi.Pointer<CBLError> outError,
-  ) => native.CBLDatabase_SaveDocumentWithConcurrencyControl(
-    db,
-    doc,
-    concurrency,
-    outError,
-  );
-
-  @override
-  bool CBLDatabase_SaveDocumentWithConflictHandler(
-    ffi.Pointer<CBLDatabase> db,
-    ffi.Pointer<CBLDocument> doc,
-    CBLConflictHandler conflictHandler,
-    ffi.Pointer<ffi.Void> context,
-    ffi.Pointer<CBLError> outError,
-  ) => native.CBLDatabase_SaveDocumentWithConflictHandler(
-    db,
-    doc,
-    conflictHandler,
-    context,
-    outError,
-  );
-
-  @override
-  bool CBLDatabase_DeleteDocument(
-    ffi.Pointer<CBLDatabase> db,
-    ffi.Pointer<CBLDocument> document,
-    ffi.Pointer<CBLError> outError,
-  ) => native.CBLDatabase_DeleteDocument(db, document, outError);
-
-  @override
-  bool CBLDatabase_DeleteDocumentWithConcurrencyControl(
-    ffi.Pointer<CBLDatabase> db,
-    ffi.Pointer<CBLDocument> document,
-    int concurrency,
-    ffi.Pointer<CBLError> outError,
-  ) => native.CBLDatabase_DeleteDocumentWithConcurrencyControl(
-    db,
-    document,
-    concurrency,
-    outError,
-  );
-
-  @override
-  bool CBLDatabase_PurgeDocument(
-    ffi.Pointer<CBLDatabase> db,
-    ffi.Pointer<CBLDocument> document,
-    ffi.Pointer<CBLError> outError,
-  ) => native.CBLDatabase_PurgeDocument(db, document, outError);
-
-  @override
-  bool CBLDatabase_PurgeDocumentByID(
-    ffi.Pointer<CBLDatabase> database,
-    FLString docID,
-    ffi.Pointer<CBLError> outError,
-  ) => native.CBLDatabase_PurgeDocumentByID(database, docID, outError);
-
-  @override
-  ffi.Pointer<CBLDocument> CBLDatabase_GetMutableDocument(
-    ffi.Pointer<CBLDatabase> database,
-    FLString docID,
-    ffi.Pointer<CBLError> outError,
-  ) => native.CBLDatabase_GetMutableDocument(database, docID, outError);
-
-  @override
   ffi.Pointer<CBLDocument> CBLDocument_Create() => native.CBLDocument_Create();
 
   @override
@@ -270,6 +187,10 @@ class cbliteNativeAssetsBridge implements cblite {
   @override
   FLString CBLDocument_RevisionID(ffi.Pointer<CBLDocument> arg0) =>
       native.CBLDocument_RevisionID(arg0);
+
+  @override
+  int CBLDocument_Timestamp(ffi.Pointer<CBLDocument> arg0) =>
+      native.CBLDocument_Timestamp(arg0);
 
   @override
   int CBLDocument_Sequence(ffi.Pointer<CBLDocument> arg0) =>
@@ -304,35 +225,6 @@ class cbliteNativeAssetsBridge implements cblite {
     FLSlice json,
     ffi.Pointer<CBLError> outError,
   ) => native.CBLDocument_SetJSON(arg0, json, outError);
-
-  @override
-  int CBLDatabase_GetDocumentExpiration(
-    ffi.Pointer<CBLDatabase> db,
-    FLSlice docID,
-    ffi.Pointer<CBLError> outError,
-  ) => native.CBLDatabase_GetDocumentExpiration(db, docID, outError);
-
-  @override
-  bool CBLDatabase_SetDocumentExpiration(
-    ffi.Pointer<CBLDatabase> db,
-    FLSlice docID,
-    int expiration,
-    ffi.Pointer<CBLError> outError,
-  ) =>
-      native.CBLDatabase_SetDocumentExpiration(db, docID, expiration, outError);
-
-  @override
-  ffi.Pointer<CBLListenerToken> CBLDatabase_AddDocumentChangeListener(
-    ffi.Pointer<CBLDatabase> db,
-    FLString docID,
-    CBLDocumentChangeListener listener,
-    ffi.Pointer<ffi.Void> context,
-  ) => native.CBLDatabase_AddDocumentChangeListener(
-    db,
-    docID,
-    listener,
-    context,
-  );
 
   @override
   ffi.Pointer<CBLVectorEncoding> CBLVectorEncoding_CreateNone() =>
@@ -725,46 +617,8 @@ class cbliteNativeAssetsBridge implements cblite {
       native.CBLDatabase_Path(arg0);
 
   @override
-  int CBLDatabase_Count(ffi.Pointer<CBLDatabase> arg0) =>
-      native.CBLDatabase_Count(arg0);
-
-  @override
   CBLDatabaseConfiguration CBLDatabase_Config(ffi.Pointer<CBLDatabase> arg0) =>
       native.CBLDatabase_Config(arg0);
-
-  @override
-  bool CBLDatabase_CreateValueIndex(
-    ffi.Pointer<CBLDatabase> db,
-    FLString name,
-    CBLValueIndexConfiguration config,
-    ffi.Pointer<CBLError> outError,
-  ) => native.CBLDatabase_CreateValueIndex(db, name, config, outError);
-
-  @override
-  bool CBLDatabase_CreateFullTextIndex(
-    ffi.Pointer<CBLDatabase> db,
-    FLString name,
-    CBLFullTextIndexConfiguration config,
-    ffi.Pointer<CBLError> outError,
-  ) => native.CBLDatabase_CreateFullTextIndex(db, name, config, outError);
-
-  @override
-  bool CBLDatabase_DeleteIndex(
-    ffi.Pointer<CBLDatabase> db,
-    FLString name,
-    ffi.Pointer<CBLError> outError,
-  ) => native.CBLDatabase_DeleteIndex(db, name, outError);
-
-  @override
-  FLArray CBLDatabase_GetIndexNames(ffi.Pointer<CBLDatabase> db) =>
-      native.CBLDatabase_GetIndexNames(db);
-
-  @override
-  ffi.Pointer<CBLListenerToken> CBLDatabase_AddChangeListener(
-    ffi.Pointer<CBLDatabase> db,
-    CBLDatabaseChangeListener listener,
-    ffi.Pointer<ffi.Void> context,
-  ) => native.CBLDatabase_AddChangeListener(db, listener, context);
 
   @override
   void CBLDatabase_BufferNotifications(
@@ -1057,15 +911,18 @@ class cbliteNativeAssetsBridge implements cblite {
   @override
   FLDict CBLReplicator_PendingDocumentIDs(
     ffi.Pointer<CBLReplicator> arg0,
+    ffi.Pointer<CBLCollection> collection,
     ffi.Pointer<CBLError> outError,
-  ) => native.CBLReplicator_PendingDocumentIDs(arg0, outError);
+  ) => native.CBLReplicator_PendingDocumentIDs(arg0, collection, outError);
 
   @override
   bool CBLReplicator_IsDocumentPending(
     ffi.Pointer<CBLReplicator> repl,
     FLString docID,
+    ffi.Pointer<CBLCollection> collection,
     ffi.Pointer<CBLError> outError,
-  ) => native.CBLReplicator_IsDocumentPending(repl, docID, outError);
+  ) =>
+      native.CBLReplicator_IsDocumentPending(repl, docID, collection, outError);
 
   @override
   FLDict CBLReplicator_PendingDocumentIDs2(
@@ -1118,10 +975,6 @@ class cbliteNativeAssetsBridge implements cblite {
       native.kCBLDefaultLogFileUsePlaintext;
 
   @override
-  bool get kCBLDefaultLogFileUsePlainText =>
-      native.kCBLDefaultLogFileUsePlainText;
-
-  @override
   int get kCBLDefaultLogFileMaxSize => native.kCBLDefaultLogFileMaxSize;
 
   @override
@@ -1166,10 +1019,6 @@ class cbliteNativeAssetsBridge implements cblite {
   @override
   int get kCBLDefaultReplicatorMaxAttemptsWaitTime =>
       native.kCBLDefaultReplicatorMaxAttemptsWaitTime;
-
-  @override
-  int get kCBLDefaultReplicatorMaxAttemptWaitTime =>
-      native.kCBLDefaultReplicatorMaxAttemptWaitTime;
 
   @override
   bool get kCBLDefaultReplicatorDisableAutoPurge =>
@@ -1296,36 +1145,6 @@ class cbliteNativeAssetsBridge implements cblite {
   @override
   void CBL_LogMessage(int domain, int level, FLSlice message) =>
       native.CBL_LogMessage(domain, level, message);
-
-  @override
-  int CBLLog_ConsoleLevel() => native.CBLLog_ConsoleLevel();
-
-  @override
-  void CBLLog_SetConsoleLevel(int arg0) => native.CBLLog_SetConsoleLevel(arg0);
-
-  @override
-  int CBLLog_CallbackLevel() => native.CBLLog_CallbackLevel();
-
-  @override
-  void CBLLog_SetCallbackLevel(int arg0) =>
-      native.CBLLog_SetCallbackLevel(arg0);
-
-  @override
-  CBLLogCallback CBLLog_Callback() => native.CBLLog_Callback();
-
-  @override
-  void CBLLog_SetCallback(CBLLogCallback callback) =>
-      native.CBLLog_SetCallback(callback);
-
-  @override
-  ffi.Pointer<CBLLogFileConfiguration> CBLLog_FileConfig() =>
-      native.CBLLog_FileConfig();
-
-  @override
-  bool CBLLog_SetFileConfig(
-    CBLLogFileConfiguration arg0,
-    ffi.Pointer<CBLError> outError,
-  ) => native.CBLLog_SetFileConfig(arg0, outError);
 
   @override
   void CBL_RegisterPredictiveModel(FLString name, CBLPredictiveModel model) =>
@@ -1767,14 +1586,14 @@ class cbliteNativeAssetsBridge implements cblite {
   FLDoc FLDoc_Retain(FLDoc arg0) => native.FLDoc_Retain(arg0);
 
   @override
-  FLSlice FLDoc_GetData(FLDoc arg0) => native.FLDoc_GetData(arg0);
+  FLSlice FLDoc_GetData(FLDoc doc) => native.FLDoc_GetData(doc);
 
   @override
   FLSliceResult FLDoc_GetAllocedData(FLDoc arg0) =>
       native.FLDoc_GetAllocedData(arg0);
 
   @override
-  FLValue FLDoc_GetRoot(FLDoc arg0) => native.FLDoc_GetRoot(arg0);
+  FLValue FLDoc_GetRoot(FLDoc doc) => native.FLDoc_GetRoot(doc);
 
   @override
   FLSharedKeys FLDoc_GetSharedKeys(FLDoc arg0) =>
@@ -1878,6 +1697,17 @@ class cbliteNativeAssetsBridge implements cblite {
       native.FLEncoder_WriteValue(arg0, arg1);
 
   @override
+  bool FLEncoder_WriteFormatted(FLEncoder arg0, ffi.Pointer<ffi.Char> format) =>
+      native.FLEncoder_WriteFormatted(arg0, format);
+
+  @override
+  bool FLEncoder_WriteFormattedArgs(
+    FLEncoder arg0,
+    ffi.Pointer<ffi.Char> format,
+    va_list args,
+  ) => native.FLEncoder_WriteFormattedArgs(arg0, format, args);
+
+  @override
   bool FLEncoder_BeginArray(FLEncoder arg0, int reserveCount) =>
       native.FLEncoder_BeginArray(arg0, reserveCount);
 
@@ -1919,8 +1749,8 @@ class cbliteNativeAssetsBridge implements cblite {
   int FLEncoder_GetError(FLEncoder arg0) => native.FLEncoder_GetError(arg0);
 
   @override
-  ffi.Pointer<ffi.Char> FLEncoder_GetErrorMessage(FLEncoder arg0) =>
-      native.FLEncoder_GetErrorMessage(arg0);
+  ffi.Pointer<ffi.Char> FLEncoder_GetErrorMessage(FLEncoder e) =>
+      native.FLEncoder_GetErrorMessage(e);
 
   @override
   FLStringResult FLValue_ToJSON(FLValue arg0) => native.FLValue_ToJSON(arg0);
@@ -1981,12 +1811,37 @@ class cbliteNativeAssetsBridge implements cblite {
       native.FLKeyPath_Equals(path1, path2);
 
   @override
+  int FLKeyPath_GetCount(FLKeyPath arg0) => native.FLKeyPath_GetCount(arg0);
+
+  @override
   bool FLKeyPath_GetElement(
-    FLKeyPath arg0,
+    FLKeyPath path,
     int i,
     ffi.Pointer<FLSlice> outDictKey,
     ffi.Pointer<ffi.Int32> outArrayIndex,
-  ) => native.FLKeyPath_GetElement(arg0, i, outDictKey, outArrayIndex);
+  ) => native.FLKeyPath_GetElement(path, i, outDictKey, outArrayIndex);
+
+  @override
+  FLKeyPath FLKeyPath_NewEmpty() => native.FLKeyPath_NewEmpty();
+
+  @override
+  void FLKeyPath_AddProperty(FLKeyPath arg0, FLString property) =>
+      native.FLKeyPath_AddProperty(arg0, property);
+
+  @override
+  void FLKeyPath_AddIndex(FLKeyPath arg0, int index) =>
+      native.FLKeyPath_AddIndex(arg0, index);
+
+  @override
+  bool FLKeyPath_AddComponents(
+    FLKeyPath arg0,
+    FLString specifier,
+    ffi.Pointer<ffi.UnsignedInt> outError,
+  ) => native.FLKeyPath_AddComponents(arg0, specifier, outError);
+
+  @override
+  void FLKeyPath_DropComponents(FLKeyPath arg0, int n) =>
+      native.FLKeyPath_DropComponents(arg0, n);
 
   @override
   FLValue get kFLNullValue => native.kFLNullValue;
@@ -2190,6 +2045,35 @@ class cbliteNativeAssetsBridge implements cblite {
   @override
   void FLSlot_SetValue(FLSlot arg0, FLValue arg1) =>
       native.FLSlot_SetValue(arg0, arg1);
+
+  @override
+  FLValue FLValue_NewWithFormat(ffi.Pointer<ffi.Char> format) =>
+      native.FLValue_NewWithFormat(format);
+
+  @override
+  FLValue FLValue_NewWithFormatV(
+    ffi.Pointer<ffi.Char> format,
+    va_list$1 args,
+  ) => native.FLValue_NewWithFormatV(format, args);
+
+  @override
+  void FLMutableArray_UpdateWithFormat(
+    FLMutableArray arg0,
+    ffi.Pointer<ffi.Char> format,
+  ) => native.FLMutableArray_UpdateWithFormat(arg0, format);
+
+  @override
+  void FLMutableDict_UpdateWithFormat(
+    FLMutableDict arg0,
+    ffi.Pointer<ffi.Char> format,
+  ) => native.FLMutableDict_UpdateWithFormat(arg0, format);
+
+  @override
+  void FLValue_UpdateWithFormatV(
+    FLValue arg0,
+    ffi.Pointer<ffi.Char> format,
+    va_list$1 args,
+  ) => native.FLValue_UpdateWithFormatV(arg0, format, args);
 
   @override
   FLSliceResult FLCreateJSONDelta(FLValue old, FLValue nuu) =>

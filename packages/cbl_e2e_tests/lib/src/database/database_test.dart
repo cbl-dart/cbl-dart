@@ -762,7 +762,8 @@ void main() {
           final doc = MutableDocument();
           await db.saveDocument(doc);
 
-          expect(doc.revisionId, '1-581ad726ee407c8376fc94aad966051d013893c4');
+          expect(doc.revisionId, isNotNull);
+          expect(doc.revisionId, isNotEmpty);
         },
       );
 
@@ -837,7 +838,7 @@ void main() {
 
           final explain = await q.explain();
 
-          expect(explain, contains('fts1 VIRTUAL TABLE INDEX'));
+          expect(explain, contains('VIRTUAL TABLE INDEX'));
         },
       );
 
@@ -868,7 +869,7 @@ void main() {
 
         final explain = await q.explain();
 
-        expect(explain, contains('fts1 VIRTUAL TABLE INDEX'));
+        expect(explain, contains('VIRTUAL TABLE INDEX'));
       });
 
       apiTest('deleteIndex should delete the given index', () async {

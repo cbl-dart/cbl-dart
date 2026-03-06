@@ -382,175 +382,6 @@ class cblite {
 
   FLSlice get kCBLTypeProperty => _kCBLTypeProperty.ref;
 
-  ffi.Pointer<CBLDocument> CBLDatabase_GetDocument(
-    ffi.Pointer<CBLDatabase> database,
-    FLString docID,
-    ffi.Pointer<CBLError> outError,
-  ) {
-    return _CBLDatabase_GetDocument(database, docID, outError);
-  }
-
-  late final _CBLDatabase_GetDocumentPtr =
-      _lookup<ffi.NativeFunction<NativeCBLDatabase_GetDocument>>(
-        'CBLDatabase_GetDocument',
-      );
-  late final _CBLDatabase_GetDocument =
-      _CBLDatabase_GetDocumentPtr.asFunction<DartCBLDatabase_GetDocument>();
-
-  bool CBLDatabase_SaveDocument(
-    ffi.Pointer<CBLDatabase> db,
-    ffi.Pointer<CBLDocument> doc,
-    ffi.Pointer<CBLError> outError,
-  ) {
-    return _CBLDatabase_SaveDocument(db, doc, outError);
-  }
-
-  late final _CBLDatabase_SaveDocumentPtr =
-      _lookup<ffi.NativeFunction<NativeCBLDatabase_SaveDocument>>(
-        'CBLDatabase_SaveDocument',
-      );
-  late final _CBLDatabase_SaveDocument =
-      _CBLDatabase_SaveDocumentPtr.asFunction<DartCBLDatabase_SaveDocument>();
-
-  bool CBLDatabase_SaveDocumentWithConcurrencyControl(
-    ffi.Pointer<CBLDatabase> db,
-    ffi.Pointer<CBLDocument> doc,
-    int concurrency,
-    ffi.Pointer<CBLError> outError,
-  ) {
-    return _CBLDatabase_SaveDocumentWithConcurrencyControl(
-      db,
-      doc,
-      concurrency,
-      outError,
-    );
-  }
-
-  late final _CBLDatabase_SaveDocumentWithConcurrencyControlPtr =
-      _lookup<
-        ffi.NativeFunction<NativeCBLDatabase_SaveDocumentWithConcurrencyControl>
-      >('CBLDatabase_SaveDocumentWithConcurrencyControl');
-  late final _CBLDatabase_SaveDocumentWithConcurrencyControl =
-      _CBLDatabase_SaveDocumentWithConcurrencyControlPtr.asFunction<
-        DartCBLDatabase_SaveDocumentWithConcurrencyControl
-      >();
-
-  bool CBLDatabase_SaveDocumentWithConflictHandler(
-    ffi.Pointer<CBLDatabase> db,
-    ffi.Pointer<CBLDocument> doc,
-    CBLConflictHandler conflictHandler,
-    ffi.Pointer<ffi.Void> context,
-    ffi.Pointer<CBLError> outError,
-  ) {
-    return _CBLDatabase_SaveDocumentWithConflictHandler(
-      db,
-      doc,
-      conflictHandler,
-      context,
-      outError,
-    );
-  }
-
-  late final _CBLDatabase_SaveDocumentWithConflictHandlerPtr =
-      _lookup<
-        ffi.NativeFunction<NativeCBLDatabase_SaveDocumentWithConflictHandler>
-      >('CBLDatabase_SaveDocumentWithConflictHandler');
-  late final _CBLDatabase_SaveDocumentWithConflictHandler =
-      _CBLDatabase_SaveDocumentWithConflictHandlerPtr.asFunction<
-        DartCBLDatabase_SaveDocumentWithConflictHandler
-      >();
-
-  bool CBLDatabase_DeleteDocument(
-    ffi.Pointer<CBLDatabase> db,
-    ffi.Pointer<CBLDocument> document,
-    ffi.Pointer<CBLError> outError,
-  ) {
-    return _CBLDatabase_DeleteDocument(db, document, outError);
-  }
-
-  late final _CBLDatabase_DeleteDocumentPtr =
-      _lookup<ffi.NativeFunction<NativeCBLDatabase_DeleteDocument>>(
-        'CBLDatabase_DeleteDocument',
-      );
-  late final _CBLDatabase_DeleteDocument =
-      _CBLDatabase_DeleteDocumentPtr.asFunction<
-        DartCBLDatabase_DeleteDocument
-      >();
-
-  bool CBLDatabase_DeleteDocumentWithConcurrencyControl(
-    ffi.Pointer<CBLDatabase> db,
-    ffi.Pointer<CBLDocument> document,
-    int concurrency,
-    ffi.Pointer<CBLError> outError,
-  ) {
-    return _CBLDatabase_DeleteDocumentWithConcurrencyControl(
-      db,
-      document,
-      concurrency,
-      outError,
-    );
-  }
-
-  late final _CBLDatabase_DeleteDocumentWithConcurrencyControlPtr =
-      _lookup<
-        ffi.NativeFunction<
-          NativeCBLDatabase_DeleteDocumentWithConcurrencyControl
-        >
-      >('CBLDatabase_DeleteDocumentWithConcurrencyControl');
-  late final _CBLDatabase_DeleteDocumentWithConcurrencyControl =
-      _CBLDatabase_DeleteDocumentWithConcurrencyControlPtr.asFunction<
-        DartCBLDatabase_DeleteDocumentWithConcurrencyControl
-      >();
-
-  bool CBLDatabase_PurgeDocument(
-    ffi.Pointer<CBLDatabase> db,
-    ffi.Pointer<CBLDocument> document,
-    ffi.Pointer<CBLError> outError,
-  ) {
-    return _CBLDatabase_PurgeDocument(db, document, outError);
-  }
-
-  late final _CBLDatabase_PurgeDocumentPtr =
-      _lookup<ffi.NativeFunction<NativeCBLDatabase_PurgeDocument>>(
-        'CBLDatabase_PurgeDocument',
-      );
-  late final _CBLDatabase_PurgeDocument =
-      _CBLDatabase_PurgeDocumentPtr.asFunction<DartCBLDatabase_PurgeDocument>();
-
-  bool CBLDatabase_PurgeDocumentByID(
-    ffi.Pointer<CBLDatabase> database,
-    FLString docID,
-    ffi.Pointer<CBLError> outError,
-  ) {
-    return _CBLDatabase_PurgeDocumentByID(database, docID, outError);
-  }
-
-  late final _CBLDatabase_PurgeDocumentByIDPtr =
-      _lookup<ffi.NativeFunction<NativeCBLDatabase_PurgeDocumentByID>>(
-        'CBLDatabase_PurgeDocumentByID',
-      );
-  late final _CBLDatabase_PurgeDocumentByID =
-      _CBLDatabase_PurgeDocumentByIDPtr.asFunction<
-        DartCBLDatabase_PurgeDocumentByID
-      >();
-
-  ffi.Pointer<CBLDocument> CBLDatabase_GetMutableDocument(
-    ffi.Pointer<CBLDatabase> database,
-    FLString docID,
-    ffi.Pointer<CBLError> outError,
-  ) {
-    return _CBLDatabase_GetMutableDocument(database, docID, outError);
-  }
-
-  late final _CBLDatabase_GetMutableDocumentPtr =
-      _lookup<ffi.NativeFunction<NativeCBLDatabase_GetMutableDocument>>(
-        'CBLDatabase_GetMutableDocument',
-      );
-  late final _CBLDatabase_GetMutableDocument =
-      _CBLDatabase_GetMutableDocumentPtr.asFunction<
-        DartCBLDatabase_GetMutableDocument
-      >();
-
   ffi.Pointer<CBLDocument> CBLDocument_Create() {
     return _CBLDocument_Create();
   }
@@ -605,6 +436,17 @@ class cblite {
       );
   late final _CBLDocument_RevisionID =
       _CBLDocument_RevisionIDPtr.asFunction<DartCBLDocument_RevisionID>();
+
+  int CBLDocument_Timestamp(ffi.Pointer<CBLDocument> arg0) {
+    return _CBLDocument_Timestamp(arg0);
+  }
+
+  late final _CBLDocument_TimestampPtr =
+      _lookup<ffi.NativeFunction<NativeCBLDocument_Timestamp>>(
+        'CBLDocument_Timestamp',
+      );
+  late final _CBLDocument_Timestamp =
+      _CBLDocument_TimestampPtr.asFunction<DartCBLDocument_Timestamp>();
 
   int CBLDocument_Sequence(ffi.Pointer<CBLDocument> arg0) {
     return _CBLDocument_Sequence(arg0);
@@ -693,59 +535,6 @@ class cblite {
       );
   late final _CBLDocument_SetJSON =
       _CBLDocument_SetJSONPtr.asFunction<DartCBLDocument_SetJSON>();
-
-  int CBLDatabase_GetDocumentExpiration(
-    ffi.Pointer<CBLDatabase> db,
-    FLSlice docID,
-    ffi.Pointer<CBLError> outError,
-  ) {
-    return _CBLDatabase_GetDocumentExpiration(db, docID, outError);
-  }
-
-  late final _CBLDatabase_GetDocumentExpirationPtr =
-      _lookup<ffi.NativeFunction<NativeCBLDatabase_GetDocumentExpiration>>(
-        'CBLDatabase_GetDocumentExpiration',
-      );
-  late final _CBLDatabase_GetDocumentExpiration =
-      _CBLDatabase_GetDocumentExpirationPtr.asFunction<
-        DartCBLDatabase_GetDocumentExpiration
-      >();
-
-  bool CBLDatabase_SetDocumentExpiration(
-    ffi.Pointer<CBLDatabase> db,
-    FLSlice docID,
-    int expiration,
-    ffi.Pointer<CBLError> outError,
-  ) {
-    return _CBLDatabase_SetDocumentExpiration(db, docID, expiration, outError);
-  }
-
-  late final _CBLDatabase_SetDocumentExpirationPtr =
-      _lookup<ffi.NativeFunction<NativeCBLDatabase_SetDocumentExpiration>>(
-        'CBLDatabase_SetDocumentExpiration',
-      );
-  late final _CBLDatabase_SetDocumentExpiration =
-      _CBLDatabase_SetDocumentExpirationPtr.asFunction<
-        DartCBLDatabase_SetDocumentExpiration
-      >();
-
-  ffi.Pointer<CBLListenerToken> CBLDatabase_AddDocumentChangeListener(
-    ffi.Pointer<CBLDatabase> db,
-    FLString docID,
-    CBLDocumentChangeListener listener,
-    ffi.Pointer<ffi.Void> context,
-  ) {
-    return _CBLDatabase_AddDocumentChangeListener(db, docID, listener, context);
-  }
-
-  late final _CBLDatabase_AddDocumentChangeListenerPtr =
-      _lookup<ffi.NativeFunction<NativeCBLDatabase_AddDocumentChangeListener>>(
-        'CBLDatabase_AddDocumentChangeListener',
-      );
-  late final _CBLDatabase_AddDocumentChangeListener =
-      _CBLDatabase_AddDocumentChangeListenerPtr.asFunction<
-        DartCBLDatabase_AddDocumentChangeListener
-      >();
 
   ffi.Pointer<CBLVectorEncoding> CBLVectorEncoding_CreateNone() {
     return _CBLVectorEncoding_CreateNone();
@@ -1600,15 +1389,6 @@ class cblite {
   late final _CBLDatabase_Path =
       _CBLDatabase_PathPtr.asFunction<DartCBLDatabase_Path>();
 
-  int CBLDatabase_Count(ffi.Pointer<CBLDatabase> arg0) {
-    return _CBLDatabase_Count(arg0);
-  }
-
-  late final _CBLDatabase_CountPtr =
-      _lookup<ffi.NativeFunction<NativeCBLDatabase_Count>>('CBLDatabase_Count');
-  late final _CBLDatabase_Count =
-      _CBLDatabase_CountPtr.asFunction<DartCBLDatabase_Count>();
-
   CBLDatabaseConfiguration CBLDatabase_Config(ffi.Pointer<CBLDatabase> arg0) {
     return _CBLDatabase_Config(arg0);
   }
@@ -1619,85 +1399,6 @@ class cblite {
       );
   late final _CBLDatabase_Config =
       _CBLDatabase_ConfigPtr.asFunction<DartCBLDatabase_Config>();
-
-  bool CBLDatabase_CreateValueIndex(
-    ffi.Pointer<CBLDatabase> db,
-    FLString name,
-    CBLValueIndexConfiguration config,
-    ffi.Pointer<CBLError> outError,
-  ) {
-    return _CBLDatabase_CreateValueIndex(db, name, config, outError);
-  }
-
-  late final _CBLDatabase_CreateValueIndexPtr =
-      _lookup<ffi.NativeFunction<NativeCBLDatabase_CreateValueIndex>>(
-        'CBLDatabase_CreateValueIndex',
-      );
-  late final _CBLDatabase_CreateValueIndex =
-      _CBLDatabase_CreateValueIndexPtr.asFunction<
-        DartCBLDatabase_CreateValueIndex
-      >();
-
-  bool CBLDatabase_CreateFullTextIndex(
-    ffi.Pointer<CBLDatabase> db,
-    FLString name,
-    CBLFullTextIndexConfiguration config,
-    ffi.Pointer<CBLError> outError,
-  ) {
-    return _CBLDatabase_CreateFullTextIndex(db, name, config, outError);
-  }
-
-  late final _CBLDatabase_CreateFullTextIndexPtr =
-      _lookup<ffi.NativeFunction<NativeCBLDatabase_CreateFullTextIndex>>(
-        'CBLDatabase_CreateFullTextIndex',
-      );
-  late final _CBLDatabase_CreateFullTextIndex =
-      _CBLDatabase_CreateFullTextIndexPtr.asFunction<
-        DartCBLDatabase_CreateFullTextIndex
-      >();
-
-  bool CBLDatabase_DeleteIndex(
-    ffi.Pointer<CBLDatabase> db,
-    FLString name,
-    ffi.Pointer<CBLError> outError,
-  ) {
-    return _CBLDatabase_DeleteIndex(db, name, outError);
-  }
-
-  late final _CBLDatabase_DeleteIndexPtr =
-      _lookup<ffi.NativeFunction<NativeCBLDatabase_DeleteIndex>>(
-        'CBLDatabase_DeleteIndex',
-      );
-  late final _CBLDatabase_DeleteIndex =
-      _CBLDatabase_DeleteIndexPtr.asFunction<DartCBLDatabase_DeleteIndex>();
-
-  FLArray CBLDatabase_GetIndexNames(ffi.Pointer<CBLDatabase> db) {
-    return _CBLDatabase_GetIndexNames(db);
-  }
-
-  late final _CBLDatabase_GetIndexNamesPtr =
-      _lookup<ffi.NativeFunction<NativeCBLDatabase_GetIndexNames>>(
-        'CBLDatabase_GetIndexNames',
-      );
-  late final _CBLDatabase_GetIndexNames =
-      _CBLDatabase_GetIndexNamesPtr.asFunction<DartCBLDatabase_GetIndexNames>();
-
-  ffi.Pointer<CBLListenerToken> CBLDatabase_AddChangeListener(
-    ffi.Pointer<CBLDatabase> db,
-    CBLDatabaseChangeListener listener,
-    ffi.Pointer<ffi.Void> context,
-  ) {
-    return _CBLDatabase_AddChangeListener(db, listener, context);
-  }
-
-  late final _CBLDatabase_AddChangeListenerPtr =
-      _lookup<ffi.NativeFunction<NativeCBLDatabase_AddChangeListener>>(
-        'CBLDatabase_AddChangeListener',
-      );
-  late final _CBLDatabase_AddChangeListener =
-      _CBLDatabase_AddChangeListenerPtr.asFunction<
-        DartCBLDatabase_AddChangeListener
-      >();
 
   void CBLDatabase_BufferNotifications(
     ffi.Pointer<CBLDatabase> db,
@@ -2321,9 +2022,10 @@ class cblite {
 
   FLDict CBLReplicator_PendingDocumentIDs(
     ffi.Pointer<CBLReplicator> arg0,
+    ffi.Pointer<CBLCollection> collection,
     ffi.Pointer<CBLError> outError,
   ) {
-    return _CBLReplicator_PendingDocumentIDs(arg0, outError);
+    return _CBLReplicator_PendingDocumentIDs(arg0, collection, outError);
   }
 
   late final _CBLReplicator_PendingDocumentIDsPtr =
@@ -2338,9 +2040,10 @@ class cblite {
   bool CBLReplicator_IsDocumentPending(
     ffi.Pointer<CBLReplicator> repl,
     FLString docID,
+    ffi.Pointer<CBLCollection> collection,
     ffi.Pointer<CBLError> outError,
   ) {
-    return _CBLReplicator_IsDocumentPending(repl, docID, outError);
+    return _CBLReplicator_IsDocumentPending(repl, docID, collection, outError);
   }
 
   late final _CBLReplicator_IsDocumentPendingPtr =
@@ -2453,12 +2156,6 @@ class cblite {
   bool get kCBLDefaultLogFileUsePlaintext =>
       _kCBLDefaultLogFileUsePlaintext.value;
 
-  late final ffi.Pointer<ffi.Bool> _kCBLDefaultLogFileUsePlainText =
-      _lookup<ffi.Bool>('kCBLDefaultLogFileUsePlainText');
-
-  bool get kCBLDefaultLogFileUsePlainText =>
-      _kCBLDefaultLogFileUsePlainText.value;
-
   late final ffi.Pointer<ffi.Size> _kCBLDefaultLogFileMaxSize =
       _lookup<ffi.Size>('kCBLDefaultLogFileMaxSize');
 
@@ -2534,14 +2231,6 @@ class cblite {
 
   int get kCBLDefaultReplicatorMaxAttemptsWaitTime =>
       _kCBLDefaultReplicatorMaxAttemptsWaitTime.value;
-
-  late final ffi.Pointer<ffi.UnsignedInt>
-  _kCBLDefaultReplicatorMaxAttemptWaitTime = _lookup<ffi.UnsignedInt>(
-    'kCBLDefaultReplicatorMaxAttemptWaitTime',
-  );
-
-  int get kCBLDefaultReplicatorMaxAttemptWaitTime =>
-      _kCBLDefaultReplicatorMaxAttemptWaitTime.value;
 
   late final ffi.Pointer<ffi.Bool> _kCBLDefaultReplicatorDisableAutoPurge =
       _lookup<ffi.Bool>('kCBLDefaultReplicatorDisableAutoPurge');
@@ -2876,93 +2565,6 @@ class cblite {
       _lookup<ffi.NativeFunction<NativeCBL_LogMessage>>('CBL_LogMessage');
   late final _CBL_LogMessage =
       _CBL_LogMessagePtr.asFunction<DartCBL_LogMessage>();
-
-  int CBLLog_ConsoleLevel() {
-    return _CBLLog_ConsoleLevel();
-  }
-
-  late final _CBLLog_ConsoleLevelPtr =
-      _lookup<ffi.NativeFunction<NativeCBLLog_ConsoleLevel>>(
-        'CBLLog_ConsoleLevel',
-      );
-  late final _CBLLog_ConsoleLevel =
-      _CBLLog_ConsoleLevelPtr.asFunction<DartCBLLog_ConsoleLevel>();
-
-  void CBLLog_SetConsoleLevel(int arg0) {
-    return _CBLLog_SetConsoleLevel(arg0);
-  }
-
-  late final _CBLLog_SetConsoleLevelPtr =
-      _lookup<ffi.NativeFunction<NativeCBLLog_SetConsoleLevel>>(
-        'CBLLog_SetConsoleLevel',
-      );
-  late final _CBLLog_SetConsoleLevel =
-      _CBLLog_SetConsoleLevelPtr.asFunction<DartCBLLog_SetConsoleLevel>();
-
-  int CBLLog_CallbackLevel() {
-    return _CBLLog_CallbackLevel();
-  }
-
-  late final _CBLLog_CallbackLevelPtr =
-      _lookup<ffi.NativeFunction<NativeCBLLog_CallbackLevel>>(
-        'CBLLog_CallbackLevel',
-      );
-  late final _CBLLog_CallbackLevel =
-      _CBLLog_CallbackLevelPtr.asFunction<DartCBLLog_CallbackLevel>();
-
-  void CBLLog_SetCallbackLevel(int arg0) {
-    return _CBLLog_SetCallbackLevel(arg0);
-  }
-
-  late final _CBLLog_SetCallbackLevelPtr =
-      _lookup<ffi.NativeFunction<NativeCBLLog_SetCallbackLevel>>(
-        'CBLLog_SetCallbackLevel',
-      );
-  late final _CBLLog_SetCallbackLevel =
-      _CBLLog_SetCallbackLevelPtr.asFunction<DartCBLLog_SetCallbackLevel>();
-
-  CBLLogCallback CBLLog_Callback() {
-    return _CBLLog_Callback();
-  }
-
-  late final _CBLLog_CallbackPtr =
-      _lookup<ffi.NativeFunction<NativeCBLLog_Callback>>('CBLLog_Callback');
-  late final _CBLLog_Callback =
-      _CBLLog_CallbackPtr.asFunction<DartCBLLog_Callback>();
-
-  void CBLLog_SetCallback(CBLLogCallback callback) {
-    return _CBLLog_SetCallback(callback);
-  }
-
-  late final _CBLLog_SetCallbackPtr =
-      _lookup<ffi.NativeFunction<NativeCBLLog_SetCallback>>(
-        'CBLLog_SetCallback',
-      );
-  late final _CBLLog_SetCallback =
-      _CBLLog_SetCallbackPtr.asFunction<DartCBLLog_SetCallback>();
-
-  ffi.Pointer<CBLLogFileConfiguration> CBLLog_FileConfig() {
-    return _CBLLog_FileConfig();
-  }
-
-  late final _CBLLog_FileConfigPtr =
-      _lookup<ffi.NativeFunction<NativeCBLLog_FileConfig>>('CBLLog_FileConfig');
-  late final _CBLLog_FileConfig =
-      _CBLLog_FileConfigPtr.asFunction<DartCBLLog_FileConfig>();
-
-  bool CBLLog_SetFileConfig(
-    CBLLogFileConfiguration arg0,
-    ffi.Pointer<CBLError> outError,
-  ) {
-    return _CBLLog_SetFileConfig(arg0, outError);
-  }
-
-  late final _CBLLog_SetFileConfigPtr =
-      _lookup<ffi.NativeFunction<NativeCBLLog_SetFileConfig>>(
-        'CBLLog_SetFileConfig',
-      );
-  late final _CBLLog_SetFileConfig =
-      _CBLLog_SetFileConfigPtr.asFunction<DartCBLLog_SetFileConfig>();
 
   void CBL_RegisterPredictiveModel(FLString name, CBLPredictiveModel model) {
     return _CBL_RegisterPredictiveModel(name, model);
@@ -4067,8 +3669,8 @@ class cblite {
   );
   late final _FLDoc_Retain = _FLDoc_RetainPtr.asFunction<DartFLDoc_Retain>();
 
-  FLSlice FLDoc_GetData(FLDoc arg0) {
-    return _FLDoc_GetData(arg0);
+  FLSlice FLDoc_GetData(FLDoc doc) {
+    return _FLDoc_GetData(doc);
   }
 
   late final _FLDoc_GetDataPtr =
@@ -4086,8 +3688,8 @@ class cblite {
   late final _FLDoc_GetAllocedData =
       _FLDoc_GetAllocedDataPtr.asFunction<DartFLDoc_GetAllocedData>();
 
-  FLValue FLDoc_GetRoot(FLDoc arg0) {
-    return _FLDoc_GetRoot(arg0);
+  FLValue FLDoc_GetRoot(FLDoc doc) {
+    return _FLDoc_GetRoot(doc);
   }
 
   late final _FLDoc_GetRootPtr =
@@ -4365,6 +3967,34 @@ class cblite {
   late final _FLEncoder_WriteValue =
       _FLEncoder_WriteValuePtr.asFunction<DartFLEncoder_WriteValue>();
 
+  bool FLEncoder_WriteFormatted(FLEncoder arg0, ffi.Pointer<ffi.Char> format) {
+    return _FLEncoder_WriteFormatted(arg0, format);
+  }
+
+  late final _FLEncoder_WriteFormattedPtr =
+      _lookup<ffi.NativeFunction<NativeFLEncoder_WriteFormatted>>(
+        'FLEncoder_WriteFormatted',
+      );
+  late final _FLEncoder_WriteFormatted =
+      _FLEncoder_WriteFormattedPtr.asFunction<DartFLEncoder_WriteFormatted>();
+
+  bool FLEncoder_WriteFormattedArgs(
+    FLEncoder arg0,
+    ffi.Pointer<ffi.Char> format,
+    va_list args,
+  ) {
+    return _FLEncoder_WriteFormattedArgs(arg0, format, args);
+  }
+
+  late final _FLEncoder_WriteFormattedArgsPtr =
+      _lookup<ffi.NativeFunction<NativeFLEncoder_WriteFormattedArgs>>(
+        'FLEncoder_WriteFormattedArgs',
+      );
+  late final _FLEncoder_WriteFormattedArgs =
+      _FLEncoder_WriteFormattedArgsPtr.asFunction<
+        DartFLEncoder_WriteFormattedArgs
+      >();
+
   bool FLEncoder_BeginArray(FLEncoder arg0, int reserveCount) {
     return _FLEncoder_BeginArray(arg0, reserveCount);
   }
@@ -4477,8 +4107,8 @@ class cblite {
   late final _FLEncoder_GetError =
       _FLEncoder_GetErrorPtr.asFunction<DartFLEncoder_GetError>();
 
-  ffi.Pointer<ffi.Char> FLEncoder_GetErrorMessage(FLEncoder arg0) {
-    return _FLEncoder_GetErrorMessage(arg0);
+  ffi.Pointer<ffi.Char> FLEncoder_GetErrorMessage(FLEncoder e) {
+    return _FLEncoder_GetErrorMessage(e);
   }
 
   late final _FLEncoder_GetErrorMessagePtr =
@@ -4629,13 +4259,24 @@ class cblite {
   late final _FLKeyPath_Equals =
       _FLKeyPath_EqualsPtr.asFunction<DartFLKeyPath_Equals>();
 
+  int FLKeyPath_GetCount(FLKeyPath arg0) {
+    return _FLKeyPath_GetCount(arg0);
+  }
+
+  late final _FLKeyPath_GetCountPtr =
+      _lookup<ffi.NativeFunction<NativeFLKeyPath_GetCount>>(
+        'FLKeyPath_GetCount',
+      );
+  late final _FLKeyPath_GetCount =
+      _FLKeyPath_GetCountPtr.asFunction<DartFLKeyPath_GetCount>();
+
   bool FLKeyPath_GetElement(
-    FLKeyPath arg0,
+    FLKeyPath path,
     int i,
     ffi.Pointer<FLSlice> outDictKey,
     ffi.Pointer<ffi.Int32> outArrayIndex,
   ) {
-    return _FLKeyPath_GetElement(arg0, i, outDictKey, outArrayIndex);
+    return _FLKeyPath_GetElement(path, i, outDictKey, outArrayIndex);
   }
 
   late final _FLKeyPath_GetElementPtr =
@@ -4644,6 +4285,65 @@ class cblite {
       );
   late final _FLKeyPath_GetElement =
       _FLKeyPath_GetElementPtr.asFunction<DartFLKeyPath_GetElement>();
+
+  FLKeyPath FLKeyPath_NewEmpty() {
+    return _FLKeyPath_NewEmpty();
+  }
+
+  late final _FLKeyPath_NewEmptyPtr =
+      _lookup<ffi.NativeFunction<NativeFLKeyPath_NewEmpty>>(
+        'FLKeyPath_NewEmpty',
+      );
+  late final _FLKeyPath_NewEmpty =
+      _FLKeyPath_NewEmptyPtr.asFunction<DartFLKeyPath_NewEmpty>();
+
+  void FLKeyPath_AddProperty(FLKeyPath arg0, FLString property) {
+    return _FLKeyPath_AddProperty(arg0, property);
+  }
+
+  late final _FLKeyPath_AddPropertyPtr =
+      _lookup<ffi.NativeFunction<NativeFLKeyPath_AddProperty>>(
+        'FLKeyPath_AddProperty',
+      );
+  late final _FLKeyPath_AddProperty =
+      _FLKeyPath_AddPropertyPtr.asFunction<DartFLKeyPath_AddProperty>();
+
+  void FLKeyPath_AddIndex(FLKeyPath arg0, int index) {
+    return _FLKeyPath_AddIndex(arg0, index);
+  }
+
+  late final _FLKeyPath_AddIndexPtr =
+      _lookup<ffi.NativeFunction<NativeFLKeyPath_AddIndex>>(
+        'FLKeyPath_AddIndex',
+      );
+  late final _FLKeyPath_AddIndex =
+      _FLKeyPath_AddIndexPtr.asFunction<DartFLKeyPath_AddIndex>();
+
+  bool FLKeyPath_AddComponents(
+    FLKeyPath arg0,
+    FLString specifier,
+    ffi.Pointer<ffi.UnsignedInt> outError,
+  ) {
+    return _FLKeyPath_AddComponents(arg0, specifier, outError);
+  }
+
+  late final _FLKeyPath_AddComponentsPtr =
+      _lookup<ffi.NativeFunction<NativeFLKeyPath_AddComponents>>(
+        'FLKeyPath_AddComponents',
+      );
+  late final _FLKeyPath_AddComponents =
+      _FLKeyPath_AddComponentsPtr.asFunction<DartFLKeyPath_AddComponents>();
+
+  void FLKeyPath_DropComponents(FLKeyPath arg0, int n) {
+    return _FLKeyPath_DropComponents(arg0, n);
+  }
+
+  late final _FLKeyPath_DropComponentsPtr =
+      _lookup<ffi.NativeFunction<NativeFLKeyPath_DropComponents>>(
+        'FLKeyPath_DropComponents',
+      );
+  late final _FLKeyPath_DropComponents =
+      _FLKeyPath_DropComponentsPtr.asFunction<DartFLKeyPath_DropComponents>();
 
   late final ffi.Pointer<FLValue> _kFLNullValue = _lookup<FLValue>(
     'kFLNullValue',
@@ -5186,6 +4886,75 @@ class cblite {
       _lookup<ffi.NativeFunction<NativeFLSlot_SetValue>>('FLSlot_SetValue');
   late final _FLSlot_SetValue =
       _FLSlot_SetValuePtr.asFunction<DartFLSlot_SetValue>();
+
+  FLValue FLValue_NewWithFormat(ffi.Pointer<ffi.Char> format) {
+    return _FLValue_NewWithFormat(format);
+  }
+
+  late final _FLValue_NewWithFormatPtr =
+      _lookup<ffi.NativeFunction<NativeFLValue_NewWithFormat>>(
+        'FLValue_NewWithFormat',
+      );
+  late final _FLValue_NewWithFormat =
+      _FLValue_NewWithFormatPtr.asFunction<DartFLValue_NewWithFormat>();
+
+  FLValue FLValue_NewWithFormatV(ffi.Pointer<ffi.Char> format, va_list$1 args) {
+    return _FLValue_NewWithFormatV(format, args);
+  }
+
+  late final _FLValue_NewWithFormatVPtr =
+      _lookup<ffi.NativeFunction<NativeFLValue_NewWithFormatV>>(
+        'FLValue_NewWithFormatV',
+      );
+  late final _FLValue_NewWithFormatV =
+      _FLValue_NewWithFormatVPtr.asFunction<DartFLValue_NewWithFormatV>();
+
+  void FLMutableArray_UpdateWithFormat(
+    FLMutableArray arg0,
+    ffi.Pointer<ffi.Char> format,
+  ) {
+    return _FLMutableArray_UpdateWithFormat(arg0, format);
+  }
+
+  late final _FLMutableArray_UpdateWithFormatPtr =
+      _lookup<ffi.NativeFunction<NativeFLMutableArray_UpdateWithFormat>>(
+        'FLMutableArray_UpdateWithFormat',
+      );
+  late final _FLMutableArray_UpdateWithFormat =
+      _FLMutableArray_UpdateWithFormatPtr.asFunction<
+        DartFLMutableArray_UpdateWithFormat
+      >();
+
+  void FLMutableDict_UpdateWithFormat(
+    FLMutableDict arg0,
+    ffi.Pointer<ffi.Char> format,
+  ) {
+    return _FLMutableDict_UpdateWithFormat(arg0, format);
+  }
+
+  late final _FLMutableDict_UpdateWithFormatPtr =
+      _lookup<ffi.NativeFunction<NativeFLMutableDict_UpdateWithFormat>>(
+        'FLMutableDict_UpdateWithFormat',
+      );
+  late final _FLMutableDict_UpdateWithFormat =
+      _FLMutableDict_UpdateWithFormatPtr.asFunction<
+        DartFLMutableDict_UpdateWithFormat
+      >();
+
+  void FLValue_UpdateWithFormatV(
+    FLValue arg0,
+    ffi.Pointer<ffi.Char> format,
+    va_list$1 args,
+  ) {
+    return _FLValue_UpdateWithFormatV(arg0, format, args);
+  }
+
+  late final _FLValue_UpdateWithFormatVPtr =
+      _lookup<ffi.NativeFunction<NativeFLValue_UpdateWithFormatV>>(
+        'FLValue_UpdateWithFormatV',
+      );
+  late final _FLValue_UpdateWithFormatV =
+      _FLValue_UpdateWithFormatVPtr.asFunction<DartFLValue_UpdateWithFormatV>();
 
   FLSliceResult FLCreateJSONDelta(FLValue old, FLValue nuu) {
     return _FLCreateJSONDelta(old, nuu);
@@ -5864,122 +5633,6 @@ typedef DartCBLConflictHandlerFunction =
     );
 typedef CBLConflictHandler =
     ffi.Pointer<ffi.NativeFunction<CBLConflictHandlerFunction>>;
-typedef NativeCBLDatabase_GetDocument =
-    ffi.Pointer<CBLDocument> Function(
-      ffi.Pointer<CBLDatabase> database,
-      FLString docID,
-      ffi.Pointer<CBLError> outError,
-    );
-typedef DartCBLDatabase_GetDocument =
-    ffi.Pointer<CBLDocument> Function(
-      ffi.Pointer<CBLDatabase> database,
-      FLString docID,
-      ffi.Pointer<CBLError> outError,
-    );
-typedef NativeCBLDatabase_SaveDocument =
-    ffi.Bool Function(
-      ffi.Pointer<CBLDatabase> db,
-      ffi.Pointer<CBLDocument> doc,
-      ffi.Pointer<CBLError> outError,
-    );
-typedef DartCBLDatabase_SaveDocument =
-    bool Function(
-      ffi.Pointer<CBLDatabase> db,
-      ffi.Pointer<CBLDocument> doc,
-      ffi.Pointer<CBLError> outError,
-    );
-typedef NativeCBLDatabase_SaveDocumentWithConcurrencyControl =
-    ffi.Bool Function(
-      ffi.Pointer<CBLDatabase> db,
-      ffi.Pointer<CBLDocument> doc,
-      CBLConcurrencyControl concurrency,
-      ffi.Pointer<CBLError> outError,
-    );
-typedef DartCBLDatabase_SaveDocumentWithConcurrencyControl =
-    bool Function(
-      ffi.Pointer<CBLDatabase> db,
-      ffi.Pointer<CBLDocument> doc,
-      int concurrency,
-      ffi.Pointer<CBLError> outError,
-    );
-typedef NativeCBLDatabase_SaveDocumentWithConflictHandler =
-    ffi.Bool Function(
-      ffi.Pointer<CBLDatabase> db,
-      ffi.Pointer<CBLDocument> doc,
-      CBLConflictHandler conflictHandler,
-      ffi.Pointer<ffi.Void> context,
-      ffi.Pointer<CBLError> outError,
-    );
-typedef DartCBLDatabase_SaveDocumentWithConflictHandler =
-    bool Function(
-      ffi.Pointer<CBLDatabase> db,
-      ffi.Pointer<CBLDocument> doc,
-      CBLConflictHandler conflictHandler,
-      ffi.Pointer<ffi.Void> context,
-      ffi.Pointer<CBLError> outError,
-    );
-typedef NativeCBLDatabase_DeleteDocument =
-    ffi.Bool Function(
-      ffi.Pointer<CBLDatabase> db,
-      ffi.Pointer<CBLDocument> document,
-      ffi.Pointer<CBLError> outError,
-    );
-typedef DartCBLDatabase_DeleteDocument =
-    bool Function(
-      ffi.Pointer<CBLDatabase> db,
-      ffi.Pointer<CBLDocument> document,
-      ffi.Pointer<CBLError> outError,
-    );
-typedef NativeCBLDatabase_DeleteDocumentWithConcurrencyControl =
-    ffi.Bool Function(
-      ffi.Pointer<CBLDatabase> db,
-      ffi.Pointer<CBLDocument> document,
-      CBLConcurrencyControl concurrency,
-      ffi.Pointer<CBLError> outError,
-    );
-typedef DartCBLDatabase_DeleteDocumentWithConcurrencyControl =
-    bool Function(
-      ffi.Pointer<CBLDatabase> db,
-      ffi.Pointer<CBLDocument> document,
-      int concurrency,
-      ffi.Pointer<CBLError> outError,
-    );
-typedef NativeCBLDatabase_PurgeDocument =
-    ffi.Bool Function(
-      ffi.Pointer<CBLDatabase> db,
-      ffi.Pointer<CBLDocument> document,
-      ffi.Pointer<CBLError> outError,
-    );
-typedef DartCBLDatabase_PurgeDocument =
-    bool Function(
-      ffi.Pointer<CBLDatabase> db,
-      ffi.Pointer<CBLDocument> document,
-      ffi.Pointer<CBLError> outError,
-    );
-typedef NativeCBLDatabase_PurgeDocumentByID =
-    ffi.Bool Function(
-      ffi.Pointer<CBLDatabase> database,
-      FLString docID,
-      ffi.Pointer<CBLError> outError,
-    );
-typedef DartCBLDatabase_PurgeDocumentByID =
-    bool Function(
-      ffi.Pointer<CBLDatabase> database,
-      FLString docID,
-      ffi.Pointer<CBLError> outError,
-    );
-typedef NativeCBLDatabase_GetMutableDocument =
-    ffi.Pointer<CBLDocument> Function(
-      ffi.Pointer<CBLDatabase> database,
-      FLString docID,
-      ffi.Pointer<CBLError> outError,
-    );
-typedef DartCBLDatabase_GetMutableDocument =
-    ffi.Pointer<CBLDocument> Function(
-      ffi.Pointer<CBLDatabase> database,
-      FLString docID,
-      ffi.Pointer<CBLError> outError,
-    );
 typedef NativeCBLDocument_Create = ffi.Pointer<CBLDocument> Function();
 typedef DartCBLDocument_Create = ffi.Pointer<CBLDocument> Function();
 typedef NativeCBLDocument_CreateWithID =
@@ -5996,6 +5649,9 @@ typedef NativeCBLDocument_RevisionID =
     FLString Function(ffi.Pointer<CBLDocument> arg0);
 typedef DartCBLDocument_RevisionID =
     FLString Function(ffi.Pointer<CBLDocument> arg0);
+typedef NativeCBLDocument_Timestamp =
+    ffi.Uint64 Function(ffi.Pointer<CBLDocument> arg0);
+typedef DartCBLDocument_Timestamp = int Function(ffi.Pointer<CBLDocument> arg0);
 typedef NativeCBLDocument_Sequence =
     ffi.Uint64 Function(ffi.Pointer<CBLDocument> arg0);
 typedef DartCBLDocument_Sequence = int Function(ffi.Pointer<CBLDocument> arg0);
@@ -6031,60 +5687,6 @@ typedef DartCBLDocument_SetJSON =
       ffi.Pointer<CBLDocument> arg0,
       FLSlice json,
       ffi.Pointer<CBLError> outError,
-    );
-typedef NativeCBLDatabase_GetDocumentExpiration =
-    CBLTimestamp Function(
-      ffi.Pointer<CBLDatabase> db,
-      FLSlice docID,
-      ffi.Pointer<CBLError> outError,
-    );
-typedef DartCBLDatabase_GetDocumentExpiration =
-    int Function(
-      ffi.Pointer<CBLDatabase> db,
-      FLSlice docID,
-      ffi.Pointer<CBLError> outError,
-    );
-typedef NativeCBLDatabase_SetDocumentExpiration =
-    ffi.Bool Function(
-      ffi.Pointer<CBLDatabase> db,
-      FLSlice docID,
-      CBLTimestamp expiration,
-      ffi.Pointer<CBLError> outError,
-    );
-typedef DartCBLDatabase_SetDocumentExpiration =
-    bool Function(
-      ffi.Pointer<CBLDatabase> db,
-      FLSlice docID,
-      int expiration,
-      ffi.Pointer<CBLError> outError,
-    );
-typedef CBLDocumentChangeListenerFunction =
-    ffi.Void Function(
-      ffi.Pointer<ffi.Void> context,
-      ffi.Pointer<CBLDatabase> db,
-      FLString docID,
-    );
-typedef DartCBLDocumentChangeListenerFunction =
-    void Function(
-      ffi.Pointer<ffi.Void> context,
-      ffi.Pointer<CBLDatabase> db,
-      FLString docID,
-    );
-typedef CBLDocumentChangeListener =
-    ffi.Pointer<ffi.NativeFunction<CBLDocumentChangeListenerFunction>>;
-typedef NativeCBLDatabase_AddDocumentChangeListener =
-    ffi.Pointer<CBLListenerToken> Function(
-      ffi.Pointer<CBLDatabase> db,
-      FLString docID,
-      CBLDocumentChangeListener listener,
-      ffi.Pointer<ffi.Void> context,
-    );
-typedef DartCBLDatabase_AddDocumentChangeListener =
-    ffi.Pointer<CBLListenerToken> Function(
-      ffi.Pointer<CBLDatabase> db,
-      FLString docID,
-      CBLDocumentChangeListener listener,
-      ffi.Pointer<ffi.Void> context,
     );
 typedef CBLQueryLanguage = ffi.Uint32;
 typedef DartCBLQueryLanguage = int;
@@ -6621,9 +6223,6 @@ final class CBLDatabaseConfiguration extends ffi.Struct {
 
   @ffi.Bool()
   external bool fullSync;
-
-  @ffi.Bool()
-  external bool mmapDisabled;
 }
 
 typedef NativeCBLDatabaseConfiguration_Default =
@@ -6755,86 +6354,10 @@ typedef NativeCBLDatabase_Path =
     FLStringResult Function(ffi.Pointer<CBLDatabase> arg0);
 typedef DartCBLDatabase_Path =
     FLStringResult Function(ffi.Pointer<CBLDatabase> arg0);
-typedef NativeCBLDatabase_Count =
-    ffi.Uint64 Function(ffi.Pointer<CBLDatabase> arg0);
-typedef DartCBLDatabase_Count = int Function(ffi.Pointer<CBLDatabase> arg0);
 typedef NativeCBLDatabase_Config =
     CBLDatabaseConfiguration Function(ffi.Pointer<CBLDatabase> arg0);
 typedef DartCBLDatabase_Config =
     CBLDatabaseConfiguration Function(ffi.Pointer<CBLDatabase> arg0);
-typedef NativeCBLDatabase_CreateValueIndex =
-    ffi.Bool Function(
-      ffi.Pointer<CBLDatabase> db,
-      FLString name,
-      CBLValueIndexConfiguration config,
-      ffi.Pointer<CBLError> outError,
-    );
-typedef DartCBLDatabase_CreateValueIndex =
-    bool Function(
-      ffi.Pointer<CBLDatabase> db,
-      FLString name,
-      CBLValueIndexConfiguration config,
-      ffi.Pointer<CBLError> outError,
-    );
-typedef NativeCBLDatabase_CreateFullTextIndex =
-    ffi.Bool Function(
-      ffi.Pointer<CBLDatabase> db,
-      FLString name,
-      CBLFullTextIndexConfiguration config,
-      ffi.Pointer<CBLError> outError,
-    );
-typedef DartCBLDatabase_CreateFullTextIndex =
-    bool Function(
-      ffi.Pointer<CBLDatabase> db,
-      FLString name,
-      CBLFullTextIndexConfiguration config,
-      ffi.Pointer<CBLError> outError,
-    );
-typedef NativeCBLDatabase_DeleteIndex =
-    ffi.Bool Function(
-      ffi.Pointer<CBLDatabase> db,
-      FLString name,
-      ffi.Pointer<CBLError> outError,
-    );
-typedef DartCBLDatabase_DeleteIndex =
-    bool Function(
-      ffi.Pointer<CBLDatabase> db,
-      FLString name,
-      ffi.Pointer<CBLError> outError,
-    );
-typedef FLArray = ffi.Pointer<_FLArray>;
-typedef NativeCBLDatabase_GetIndexNames =
-    FLArray Function(ffi.Pointer<CBLDatabase> db);
-typedef DartCBLDatabase_GetIndexNames =
-    FLArray Function(ffi.Pointer<CBLDatabase> db);
-typedef CBLDatabaseChangeListenerFunction =
-    ffi.Void Function(
-      ffi.Pointer<ffi.Void> context,
-      ffi.Pointer<CBLDatabase> db,
-      ffi.UnsignedInt numDocs,
-      ffi.Pointer<FLString> docIDs,
-    );
-typedef DartCBLDatabaseChangeListenerFunction =
-    void Function(
-      ffi.Pointer<ffi.Void> context,
-      ffi.Pointer<CBLDatabase> db,
-      int numDocs,
-      ffi.Pointer<FLString> docIDs,
-    );
-typedef CBLDatabaseChangeListener =
-    ffi.Pointer<ffi.NativeFunction<CBLDatabaseChangeListenerFunction>>;
-typedef NativeCBLDatabase_AddChangeListener =
-    ffi.Pointer<CBLListenerToken> Function(
-      ffi.Pointer<CBLDatabase> db,
-      CBLDatabaseChangeListener listener,
-      ffi.Pointer<ffi.Void> context,
-    );
-typedef DartCBLDatabase_AddChangeListener =
-    ffi.Pointer<CBLListenerToken> Function(
-      ffi.Pointer<CBLDatabase> db,
-      CBLDatabaseChangeListener listener,
-      ffi.Pointer<ffi.Void> context,
-    );
 typedef CBLNotificationsReadyCallbackFunction =
     ffi.Void Function(
       ffi.Pointer<ffi.Void> context,
@@ -7169,32 +6692,6 @@ final class CBLProxySettings extends ffi.Struct {
   external FLString password;
 }
 
-typedef CBLPropertyEncryptorFunction =
-    FLSliceResult Function(
-      ffi.Pointer<ffi.Void> context,
-      FLString documentID,
-      FLDict properties,
-      FLString keyPath,
-      FLSlice input,
-      ffi.Pointer<FLStringResult> algorithm,
-      ffi.Pointer<FLStringResult> kid,
-      ffi.Pointer<CBLError> error,
-    );
-typedef CBLPropertyEncryptor =
-    ffi.Pointer<ffi.NativeFunction<CBLPropertyEncryptorFunction>>;
-typedef CBLPropertyDecryptorFunction =
-    FLSliceResult Function(
-      ffi.Pointer<ffi.Void> context,
-      FLString documentID,
-      FLDict properties,
-      FLString keyPath,
-      FLSlice input,
-      FLString algorithm,
-      FLString kid,
-      ffi.Pointer<CBLError> error,
-    );
-typedef CBLPropertyDecryptor =
-    ffi.Pointer<ffi.NativeFunction<CBLPropertyDecryptorFunction>>;
 typedef CBLDocumentPropertyEncryptorFunction =
     FLSliceResult Function(
       ffi.Pointer<ffi.Void> context,
@@ -7225,8 +6722,9 @@ typedef CBLDocumentPropertyDecryptorFunction =
     );
 typedef CBLDocumentPropertyDecryptor =
     ffi.Pointer<ffi.NativeFunction<CBLDocumentPropertyDecryptorFunction>>;
+typedef FLArray = ffi.Pointer<_FLArray>;
 
-final class CBLReplicationCollection extends ffi.Struct {
+final class CBLCollectionConfiguration extends ffi.Struct {
   external ffi.Pointer<CBLCollection> collection;
 
   external CBLConflictResolver conflictResolver;
@@ -7240,8 +6738,13 @@ final class CBLReplicationCollection extends ffi.Struct {
   external FLArray documentIDs;
 }
 
+typedef CBLReplicationCollection = CBLCollectionConfiguration;
+
 final class CBLReplicatorConfiguration extends ffi.Struct {
-  external ffi.Pointer<CBLDatabase> database;
+  external ffi.Pointer<CBLCollectionConfiguration> collections;
+
+  @ffi.Size()
+  external int collectionCount;
 
   external ffi.Pointer<CBLEndpoint> endpoint;
 
@@ -7250,6 +6753,12 @@ final class CBLReplicatorConfiguration extends ffi.Struct {
 
   @ffi.Bool()
   external bool continuous;
+
+  external ffi.Pointer<CBLAuthenticator> authenticator;
+
+  external ffi.Pointer<ffi.Void> context;
+
+  external FLSlice pinnedServerCertificate;
 
   @ffi.Bool()
   external bool disableAutoPurge;
@@ -7263,46 +6772,21 @@ final class CBLReplicatorConfiguration extends ffi.Struct {
   @ffi.UnsignedInt()
   external int heartbeat;
 
-  external ffi.Pointer<CBLAuthenticator> authenticator;
-
-  external ffi.Pointer<CBLProxySettings> proxy;
-
   external FLDict headers;
 
-  external FLSlice pinnedServerCertificate;
-
-  external FLSlice trustedRootCertificates;
-
-  external FLArray channels;
-
-  external FLArray documentIDs;
-
-  external CBLReplicationFilter pushFilter;
-
-  external CBLReplicationFilter pullFilter;
-
-  external CBLConflictResolver conflictResolver;
-
-  external ffi.Pointer<ffi.Void> context;
-
-  external CBLPropertyEncryptor propertyEncryptor;
-
-  external CBLPropertyDecryptor propertyDecryptor;
-
-  external CBLDocumentPropertyEncryptor documentPropertyEncryptor;
-
-  external CBLDocumentPropertyDecryptor documentPropertyDecryptor;
-
-  external ffi.Pointer<CBLReplicationCollection> collections;
-
-  @ffi.Size()
-  external int collectionCount;
+  external ffi.Pointer<CBLProxySettings> proxy;
 
   @ffi.Bool()
   external bool acceptParentDomainCookies;
 
+  external FLSlice trustedRootCertificates;
+
   @ffi.Bool()
   external bool acceptOnlySelfSignedServerCertificate;
+
+  external CBLDocumentPropertyEncryptor documentPropertyEncryptor;
+
+  external CBLDocumentPropertyDecryptor documentPropertyDecryptor;
 }
 
 typedef NativeCBLReplicator_Create =
@@ -7368,23 +6852,27 @@ typedef DartCBLReplicator_Status =
 typedef NativeCBLReplicator_PendingDocumentIDs =
     FLDict Function(
       ffi.Pointer<CBLReplicator> arg0,
+      ffi.Pointer<CBLCollection> collection,
       ffi.Pointer<CBLError> outError,
     );
 typedef DartCBLReplicator_PendingDocumentIDs =
     FLDict Function(
       ffi.Pointer<CBLReplicator> arg0,
+      ffi.Pointer<CBLCollection> collection,
       ffi.Pointer<CBLError> outError,
     );
 typedef NativeCBLReplicator_IsDocumentPending =
     ffi.Bool Function(
       ffi.Pointer<CBLReplicator> repl,
       FLString docID,
+      ffi.Pointer<CBLCollection> collection,
       ffi.Pointer<CBLError> outError,
     );
 typedef DartCBLReplicator_IsDocumentPending =
     bool Function(
       ffi.Pointer<CBLReplicator> repl,
       FLString docID,
+      ffi.Pointer<CBLCollection> collection,
       ffi.Pointer<CBLError> outError,
     );
 typedef NativeCBLReplicator_PendingDocumentIDs2 =
@@ -7625,46 +7113,6 @@ typedef NativeCBL_LogMessage =
     ffi.Void Function(CBLLogDomain domain, CBLLogLevel level, FLSlice message);
 typedef DartCBL_LogMessage =
     void Function(int domain, int level, FLSlice message);
-typedef CBLLogCallback = CBLLogSinkCallback;
-typedef NativeCBLLog_ConsoleLevel = CBLLogLevel Function();
-typedef DartCBLLog_ConsoleLevel = int Function();
-typedef NativeCBLLog_SetConsoleLevel = ffi.Void Function(CBLLogLevel arg0);
-typedef DartCBLLog_SetConsoleLevel = void Function(int arg0);
-typedef NativeCBLLog_CallbackLevel = CBLLogLevel Function();
-typedef DartCBLLog_CallbackLevel = int Function();
-typedef NativeCBLLog_SetCallbackLevel = ffi.Void Function(CBLLogLevel arg0);
-typedef DartCBLLog_SetCallbackLevel = void Function(int arg0);
-typedef NativeCBLLog_Callback = CBLLogCallback Function();
-typedef DartCBLLog_Callback = CBLLogCallback Function();
-typedef NativeCBLLog_SetCallback = ffi.Void Function(CBLLogCallback callback);
-typedef DartCBLLog_SetCallback = void Function(CBLLogCallback callback);
-
-final class CBLLogFileConfiguration extends ffi.Struct {
-  @CBLLogLevel()
-  external int level;
-
-  external FLString directory;
-
-  @ffi.Uint32()
-  external int maxRotateCount;
-
-  @ffi.Size()
-  external int maxSize;
-
-  @ffi.Bool()
-  external bool usePlaintext;
-}
-
-typedef NativeCBLLog_FileConfig =
-    ffi.Pointer<CBLLogFileConfiguration> Function();
-typedef DartCBLLog_FileConfig = ffi.Pointer<CBLLogFileConfiguration> Function();
-typedef NativeCBLLog_SetFileConfig =
-    ffi.Bool Function(
-      CBLLogFileConfiguration arg0,
-      ffi.Pointer<CBLError> outError,
-    );
-typedef DartCBLLog_SetFileConfig =
-    bool Function(CBLLogFileConfiguration arg0, ffi.Pointer<CBLError> outError);
 
 final class CBLPredictiveModel extends ffi.Struct {
   external ffi.Pointer<ffi.Void> context;
@@ -8080,6 +7528,7 @@ sealed class FLError {
 sealed class FLTrust {
   static const kFLUntrusted = 0;
   static const kFLTrusted = 1;
+  static const _kFLTrustInternalUseOnly = -1;
 }
 
 typedef FLTimestamp = ffi.Int64;
@@ -8272,7 +7721,7 @@ typedef DartFLDeepIterator_GetJSONPointer =
 typedef NativeFLDoc_FromResultData =
     FLDoc Function(
       FLSliceResult data,
-      ffi.UnsignedInt arg1,
+      ffi.Int arg1,
       FLSharedKeys arg2,
       FLSlice externData,
     );
@@ -8287,12 +7736,12 @@ typedef NativeFLDoc_Release = ffi.Void Function(FLDoc arg0);
 typedef DartFLDoc_Release = void Function(FLDoc arg0);
 typedef NativeFLDoc_Retain = FLDoc Function(FLDoc arg0);
 typedef DartFLDoc_Retain = FLDoc Function(FLDoc arg0);
-typedef NativeFLDoc_GetData = FLSlice Function(FLDoc arg0);
-typedef DartFLDoc_GetData = FLSlice Function(FLDoc arg0);
+typedef NativeFLDoc_GetData = FLSlice Function(FLDoc doc);
+typedef DartFLDoc_GetData = FLSlice Function(FLDoc doc);
 typedef NativeFLDoc_GetAllocedData = FLSliceResult Function(FLDoc arg0);
 typedef DartFLDoc_GetAllocedData = FLSliceResult Function(FLDoc arg0);
-typedef NativeFLDoc_GetRoot = FLValue Function(FLDoc arg0);
-typedef DartFLDoc_GetRoot = FLValue Function(FLDoc arg0);
+typedef NativeFLDoc_GetRoot = FLValue Function(FLDoc doc);
+typedef DartFLDoc_GetRoot = FLValue Function(FLDoc doc);
 typedef NativeFLDoc_GetSharedKeys = FLSharedKeys Function(FLDoc arg0);
 typedef DartFLDoc_GetSharedKeys = FLSharedKeys Function(FLDoc arg0);
 typedef NativeFLValue_FindDoc = FLDoc Function(FLValue arg0);
@@ -8469,6 +7918,21 @@ typedef DartFLEncoder_WriteData = bool Function(FLEncoder arg0, FLSlice arg1);
 typedef NativeFLEncoder_WriteValue =
     ffi.Bool Function(FLEncoder arg0, FLValue arg1);
 typedef DartFLEncoder_WriteValue = bool Function(FLEncoder arg0, FLValue arg1);
+typedef NativeFLEncoder_WriteFormatted =
+    ffi.Bool Function(FLEncoder arg0, ffi.Pointer<ffi.Char> format);
+typedef DartFLEncoder_WriteFormatted =
+    bool Function(FLEncoder arg0, ffi.Pointer<ffi.Char> format);
+typedef __builtin_va_list = ffi.Pointer<ffi.Char>;
+typedef __darwin_va_list = __builtin_va_list;
+typedef va_list = __darwin_va_list;
+typedef NativeFLEncoder_WriteFormattedArgs =
+    ffi.Bool Function(
+      FLEncoder arg0,
+      ffi.Pointer<ffi.Char> format,
+      va_list args,
+    );
+typedef DartFLEncoder_WriteFormattedArgs =
+    bool Function(FLEncoder arg0, ffi.Pointer<ffi.Char> format, va_list args);
 typedef NativeFLEncoder_BeginArray =
     ffi.Bool Function(FLEncoder arg0, ffi.Size reserveCount);
 typedef DartFLEncoder_BeginArray =
@@ -8508,9 +7972,9 @@ typedef DartFLEncoder_Finish =
 typedef NativeFLEncoder_GetError = ffi.UnsignedInt Function(FLEncoder arg0);
 typedef DartFLEncoder_GetError = int Function(FLEncoder arg0);
 typedef NativeFLEncoder_GetErrorMessage =
-    ffi.Pointer<ffi.Char> Function(FLEncoder arg0);
+    ffi.Pointer<ffi.Char> Function(FLEncoder e);
 typedef DartFLEncoder_GetErrorMessage =
-    ffi.Pointer<ffi.Char> Function(FLEncoder arg0);
+    ffi.Pointer<ffi.Char> Function(FLEncoder e);
 typedef NativeFLValue_ToJSON = FLStringResult Function(FLValue arg0);
 typedef DartFLValue_ToJSON = FLStringResult Function(FLValue arg0);
 typedef NativeFLValue_ToJSON5 = FLStringResult Function(FLValue arg0);
@@ -8581,20 +8045,46 @@ typedef DartFLKeyPath_ToString = FLStringResult Function(FLKeyPath path);
 typedef NativeFLKeyPath_Equals =
     ffi.Bool Function(FLKeyPath path1, FLKeyPath path2);
 typedef DartFLKeyPath_Equals = bool Function(FLKeyPath path1, FLKeyPath path2);
+typedef NativeFLKeyPath_GetCount = ffi.Size Function(FLKeyPath arg0);
+typedef DartFLKeyPath_GetCount = int Function(FLKeyPath arg0);
 typedef NativeFLKeyPath_GetElement =
     ffi.Bool Function(
-      FLKeyPath arg0,
+      FLKeyPath path,
       ffi.Size i,
       ffi.Pointer<FLSlice> outDictKey,
       ffi.Pointer<ffi.Int32> outArrayIndex,
     );
 typedef DartFLKeyPath_GetElement =
     bool Function(
-      FLKeyPath arg0,
+      FLKeyPath path,
       int i,
       ffi.Pointer<FLSlice> outDictKey,
       ffi.Pointer<ffi.Int32> outArrayIndex,
     );
+typedef NativeFLKeyPath_NewEmpty = FLKeyPath Function();
+typedef DartFLKeyPath_NewEmpty = FLKeyPath Function();
+typedef NativeFLKeyPath_AddProperty =
+    ffi.Void Function(FLKeyPath arg0, FLString property);
+typedef DartFLKeyPath_AddProperty =
+    void Function(FLKeyPath arg0, FLString property);
+typedef NativeFLKeyPath_AddIndex =
+    ffi.Void Function(FLKeyPath arg0, ffi.Int index);
+typedef DartFLKeyPath_AddIndex = void Function(FLKeyPath arg0, int index);
+typedef NativeFLKeyPath_AddComponents =
+    ffi.Bool Function(
+      FLKeyPath arg0,
+      FLString specifier,
+      ffi.Pointer<ffi.UnsignedInt> outError,
+    );
+typedef DartFLKeyPath_AddComponents =
+    bool Function(
+      FLKeyPath arg0,
+      FLString specifier,
+      ffi.Pointer<ffi.UnsignedInt> outError,
+    );
+typedef NativeFLKeyPath_DropComponents =
+    ffi.Void Function(FLKeyPath arg0, ffi.Size n);
+typedef DartFLKeyPath_DropComponents = void Function(FLKeyPath arg0, int n);
 
 sealed class FLValueType {
   static const kFLUndefined = -1;
@@ -8756,6 +8246,31 @@ typedef NativeFLSlot_SetData = ffi.Void Function(FLSlot arg0, FLSlice arg1);
 typedef DartFLSlot_SetData = void Function(FLSlot arg0, FLSlice arg1);
 typedef NativeFLSlot_SetValue = ffi.Void Function(FLSlot arg0, FLValue arg1);
 typedef DartFLSlot_SetValue = void Function(FLSlot arg0, FLValue arg1);
+typedef NativeFLValue_NewWithFormat =
+    FLValue Function(ffi.Pointer<ffi.Char> format);
+typedef DartFLValue_NewWithFormat =
+    FLValue Function(ffi.Pointer<ffi.Char> format);
+typedef va_list$1 = __builtin_va_list;
+typedef NativeFLValue_NewWithFormatV =
+    FLValue Function(ffi.Pointer<ffi.Char> format, va_list$1 args);
+typedef DartFLValue_NewWithFormatV =
+    FLValue Function(ffi.Pointer<ffi.Char> format, va_list$1 args);
+typedef NativeFLMutableArray_UpdateWithFormat =
+    ffi.Void Function(FLMutableArray arg0, ffi.Pointer<ffi.Char> format);
+typedef DartFLMutableArray_UpdateWithFormat =
+    void Function(FLMutableArray arg0, ffi.Pointer<ffi.Char> format);
+typedef NativeFLMutableDict_UpdateWithFormat =
+    ffi.Void Function(FLMutableDict arg0, ffi.Pointer<ffi.Char> format);
+typedef DartFLMutableDict_UpdateWithFormat =
+    void Function(FLMutableDict arg0, ffi.Pointer<ffi.Char> format);
+typedef NativeFLValue_UpdateWithFormatV =
+    ffi.Void Function(
+      FLValue arg0,
+      ffi.Pointer<ffi.Char> format,
+      va_list$1 args,
+    );
+typedef DartFLValue_UpdateWithFormatV =
+    void Function(FLValue arg0, ffi.Pointer<ffi.Char> format, va_list$1 args);
 typedef NativeFLCreateJSONDelta =
     FLSliceResult Function(FLValue old, FLValue nuu);
 typedef DartFLCreateJSONDelta =
@@ -8844,8 +8359,7 @@ typedef DartFLSharedKeyScope_WithRange =
     FLSharedKeyScope Function(FLSlice range, FLSharedKeys arg1);
 typedef NativeFLSharedKeyScope_Free = ffi.Void Function(FLSharedKeyScope arg0);
 typedef DartFLSharedKeyScope_Free = void Function(FLSharedKeyScope arg0);
-typedef NativeFLValue_FromData =
-    FLValue Function(FLSlice data, ffi.UnsignedInt trust);
+typedef NativeFLValue_FromData = FLValue Function(FLSlice data, ffi.Int trust);
 typedef DartFLValue_FromData = FLValue Function(FLSlice data, int trust);
 typedef NativeFLJSON5_ToJSON =
     FLStringResult Function(
@@ -9128,15 +8642,15 @@ const int kCBLLogDomainMaskListener = 16;
 
 const int kCBLLogDomainMaskAll = 255;
 
-const String CBLITE_VERSION = '3.2.4';
+const String CBLITE_VERSION = '4.0.3';
 
-const int CBLITE_VERSION_NUMBER = 3002004;
+const int CBLITE_VERSION_NUMBER = 4000003;
 
-const int CBLITE_BUILD_NUMBER = 9;
+const int CBLITE_BUILD_NUMBER = 3;
 
-const String CBLITE_SOURCE_ID = '01ea1ce+664eff6';
+const String CBLITE_SOURCE_ID = '7e2083f+21f4b49';
 
-const String CBLITE_BUILD_TIMESTAMP = '2025-06-04T20:46:23Z';
+const String CBLITE_BUILD_TIMESTAMP = '2026-02-06T22:41:33Z';
 
 const String HOTLEVEL = 'Ofast';
 
@@ -9144,6 +8658,6 @@ const String COLDLEVEL = 'Oz';
 
 const int FLTimestampNone = -9223372036854775808;
 
-const int kFLTrustedDontParse = 4294967295;
+const int kFLTrustedDontParse = -1;
 
 const int kFLNoWrittenValue = -9223372036854775808;

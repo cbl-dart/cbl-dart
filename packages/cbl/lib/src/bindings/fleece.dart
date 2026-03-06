@@ -68,6 +68,9 @@ enum FLError {
     cblite_lib.FLError.kFLUnknownValue => unknownValue,
     cblite_lib.FLError.kFLInternalError => internalError,
     cblite_lib.FLError.kFLNotFound => notFound,
+    cblite_lib.FLError.kFLSharedKeysStateError => sharedKeysStateError,
+    cblite_lib.FLError.kFLPOSIXError => posixError,
+    cblite_lib.FLError.kFLUnsupported => unsupported,
     _ => throw ArgumentError('Unknown value for FLError: $value'),
   };
 

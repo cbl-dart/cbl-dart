@@ -32,11 +32,11 @@
 
 #ifdef _MSC_VER
     #include <sal.h>
-    #define CBLINLINE               __forceinline
+    #define CBLFORCEINLINE          __forceinline
     #define _cbl_nonnull            _In_
     #define _cbl_warn_unused        _Check_return_
 #else
-    #define CBLINLINE               inline
+    #define CBLFORCEINLINE          inline
     #define _cbl_warn_unused        __attribute__((warn_unused_result))
 #endif
 
@@ -98,10 +98,12 @@
 
 #ifdef __cplusplus
     #define CBLAPI          noexcept
+    #define CBLINLINE       inline
     #define CBL_CAPI_BEGIN  extern "C" { CBL_ASSUME_NONNULL_BEGIN
     #define CBL_CAPI_END    CBL_ASSUME_NONNULL_END }
 #else
     #define CBLAPI
+    #define CBLINLINE       static inline
     #define CBL_CAPI_BEGIN  CBL_ASSUME_NONNULL_BEGIN
     #define CBL_CAPI_END    CBL_ASSUME_NONNULL_END
 #endif

@@ -140,7 +140,7 @@ FLDict CBLEncryptable_Properties(const CBLEncryptable* encryptable) CBLAPI;
 bool FLDict_IsEncryptableValue(FLDict _cbl_nullable) CBLAPI;
 
 /** Checks whether the given FLValue is a \ref CBLEncryptable or not. */
-static inline bool FLValue_IsEncryptableValue(FLValue _cbl_nullable value) {
+CBLINLINE bool FLValue_IsEncryptableValue(FLValue _cbl_nullable value) {
     return FLDict_IsEncryptableValue(FLValue_AsDict(value));
 }
 
@@ -152,7 +152,7 @@ const CBLEncryptable* _cbl_nullable FLDict_GetEncryptableValue(FLDict _cbl_nulla
 /** Returns a \ref CBLEncryptable object corresponding to the given \ref FLValue in a document
     or NULL if the value is not a \ref CBLEncryptable.
     \note  The returned CBLEncryptable object will be released when its document is released. */
-static inline const CBLEncryptable* _cbl_nullable FLValue_GetEncryptableValue(FLValue _cbl_nullable value) {
+CBLINLINE const CBLEncryptable* _cbl_nullable FLValue_GetEncryptableValue(FLValue _cbl_nullable value) {
     return FLDict_GetEncryptableValue(FLValue_AsDict(value));
 }
 
@@ -160,7 +160,7 @@ static inline const CBLEncryptable* _cbl_nullable FLValue_GetEncryptableValue(FL
 void FLSlot_SetEncryptableValue(FLSlot slot, const CBLEncryptable* encryptable) CBLAPI;
 
 /** Set a \ref CBLEncryptable's dictionary into a mutable dictionary. */
-static inline void FLMutableDict_SetEncryptableValue(FLMutableDict dict, FLString key, CBLEncryptable* encryptable) {
+CBLINLINE void FLMutableDict_SetEncryptableValue(FLMutableDict dict, FLString key, CBLEncryptable* encryptable) {
     FLSlot_SetEncryptableValue(FLMutableDict_Set(dict, key), encryptable);
 }
 

@@ -772,6 +772,10 @@ final class PointycastleExternalKeyPairDelegate
       SignatureDigestAlgorithm.sha384 => '0609608648016503040202',
       SignatureDigestAlgorithm.sha512 => '0609608648016503040203',
       SignatureDigestAlgorithm.ripemd160 => '06052b24030201',
+      SignatureDigestAlgorithm.sha3_224 => '0609608648016503040207',
+      SignatureDigestAlgorithm.sha3_256 => '0609608648016503040208',
+      SignatureDigestAlgorithm.sha3_384 => '0609608648016503040209',
+      SignatureDigestAlgorithm.sha3_512 => '060960864801650304020a',
     })..init(true, PrivateKeyParameter<RSAPrivateKey>(_keyPair.privateKey));
     return signer.generateSignature(data).bytes;
   }

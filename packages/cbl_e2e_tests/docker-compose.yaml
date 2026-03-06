@@ -1,11 +1,35 @@
-version: '3.1'
 services:
+  couchbase-server:
+    image: couchbase/server:enterprise-8.0.0
+    ports:
+      - 8091:8091
+      - 11210:11210
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -sf http://localhost:8091/pools || exit 1']
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 15s
+    restart: on-failure
+
+  couchbase-server-init:
+    image: couchbase/server:enterprise-8.0.0
+    depends_on:
+      couchbase-server:
+        condition: service_healthy
+    entrypoint: []
+    command: /opt/couchbase/init/init-couchbase.sh
+    volumes:
+      - ./init-couchbase.sh:/opt/couchbase/init/init-couchbase.sh:ro
+    restart: 'no'
+
   sync-gateway:
-    image: couchbase/sync-gateway:3.0.3-community
+    image: couchbase/sync-gateway:4.0.3-community
     command:
       [
         '-disable_persistent_config',
         '-api.admin_interface_authentication=false',
+        '-bootstrap.use_tls_server=false',
         '/etc/sync-gateway-config.json',
       ]
     ports:
@@ -13,4 +37,7 @@ services:
       - 4985:4985
     volumes:
       - ./sync-gateway-config.json:/etc/sync-gateway-config.json:ro
+    depends_on:
+      couchbase-server-init:
+        condition: service_completed_successfully
     restart: on-failure

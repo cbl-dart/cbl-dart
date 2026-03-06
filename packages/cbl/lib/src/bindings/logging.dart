@@ -4,7 +4,6 @@ import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 
-import 'base.dart';
 import 'bindings.dart';
 import 'cblite.dart' as cblite_lib;
 import 'cblitedart.dart' as cblitedart_lib;
@@ -71,12 +70,12 @@ final class LogCallbackMessage {
   final String message;
 }
 
-extension on cblite_lib.CBLLogFileConfiguration {
+extension on cblite_lib.CBLFileLogSink {
   CBLLogFileConfiguration toCBLLogFileConfiguration() =>
       CBLLogFileConfiguration(
         level: CBLLogLevel.fromValue(level),
         directory: directory.toDartString()!,
-        maxRotateCount: maxRotateCount,
+        maxKeptFiles: maxKeptFiles,
         maxSize: maxSize,
         usePlainText: usePlaintext,
       );
@@ -87,27 +86,27 @@ final class CBLLogFileConfiguration {
   const CBLLogFileConfiguration({
     required this.level,
     required this.directory,
-    required this.maxRotateCount,
+    required this.maxKeptFiles,
     required this.maxSize,
     required this.usePlainText,
   });
 
   final CBLLogLevel level;
   final String directory;
-  final int maxRotateCount;
+  final int maxKeptFiles;
   final int maxSize;
   final bool usePlainText;
 
   CBLLogFileConfiguration copyWith({
     CBLLogLevel? level,
     String? directory,
-    int? maxRotateCount,
+    int? maxKeptFiles,
     int? maxSize,
     bool? usePlainText,
   }) => CBLLogFileConfiguration(
     level: level ?? this.level,
     directory: directory ?? this.directory,
-    maxRotateCount: maxRotateCount ?? this.maxRotateCount,
+    maxKeptFiles: maxKeptFiles ?? this.maxKeptFiles,
     maxSize: maxSize ?? this.maxSize,
     usePlainText: usePlainText ?? this.usePlainText,
   );
@@ -119,7 +118,7 @@ final class CBLLogFileConfiguration {
           runtimeType == other.runtimeType &&
           level == other.level &&
           directory == other.directory &&
-          maxRotateCount == other.maxRotateCount &&
+          maxKeptFiles == other.maxKeptFiles &&
           maxSize == other.maxSize &&
           usePlainText == other.usePlainText;
 
@@ -127,7 +126,7 @@ final class CBLLogFileConfiguration {
   int get hashCode =>
       level.hashCode ^
       directory.hashCode ^
-      maxRotateCount.hashCode ^
+      maxKeptFiles.hashCode ^
       maxSize.hashCode ^
       usePlainText.hashCode;
 }
@@ -144,10 +143,11 @@ final class LoggingBindings extends Bindings {
   }
 
   CBLLogLevel consoleLevel() =>
-      CBLLogLevel.fromValue(cblite.CBLLog_ConsoleLevel());
+      CBLLogLevel.fromValue(cblite.CBLLogSinks_Console().level);
 
   void setConsoleLevel(CBLLogLevel logLevel) {
-    cblite.CBLLog_SetConsoleLevel(logLevel.value);
+    final sink = cblite.CBLLogSinks_Console()..level = logLevel.value;
+    cblite.CBLLogSinks_SetConsole(sink);
   }
 
   void setCallbackLevel(CBLLogLevel logLevel) {
@@ -159,15 +159,12 @@ final class LoggingBindings extends Bindings {
 
   void setFileLogConfiguration(CBLLogFileConfiguration? config) {
     withGlobalArena(() {
-      cblitedart.CBLDart_CBLLog_SetFileConfig(
-        _logFileConfig(config),
-        globalCBLError,
-      ).checkError();
+      cblitedart.CBLDart_CBLLog_SetFileSink(_logFileSink(config));
     });
   }
 
   CBLLogFileConfiguration? getLogFileConfiguration() =>
-      cblitedart.CBLDart_CBLLog_GetFileConfig()
+      cblitedart.CBLDart_CBLLog_GetFileSink()
           .toNullable()
           ?.ref
           .toCBLLogFileConfiguration();
@@ -175,19 +172,19 @@ final class LoggingBindings extends Bindings {
   bool setSentryBreadcrumbs({required bool enabled}) =>
       cblitedart.CBLDart_CBLLog_SetSentryBreadcrumbs(enabled);
 
-  Pointer<cblite_lib.CBLLogFileConfiguration> _logFileConfig(
+  Pointer<cblite_lib.CBLFileLogSink> _logFileSink(
     CBLLogFileConfiguration? config,
   ) {
     if (config == null) {
       return nullptr;
     }
 
-    final result = globalArena<cblite_lib.CBLLogFileConfiguration>();
+    final result = globalArena<cblite_lib.CBLFileLogSink>();
 
     result.ref
       ..level = config.level.value
       ..directory = config.directory.toFLString()
-      ..maxRotateCount = config.maxRotateCount
+      ..maxKeptFiles = config.maxKeptFiles
       ..maxSize = config.maxSize
       ..usePlaintext = config.usePlainText;
 

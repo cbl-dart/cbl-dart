@@ -26,24 +26,41 @@ enum CBLKeyUsages {
 }
 
 enum CBLSignatureDigestAlgorithm {
-  none(cblite_lib.kCBLSignatureDigestNone),
-  sha1(cblite_lib.kCBLSignatureDigestSHA1),
-  sha224(cblite_lib.kCBLSignatureDigestSHA224),
-  sha256(cblite_lib.kCBLSignatureDigestSHA256),
-  sha384(cblite_lib.kCBLSignatureDigestSHA384),
-  sha512(cblite_lib.kCBLSignatureDigestSHA512),
-  ripemd160(cblite_lib.kCBLSignatureDigestRIPEMD160);
+  none(0),
+  sha1(5),
+  sha224(8),
+  sha256(9),
+  sha384(10),
+  sha512(11),
+  ripemd160(4),
+  sha3_224(16),
+  sha3_256(17),
+  sha3_384(18),
+  sha3_512(19);
 
   const CBLSignatureDigestAlgorithm(this.value);
 
+  // ignore: flutter_style_todos
+  // TODO(https://github.com/cbl-dart/cbl-dart/issues/861): Remove workaround
+  // for mbedTLS 3.6.5 enum renumbering.
+  //
+  // CBL 4.0.3 includes mbedTLS 3.6.5, which renumbered mbedtls_md_type_t to
+  // align with PSA crypto API values. The CBL C header still declares the old
+  // mbedTLS 2.x values, but the compiled binary passes the new 3.6.5 values
+  // through the external key callbacks. We map the actual runtime values here
+  // instead of using the header constants.
   factory CBLSignatureDigestAlgorithm.fromValue(int value) => switch (value) {
-    cblite_lib.kCBLSignatureDigestNone => none,
-    cblite_lib.kCBLSignatureDigestSHA1 => sha1,
-    cblite_lib.kCBLSignatureDigestSHA224 => sha224,
-    cblite_lib.kCBLSignatureDigestSHA256 => sha256,
-    cblite_lib.kCBLSignatureDigestSHA384 => sha384,
-    cblite_lib.kCBLSignatureDigestSHA512 => sha512,
-    cblite_lib.kCBLSignatureDigestRIPEMD160 => ripemd160,
+    0 => none,
+    4 => ripemd160,
+    5 => sha1,
+    8 => sha224,
+    9 => sha256,
+    10 => sha384,
+    11 => sha512,
+    16 => sha3_224,
+    17 => sha3_256,
+    18 => sha3_384,
+    19 => sha3_512,
     _ => throw ArgumentError('Unknown signature digest algorithm: $value'),
   };
 

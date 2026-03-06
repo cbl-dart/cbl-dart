@@ -104,6 +104,9 @@ class cblitedartNativeAssetsBridge implements cblitedart {
   bool CBLDart_CpuSupportsAVX2() => native.CBLDart_CpuSupportsAVX2();
 
   @override
+  void CBLDart_DiagnoseClock() => native.CBLDart_DiagnoseClock();
+
+  @override
   int CBLDart_Initialize(
     ffi.Pointer<ffi.Void> dartInitializeDlData,
     ffi.Pointer<ffi.Void> cblInitContext,
@@ -155,14 +158,12 @@ class cblitedartNativeAssetsBridge implements cblitedart {
       native.CBLDart_CBLLog_SetCallbackLevel(level);
 
   @override
-  bool CBLDart_CBLLog_SetFileConfig(
-    ffi.Pointer<CBLLogFileConfiguration> config,
-    ffi.Pointer<CBLError> errorOut,
-  ) => native.CBLDart_CBLLog_SetFileConfig(config, errorOut);
+  void CBLDart_CBLLog_SetFileSink(ffi.Pointer<CBLFileLogSink> sink) =>
+      native.CBLDart_CBLLog_SetFileSink(sink);
 
   @override
-  ffi.Pointer<CBLLogFileConfiguration> CBLDart_CBLLog_GetFileConfig() =>
-      native.CBLDart_CBLLog_GetFileConfig();
+  ffi.Pointer<CBLFileLogSink> CBLDart_CBLLog_GetFileSink() =>
+      native.CBLDart_CBLLog_GetFileSink();
 
   @override
   bool CBLDart_CBLLog_SetSentryBreadcrumbs(bool enabled) =>
