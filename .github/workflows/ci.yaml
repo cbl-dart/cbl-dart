@@ -90,6 +90,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: ${{ env.flutter-channel }}
+          cache: true
 
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
@@ -135,6 +136,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: ${{ env.flutter-channel }}
+          cache: true
 
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
@@ -205,7 +207,7 @@ jobs:
         "macOS":"macos-15",
         "Android":"blacksmith-4vcpu-ubuntu-2204",
         "Ubuntu":"blacksmith-4vcpu-ubuntu-2204",
-        "Windows":"blacksmith-4vcpu-windows-2025"
+        "Windows":"windows-2022"
       }')[matrix.os] }}
     env:
       EMBEDDER: ${{ matrix.embedder }}
@@ -240,6 +242,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: ${{ env.flutter-channel }}
+          cache: true
 
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
@@ -325,7 +328,7 @@ jobs:
         "macOS":"macos-15",
         "Android":"blacksmith-4vcpu-ubuntu-2204",
         "Ubuntu":"blacksmith-4vcpu-ubuntu-2204",
-        "Windows":"blacksmith-4vcpu-windows-2025"
+        "Windows":"windows-2022"
       }')[matrix.os] }}
     env:
       EMBEDDER: ${{ matrix.embedder }}
@@ -349,6 +352,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: ${{ env.flutter-channel }}
+          cache: true
 
       - name: Setup Melos
         run: dart pub global activate melos
@@ -414,7 +418,7 @@ jobs:
       ${{ fromJSON('{
         "macOS":"macos-15",
         "Ubuntu":"blacksmith-4vcpu-ubuntu-2204",
-        "Windows":"blacksmith-4vcpu-windows-2025"
+        "Windows":"windows-2022"
       }')[matrix.os] }}
     steps:
       - name: Checkout repository
@@ -424,6 +428,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: ${{ env.flutter-channel }}
+          cache: true
 
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
@@ -472,7 +477,7 @@ jobs:
         "macOS":"macos-14",
         "Android":"blacksmith-4vcpu-ubuntu-2204",
         "Ubuntu":"blacksmith-4vcpu-ubuntu-2204",
-        "Windows":"blacksmith-4vcpu-windows-2025"
+        "Windows":"windows-2022"
       }')[matrix.os] }}
 
     steps:
@@ -483,6 +488,8 @@ jobs:
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
+        with:
+          cache: true
 
       - name: Setup Melos
         run: dart pub global activate melos
