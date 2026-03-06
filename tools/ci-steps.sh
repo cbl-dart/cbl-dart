@@ -128,7 +128,9 @@ function runE2ETests() {
         case "$targetOs" in
         macOS)
             # The tests are run with sudo, so that macOS records crash reports.
-            sudo $testCommand
+            # -E preserves the environment so that the Flutter SDK is
+            # discoverable for pub workspace resolution.
+            sudo -E $testCommand
             # Since we ran the tests under sudo, the test outputs such as
             # coverage data and logs are owned by sudo.
             # Here we recursively restore ownership of the package directory
