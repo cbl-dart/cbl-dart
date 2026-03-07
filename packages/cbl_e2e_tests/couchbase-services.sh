@@ -140,7 +140,7 @@ function waitForCouchbaseQueryService() {
                 --data-urlencode 'statement=SELECT 1;' 2>&1 || true
         )"
 
-        if echo "$response" | grep -q '"status":"success"'; then
+        if echo "$response" | grep -Eq '"status"[[:space:]]*:[[:space:]]*"success"'; then
             break
         fi
 
