@@ -14,6 +14,9 @@ couchbaseServerAdminPass="password"
 couchbaseServerBucket="db"
 sgRbacUser="sync_gateway"
 sgRbacPass="sync_gateway"
+# Use IPv4 loopback consistently for native macOS/Windows startup. On some
+# hosts, localhost can resolve differently across services and SDKs.
+couchbaseServerHost="127.0.0.1"
 macOSCouchbaseServerLogFile="${RUNNER_TEMP:-/tmp}/couchbase-server-macos.log"
 macOSCouchbaseAppLogFile="$HOME/Library/Logs/CouchbaseServer.log"
 macOSCouchbaseHTTPLogFile="$HOME/Library/Logs/couchbase-server.log"
@@ -57,7 +60,7 @@ function waitForService() {
 function waitForSyncGateway() {
     waitForService \
         "Sync Gateway" \
-        localhost:4984 \
+        "http://${couchbaseServerHost}:4984" \
         dumpSyncGatewayDiagnostics
 }
 
@@ -120,7 +123,7 @@ function dumpSyncGatewayDiagnostics() {
 function waitForCouchbaseServer() {
     waitForService \
         "Couchbase Server" \
-        http://localhost:8091/pools \
+        "http://${couchbaseServerHost}:8091/pools" \
         dumpCouchbaseServerDiagnostics
 }
 
@@ -135,7 +138,7 @@ function waitForCouchbaseQueryService() {
     while true; do
         echo "Attempt $attempt to query Couchbase Query Service"
         response="$(
-            curl --silent --show-error -X POST http://localhost:8093/query/service \
+            curl --silent --show-error -X POST "http://${couchbaseServerHost}:8093/query/service" \
                 -u "${couchbaseServerAdminUser}:${couchbaseServerAdminPass}" \
                 --data-urlencode 'statement=SELECT 1;' 2>&1 || true
         )"
@@ -166,8 +169,8 @@ function initCouchbaseServer() {
 
     echo "Initializing cluster..."
     # Omit dataPath/indexPath so CBS uses its platform-specific defaults.
-    curl -sf -X POST http://localhost:8091/clusterInit \
-        -d "hostname=127.0.0.1" \
+    curl -sf -X POST "http://${couchbaseServerHost}:8091/clusterInit" \
+        -d "hostname=${couchbaseServerHost}" \
         -d "services=kv,index,n1ql" \
         -d "memoryQuota=256" \
         -d "indexMemoryQuota=256" \
@@ -177,13 +180,13 @@ function initCouchbaseServer() {
         -d "indexerStorageMode=plasma"
 
     echo "Setting index replicas to 0..."
-    curl -sf -X POST http://localhost:8091/settings/indexes \
+    curl -sf -X POST "http://${couchbaseServerHost}:8091/settings/indexes" \
         -u "${couchbaseServerAdminUser}:${couchbaseServerAdminPass}" \
         -d "numReplica=0" \
         -d "storageMode=plasma"
 
     echo "Creating bucket '${couchbaseServerBucket}'..."
-    curl -sf -X POST http://localhost:8091/pools/default/buckets \
+    curl -sf -X POST "http://${couchbaseServerHost}:8091/pools/default/buckets" \
         -u "${couchbaseServerAdminUser}:${couchbaseServerAdminPass}" \
         -d "name=${couchbaseServerBucket}" \
         -d "ramQuota=100" \
@@ -192,7 +195,7 @@ function initCouchbaseServer() {
 
     echo "Waiting for bucket to be ready..."
     local attempt=0
-    until curl -sf "http://localhost:8091/pools/default/buckets/${couchbaseServerBucket}" \
+    until curl -sf "http://${couchbaseServerHost}:8091/pools/default/buckets/${couchbaseServerBucket}" \
         -u "${couchbaseServerAdminUser}:${couchbaseServerAdminPass}" | grep -q '"status":"healthy"'; do
         attempt=$((attempt + 1))
         if ((attempt > 30)); then
@@ -203,12 +206,12 @@ function initCouchbaseServer() {
     done
 
     echo "Enabling cross-cluster versioning on bucket '${couchbaseServerBucket}'..."
-    curl -sf -X POST "http://localhost:8091/pools/default/buckets/${couchbaseServerBucket}" \
+    curl -sf -X POST "http://${couchbaseServerHost}:8091/pools/default/buckets/${couchbaseServerBucket}" \
         -u "${couchbaseServerAdminUser}:${couchbaseServerAdminPass}" \
         -d "enableCrossClusterVersioning=true"
 
     echo "Creating RBAC user '${sgRbacUser}'..."
-    curl -sf -X PUT "http://localhost:8091/settings/rbac/users/local/${sgRbacUser}" \
+    curl -sf -X PUT "http://${couchbaseServerHost}:8091/settings/rbac/users/local/${sgRbacUser}" \
         -u "${couchbaseServerAdminUser}:${couchbaseServerAdminPass}" \
         -d "password=${sgRbacPass}" \
         -d "roles=bucket_full_access[${couchbaseServerBucket}],bucket_admin[${couchbaseServerBucket}]"
