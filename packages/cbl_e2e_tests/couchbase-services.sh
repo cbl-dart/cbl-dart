@@ -15,6 +15,10 @@ couchbaseServerBucket="db"
 sgRbacUser="sync_gateway"
 sgRbacPass="sync_gateway"
 macOSCouchbaseServerLogFile="${RUNNER_TEMP:-/tmp}/couchbase-server-macos.log"
+macOSCouchbaseAppLogFile="$HOME/Library/Logs/CouchbaseServer.log"
+macOSCouchbaseHTTPLogFile="$HOME/Library/Logs/couchbase-server.log"
+macOSCouchbaseAppDir="/Applications/Couchbase Server.app"
+macOSCouchbaseCouchJSFile="$macOSCouchbaseAppDir/Contents/Resources/couchbase-core/bin/couchjs"
 
 function waitForService() {
     name="$1"
@@ -58,9 +62,19 @@ function dumpCouchbaseServerDiagnostics() {
     case "$(uname)" in
     Darwin)
         ps aux | grep -i '[c]ouchbase' || true
+        ls -ld "$macOSCouchbaseAppDir" || true
+        ls -l "$macOSCouchbaseCouchJSFile" || true
         if [ -f "$macOSCouchbaseServerLogFile" ]; then
             echo "-- $macOSCouchbaseServerLogFile --"
             tail -n 200 "$macOSCouchbaseServerLogFile" || true
+        fi
+        if [ -f "$macOSCouchbaseAppLogFile" ]; then
+            echo "-- $macOSCouchbaseAppLogFile --"
+            tail -n 200 "$macOSCouchbaseAppLogFile" || true
+        fi
+        if [ -f "$macOSCouchbaseHTTPLogFile" ]; then
+            echo "-- $macOSCouchbaseHTTPLogFile --"
+            tail -n 200 "$macOSCouchbaseHTTPLogFile" || true
         fi
         ;;
     MINGW64* | MSYS* | CYGWIN*)
@@ -143,7 +157,7 @@ function startCouchbaseServerMacOS() {
     fi
     local cbsDmg="couchbase-server-enterprise_${couchbaseServerVersion}-macos_${arch}.dmg"
     local cbsUrl="https://packages.couchbase.com/releases/${couchbaseServerVersion}/${cbsDmg}"
-    local cbsAppDir="/Applications/Couchbase Server.app"
+    local cbsAppDir="$macOSCouchbaseAppDir"
     local cbsExecutable="$cbsAppDir/Contents/MacOS/Couchbase Server"
 
     if [ ! -d "$cbsAppDir" ]; then
@@ -163,6 +177,11 @@ function startCouchbaseServerMacOS() {
 
         echo "::endgroup::"
     fi
+
+    # The macOS startup script rewrites files inside the app bundle before
+    # launching Erlang, so the runner user must own the copied app.
+    sudo chown -R "$(id -un):$(id -gn)" "$cbsAppDir"
+    chmod -R u+w "$cbsAppDir"
 
     if [ ! -x "$cbsExecutable" ]; then
         echo "Could not find Couchbase Server executable at $cbsExecutable"
