@@ -237,7 +237,8 @@ function runE2ETests() {
             $DART_DEFINES \
             --keep-app-running \
             --driver test_driver/integration_test.dart \
-            --target integration_test/e2e_test.dart
+            --target integration_test/e2e_test.dart \
+            -v
         ;;
     esac
 }
