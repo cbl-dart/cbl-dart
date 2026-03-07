@@ -150,4 +150,4 @@ through `flutter test` with a specific test file in `integration_test`. By using
   https://github.com/cbl-dart/cbl-dart/tree/main/packages/cbl_generator
 [libcblite]: https://github.com/couchbaselabs/couchbase-lite-C
 [libcblitedart]:
-  https://github.com/cbl-dart/cbl-dart/tree/main/native/couchbase-lite-dart
+  https://github.com/cbl-dart/cbl-dart/tree/main/packages/cbl/native/couchbase-lite-dart
