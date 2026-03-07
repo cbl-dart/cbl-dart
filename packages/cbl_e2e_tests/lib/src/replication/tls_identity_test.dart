@@ -403,7 +403,7 @@ b17aolOOq/6xfP6QIc9I6pOoPhEFY18mCqVCKrF3YCQjVC3P7Ac1m2x5iMXL+fXF
           final keyPair = await KeyPair.fromExternal(
             ExceptionExternalKeyPairDelegate(),
           );
-          expect(await keyPair.publicKeyDigest, '<unknown>');
+          expect(await keyPair.publicKeyDigest, isNull);
         });
       });
 

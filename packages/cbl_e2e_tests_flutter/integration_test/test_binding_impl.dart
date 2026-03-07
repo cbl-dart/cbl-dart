@@ -27,7 +27,6 @@ final class FlutterCblE2eTestBinding extends CblE2eTestBinding {
   @override
   FutureOr<void> initCouchbaseLite() async {
     await CouchbaseLite.init();
-    Extension.enableVectorSearch();
   }
 
   @override

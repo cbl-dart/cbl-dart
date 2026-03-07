@@ -119,7 +119,10 @@ class MicroBenchmarkRunner extends BenchmarkRunnerBase {
     final latencies = <String, double>{};
 
     for (final line in stdout.trim().split('\n')) {
-      final match = benchmarkResultRegExp.firstMatch(line)!;
+      final match = benchmarkResultRegExp.firstMatch(line);
+      if (match == null) {
+        continue;
+      }
       final name = match.group(1)!;
       latencies[name] = double.parse(match.group(2)!) * 1000;
     }
@@ -172,9 +175,17 @@ class DatabaseBenchmarkRunner extends BenchmarkRunnerBase {
   ];
 
   @override
-  BenchmarkResults parseResults(String stdout) => BenchmarkResults({
-    invocationId: BenchmarkResult.fromJson(
-      jsonDecode(stdout) as Map<String, Object?>,
-    ),
-  });
+  BenchmarkResults parseResults(String stdout) {
+    // Strip any output before the JSON object, such as "Running build hooks..."
+    // printed by the Dart native assets system.
+    final jsonStart = stdout.indexOf('{');
+    if (jsonStart == -1) {
+      throw FormatException('No JSON object found in benchmark output', stdout);
+    }
+    return BenchmarkResults({
+      invocationId: BenchmarkResult.fromJson(
+        jsonDecode(stdout.substring(jsonStart)) as Map<String, Object?>,
+      ),
+    });
+  }
 }
