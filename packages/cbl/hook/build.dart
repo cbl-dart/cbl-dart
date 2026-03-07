@@ -7,6 +7,9 @@ import 'package:path/path.dart' as p;
 
 import 'src/download.dart' as dl;
 
+const _cbliteRelease = '3.2.4';
+const _vectorSearchRelease = '1.0.0';
+
 void main(List<String> args) async {
   await build(args, _build);
 }
@@ -233,8 +236,9 @@ Uri _findLibrary(dl.Package package, dl.OS os) {
 Future<T> _retryOnce<T>(Future<T> Function() fn) async {
   try {
     return await fn();
-    // ignore: avoid_catches_without_on_clauses
-  } catch (_) {
+  } on IOException {
+    return fn();
+  } on dl.HttpException {
     return fn();
   }
 }
@@ -249,7 +253,10 @@ Future<Uri> _thinIfNeeded(
   required Architecture targetArchitecture,
   required Uri outputDir,
 }) async {
-  if (targetOS != OS.macOS) return libPath;
+  // TODO(blaugold): Check whether iOS universal frameworks also need thinning.
+  if (targetOS != OS.macOS) {
+    return libPath;
+  }
 
   final arch = switch (targetArchitecture) {
     Architecture.arm64 => 'arm64',
@@ -306,6 +313,3 @@ dl.Architecture _mapArchitecture(Architecture arch) => switch (arch) {
   Architecture.x64 => dl.Architecture.x64,
   _ => throw Exception('Unsupported target architecture: $arch'),
 };
-
-const _cbliteRelease = '3.2.4';
-const _vectorSearchRelease = '1.0.0';

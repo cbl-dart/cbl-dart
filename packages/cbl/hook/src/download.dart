@@ -264,12 +264,12 @@ Future<Uint8List> _downloadUrl(
   Duration timeout = const Duration(minutes: 5),
 }) => _retryWithExponentialBackoff(
   timeout: timeout,
-  retryOn: (error) => error is _HttpException && error.statusCode >= 500,
+  retryOn: (error) => error is HttpException && error.statusCode >= 500,
   () async {
     final response = await get(Uri.parse(url));
 
     if (response.statusCode != 200) {
-      throw _HttpException(
+      throw HttpException(
         'Failed to download $url: ${response.statusCode} ${response.body}',
         response.statusCode,
       );
@@ -325,6 +325,7 @@ Future<void> _unpackArchive(
 Future<void> _unpackZipArchive(Uint8List archiveData, String outputDir) async {
   final archive = ZipDecoder().decodeBytes(archiveData, verify: true);
   for (final file in archive.files) {
+    // Access content to force decompression before extracting to disk.
     file.content;
   }
   await extractArchiveToDisk(archive, outputDir);
@@ -352,8 +353,8 @@ extension on OS {
   };
 }
 
-final class _HttpException implements Exception {
-  _HttpException(this.message, this.statusCode);
+final class HttpException implements Exception {
+  HttpException(this.message, this.statusCode);
 
   final String message;
   final int statusCode;
