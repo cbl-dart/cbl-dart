@@ -13,6 +13,10 @@ const syncGatewayHost = 'localhost';
 const syncGatewayPublicPort = 4984;
 const syncGatewayAdminPort = 4985;
 const syncGatewayDatabase = 'db';
+const couchbaseServerHost = '127.0.0.1';
+const couchbaseServerAdminPort = 8091;
+const couchbaseServerAdminUser = 'Administrator';
+const couchbaseServerAdminPassword = 'password';
 final syncGatewayReplicationUrl = Uri(
   scheme: 'ws',
   host: syncGatewayHost,
@@ -23,6 +27,11 @@ final syncGatewayAdminApiUrl = Uri(
   scheme: 'http',
   host: syncGatewayHost,
   port: syncGatewayAdminPort,
+);
+final couchbaseServerAdminApiUrl = Uri(
+  scheme: 'http',
+  host: couchbaseServerHost,
+  port: couchbaseServerAdminPort,
 );
 final janeAuthenticator = BasicAuthenticator(
   username: 'Jane',
@@ -88,13 +97,95 @@ Future<T> _withClient<T>(Future<T> Function(Client) fn) async {
 }
 
 Future<void> flushDatabaseByAdmin() async {
-  // Purging documents leaves replication metadata behind in Sync Gateway 4.x,
-  // which makes subsequent replication tests flaky after upgrading to CBL 4.
-  // `_flush` fully resets the database state between tests.
+  // With shared bucket access enabled, Sync Gateway's `_flush` endpoint can be
+  // unavailable. Flushing the Couchbase bucket resets Sync Gateway metadata as
+  // well, without relying on the blocked admin endpoint.
+  if (await _flushCouchbaseBucket()) {
+    await _waitForSyncGatewayAfterBucketFlush();
+    return;
+  }
+
+  await _purgeSyncGatewayDatabase();
+}
+
+Future<bool> _flushCouchbaseBucket() async {
+  final request = Request(
+    'POST',
+    couchbaseServerAdminApiUrl.resolve(
+      '/pools/default/buckets/$syncGatewayDatabase/controller/doFlush',
+    ),
+  );
+  request.headers['Authorization'] =
+      'Basic ${base64Encode(utf8.encode('$couchbaseServerAdminUser:'
+          '$couchbaseServerAdminPassword'))}';
+
+  try {
+    await _withClient((client) async {
+      final response = await client.send(request);
+      await response.stream.drain<void>();
+
+      if (response.statusCode != 200) {
+        throw StateError(
+          'Got a response with status code ${response.statusCode} from '
+          'Couchbase Server but expected status code 200.',
+        );
+      }
+    });
+    return true;
+  } on Object catch (error) {
+    // ignore: avoid_print
+    print('Falling back to Sync Gateway purge: $error');
+    return false;
+  }
+}
+
+Future<void> _waitForSyncGatewayAfterBucketFlush() async {
+  final timeoutAt = DateTime.now().add(const Duration(seconds: 30));
+
+  while (true) {
+    try {
+      final response = await syncGatewayRequest(
+        Uri.parse('$syncGatewayDatabase/_all_docs'),
+        admin: true,
+      );
+      final allDocs = jsonDecode(response) as Map<String, Object?>;
+      final rows = allDocs['rows']! as List<Object?>;
+      if (rows.isEmpty) {
+        return;
+      }
+    } on Object {
+      // Ignore transient errors while Sync Gateway reconnects to the bucket.
+    }
+
+    if (DateTime.now().isAfter(timeoutAt)) {
+      throw TimeoutException(
+        'Sync Gateway did not recover after flushing the Couchbase bucket.',
+      );
+    }
+
+    await Future<void>.delayed(const Duration(milliseconds: 200));
+  }
+}
+
+Future<void> _purgeSyncGatewayDatabase() async {
+  final response = await syncGatewayRequest(
+    Uri.parse('$syncGatewayDatabase/_all_docs'),
+    admin: true,
+  );
+  final allDocs = jsonDecode(response) as Map<String, Object?>;
+  final rows = allDocs['rows']! as List<Object?>;
+  if (rows.isEmpty) {
+    return;
+  }
+  final purgeBody = {
+    for (final row in rows.cast<Map<String, Object?>>())
+      row['id']! as String: ['*'],
+  };
   await syncGatewayRequest(
-    Uri.parse('$syncGatewayDatabase/_flush'),
+    Uri.parse('$syncGatewayDatabase/_purge'),
     method: 'POST',
     admin: true,
+    body: jsonEncode(purgeBody),
   );
 }
 
@@ -134,28 +225,29 @@ extension ReplicatorUtilsDatabaseExtension on Database {
     TypedConflictResolverFunction? typedConflictResolver,
     bool? enableAutoPurge,
     Authenticator? authenticator,
-  }) => Replicator.create(
-    ReplicatorConfiguration(
-      database: this,
-      target: UrlEndpoint(syncGatewayReplicationUrl),
-      replicatorType: replicatorType ?? ReplicatorType.pushAndPull,
-      continuous: continuous ?? false,
-      channels: channels,
-      documentIds: documentIds,
-      pushFilter: pushFilter,
-      typedPushFilter: typedPushFilter,
-      pullFilter: pullFilter,
-      typedPullFilter: typedPullFilter,
-      conflictResolver: conflictResolver != null
-          ? ConflictResolver.from(conflictResolver)
-          : null,
-      typedConflictResolver: typedConflictResolver != null
-          ? TypedConflictResolver.from(typedConflictResolver)
-          : null,
-      enableAutoPurge: enableAutoPurge ?? true,
-      authenticator: authenticator ?? janeAuthenticator,
-    ),
-  );
+  }) =>
+      Replicator.create(
+        ReplicatorConfiguration(
+          database: this,
+          target: UrlEndpoint(syncGatewayReplicationUrl),
+          replicatorType: replicatorType ?? ReplicatorType.pushAndPull,
+          continuous: continuous ?? false,
+          channels: channels,
+          documentIds: documentIds,
+          pushFilter: pushFilter,
+          typedPushFilter: typedPushFilter,
+          pullFilter: pullFilter,
+          typedPullFilter: typedPullFilter,
+          conflictResolver: conflictResolver != null
+              ? ConflictResolver.from(conflictResolver)
+              : null,
+          typedConflictResolver: typedConflictResolver != null
+              ? TypedConflictResolver.from(typedConflictResolver)
+              : null,
+          enableAutoPurge: enableAutoPurge ?? true,
+          authenticator: authenticator ?? janeAuthenticator,
+        ),
+      );
 }
 
 final isReplicatorStatus = isA<ReplicatorStatus>();
@@ -213,24 +305,22 @@ extension ReplicatorUtilsExtension on Replicator {
     validStatusMatcher ??= isNot(isErrorReplicatorStatus);
     var isInitialStatus = true;
 
-    await pollStatus()
-        .asyncMap((status) async {
-          expect(status, validStatusMatcher);
+    await pollStatus().asyncMap((status) async {
+      expect(status, validStatusMatcher);
 
-          if (isInitialStatus) {
-            isInitialStatus = false;
+      if (isInitialStatus) {
+        isInitialStatus = false;
 
-            if (matchInitialStatus) {
-              expect(status, statusMatcher);
-            }
+        if (matchInitialStatus) {
+          expect(status, statusMatcher);
+        }
 
-            await fn();
-            return false;
-          }
+        await fn();
+        return false;
+      }
 
-          return _matches(status, statusMatcher);
-        })
-        .firstWhere((isMatch) => isMatch);
+      return _matches(status, statusMatcher);
+    }).firstWhere((isMatch) => isMatch);
   }
 
   /// Drives the status of this replicator to match [statusMatcher].
@@ -248,19 +338,17 @@ extension ReplicatorUtilsExtension on Replicator {
     validStatusMatcher ??= isNot(isErrorReplicatorStatus);
     var calledDriveFn = false;
 
-    await pollStatus()
-        .asyncMap((status) async {
-          expect(status, validStatusMatcher);
+    await pollStatus().asyncMap((status) async {
+      expect(status, validStatusMatcher);
 
-          final isMatch = _matches(status, statusMatcher);
-          if (!calledDriveFn && !isMatch) {
-            calledDriveFn = true;
-            await fn();
-          }
+      final isMatch = _matches(status, statusMatcher);
+      if (!calledDriveFn && !isMatch) {
+        calledDriveFn = true;
+        await fn();
+      }
 
-          return isMatch;
-        })
-        .firstWhere((isMatch) => isMatch);
+      return isMatch;
+    }).firstWhere((isMatch) => isMatch);
   }
 
   /// Calls [fn] once the status of this replicator matches [statusMatcher].
@@ -274,18 +362,16 @@ extension ReplicatorUtilsExtension on Replicator {
   }) async {
     validStatusMatcher ??= isNot(isErrorReplicatorStatus);
 
-    await pollStatus()
-        .asyncMap((status) async {
-          expect(status, validStatusMatcher);
+    await pollStatus().asyncMap((status) async {
+      expect(status, validStatusMatcher);
 
-          final isMatch = _matches(status, statusMatcher);
-          if (isMatch) {
-            await fn();
-          }
+      final isMatch = _matches(status, statusMatcher);
+      if (isMatch) {
+        await fn();
+      }
 
-          return isMatch;
-        })
-        .firstWhere((isMatch) => isMatch);
+      return isMatch;
+    }).firstWhere((isMatch) => isMatch);
   }
 
   /// Starts a one shot replicator and completes when it has stopped.
