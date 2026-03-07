@@ -440,8 +440,33 @@ Future<Uri> _stageCblite(
       return Uri.file(dllDest);
 
     case OS.iOS:
+      // The iOS xcframework simulator slice is a universal binary containing
+      // both arm64 and x86_64. The native assets bundler invokes the hook once
+      // per architecture and then creates a universal binary from the results.
+      // We must thin to the target architecture to avoid lipo errors.
+      final iosArch = switch (targetArchitecture) {
+        Architecture.arm64 => 'arm64',
+        Architecture.x64 => 'x86_64',
+        _ => throw UnsupportedError(
+          'Unsupported iOS architecture: $targetArchitecture',
+        ),
+      };
       final dest = p.join(stagingDir, 'CouchbaseLite');
-      await File(libFile).copy(dest);
+      final isUniversal = await _isUniversalBinary(libFile);
+      if (isUniversal) {
+        final result = await Process.run('lipo', [
+          libFile,
+          '-thin',
+          iosArch,
+          '-output',
+          dest,
+        ]);
+        if (result.exitCode != 0) {
+          throw Exception('lipo thin failed for iOS: ${result.stderr}');
+        }
+      } else {
+        await File(libFile).copy(dest);
+      }
       return Uri.file(dest);
 
     default:
@@ -481,6 +506,15 @@ Future<Uri> _lipoThin(
   }
 
   return Uri.file(outputFile);
+}
+
+/// Returns true if the given file is a universal (fat) Mach-O binary.
+Future<bool> _isUniversalBinary(String path) async {
+  final result = await Process.run('lipo', ['-info', path]);
+  if (result.exitCode != 0) {
+    return false;
+  }
+  return (result.stdout as String).contains('Architectures in the fat file');
 }
 
 dl.OS _mapOS(OS os) => switch (os) {
