@@ -228,6 +228,49 @@ function runE2ETests() {
         esac
         echo "=== End bundle inspection ==="
 
+        # --- Diagnostic: verify iOS app bundle architecture and signing ---
+        if [ "$targetOs" = "iOS" ]; then
+            echo "=== iOS app bundle diagnostics ==="
+            local appBundle
+            appBundle=$(find build/ios -name "Runner.app" -path "*/iphonesimulator/*" -type d 2>/dev/null | head -1)
+            if [ -n "$appBundle" ]; then
+                echo "App bundle: $appBundle"
+
+                echo "--- Framework architectures ---"
+                for fw in "$appBundle"/Frameworks/*.framework/*; do
+                    if [ -f "$fw" ] && file "$fw" | grep -q "Mach-O"; then
+                        echo "$fw:"
+                        lipo -info "$fw" 2>&1 || true
+                    fi
+                done
+
+                echo "--- Code signing ---"
+                codesign -dvv "$appBundle" 2>&1 || true
+
+                echo "--- Try launching app manually ---"
+                local simId
+                simId=$(xcrun simctl list devices booted -j | jq -r '.devices[][] | select(.state == "Booted") | .udid' | head -1)
+                if [ -n "$simId" ]; then
+                    echo "Booted simulator: $simId"
+                    echo "Installing app..."
+                    xcrun simctl install "$simId" "$appBundle" 2>&1 || true
+                    echo "Launching app..."
+                    xcrun simctl launch --console-pty "$simId" com.terwesten.gabriel.cblE2eTestsFlutter 2>&1 | head -50 &
+                    local launchPid=$!
+                    sleep 10
+                    kill $launchPid 2>/dev/null || true
+                    wait $launchPid 2>/dev/null || true
+                    echo "--- Checking if app process is alive ---"
+                    xcrun simctl spawn "$simId" launchctl list 2>&1 | grep -i "runner\|cbl" || echo "App not found in launchctl"
+                    echo "--- Recent crash logs ---"
+                    find ~/Library/Logs/DiagnosticReports -name "Runner*" -newer "$appBundle" 2>/dev/null | head -5 || echo "No crash logs"
+                    echo "--- Terminate test app ---"
+                    xcrun simctl terminate "$simId" com.terwesten.gabriel.cblE2eTestsFlutter 2>/dev/null || true
+                fi
+            fi
+            echo "=== End iOS diagnostics ==="
+        fi
+
         # Note: We would like to collect coverage data from tests, but
         # `flutter drive` does not support the `--coverage` flag. While
         # `flutter test` does, it does not support the `--keep-app-running`
