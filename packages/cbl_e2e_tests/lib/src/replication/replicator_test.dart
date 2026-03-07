@@ -2,6 +2,7 @@
 // ignore_for_file: deprecated_member_use
 
 import 'dart:async';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:cbl/cbl.dart';
@@ -611,7 +612,13 @@ void main() {
 
     apiTest(
       'serverCertificate returns server certificate',
-      skip: skipPeerSyncTest,
+      // TODO: Try again after upgrading CBL C binaries.
+      // CBLCert_SubjectNameComponent crashes on iOS with a null pointer
+      // dereference (CBLTLSIdentity_CAPI.cc:124) when reading attributes
+      // from a certificate obtained via CBLReplicator_ServerCertificate.
+      skip:
+          skipPeerSyncTest ??
+          (Platform.isIOS ? 'CBL C bug: crashes on iOS' : null),
       () async {
         final serverIdentity = await TlsIdentity.createIdentity(
           keyUsages: {KeyUsage.serverAuth},

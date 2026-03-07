@@ -8,6 +8,7 @@ import 'bindings/cblitedart_native_assets.dart' as cblitedart_native;
 import 'bindings/cblitedart_native_assets_bridge.dart';
 import 'database/database.dart';
 import 'log.dart';
+import 'support/app_directory.dart';
 import 'support/isolate.dart';
 import 'support/tracing.dart';
 import 'tracing.dart';
@@ -40,11 +41,16 @@ abstract final class CouchbaseLite {
   /// directory is used when opening and copying databases.
   static Future<void> init({String? filesDir}) =>
       asyncOperationTracePoint(InitializeOp.new, () async {
-        // On Android, filesDir is required. Auto-detect it from the package
-        // name if not explicitly provided.
+        // Auto-detect the app files directory from the platform if not
+        // explicitly provided. On Android, the package name is used to
+        // construct the standard app data path. On other platforms, the
+        // appropriate app directory is resolved based on app identity
+        // (bundle ID, XDG dirs, APPDATA, etc.).
         final resolvedFilesDir =
             filesDir ??
-            (Platform.isAndroid ? await _resolveAndroidFilesDir() : null);
+            (Platform.isAndroid
+                ? await _resolveAndroidFilesDir()
+                : resolveAppFilesDirectory());
 
         final context = resolvedFilesDir == null
             ? null

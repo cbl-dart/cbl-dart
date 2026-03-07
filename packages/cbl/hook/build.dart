@@ -495,10 +495,7 @@ Future<Uri> _lipoThin(
     return libPath;
   }
 
-  final outputFile = p.join(
-    outputDir.toFilePath(),
-    p.basename(inputFile),
-  );
+  final outputFile = p.join(outputDir.toFilePath(), p.basename(inputFile));
 
   final result = await Process.run('lipo', [
     inputFile,
