@@ -1,6 +1,6 @@
 services:
   couchbase-server:
-    image: couchbase/server:enterprise-8.0.0
+    image: couchbase/server:enterprise-7.6.9
     ports:
       - 8091:8091
       - 11210:11210
@@ -13,7 +13,7 @@ services:
     restart: on-failure
 
   couchbase-server-init:
-    image: couchbase/server:enterprise-8.0.0
+    image: couchbase/server:enterprise-7.6.9
     depends_on:
       couchbase-server:
         condition: service_healthy
