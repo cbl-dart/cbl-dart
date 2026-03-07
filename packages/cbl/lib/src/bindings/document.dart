@@ -21,6 +21,9 @@ final class DocumentBindings extends Bindings {
   int sequence(Pointer<cblite_lib.CBLDocument> doc) =>
       cblite.CBLDocument_Sequence(doc);
 
+  int timestamp(Pointer<cblite_lib.CBLDocument> doc) =>
+      cblite.CBLDocument_Timestamp(doc);
+
   cblite_lib.FLDict properties(Pointer<cblite_lib.CBLDocument> doc) =>
       cblite.CBLDocument_Properties(doc);
 

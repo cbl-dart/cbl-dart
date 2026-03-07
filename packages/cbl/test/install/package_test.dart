@@ -26,7 +26,7 @@ void main() {
       final tempCacheDir = tempTestDirectory();
       final loader = RemotePackageLoader(cacheDir: tempCacheDir.path);
       final packageConfigs = VectorSearchPackageConfig.all(
-        release: '1.0.0',
+        release: '2.0.0',
       ).withoutMacOSonDifferentHost;
       await Future.wait(packageConfigs.map(loader.load));
     });
@@ -34,7 +34,7 @@ void main() {
     test('package layout', () async {
       final loader = RemotePackageLoader();
       final packageConfigs = VectorSearchPackageConfig.all(
-        release: '1.0.0',
+        release: '2.0.0',
       ).withoutMacOSonDifferentHost;
 
       for (final packageConfig in packageConfigs) {

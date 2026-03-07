@@ -42,10 +42,12 @@ namespace cbl {
             with only some values different, create one query with placeholder parameter(s), and substitute
             the desired value(s) with \ref Query::setParameters(fleece::Dict parameters) each time you run the query.
             @warning <b>Deprecated :</b> Use Database::createQuery(CBLQueryLanguage language, slice queryString) instead.
-            @param language  The query language,
-                    [JSON](https://github.com/couchbase/couchbase-lite-core/wiki/JSON-Query-Schema) or
-                    [N1QL](https://docs.couchbase.com/server/4.0/n1ql/n1ql-language-reference/index.html).
-            @param queryString  The query string. */
+            @note The JSON query language is a volatile API. Volatile APIs are experimental and may likely be changed.
+                  They may also be used to indicate inherently private APIs that may be exposed, but "YMMV"
+                  (your mileage may vary) principles apply.
+            @param language  The query language
+            @param queryString  The query string.
+         */
         Query(const Database& db, CBLQueryLanguage language, slice queryString) {
             CBLError error;
             auto q = CBLDatabase_CreateQuery(db.ref(), language, queryString, nullptr, &error);

@@ -712,7 +712,19 @@ enum SignatureDigestAlgorithm {
   sha512,
 
   /// RIPEMD-160 message digest.
-  ripemd160;
+  ripemd160,
+
+  /// SHA3-224 message digest.
+  sha3_224,
+
+  /// SHA3-256 message digest.
+  sha3_256,
+
+  /// SHA3-384 message digest.
+  sha3_384,
+
+  /// SHA3-512 message digest.
+  sha3_512;
 
   static SignatureDigestAlgorithm? _fromCbl(
     CBLSignatureDigestAlgorithm value,
@@ -724,6 +736,10 @@ enum SignatureDigestAlgorithm {
     CBLSignatureDigestAlgorithm.sha384 => SignatureDigestAlgorithm.sha384,
     CBLSignatureDigestAlgorithm.sha512 => SignatureDigestAlgorithm.sha512,
     CBLSignatureDigestAlgorithm.ripemd160 => SignatureDigestAlgorithm.ripemd160,
+    CBLSignatureDigestAlgorithm.sha3_224 => SignatureDigestAlgorithm.sha3_224,
+    CBLSignatureDigestAlgorithm.sha3_256 => SignatureDigestAlgorithm.sha3_256,
+    CBLSignatureDigestAlgorithm.sha3_384 => SignatureDigestAlgorithm.sha3_384,
+    CBLSignatureDigestAlgorithm.sha3_512 => SignatureDigestAlgorithm.sha3_512,
   };
 }
 

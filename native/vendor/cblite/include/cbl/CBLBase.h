@@ -169,9 +169,9 @@ void CBL_DumpInstances(void) CBLAPI;
 
 // Declares retain/release functions for TYPE. For internal use only.
 #define CBL_REFCOUNTED(TYPE, NAME) \
-    static inline const TYPE CBL##NAME##_Retain(const TYPE _cbl_nullable t) \
+    CBLINLINE const TYPE CBL##NAME##_Retain(const TYPE _cbl_nullable t) \
                                             {return (const TYPE)CBL_Retain((CBLRefCounted*)t);} \
-    static inline void CBL##NAME##_Release(const TYPE _cbl_nullable t) {CBL_Release((CBLRefCounted*)t);}
+    CBLINLINE void CBL##NAME##_Release(const TYPE _cbl_nullable t) {CBL_Release((CBLRefCounted*)t);}
 
 /** @} */
 

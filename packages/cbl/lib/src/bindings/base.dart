@@ -44,9 +44,7 @@ extension OptionIterable<T extends Option> on Iterable<T> {
 
 enum CBLDartInitializeResult {
   success(
-    cblitedart_lib
-        .CBLDartInitializeResult
-        .CBLDartInitializeResult_kCBLInitError,
+    cblitedart_lib.CBLDartInitializeResult.CBLDartInitializeResult_kSuccess,
   ),
   incompatibleDartVM(
     cblitedart_lib

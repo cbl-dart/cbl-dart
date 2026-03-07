@@ -294,7 +294,7 @@ class _MethodNamesCollector extends RecursiveAstVisitor {
 
   @override
   void visitMethodDeclaration(MethodDeclaration node) {
-    final clazz = node.parent! as ClassDeclaration;
+    final clazz = node.parent!.parent! as ClassDeclaration;
     methodsByClass
         .putIfAbsent(clazz.namePart.typeName.lexeme, () => [])
         .add(node.name.lexeme);

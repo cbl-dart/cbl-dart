@@ -120,7 +120,7 @@ abstract base class CblE2eTestBinding {
         ..config = LogFileConfiguration(
           directory: '$tmpDir/logs',
           usePlainText: true,
-          maxRotateCount: 100,
+          maxKeptFiles: 100,
           // Should be large enough to captures all logs of a test run without
           // file splitting.
           maxSize: 100 * 1024 * 1024, // 100 MB

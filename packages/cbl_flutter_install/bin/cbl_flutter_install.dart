@@ -36,7 +36,7 @@ void main(List<String> arguments) async {
   if (config.edition == Edition.enterprise) {
     packageConfigs.addAll(
       VectorSearchPackageConfig.all(
-        release: '1.0.0',
+        release: '2.0.0',
       ).where((config) => config.os == os),
     );
   }

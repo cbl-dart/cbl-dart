@@ -114,10 +114,10 @@ namespace cbl {
                                                     const Document remoteDoc)>;
 
     /** The collection and the configuration that can be configured specifically for the replication. */
-    class ReplicationCollection {
+    class CollectionConfiguration {
     public:
-        /** Creates  ReplicationCollection with the collection. */
-        ReplicationCollection(Collection collection)
+        /** Creates CollectionConfiguration with the collection. */
+        CollectionConfiguration(Collection collection)
         :_collection(collection)
         { }
         
@@ -135,7 +135,7 @@ namespace cbl {
         /** Optional callback to filter which docs are pushed. */
         ReplicationFilter pushFilter;
         
-        /** Optional callback to validate incoming docs. */
+        /** Optional callback to filter which docs are pulled. */
         ReplicationFilter pullFilter;
         
         //-- Conflict Resolver:
@@ -146,36 +146,28 @@ namespace cbl {
         Collection _collection;
     };
 
+    /** Deprecated alias for backward compatibility
+        @warning <b>Deprecated :</b> Use CollectionConfiguration instead. */
+    using ReplicationCollection = CollectionConfiguration;
+
     /** The configuration of a replicator. */
     class ReplicatorConfiguration {
     public:
-        /** Creates a config using a database to represent the default collection and an endpoint.
-            @note Only the default collection will be used in the replication.
-            @warning <b>Deprecated :</b>
-                     Use ReplicatorConfiguration::ReplicatorConfiguration(std::vector<ReplicationCollection>collections, Endpoint endpoint)
-                     instead.
-            @param db The database to represent the default collection.
-            @param endpoint The endpoint to replicate with. */
-        ReplicatorConfiguration(Database db, Endpoint endpoint)
-        :_database(db)
-        ,_endpoint(endpoint)
-        { }
-        
         /** Creates a  config with a list of collections and per-collection configurations to replicate and an endpoint
             @param collections The collections and per-collection configurations.
             @param endpoint The endpoint to replicate with. */
-        ReplicatorConfiguration(std::vector<ReplicationCollection>collections, Endpoint endpoint)
+        ReplicatorConfiguration(std::vector<CollectionConfiguration>collections, Endpoint endpoint)
         :_collections(collections)
         ,_endpoint(endpoint)
         { }
         
         //-- Accessors:
-        /** Returns the configured database. */
-        Database database() const           {return _database;}
+        
+        /** Returns the configured collections. */
+        std::vector<CollectionConfiguration> collections() const  {return _collections;}
+        
         /** Returns the configured endpoint. */
         Endpoint endpoint() const           {return _endpoint;}
-        /** Returns the configured collections. */
-        std::vector<ReplicationCollection> collections() const  {return _collections;}
         
         //-- Types:
         /** Replicator type : Push, pull or both  */
@@ -235,38 +227,11 @@ namespace cbl {
         std::string pinnedServerCertificate;
         /** Set of anchor certs (PEM format). */
         std::string trustedRootCertificates;
-
-        //-- Filtering:
-        /** Optional set of channels to pull from when replicating with the default collection.
-            @note This property can only be used when creating the config object with the database instead of collections.
-            @warning <b>Deprecated :</b> Use ReplicationCollection::channels instead. */
-        fleece::MutableArray channels       = fleece::MutableArray::newArray();
-        
-        /** Optional set of document IDs to replicate when replicating with the default collection.
-            @note This property can only be used when creating the config object with the database instead of collections.
-            @warning <b>Deprecated :</b> Use ReplicationCollection::documentIDs instead. */
-        fleece::MutableArray documentIDs    = fleece::MutableArray::newArray();
-
-        /** Optional callback to filter which docs are pushed when replicating with the default collection.
-            @note This property can only be used when creating the config object with the database instead of collections.
-            @warning <b>Deprecated :</b> Use ReplicationCollection::pushFilter instead. */
-        ReplicationFilter pushFilter;
-        
-        /** Optional callback to validate incoming docs when replicating with the default collection.
-            @note This property can only be used when creating the config object with the database instead of collections.
-            @warning <b>Deprecated :</b> Use ReplicationCollection::pullFilter instead. */
-        ReplicationFilter pullFilter;
-        
-        //-- Conflict Resolver:
-        /** Optional conflict-resolver callback.
-            @note This property can only be used when creating the config object with the database instead of collections.
-            @warning <b>Deprecated :</b> Use ReplicationCollection::conflictResolver instead. */
-        ConflictResolver conflictResolver;
         
     protected:
         friend class Replicator;
         
-        /** Base config without database, collections, filters, and conflict resolver set. */
+        /** Base config without collections set. */
         operator CBLReplicatorConfiguration() const {
             CBLReplicatorConfiguration conf = {};
             conf.endpoint = _endpoint.ref();
@@ -294,9 +259,8 @@ namespace cbl {
         }
         
     private:
-        Database _database;
         Endpoint _endpoint;
-        std::vector<ReplicationCollection> _collections;
+        std::vector<CollectionConfiguration> _collections;
     };
 
     /** Replicator for replicating documents in collections in local database and targeted database. */
@@ -309,22 +273,6 @@ namespace cbl {
             // default collection if the config is configured with the database:
             auto collections = config.collections();
             
-            auto database = config.database();
-            if (database) {
-                assert(collections.empty());
-                auto defaultCollection = database.getDefaultCollection();
-                if (!defaultCollection) {
-                    throw std::invalid_argument("default collection not exist");
-                }
-                ReplicationCollection col = ReplicationCollection(defaultCollection);
-                col.channels = config.channels;
-                col.documentIDs = config.documentIDs;
-                col.pushFilter = config.pushFilter;
-                col.pullFilter = config.pullFilter;
-                col.conflictResolver = config.conflictResolver;
-                collections.push_back(col);
-            }
-            
             // Created a shared collection map. The pointer of the collection map will be
             // used as a context.
             _collectionMap = std::shared_ptr<CollectionToReplCollectionMap>(new CollectionToReplCollectionMap());
@@ -333,25 +281,25 @@ namespace cbl {
             CBLReplicatorConfiguration c_config = config;
             
             // Construct C replication collections to set to the c_config:
-            std::vector<CBLReplicationCollection> replCols;
+            std::vector<CBLCollectionConfiguration> colConfigs;
             for (int i = 0; i < collections.size(); i++) {
-                ReplicationCollection& col = collections[i];
+                CollectionConfiguration& col = collections[i];
                 
-                CBLReplicationCollection replCol {};
-                replCol.collection = col.collection().ref();
+                CBLCollectionConfiguration colConfig {};
+                colConfig.collection = col.collection().ref();
                 
                 if (!col.channels.empty()) {
-                    replCol.channels = col.channels;
+                    colConfig.channels = col.channels;
                 }
 
                 if (!col.documentIDs.empty()) {
-                    replCol.documentIDs = col.documentIDs;
+                    colConfig.documentIDs = col.documentIDs;
                 }
 
                 if (col.pushFilter) {
-                    replCol.pushFilter = [](void* context,
-                                            CBLDocument* cDoc,
-                                            CBLDocumentFlags flags) -> bool {
+                    colConfig.pushFilter = [](void* context,
+                                              CBLDocument* cDoc,
+                                              CBLDocumentFlags flags) -> bool {
                         auto doc = Document(cDoc);
                         auto map = (CollectionToReplCollectionMap*)context;
                         return map->find(doc.collection())->second.pushFilter(doc, flags);
@@ -359,9 +307,9 @@ namespace cbl {
                 }
                 
                 if (col.pullFilter) {
-                    replCol.pullFilter = [](void* context,
-                                            CBLDocument* cDoc,
-                                            CBLDocumentFlags flags) -> bool {
+                    colConfig.pullFilter = [](void* context,
+                                              CBLDocument* cDoc,
+                                              CBLDocumentFlags flags) -> bool {
                         auto doc = Document(cDoc);
                         auto map = (CollectionToReplCollectionMap*)context;
                         return map->find(doc.collection())->second.pullFilter(doc, flags);
@@ -369,10 +317,10 @@ namespace cbl {
                 }
                 
                 if (col.conflictResolver) {
-                    replCol.conflictResolver = [](void* context,
-                                                 FLString docID,
-                                                 const CBLDocument* cLocalDoc,
-                                                 const CBLDocument* cRemoteDoc) -> const CBLDocument*
+                    colConfig.conflictResolver = [](void* context,
+                                                    FLString docID,
+                                                    const CBLDocument* cLocalDoc,
+                                                    const CBLDocument* cRemoteDoc) -> const CBLDocument*
                     {
                         auto localDoc = Document(cLocalDoc);
                         auto remoteDoc = Document(cRemoteDoc);
@@ -389,12 +337,12 @@ namespace cbl {
                         return ref;
                     };
                 }
-                replCols.push_back(replCol);
+                colConfigs.push_back(colConfig);
                 _collectionMap->insert({col.collection(), col});
             }
             
-            c_config.collections = replCols.data();
-            c_config.collectionCount = replCols.size();
+            c_config.collections = colConfigs.data();
+            c_config.collectionCount = colConfigs.size();
             c_config.context = _collectionMap.get();
             
             CBLError error {};
@@ -432,41 +380,6 @@ namespace cbl {
 
         /** Returns the replicator's current status. */
         CBLReplicatorStatus status() const  {return CBLReplicator_Status(ref());}
-
-        /** Indicates which documents in the default collection have local changes that have not yet
-            been pushed to the server by this replicator. This is of course a snapshot, that will
-            go out of date as the replicator makes progress and/or documents are saved locally.
-
-            The result is, effectively, a set of document IDs: a dictionary whose keys are the IDs and
-            values are `true`.
-            If there are no pending documents, the dictionary is empty.
-            @note This function can be called on a stopped or un-started replicator.
-            @note Documents that would never be pushed by this replicator, due to its configuration's
-                  `pushFilter` or `docIDs`, are ignored.
-            @warning If the default collection is not part of the replication, an error will be thrown.
-            @warning <b>Deprecated :</b> Use Replicator::pendingDocumentIDs(Collection& collection) instead. */
-        fleece::Dict pendingDocumentIDs() const {
-            CBLError error;
-            fleece::Dict result = CBLReplicator_PendingDocumentIDs(ref(), &error);
-            check(result != nullptr, error);
-            return result;
-        }
-
-        /** Indicates whether the document in the default collection with the given ID has local changes that
-            have not yet been pushed to the server by this replicator.
-
-            This is equivalent to, but faster than, calling \ref Replicator::pendingDocumentIDs() and
-            checking whether the result contains \p docID. See that function's documentation for details.
-            @note A `false` result means the document is not pending, _or_ there was an error.
-                  To tell the difference, compare the error code to zero.
-            @warning If the default collection is not part of the replication, an error will be thrown.
-            @warning <b>Deprecated :</b> Use Replicator::isDocumentPending(fleece::slice docID, Collection& collection) instead. */
-        bool isDocumentPending(fleece::slice docID) const {
-            CBLError error;
-            bool pending = CBLReplicator_IsDocumentPending(ref(), docID, &error);
-            check(pending || error.code == 0, error);
-            return pending;
-        }
         
         /** Indicates which documents in the given collection have local changes that have not yet been
             pushed to the server by this replicator. This is of course a snapshot, that will go out of date
@@ -478,7 +391,7 @@ namespace cbl {
             @warning If the given collection is not part of the replication, an error will be thrown. */
         fleece::Dict pendingDocumentIDs(Collection& collection) const {
             CBLError error;
-            fleece::Dict result = CBLReplicator_PendingDocumentIDs2(ref(), collection.ref(), &error);
+            fleece::Dict result = CBLReplicator_PendingDocumentIDs(ref(), collection.ref(), &error);
             check(result != nullptr, error);
             return result;
         }
@@ -493,7 +406,7 @@ namespace cbl {
             @warning If the given collection is not part of the replication, an error will be thrown. */
         bool isDocumentPending(fleece::slice docID, Collection& collection) const {
             CBLError error;
-            bool pending = CBLReplicator_IsDocumentPending2(ref(), docID, collection.ref(), &error);
+            bool pending = CBLReplicator_IsDocumentPending(ref(), docID, collection.ref(), &error);
             check(pending || error.code == 0, error);
             return pending;
         }
@@ -547,7 +460,7 @@ namespace cbl {
             DocumentReplicationListener::call(context, Replicator(repl), isPush, docs);
         }
         
-        using CollectionToReplCollectionMap = std::unordered_map<Collection, ReplicationCollection>;
+        using CollectionToReplCollectionMap = std::unordered_map<Collection, CollectionConfiguration>;
         std::shared_ptr<CollectionToReplCollectionMap> _collectionMap;
         
         CBL_REFCOUNTED_WITHOUT_COPY_MOVE_BOILERPLATE(Replicator, RefCounted, CBLReplicator)

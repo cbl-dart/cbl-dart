@@ -17,6 +17,16 @@ CBLDART_EXPORT
 bool CBLDart_CpuSupportsAVX2();
 
 /**
+ * Diagnostic function that logs the results of both
+ * clock_gettime(CLOCK_REALTIME) and std::chrono::system_clock::now() to stderr.
+ *
+ * This is used to diagnose issues where the C++ standard library's clock
+ * returns incorrect values in certain dynamic linking scenarios.
+ */
+CBLDART_EXPORT
+void CBLDart_DiagnoseClock();
+
+/**
  * This is a compatibility layer to allow Dart code to use the Couchbase Lite C
  * API. Some method signatures are incompatible with Dart's FFI capabilities.
  *
@@ -95,11 +105,10 @@ CBLDART_EXPORT
 void CBLDart_CBLLog_SetCallbackLevel(CBLLogLevel level);
 
 CBLDART_EXPORT
-bool CBLDart_CBLLog_SetFileConfig(CBLLogFileConfiguration* config,
-                                  CBLError* errorOut);
+void CBLDart_CBLLog_SetFileSink(CBLFileLogSink* sink);
 
 CBLDART_EXPORT
-CBLLogFileConfiguration* CBLDart_CBLLog_GetFileConfig();
+CBLFileLogSink* CBLDart_CBLLog_GetFileSink();
 
 CBLDART_EXPORT
 bool CBLDart_CBLLog_SetSentryBreadcrumbs(bool enabled);
@@ -240,6 +249,7 @@ struct CBLDart_ReplicatorConfiguration {
   FLSlice* trustedRootCertificates;
   CBLDart_ReplicationCollection* collections;
   size_t collectionsCount;
+  bool acceptParentDomainCookies;
 };
 
 CBLDART_EXPORT

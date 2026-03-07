@@ -691,6 +691,7 @@ final class CblService {
       trustedRootCertificates: request.trustedRootCertificates?.toTypedList(),
       headers: request.headers,
       enableAutoPurge: request.enableAutoPurge,
+      acceptParentDomainCookies: request.acceptParentDomainCookies,
       heartbeat: request.heartbeat,
       maxAttempts: request.maxAttempts,
       maxAttemptWaitTime: request.maxAttemptWaitTime,
@@ -957,6 +958,7 @@ extension on DelegateDocument {
       docId: id,
       revisionId: revisionId,
       sequence: sequence,
+      timestamp: timestamp,
       properties: properties,
     );
   }

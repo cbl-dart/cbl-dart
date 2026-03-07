@@ -52,6 +52,14 @@ enum MaintenanceType {
 
   /// Check for database corruption.
   integrityCheck,
+
+  /// Partially scan indexes to gather database statistics that help optimize
+  /// queries.
+  optimize,
+
+  /// Fully scan all indexes to gather database statistics that help optimize
+  /// queries.
+  fullOptimize,
 }
 
 /// The result of [Collection.saveTypedDocument], which needs to be used to

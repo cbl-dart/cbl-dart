@@ -478,10 +478,10 @@ void main() {
           ),
         );
 
-        expect(await evalEvery(values: [], equalTo: 'a'), 1);
-        expect(await evalEvery(values: ['b'], equalTo: 'a'), 0);
-        expect(await evalEvery(values: ['a'], equalTo: 'a'), 1);
-        expect(await evalEvery(values: ['a', 'b'], equalTo: 'a'), 0);
+        expect(await evalEvery(values: [], equalTo: 'a'), true);
+        expect(await evalEvery(values: ['b'], equalTo: 'a'), false);
+        expect(await evalEvery(values: ['a'], equalTo: 'a'), true);
+        expect(await evalEvery(values: ['a', 'b'], equalTo: 'a'), false);
       });
 
       apiTest('range predicate ANY AND EVERY', () async {
@@ -497,10 +497,10 @@ void main() {
           doc: MutableDocument({'array': values}),
         );
 
-        expect(await evalAnyAndEvery(values: [], equalTo: 'a'), 0);
-        expect(await evalAnyAndEvery(values: ['b'], equalTo: 'a'), 0);
-        expect(await evalAnyAndEvery(values: ['a'], equalTo: 'a'), 1);
-        expect(await evalAnyAndEvery(values: ['a', 'b'], equalTo: 'a'), 0);
+        expect(await evalAnyAndEvery(values: [], equalTo: 'a'), false);
+        expect(await evalAnyAndEvery(values: ['b'], equalTo: 'a'), false);
+        expect(await evalAnyAndEvery(values: ['a'], equalTo: 'a'), true);
+        expect(await evalAnyAndEvery(values: ['a', 'b'], equalTo: 'a'), false);
       });
     });
 
@@ -602,11 +602,11 @@ void main() {
       });
 
       apiTest('negated()', () async {
-        expect(await evalExpr(Expression.negated(valExpr(true))), 0);
+        expect(await evalExpr(Expression.negated(valExpr(true))), false);
       });
 
       apiTest('not()', () async {
-        expect(await evalExpr(Expression.not(valExpr(true))), 0);
+        expect(await evalExpr(Expression.not(valExpr(true))), false);
       });
 
       apiTest('multiply()', () async {
@@ -630,40 +630,49 @@ void main() {
       });
 
       apiTest('lessThan()', () async {
-        expect(await evalExpr(valExpr(1).lessThan(valExpr(2))), 1);
-        expect(await evalExpr(valExpr(1).lessThan(valExpr(1))), 0);
+        expect(await evalExpr(valExpr(1).lessThan(valExpr(2))), true);
+        expect(await evalExpr(valExpr(1).lessThan(valExpr(1))), false);
       });
 
       apiTest('lessThanOrEqualTo()', () async {
-        expect(await evalExpr(valExpr(1).lessThanOrEqualTo(valExpr(2))), 1);
-        expect(await evalExpr(valExpr(1).lessThanOrEqualTo(valExpr(1))), 1);
-        expect(await evalExpr(valExpr(1).lessThanOrEqualTo(valExpr(0))), 0);
+        expect(await evalExpr(valExpr(1).lessThanOrEqualTo(valExpr(2))), true);
+        expect(await evalExpr(valExpr(1).lessThanOrEqualTo(valExpr(1))), true);
+        expect(await evalExpr(valExpr(1).lessThanOrEqualTo(valExpr(0))), false);
       });
 
       apiTest('greaterThan()', () async {
-        expect(await evalExpr(valExpr(1).greaterThan(valExpr(0))), 1);
-        expect(await evalExpr(valExpr(1).greaterThan(valExpr(1))), 0);
+        expect(await evalExpr(valExpr(1).greaterThan(valExpr(0))), true);
+        expect(await evalExpr(valExpr(1).greaterThan(valExpr(1))), false);
       });
 
       apiTest('greaterThanOrEqualTo()', () async {
-        expect(await evalExpr(valExpr(1).greaterThanOrEqualTo(valExpr(2))), 0);
-        expect(await evalExpr(valExpr(1).greaterThanOrEqualTo(valExpr(1))), 1);
-        expect(await evalExpr(valExpr(1).greaterThanOrEqualTo(valExpr(0))), 1);
+        expect(
+          await evalExpr(valExpr(1).greaterThanOrEqualTo(valExpr(2))),
+          false,
+        );
+        expect(
+          await evalExpr(valExpr(1).greaterThanOrEqualTo(valExpr(1))),
+          true,
+        );
+        expect(
+          await evalExpr(valExpr(1).greaterThanOrEqualTo(valExpr(0))),
+          true,
+        );
       });
 
       apiTest('equalTo()', () async {
-        expect(await evalExpr(valExpr(1).equalTo(valExpr(0))), 0);
-        expect(await evalExpr(valExpr(1).equalTo(valExpr(1))), 1);
+        expect(await evalExpr(valExpr(1).equalTo(valExpr(0))), false);
+        expect(await evalExpr(valExpr(1).equalTo(valExpr(1))), true);
       });
 
       apiTest('notEqualTo()', () async {
-        expect(await evalExpr(valExpr(1).notEqualTo(valExpr(0))), 1);
-        expect(await evalExpr(valExpr(1).notEqualTo(valExpr(1))), 0);
+        expect(await evalExpr(valExpr(1).notEqualTo(valExpr(0))), true);
+        expect(await evalExpr(valExpr(1).notEqualTo(valExpr(1))), false);
       });
 
       apiTest('like()', () async {
-        expect(await evalExpr(valExpr('a').like(valExpr('a'))), 1);
-        expect(await evalExpr(valExpr('ab').like(valExpr('a_'))), 1);
+        expect(await evalExpr(valExpr('a').like(valExpr('a'))), true);
+        expect(await evalExpr(valExpr('ab').like(valExpr('a_'))), true);
       });
 
       apiTest('regex()', () async {
@@ -672,58 +681,58 @@ void main() {
       });
 
       apiTest('is_()', () async {
-        expect(await evalExpr(valExpr('a').is_(valExpr('a'))), 1);
-        expect(await evalExpr(valExpr('a').is_(valExpr('b'))), 0);
+        expect(await evalExpr(valExpr('a').is_(valExpr('a'))), true);
+        expect(await evalExpr(valExpr('a').is_(valExpr('b'))), false);
       });
 
       apiTest('isNot()', () async {
-        expect(await evalExpr(valExpr('a').isNot(valExpr('a'))), 0);
-        expect(await evalExpr(valExpr('a').isNot(valExpr('b'))), 1);
+        expect(await evalExpr(valExpr('a').isNot(valExpr('a'))), false);
+        expect(await evalExpr(valExpr('a').isNot(valExpr('b'))), true);
       });
 
       apiTest('isNullOrMissing()', () async {
-        expect(await evalExpr(valExpr(null).isNullOrMissing()), 1);
+        expect(await evalExpr(valExpr(null).isNullOrMissing()), true);
         expect(
           await evalExpr(valExpr(Expression.property('X')).isNullOrMissing()),
-          1,
+          true,
         );
-        expect(await evalExpr(valExpr('a').isNullOrMissing()), 0);
+        expect(await evalExpr(valExpr('a').isNullOrMissing()), false);
       });
 
       apiTest('notNullOrMissing()', () async {
-        expect(await evalExpr(valExpr(null).notNullOrMissing()), 0);
+        expect(await evalExpr(valExpr(null).notNullOrMissing()), false);
         expect(
           await evalExpr(valExpr(Expression.property('X')).notNullOrMissing()),
-          0,
+          false,
         );
-        expect(await evalExpr(valExpr('a').notNullOrMissing()), 1);
+        expect(await evalExpr(valExpr('a').notNullOrMissing()), true);
       });
 
       apiTest('and()', () async {
-        expect(await evalExpr(valExpr(true).and(valExpr(true))), 1);
-        expect(await evalExpr(valExpr(true).and(valExpr(false))), 0);
+        expect(await evalExpr(valExpr(true).and(valExpr(true))), true);
+        expect(await evalExpr(valExpr(true).and(valExpr(false))), false);
       });
 
       apiTest('or()', () async {
-        expect(await evalExpr(valExpr(true).or(valExpr(true))), 1);
-        expect(await evalExpr(valExpr(true).or(valExpr(false))), 1);
-        expect(await evalExpr(valExpr(false).or(valExpr(false))), 0);
+        expect(await evalExpr(valExpr(true).or(valExpr(true))), true);
+        expect(await evalExpr(valExpr(true).or(valExpr(false))), true);
+        expect(await evalExpr(valExpr(false).or(valExpr(false))), false);
       });
 
       apiTest('between()', () async {
         expect(
           await evalExpr(valExpr(0).between(valExpr(0), and: valExpr(1))),
-          1,
+          true,
         );
         expect(
           await evalExpr(valExpr(2).between(valExpr(0), and: valExpr(1))),
-          0,
+          false,
         );
       });
 
       apiTest('in_()', () async {
-        expect(await evalExpr(valExpr('a').in_([valExpr('a')])), 1);
-        expect(await evalExpr(valExpr('a').in_([valExpr('b')])), 0);
+        expect(await evalExpr(valExpr('a').in_([valExpr('a')])), true);
+        expect(await evalExpr(valExpr('a').in_([valExpr('b')])), false);
       });
 
       apiTest('collation()', () async {
@@ -733,7 +742,7 @@ void main() {
               'A',
             ).equalTo(valExpr('a')).collate(Collation.ascii().ignoreCase(true)),
           ),
-          1,
+          true,
         );
 
         expect(
@@ -742,7 +751,7 @@ void main() {
                 .equalTo(valExpr('a'))
                 .collate(Collation.unicode().ignoreCase(true)),
           ),
-          1,
+          true,
         );
       });
     });
@@ -797,8 +806,8 @@ void main() {
       });
 
       apiTest('deleted', () async {
-        expect(await evalMetaExpr(Meta.isDeleted), 0);
-        expect(await evalMetaExpr(Meta.isDeleted, deleted: true), 1);
+        expect(await evalMetaExpr(Meta.isDeleted), false);
+        expect(await evalMetaExpr(Meta.isDeleted, deleted: true), true);
       });
 
       apiTest('expiration', () async {

@@ -15,12 +15,6 @@ files:
         dart-name: DartCBLConflictHandlerFunction
       CBLConflictResolverFunction:
         name: CBLConflictResolverFunction
-      CBLDatabaseChangeListenerFunction:
-        name: CBLDatabaseChangeListenerFunction
-        dart-name: DartCBLDatabaseChangeListenerFunction
-      CBLDocumentChangeListenerFunction:
-        name: CBLDocumentChangeListenerFunction
-        dart-name: DartCBLDocumentChangeListenerFunction
       CBLDocumentPropertyDecryptorFunction:
         name: CBLDocumentPropertyDecryptorFunction
       CBLDocumentPropertyEncryptorFunction:
@@ -40,10 +34,6 @@ files:
       CBLNotificationsReadyCallbackFunction:
         name: CBLNotificationsReadyCallbackFunction
         dart-name: DartCBLNotificationsReadyCallbackFunction
-      CBLPropertyDecryptorFunction:
-        name: CBLPropertyDecryptorFunction
-      CBLPropertyEncryptorFunction:
-        name: CBLPropertyEncryptorFunction
       CBLQueryChangeListenerFunction:
         name: CBLQueryChangeListenerFunction
         dart-name: DartCBLQueryChangeListenerFunction
@@ -372,6 +362,8 @@ files:
         name: CBLArrayIndexConfiguration
       c:@SA@CBLCollectionChange:
         name: CBLCollectionChange
+      c:@SA@CBLCollectionConfiguration:
+        name: CBLCollectionConfiguration
       c:@SA@CBLConnectionStatus:
         name: CBLConnectionStatus
       c:@SA@CBLConsoleLogSink:
@@ -390,16 +382,12 @@ files:
         name: CBLFileLogSink
       c:@SA@CBLFullTextIndexConfiguration:
         name: CBLFullTextIndexConfiguration
-      c:@SA@CBLLogFileConfiguration:
-        name: CBLLogFileConfiguration
       c:@SA@CBLPredictiveModel:
         name: CBLPredictiveModel
       c:@SA@CBLProxySettings:
         name: CBLProxySettings
       c:@SA@CBLReplicatedDocument:
         name: CBLReplicatedDocument
-      c:@SA@CBLReplicationCollection:
-        name: CBLReplicationCollection
       c:@SA@CBLReplicatorConfiguration:
         name: CBLReplicatorConfiguration
       c:@SA@CBLReplicatorProgress:
@@ -420,6 +408,10 @@ files:
         name: FLDictKey
       c:@SA@FLPathComponent:
         name: FLPathComponent
+      c:@T@__builtin_va_list:
+        name: __builtin_va_list
+      c:@T@va_list:
+        name: va_list$1
       c:CBLBase.h@T@CBLErrorCode:
         name: CBLErrorCode
         dart-name: DartCBLErrorCode
@@ -439,8 +431,6 @@ files:
         name: CBLCollectionChangeListener
       c:CBLCollection.h@T@CBLCollectionDocumentChangeListener:
         name: CBLCollectionDocumentChangeListener
-      c:CBLDatabase.h@T@CBLDatabaseChangeListener:
-        name: CBLDatabaseChangeListener
       c:CBLDatabase.h@T@CBLEncryptionAlgorithm:
         name: CBLEncryptionAlgorithm
         dart-name: DartCBLEncryptionAlgorithm
@@ -457,10 +447,6 @@ files:
         dart-name: DartCBLConcurrencyControl
       c:CBLDocument.h@T@CBLConflictHandler:
         name: CBLConflictHandler
-      c:CBLDocument.h@T@CBLDocumentChangeListener:
-        name: CBLDocumentChangeListener
-      c:CBLLog.h@T@CBLLogCallback:
-        name: CBLLogCallback
       c:CBLLogSinks.h@T@CBLLogDomain:
         name: CBLLogDomain
         dart-name: DartCBLLogDomain
@@ -494,13 +480,11 @@ files:
         name: CBLDocumentPropertyEncryptor
       c:CBLReplicator.h@T@CBLDocumentReplicationListener:
         name: CBLDocumentReplicationListener
-      c:CBLReplicator.h@T@CBLPropertyDecryptor:
-        name: CBLPropertyDecryptor
-      c:CBLReplicator.h@T@CBLPropertyEncryptor:
-        name: CBLPropertyEncryptor
       c:CBLReplicator.h@T@CBLProxyType:
         name: CBLProxyType
         dart-name: DartCBLProxyType
+      c:CBLReplicator.h@T@CBLReplicationCollection:
+        name: CBLReplicationCollection
       c:CBLReplicator.h@T@CBLReplicationFilter:
         name: CBLReplicationFilter
       c:CBLReplicator.h@T@CBLReplicatorActivityLevel:
@@ -564,6 +548,10 @@ files:
       c:_types.h@T@__darwin_off_t:
         name: __darwin_off_t
         dart-name: Dart__int64_t
+      c:_types.h@T@__darwin_va_list:
+        name: __darwin_va_list
       c:_types.h@T@__int64_t:
         name: __int64_t
         dart-name: Dart__int64_t
+      c:_va_list.h@T@va_list:
+        name: va_list
