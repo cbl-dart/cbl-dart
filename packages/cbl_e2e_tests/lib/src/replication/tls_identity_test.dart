@@ -400,26 +400,10 @@ b17aolOOq/6xfP6QIc9I6pOoPhEFY18mCqVCKrF3YCQjVC3P7Ac1m2x5iMXL+fXF
     group('fromExternal', () {
       group('failures', () {
         test('public key unavailable', () async {
-          var uncaughtError = false;
-          await runZonedGuarded(
-            () async {
-              final keyPair = await KeyPair.fromExternal(
-                ExceptionExternalKeyPairDelegate(),
-              );
-              expect(await keyPair.publicKeyDigest, isNull);
-            },
-            (error, stackTrace) {
-              if (error case UnimplementedError(
-                message: 'ExceptionExternalKeyPairDelegate.publicKeyData',
-              )) {
-                uncaughtError = true;
-              } else {
-                // ignore: only_throw_errors
-                throw error;
-              }
-            },
+          expect(
+            KeyPair.fromExternal(ExceptionExternalKeyPairDelegate()),
+            throwsA(isA<DatabaseException>()),
           );
-          expect(uncaughtError, isTrue);
         });
       });
 

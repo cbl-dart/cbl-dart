@@ -286,6 +286,10 @@ jobs:
         with:
           sdk: ${{ env.dart-version-stable }}
 
+      - name: Enable Flutter native assets
+        if: matrix.embedder == 'flutter'
+        run: flutter config --enable-native-assets
+
       - name: Get dependencies
         run: dart pub get
 

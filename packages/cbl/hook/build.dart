@@ -123,7 +123,20 @@ Future<void> _build(BuildInput input, BuildOutputBuilder output) async {
   print('[cbl build hook] Compiled and registered cblitedart asset.');
 
   // 3. Optionally download vector search extension.
-  if (edition == 'enterprise' && vectorSearch) {
+  // Vector search is only available for 64-bit architectures.
+  final vectorSearchSupported =
+      targetArchitecture != Architecture.arm &&
+      targetArchitecture != Architecture.ia32;
+
+  if (edition == 'enterprise' && vectorSearch && !vectorSearchSupported) {
+    // ignore: avoid_print
+    print(
+      '[cbl build hook] Skipping vector search: '
+      'not available for $targetArchitecture.',
+    );
+  }
+
+  if (edition == 'enterprise' && vectorSearch && vectorSearchSupported) {
     var vectorSearchLibPath = await _downloadVectorSearch(
       input: input,
       targetOS: targetOS,

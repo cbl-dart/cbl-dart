@@ -555,6 +555,7 @@ AsyncCallback _createConflictResolverCallback(
 
     return resolvedDelegate?.pointer.address;
   },
+  errorResult: false,
   ignoreErrorsInDart: ignoreErrorsInDart,
   debugName: 'ConflictResolver',
 );

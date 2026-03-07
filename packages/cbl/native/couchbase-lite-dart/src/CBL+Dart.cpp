@@ -967,8 +967,7 @@ static const CBLDocument* CBLDart_ReplicatorConflictResolverWrapper(
   args.value.as_array.length = 3;
   args.value.as_array.values = argsValues;
 
-  const CBLDocument* decision;
-  auto resolverThrewException = false;
+  const CBLDocument* decision = nullptr;
 
   auto resultHandler = [&](Dart_CObject* result) {
     switch (result->type) {
@@ -983,26 +982,19 @@ static const CBLDocument* CBLDart_ReplicatorConflictResolverWrapper(
 
       case Dart_CObject_kBool:
         // `false` means the resolver threw an exception.
-        if (!result->value.as_bool) {
-          resolverThrewException = true;
-          break;
-        }
+        // Fall through to default.
       default:
-        auto message = std::string(
-            "Unexpected result from replicator conflict resolver, with "
-            "Dart_CObject_Type: ");
-        message += std::to_string(result->type);
-
-        throw std::logic_error(message);
+        // On error or unexpected result, fall back to the library's default
+        // conflict resolver. This avoids throwing C++ exceptions across the
+        // C API boundary, which is undefined behavior between libraries with
+        // potentially different C++ standard library versions.
+        decision = CBLDefaultConflictResolver(nullptr, documentID,
+                                              localDocument, remoteDocument);
         break;
     }
   };
 
   CBLDart::AsyncCallbackCall(*callback, resultHandler).execute(args);
-
-  if (resolverThrewException) {
-    throw std::runtime_error("Replicator conflict resolver threw an exception");
-  }
 
   return decision;
 }
