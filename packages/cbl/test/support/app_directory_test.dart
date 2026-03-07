@@ -21,8 +21,11 @@ void main() {
 
         expect(
           result,
-          '/var/mobile/Containers/Data/Application/ABC123/'
-          'Library/Application Support',
+          p.join(
+            '/var/mobile/Containers/Data/Application/ABC123',
+            'Library',
+            'Application Support',
+          ),
         );
       });
     });
