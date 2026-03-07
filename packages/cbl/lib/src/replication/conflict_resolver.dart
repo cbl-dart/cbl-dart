@@ -51,6 +51,11 @@ abstract base class ConflictResolver {
   /// [Conflict.remoteDocument], or you can create a mutable copy of either one
   /// and modify it appropriately. Alternatively return `null` if the resolution
   /// is to delete the document.
+  ///
+  /// If this method throws an exception, the exception is reported as an
+  /// unhandled error in the current zone and the conflict is resolved using the
+  /// [DefaultConflictResolver] strategy. An error is also logged through the
+  /// Couchbase Lite logging facility at error level.
   /// {@endtemplate}
   FutureOr<Document?> resolve(Conflict conflict);
 }
