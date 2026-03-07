@@ -180,7 +180,7 @@ function runE2ETests() {
         *)        buildTarget="$(echo "$device" | tr '[:upper:]' '[:lower:]')" ;;
         esac
         echo "Build target: $buildTarget"
-        flutter build "$buildTarget" --debug $DART_DEFINES 2>&1 || true
+        flutter build "$buildTarget" --debug -v $DART_DEFINES 2>&1
 
         # --- Diagnostic: check for native assets builder output ---
         echo "=== Native assets builder cache ==="
