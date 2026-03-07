@@ -488,13 +488,20 @@ Future<Uri> _lipoThin(
     ),
   };
 
+  final inputFile = libPath.toFilePath();
+  final isUniversal = await _isUniversalBinary(inputFile);
+  if (!isUniversal) {
+    // Already a single-architecture binary; no thinning needed.
+    return libPath;
+  }
+
   final outputFile = p.join(
     outputDir.toFilePath(),
-    p.basename(libPath.toFilePath()),
+    p.basename(inputFile),
   );
 
   final result = await Process.run('lipo', [
-    libPath.toFilePath(),
+    inputFile,
     '-thin',
     arch,
     '-output',
