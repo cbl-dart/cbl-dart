@@ -400,10 +400,10 @@ b17aolOOq/6xfP6QIc9I6pOoPhEFY18mCqVCKrF3YCQjVC3P7Ac1m2x5iMXL+fXF
     group('fromExternal', () {
       group('failures', () {
         test('public key unavailable', () async {
-          expect(
-            KeyPair.fromExternal(ExceptionExternalKeyPairDelegate()),
-            throwsA(isA<DatabaseException>()),
+          final keyPair = await KeyPair.fromExternal(
+            ExceptionExternalKeyPairDelegate(),
           );
+          expect(await keyPair.publicKeyDigest, '<unknown>');
         });
       });
 

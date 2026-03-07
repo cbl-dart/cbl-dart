@@ -1,17 +1,12 @@
 import 'dart:async';
 
 import 'package:cbl/cbl.dart';
-import 'package:cbl/src/bindings/bindings.dart';
 
 import '../../test_binding_impl.dart';
 import '../test_binding.dart';
 import '../utils/api_variant.dart';
 import '../utils/database_utils.dart';
-
-bool get _vectorSearchAvailable {
-  final base = CBLBindings.instance.base;
-  return base.vectorSearchLibraryAvailable && base.systemSupportsVectorSearch;
-}
+import '../utils/vector_search_utils.dart';
 
 void main() {
   setupTestBinding();
@@ -607,7 +602,7 @@ void main() {
 
           expect(ids, documents.map((doc) => doc.id));
         },
-        skip: _vectorSearchAvailable
+        skip: vectorSearchAvailable
             ? null
             : 'Vector search not available on this system',
       );
