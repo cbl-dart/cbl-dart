@@ -19,12 +19,14 @@ macOSCouchbaseAppLogFile="$HOME/Library/Logs/CouchbaseServer.log"
 macOSCouchbaseHTTPLogFile="$HOME/Library/Logs/couchbase-server.log"
 macOSCouchbaseAppDir="/Applications/Couchbase Server.app"
 macOSCouchbaseCouchJSFile="$macOSCouchbaseAppDir/Contents/Resources/couchbase-core/bin/couchjs"
+syncGatewayMacOSLogFile="${RUNNER_TEMP:-/tmp}/sync-gateway-macos.log"
+syncGatewayWindowsLogFile="${RUNNER_TEMP:-/tmp}/sync-gateway-windows.log"
 
 function waitForService() {
     name="$1"
     url="$2"
     diagnostics="${3:-}"
-    maxAttempts=50
+    maxAttempts=10
     delayBetweenAttempts=5
     attempt=0
 
@@ -53,7 +55,10 @@ function waitForService() {
 }
 
 function waitForSyncGateway() {
-    waitForService "Sync Gateway" localhost:4984
+    waitForService \
+        "Sync Gateway" \
+        localhost:4984 \
+        dumpSyncGatewayDiagnostics
 }
 
 function dumpCouchbaseServerDiagnostics() {
@@ -79,6 +84,33 @@ function dumpCouchbaseServerDiagnostics() {
         ;;
     MINGW64* | MSYS* | CYGWIN*)
         powershell.exe -Command "\$service = Get-Service | Where-Object { \$_.Name -like 'CouchbaseServer*' -or \$_.DisplayName -like 'Couchbase Server*' } | Select-Object -First 1; if (\$null -eq \$service) { Write-Host 'No Couchbase service found'; exit 0 }; \$service | Format-List -Property Name,DisplayName,Status,StartType" || true
+        ;;
+    esac
+
+    echo "::endgroup::"
+}
+
+function dumpSyncGatewayDiagnostics() {
+    echo "::group::Sync Gateway diagnostics"
+
+    case "$(uname)" in
+    Darwin)
+        ps aux | grep -i '[s]ync_gateway' || true
+        if [ -f "$syncGatewayMacOSLogFile" ]; then
+            echo "-- $syncGatewayMacOSLogFile --"
+            tail -n 200 "$syncGatewayMacOSLogFile" || true
+        fi
+        ;;
+    MINGW64* | MSYS* | CYGWIN*)
+        powershell.exe -Command "Get-Process sync_gateway -ErrorAction SilentlyContinue | Format-List -Property Id,ProcessName,Path,StartTime" || true
+        if [ -f "$syncGatewayWindowsLogFile" ]; then
+            echo "-- $syncGatewayWindowsLogFile --"
+            tail -n 200 "$syncGatewayWindowsLogFile" || true
+        fi
+        ;;
+    *)
+        docker compose -f "$dockerComposeFile" ps || true
+        docker compose -f "$dockerComposeFile" logs sync-gateway || true
         ;;
     esac
 
@@ -240,12 +272,13 @@ function startSyncGatewayMacOS {
         echo "::endgroup::"
     fi
 
-    cd "$syncGatewayInstallDir"
-    bin/sync_gateway \
+    rm -f "$syncGatewayMacOSLogFile"
+    "$syncGatewayInstallDir/bin/sync_gateway" \
         '-disable_persistent_config' \
         '-api.admin_interface_authentication=false' \
         '-bootstrap.use_tls_server=false' \
-        "$syncGatewayConfig"
+        "$syncGatewayConfig" \
+        >"$syncGatewayMacOSLogFile" 2>&1
 }
 
 function startSyncGatewayWindows {
@@ -259,18 +292,31 @@ function startSyncGatewayWindows {
 
     powershell.exe -Command "Start-Process msiexec.exe -Wait -ArgumentList '/i $syncGatewayMsi /passive'"
 
-    # Stop the service which was started during installation.
-    sc.exe stop SyncGateway || true
+    # Stop the service which was started during installation and wait until
+    # it has fully released its process and ports before launching the test
+    # instance with our custom config.
+    powershell.exe -Command "\
+        \$service = Get-Service -Name 'SyncGateway' -ErrorAction SilentlyContinue; \
+        if (\$null -ne \$service) { \
+            if (\$service.Status -ne 'Stopped') { \
+                Stop-Service -Name 'SyncGateway' -Force -ErrorAction SilentlyContinue; \
+                \$service.WaitForStatus('Stopped', [TimeSpan]::FromMinutes(2)); \
+            } \
+        }; \
+        Get-Process sync_gateway -ErrorAction SilentlyContinue | Stop-Process -Force; \
+        Start-Sleep -Seconds 2"
 
     rm "$syncGatewayMsi"
 
     echo "::endgroup::"
 
+    rm -f "$syncGatewayWindowsLogFile"
     "C:\Program Files\Couchbase\Sync Gateway\sync_gateway.exe" \
         '-disable_persistent_config' \
         '-api.admin_interface_authentication=false' \
         '-bootstrap.use_tls_server=false' \
-        "$syncGatewayConfig"
+        "$syncGatewayConfig" \
+        >"$syncGatewayWindowsLogFile" 2>&1
 }
 
 function startDockerService {
