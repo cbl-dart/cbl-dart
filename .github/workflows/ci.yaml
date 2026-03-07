@@ -34,6 +34,7 @@ jobs:
         with:
           channel: ${{ env.flutter-channel }}
           cache: true
+          cache-key: "flutter-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}"
 
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
@@ -86,6 +87,7 @@ jobs:
         with:
           channel: ${{ env.flutter-channel }}
           cache: true
+          cache-key: "flutter-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}"
 
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
@@ -111,45 +113,74 @@ jobs:
         dart: [stable, beta]
         embedder: [standalone]
         os: [Ubuntu]
+        include:
+          - package: cbl
+            dart: stable
+            embedder: standalone
+            os: macOS
+          - package: cbl
+            dart: stable
+            embedder: standalone
+            os: Windows
     env:
       EMBEDDER: ${{ matrix.embedder }}
       TARGET_OS: ${{ matrix.os }}
       TEST_PACKAGE: ${{ matrix.package }}
     continue-on-error: ${{ matrix.dart != 'stable' }}
-    runs-on: blacksmith-4vcpu-ubuntu-2204
+    runs-on: >-
+      ${{ fromJSON('{
+        "Ubuntu":"blacksmith-4vcpu-ubuntu-2204",
+        "macOS":"macos-15",
+        "Windows":"windows-2025"
+      }')[matrix.os] }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Disable Windows Defender
+        if: runner.os == 'Windows'
+        run: Set-MpPreference -DisableRealtimeMonitoring $true
+        shell: powershell
+
+      - name: Install Linux cross-compilation toolchain
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: ${{ env.flutter-channel }}
           cache: true
+          cache-key: "flutter-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}"
 
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
         with:
           sdk: ${{ env[format('dart-version-{0}', matrix.dart)] }}
 
-      - name: Setup Melos
-        run: dart pub global activate melos
+      - name: Get dependencies
+        run: dart pub get
 
       - name: Bootstrap repository
         shell: bash
-        run: melos bootstrap
+        run: dart run melos bootstrap
 
       - name: Run build_runner
         if: ${{ matrix.package == 'cbl_generator' }}
+        shell: bash
         run: ./tools/ci-steps.sh checkBuildRunnerOutput
 
       - name: Run tests
+        shell: bash
         run: ./tools/ci-steps.sh runUnitTests
 
       - name: Upload coverage data
         if: ${{ matrix.dart == 'stable' }}
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        shell: bash
         run: |
           ./tools/ci-steps.sh uploadCoverageData "unit.${{ matrix.package }}"
 
@@ -174,9 +205,6 @@ jobs:
           # TODO: Get iOS tests to launch again in CI
           - embedder: flutter
             os: iOS
-    # Flutter + Ubuntu is flaky, likely because of a bug in CBL C, so we allow it to fail for now.
-    continue-on-error:
-      ${{ matrix.embedder == 'flutter' && matrix.os == 'Ubuntu' }}
     runs-on: >-
       ${{ fromJSON('{
         "iOS":"macos-14",
@@ -250,6 +278,7 @@ jobs:
         with:
           channel: ${{ env.flutter-channel }}
           cache: true
+          cache-key: "flutter-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}"
 
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
@@ -257,12 +286,12 @@ jobs:
         with:
           sdk: ${{ env.dart-version-stable }}
 
-      - name: Setup Melos
-        run: dart pub global activate melos
+      - name: Get dependencies
+        run: dart pub get
 
       - name: Bootstrap repository
         shell: bash
-        run: melos bootstrap
+        run: dart run melos bootstrap
 
       - name: Start Couchbase services
         shell: bash
@@ -282,12 +311,8 @@ jobs:
         run: ./tools/ci-steps.sh startVirtualDevices
 
       - name: Run tests
-        uses: nick-fields/retry@v3
-        with:
-          shell: bash
-          timeout_minutes: 20
-          max_attempts: 3
-          command: ./tools/ci-steps.sh runE2ETests
+        shell: bash
+        run: ./tools/ci-steps.sh runE2ETests
 
       - name: Collect test results
         if: failure()

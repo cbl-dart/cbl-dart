@@ -49,6 +49,7 @@ jobs:
         with:
           flutter-version: 3.41.2
           cache: true
+          cache-key: "flutter-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}"
 
       - name: Setup Melos
         run: dart pub global activate melos

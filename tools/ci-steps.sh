@@ -24,15 +24,6 @@ iosDevice="iPhone 13"
 androidVersion="27"
 androidDevice="pixel_4"
 
-case "$(uname)" in
-MINGW* | CYGWIN* | MSYS*)
-    melosBin="melos.bat"
-    ;;
-*)
-    melosBin="melos"
-    ;;
-esac
-
 # === Steps ===================================================================
 
 function startCouchbaseServices() {
@@ -84,6 +75,28 @@ function runUnitTests() {
         flutter test --coverage coverage -r expanded
         ;;
     esac
+}
+
+function _verifyFlutterTestResults() {
+    local responseDataFile="build/integration_response_data.json"
+
+    if [ ! -f "$responseDataFile" ]; then
+        echo "ERROR: No integration test response data found at $responseDataFile"
+        echo "Tests may have crashed or timed out without producing results."
+        exit 1
+    fi
+
+    # The response data is a JSON object where the "result" key is "true" or
+    # "false" (as a string). See Response.toJson() in the integration_test
+    # package.
+    if ! grep -q '"result":"true"' "$responseDataFile" 2>/dev/null &&
+        ! grep -q '"result": "true"' "$responseDataFile" 2>/dev/null; then
+        echo "ERROR: Integration tests failed. Response data:"
+        cat "$responseDataFile"
+        exit 1
+    fi
+
+    echo "Integration test response data confirms all tests passed."
 }
 
 function runE2ETests() {
@@ -159,6 +172,8 @@ function runE2ETests() {
             --keep-app-running \
             --driver test_driver/integration_test.dart \
             --target integration_test/e2e_test.dart
+
+        _verifyFlutterTestResults
         ;;
     esac
 }
