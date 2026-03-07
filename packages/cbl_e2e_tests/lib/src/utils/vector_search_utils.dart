@@ -16,6 +16,7 @@ bool get _vectorSearchLibraryAvailable {
   try {
     cblite_vector_search.vectorSearchLibraryPath;
     return true;
+  // ignore: avoid_catching_errors
   } on ArgumentError {
     return false;
   }
