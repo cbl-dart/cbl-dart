@@ -13,10 +13,6 @@ const syncGatewayHost = 'localhost';
 const syncGatewayPublicPort = 4984;
 const syncGatewayAdminPort = 4985;
 const syncGatewayDatabase = 'db';
-const couchbaseServerHost = '127.0.0.1';
-const couchbaseServerAdminPort = 8091;
-const couchbaseServerAdminUser = 'Administrator';
-const couchbaseServerAdminPassword = 'password';
 final syncGatewayReplicationUrl = Uri(
   scheme: 'ws',
   host: syncGatewayHost,
@@ -27,11 +23,6 @@ final syncGatewayAdminApiUrl = Uri(
   scheme: 'http',
   host: syncGatewayHost,
   port: syncGatewayAdminPort,
-);
-final couchbaseServerAdminApiUrl = Uri(
-  scheme: 'http',
-  host: couchbaseServerHost,
-  port: couchbaseServerAdminPort,
 );
 final janeAuthenticator = BasicAuthenticator(
   username: 'Jane',
@@ -98,81 +89,8 @@ Future<T> _withClient<T>(Future<T> Function(Client) fn) async {
 
 Future<void> flushDatabaseByAdmin() async {
   // Prefer purging via Sync Gateway because it is faster and preserves auth
-  // metadata such as test users. Fall back to flushing the backing bucket only
-  // if the admin purge path is unavailable.
-  try {
-    await _purgeSyncGatewayDatabase();
-    return;
-  } on Object catch (error, stackTrace) {
-    // ignore: avoid_print
-    print('Falling back to Couchbase bucket flush: $error');
-
-    if (await _flushCouchbaseBucket()) {
-      await _waitForSyncGatewayAfterBucketFlush();
-      return;
-    }
-
-    Error.throwWithStackTrace(error, stackTrace);
-  }
-}
-
-Future<bool> _flushCouchbaseBucket() async {
-  final request = Request(
-    'POST',
-    couchbaseServerAdminApiUrl.resolve(
-      '/pools/default/buckets/$syncGatewayDatabase/controller/doFlush',
-    ),
-  );
-  request.headers['Authorization'] =
-      'Basic ${base64Encode(utf8.encode('$couchbaseServerAdminUser:'
-          '$couchbaseServerAdminPassword'))}';
-
-  try {
-    await _withClient((client) async {
-      final response = await client.send(request);
-      await response.stream.drain<void>();
-
-      if (response.statusCode != 200) {
-        throw StateError(
-          'Got a response with status code ${response.statusCode} from '
-          'Couchbase Server but expected status code 200.',
-        );
-      }
-    });
-    return true;
-  } on Object catch (error) {
-    // ignore: avoid_print
-    print('Falling back to Sync Gateway purge: $error');
-    return false;
-  }
-}
-
-Future<void> _waitForSyncGatewayAfterBucketFlush() async {
-  final timeoutAt = DateTime.now().add(const Duration(seconds: 30));
-
-  while (true) {
-    try {
-      final response = await syncGatewayRequest(
-        Uri.parse('$syncGatewayDatabase/_all_docs'),
-        admin: true,
-      );
-      final allDocs = jsonDecode(response) as Map<String, Object?>;
-      final rows = allDocs['rows']! as List<Object?>;
-      if (rows.isEmpty) {
-        return;
-      }
-    } on Object {
-      // Ignore transient errors while Sync Gateway reconnects to the bucket.
-    }
-
-    if (DateTime.now().isAfter(timeoutAt)) {
-      throw TimeoutException(
-        'Sync Gateway did not recover after flushing the Couchbase bucket.',
-      );
-    }
-
-    await Future<void>.delayed(const Duration(milliseconds: 200));
-  }
+  // metadata such as test users.
+  await _purgeSyncGatewayDatabase();
 }
 
 Future<void> _purgeSyncGatewayDatabase() async {
