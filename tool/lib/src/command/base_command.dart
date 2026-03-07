@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:args/command_runner.dart';
 import 'package:cli_util/cli_logging.dart';
 import 'package:meta/meta.dart';
+import 'package:path/path.dart' as p;
 
 import '../project_layout.dart';
 import '../runner.dart';
@@ -15,7 +16,7 @@ abstract class BaseCommand extends Command<void> {
 
   late final Logger logger = verbose ? Logger.verbose() : Logger.standard();
 
-  late final projectLayout = ProjectLayout(runner!.projectDir);
+  late final projectLayout = ProjectLayout(p.dirname(runner!.projectDir));
 
   @visibleForOverriding
   Future<void> doRun();

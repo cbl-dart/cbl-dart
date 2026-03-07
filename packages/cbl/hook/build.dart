@@ -84,22 +84,22 @@ Future<void> _build(BuildInput input, BuildOutputBuilder output) async {
       // Link against cblite.
       ...switch (targetOS) {
         OS.iOS => [
-            '-F${cblite.libPath.resolve('../').toFilePath()}',
-            '-framework',
-            'CouchbaseLite',
-          ],
+          '-F${cblite.libPath.resolve('../').toFilePath()}',
+          '-framework',
+          'CouchbaseLite',
+        ],
         OS.macOS => [
-            '-L${cblite.libPath.resolve('./').toFilePath()}',
-            '-lcblite',
-          ],
+          '-L${cblite.libPath.resolve('./').toFilePath()}',
+          '-lcblite',
+        ],
         OS.android || OS.linux => [
-            r'-Wl,-rpath=$ORIGIN',
-            '-L${cblite.libPath.resolve('./').toFilePath()}',
-            '-lcblite',
-          ],
+          r'-Wl,-rpath=$ORIGIN',
+          '-L${cblite.libPath.resolve('./').toFilePath()}',
+          '-lcblite',
+        ],
         OS.windows => [
-            cblite.libPath.resolve('../lib/cblite.lib').toFilePath(),
-          ],
+          cblite.libPath.resolve('../lib/cblite.lib').toFilePath(),
+        ],
         _ => throw UnsupportedError('Unsupported OS: $targetOS'),
       },
     ],
@@ -241,8 +241,8 @@ Future<T> _retryOnce<T>(Future<T> Function() fn) async {
 
 /// Extracts the target architecture from a universal (fat) binary using lipo.
 ///
-/// On macOS, downloaded cblite packages are universal binaries. The Dart
-/// native assets bundler expects single-architecture binaries.
+/// On macOS, downloaded cblite packages are universal binaries. The Dart native
+/// assets bundler expects single-architecture binaries.
 Future<Uri> _thinIfNeeded(
   Uri libPath, {
   required OS targetOS,
@@ -254,7 +254,9 @@ Future<Uri> _thinIfNeeded(
   final arch = switch (targetArchitecture) {
     Architecture.arm64 => 'arm64',
     Architecture.x64 => 'x86_64',
-    _ => throw UnsupportedError('Unsupported macOS architecture: $targetArchitecture'),
+    _ => throw UnsupportedError(
+      'Unsupported macOS architecture: $targetArchitecture',
+    ),
   };
 
   final outputFile = p.join(

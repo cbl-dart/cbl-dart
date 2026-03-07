@@ -21,9 +21,9 @@ export 'support/streams.dart' show AsyncListenStream;
 abstract final class CouchbaseLite {
   /// Initializes the `cbl` package, for the main isolate.
   ///
-  /// With native assets, libraries are loaded automatically by the Dart VM.
-  /// No manual library configuration is needed. The edition and optional
-  /// features are configured via user defines in `pubspec.yaml`:
+  /// With native assets, libraries are loaded automatically by the Dart VM. No
+  /// manual library configuration is needed. The edition and optional features
+  /// are configured via user defines in `pubspec.yaml`:
   ///
   /// ```yaml
   /// hooks:
@@ -86,8 +86,8 @@ abstract final class CouchbaseLite {
 }
 
 /// Returns whether the cblitedart library was compiled with the enterprise
-/// edition of Couchbase Lite. This is determined by a compile-time define
-/// set by the build hook based on user defines.
+/// edition of Couchbase Lite. This is determined by a compile-time define set
+/// by the build hook based on user defines.
 @ffi.Native<ffi.Bool Function()>(
   symbol: 'CBLDart_IsEnterprise',
   assetId: 'package:cbl/src/bindings/cblitedart_native_assets.dart',

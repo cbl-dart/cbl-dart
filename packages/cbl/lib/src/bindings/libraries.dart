@@ -5,8 +5,8 @@ import 'dart:io';
 
 import 'package:ffi/ffi.dart';
 
-/// Resolves the file path of a loaded native library from the address of one
-/// of its symbols.
+/// Resolves the file path of a loaded native library from the address of one of
+/// its symbols.
 ///
 /// Uses `dladdr` on POSIX platforms and `GetModuleHandleEx` +
 /// `GetModuleFileName` on Windows.
