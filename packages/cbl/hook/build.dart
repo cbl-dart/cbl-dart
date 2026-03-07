@@ -98,6 +98,9 @@ Future<void> _build(BuildInput input, BuildOutputBuilder output) async {
     defines: {if (edition == 'enterprise') 'COUCHBASE_ENTERPRISE': '1'},
     language: Language.cpp,
     std: 'c++17',
+    // Use static libc++ on Android to avoid needing to bundle
+    // libc++_shared.so as a separate code asset.
+    cppLinkStdLib: targetOS == OS.android ? 'c++_static' : null,
   );
   await builder.run(input: input, output: output);
 
