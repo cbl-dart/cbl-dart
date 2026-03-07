@@ -47,6 +47,9 @@ function startVirtualDevices() {
 
     case "$targetOs" in
     iOS)
+        # Reset CoreSimulator daemon to avoid stale state on CI runners.
+        sudo killall -9 com.apple.CoreSimulator.CoreSimulatorService 2>/dev/null || true
+        sleep 3
         ./tools/apple-simulator.sh start -o "iOS-$iosVersion" -d "$iosDevice"
         ;;
     Android)
@@ -228,47 +231,71 @@ function runE2ETests() {
         esac
         echo "=== End bundle inspection ==="
 
-        # --- Diagnostic: verify iOS app bundle architecture and signing ---
+        # --- iOS: ensure simulator is fully ready before flutter drive ---
         if [ "$targetOs" = "iOS" ]; then
-            echo "=== iOS app bundle diagnostics ==="
-            local appBundle
-            appBundle=$(find build/ios -name "Runner.app" -path "*/iphonesimulator/*" -type d 2>/dev/null | head -1)
-            if [ -n "$appBundle" ]; then
-                echo "App bundle: $appBundle"
+            echo "=== iOS simulator readiness ==="
+            local simId
+            simId=$(xcrun simctl list devices booted -j | jq -r '.devices[][] | select(.state == "Booted") | .udid' | head -1)
+            if [ -n "$simId" ]; then
+                echo "Booted simulator: $simId"
 
-                echo "--- Framework architectures ---"
-                for fw in "$appBundle"/Frameworks/*.framework/*; do
-                    if [ -f "$fw" ] && file "$fw" | grep -q "Mach-O"; then
-                        echo "$fw:"
-                        lipo -info "$fw" 2>&1 || true
-                    fi
-                done
+                # Re-confirm boot status (blocks until truly ready).
+                echo "Waiting for simulator to be fully ready..."
+                xcrun simctl bootstatus "$simId" -b 2>&1 || true
 
-                echo "--- Code signing ---"
-                codesign -dvv "$appBundle" 2>&1 || true
+                # Wait for SpringBoard to be responsive — it can lag behind
+                # the "Booted" state and cause app launches to hang.
+                echo "Warming up SpringBoard..."
+                xcrun simctl launch "$simId" com.apple.springboard 2>/dev/null || true
+                sleep 5
 
-                echo "--- Try launching app manually ---"
-                local simId
-                simId=$(xcrun simctl list devices booted -j | jq -r '.devices[][] | select(.state == "Booted") | .udid' | head -1)
-                if [ -n "$simId" ]; then
-                    echo "Booted simulator: $simId"
-                    echo "Installing app..."
+                # Verify the app bundle exists and inspect it.
+                local appBundle
+                appBundle=$(find build/ios -name "Runner.app" -path "*/iphonesimulator/*" -type d 2>/dev/null | head -1)
+                if [ -n "$appBundle" ]; then
+                    echo "App bundle: $appBundle"
+
+                    echo "--- Framework architectures ---"
+                    for fw in "$appBundle"/Frameworks/*.framework/*; do
+                        if [ -f "$fw" ] && file "$fw" | grep -q "Mach-O"; then
+                            echo "$fw:"
+                            lipo -info "$fw" 2>&1 || true
+                        fi
+                    done
+
+                    echo "--- Code signing ---"
+                    codesign -dvv "$appBundle" 2>&1 || true
+
+                    # Pre-install the app and verify it launches before
+                    # handing off to flutter drive.
+                    echo "--- Pre-installing app ---"
                     xcrun simctl install "$simId" "$appBundle" 2>&1 || true
-                    echo "Launching app..."
-                    xcrun simctl launch --console-pty "$simId" com.terwesten.gabriel.cblE2eTestsFlutter 2>&1 | head -50 &
+
+                    echo "--- Test-launching app ---"
+                    xcrun simctl launch --terminate-running-process --console-pty "$simId" "$testAppBundleId" 2>&1 | head -50 &
                     local launchPid=$!
                     sleep 10
                     kill $launchPid 2>/dev/null || true
                     wait $launchPid 2>/dev/null || true
+
                     echo "--- Checking if app process is alive ---"
                     xcrun simctl spawn "$simId" launchctl list 2>&1 | grep -i "runner\|cbl" || echo "App not found in launchctl"
+
                     echo "--- Recent crash logs ---"
                     find ~/Library/Logs/DiagnosticReports -name "Runner*" -newer "$appBundle" 2>/dev/null | head -5 || echo "No crash logs"
-                    echo "--- Terminate test app ---"
-                    xcrun simctl terminate "$simId" com.terwesten.gabriel.cblE2eTestsFlutter 2>/dev/null || true
+
+                    # Clean up: terminate the test launch so flutter drive
+                    # starts fresh.
+                    echo "--- Terminate pre-launch ---"
+                    xcrun simctl terminate "$simId" "$testAppBundleId" 2>/dev/null || true
+                    sleep 2
+                else
+                    echo "WARNING: No Runner.app found — skipping pre-launch"
                 fi
+            else
+                echo "WARNING: No booted simulator found"
             fi
-            echo "=== End iOS diagnostics ==="
+            echo "=== End iOS simulator readiness ==="
         fi
 
         # Note: We would like to collect coverage data from tests, but
