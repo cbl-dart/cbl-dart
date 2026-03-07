@@ -143,7 +143,7 @@ Future<void> _build(BuildInput input, BuildOutputBuilder output) async {
       targetArchitecture: targetArchitecture,
     );
 
-    if (targetOS == OS.macOS) {
+    if (targetOS == OS.macOS || targetOS == OS.iOS) {
       vectorSearchLibPath = await _lipoThin(
         vectorSearchLibPath,
         targetArchitecture: targetArchitecture,
