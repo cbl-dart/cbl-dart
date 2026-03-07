@@ -20,6 +20,7 @@ String? resolveAppFilesDirectory({
   bool? isAndroid,
   bool? isLinux,
   bool? isWindows,
+  String? iosHome,
 }) {
   resolvedExecutable ??= Platform.resolvedExecutable;
   environment ??= Platform.environment;
@@ -30,7 +31,7 @@ String? resolveAppFilesDirectory({
   isWindows ??= Platform.isWindows;
 
   if (isIOS) {
-    return _resolveIOSDirectory();
+    return _resolveIOSDirectory(iosHome);
   } else if (isMacOS) {
     return _resolveMacOSDirectory(resolvedExecutable, environment);
   } else if (isLinux) {
@@ -45,8 +46,8 @@ String? resolveAppFilesDirectory({
 /// iOS: Always sandboxed. Use `<sandbox>/Library/Application Support`.
 ///
 /// Uses `NSHomeDirectory()` via FFI to get the app sandbox home directory.
-String _resolveIOSDirectory() {
-  final home = _nsHomeDirectory();
+String _resolveIOSDirectory(String? iosHome) {
+  final home = iosHome ?? _nsHomeDirectory();
   return p.join(home, 'Library', 'Application Support');
 }
 

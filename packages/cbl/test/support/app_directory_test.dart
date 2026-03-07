@@ -8,10 +8,6 @@ void main() {
   group('resolveAppFilesDirectory', () {
     group('iOS', () {
       test('returns Application Support under sandbox home', () {
-        // On iOS, the home directory is derived by creating a temp dir and
-        // resolving its real path to find the sandbox root.
-        // On macOS (where this test runs), the resolved path will be based on
-        // the actual system temp directory.
         final result = resolveAppFilesDirectory(
           resolvedExecutable: '/path/to/Runner',
           environment: {},
@@ -20,10 +16,14 @@ void main() {
           isAndroid: false,
           isLinux: false,
           isWindows: false,
+          iosHome: '/var/mobile/Containers/Data/Application/ABC123',
         );
 
-        expect(result, isNotNull);
-        expect(result, endsWith(p.join('Library', 'Application Support')));
+        expect(
+          result,
+          '/var/mobile/Containers/Data/Application/ABC123/'
+          'Library/Application Support',
+        );
       });
     });
 
