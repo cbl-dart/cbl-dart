@@ -300,8 +300,15 @@ jobs:
         run: ./tools/ci-steps.sh buildNativeLibraries
 
       - name: Start Couchbase services
+        id: start_couchbase_services
         shell: bash
         run: ./tools/ci-steps.sh startCouchbaseServices
+
+      - name: Debug macOS runner with tmate
+        if: ${{ failure() && matrix.os == 'macOS' && steps.start_couchbase_services.outcome == 'failure' }}
+        uses: mxschmitt/action-tmate@v3
+        with:
+          limit-access-to-actor: true
 
       - name: Cache Android emulator
         if: matrix.os == 'Android'
