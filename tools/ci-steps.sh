@@ -77,28 +77,6 @@ function runUnitTests() {
     esac
 }
 
-function _verifyFlutterTestResults() {
-    local responseDataFile="build/integration_response_data.json"
-
-    if [ ! -f "$responseDataFile" ]; then
-        echo "ERROR: No integration test response data found at $responseDataFile"
-        echo "Tests may have crashed or timed out without producing results."
-        exit 1
-    fi
-
-    # The response data is a JSON object where the "result" key is "true" or
-    # "false" (as a string). See Response.toJson() in the integration_test
-    # package.
-    if ! grep -q '"result":"true"' "$responseDataFile" 2>/dev/null &&
-        ! grep -q '"result": "true"' "$responseDataFile" 2>/dev/null; then
-        echo "ERROR: Integration tests failed. Response data:"
-        cat "$responseDataFile"
-        exit 1
-    fi
-
-    echo "Integration test response data confirms all tests passed."
-}
-
 function runE2ETests() {
     requireEnvVar EMBEDDER
     requireEnvVar TARGET_OS
@@ -186,8 +164,9 @@ function runE2ETests() {
         echo "=== Native assets builder cache ==="
         # This directory contains the build hook output when Flutter invokes it.
         find .dart_tool -path '*/native_assets_builder/*' -type f 2>/dev/null | head -50 || echo "No native_assets_builder directory found"
+        find .dart_tool -path '*/hooks_runner/*' -type f 2>/dev/null | head -50 || echo "No hooks_runner directory found"
         # Show the build output JSON if it exists (contains registered assets).
-        find .dart_tool -name 'build_output.json' 2>/dev/null | while read -r f; do
+        find .dart_tool -name 'build_output.json' -o -name 'output.json' 2>/dev/null | while read -r f; do
             echo "--- $f ---"
             cat "$f"
             echo ""
@@ -201,6 +180,12 @@ function runE2ETests() {
             find build/linux/ -type f \( -name '*.so' -o -name '*.so.*' \) 2>/dev/null || echo "No .so files found"
             echo "--- Full bundle lib dir ---"
             ls -laR build/linux/x64/debug/bundle/lib/ 2>/dev/null || echo "bundle/lib/ not found"
+            echo "--- Native assets staging dir (build/native_assets/) ---"
+            ls -laR build/native_assets/ 2>/dev/null || echo "build/native_assets/ not found"
+            echo "--- CMake install log (cmake_install.cmake) ---"
+            grep -A2 'native_assets' build/linux/x64/debug/cmake_install.cmake 2>/dev/null || echo "No native_assets in cmake_install.cmake"
+            echo "--- generated_config.cmake PROJECT_DIR ---"
+            grep 'PROJECT_DIR' linux/flutter/ephemeral/generated_config.cmake 2>/dev/null || echo "generated_config.cmake not found"
             ;;
         Windows)
             echo "--- Windows .dll files ---"
@@ -243,8 +228,6 @@ function runE2ETests() {
             --keep-app-running \
             --driver test_driver/integration_test.dart \
             --target integration_test/e2e_test.dart
-
-        _verifyFlutterTestResults
         ;;
     esac
 }

@@ -176,6 +176,14 @@ jobs:
         shell: bash
         run: ./tools/ci-steps.sh runUnitTests
 
+      - name: Clean up broken symlinks
+        if: always()
+        shell: bash
+        run: |
+          # Remove broken symlinks that cause hashFiles('**/pubspec.lock') to
+          # fail in the flutter-action post-cache step.
+          find . -type l ! -exec test -e {} \; -delete 2>/dev/null || true
+
       - name: Upload coverage data
         if: ${{ matrix.dart == 'stable' }}
         env:
@@ -317,6 +325,14 @@ jobs:
       - name: Run tests
         shell: bash
         run: ./tools/ci-steps.sh runE2ETests
+
+      - name: Clean up broken symlinks
+        if: always()
+        shell: bash
+        run: |
+          # Remove broken symlinks that cause hashFiles('**/pubspec.lock') to
+          # fail in the flutter-action post-cache step.
+          find . -type l ! -exec test -e {} \; -delete 2>/dev/null || true
 
       - name: Collect test results
         if: failure()
