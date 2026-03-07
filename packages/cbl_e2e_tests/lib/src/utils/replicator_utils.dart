@@ -117,7 +117,7 @@ Future<bool> _flushCouchbaseBucket() async {
   );
   request.headers['Authorization'] =
       'Basic ${base64Encode(utf8.encode('$couchbaseServerAdminUser:'
-          '$couchbaseServerAdminPassword'))}';
+      '$couchbaseServerAdminPassword'))}';
 
   try {
     await _withClient((client) async {
@@ -225,29 +225,28 @@ extension ReplicatorUtilsDatabaseExtension on Database {
     TypedConflictResolverFunction? typedConflictResolver,
     bool? enableAutoPurge,
     Authenticator? authenticator,
-  }) =>
-      Replicator.create(
-        ReplicatorConfiguration(
-          database: this,
-          target: UrlEndpoint(syncGatewayReplicationUrl),
-          replicatorType: replicatorType ?? ReplicatorType.pushAndPull,
-          continuous: continuous ?? false,
-          channels: channels,
-          documentIds: documentIds,
-          pushFilter: pushFilter,
-          typedPushFilter: typedPushFilter,
-          pullFilter: pullFilter,
-          typedPullFilter: typedPullFilter,
-          conflictResolver: conflictResolver != null
-              ? ConflictResolver.from(conflictResolver)
-              : null,
-          typedConflictResolver: typedConflictResolver != null
-              ? TypedConflictResolver.from(typedConflictResolver)
-              : null,
-          enableAutoPurge: enableAutoPurge ?? true,
-          authenticator: authenticator ?? janeAuthenticator,
-        ),
-      );
+  }) => Replicator.create(
+    ReplicatorConfiguration(
+      database: this,
+      target: UrlEndpoint(syncGatewayReplicationUrl),
+      replicatorType: replicatorType ?? ReplicatorType.pushAndPull,
+      continuous: continuous ?? false,
+      channels: channels,
+      documentIds: documentIds,
+      pushFilter: pushFilter,
+      typedPushFilter: typedPushFilter,
+      pullFilter: pullFilter,
+      typedPullFilter: typedPullFilter,
+      conflictResolver: conflictResolver != null
+          ? ConflictResolver.from(conflictResolver)
+          : null,
+      typedConflictResolver: typedConflictResolver != null
+          ? TypedConflictResolver.from(typedConflictResolver)
+          : null,
+      enableAutoPurge: enableAutoPurge ?? true,
+      authenticator: authenticator ?? janeAuthenticator,
+    ),
+  );
 }
 
 final isReplicatorStatus = isA<ReplicatorStatus>();
@@ -305,22 +304,24 @@ extension ReplicatorUtilsExtension on Replicator {
     validStatusMatcher ??= isNot(isErrorReplicatorStatus);
     var isInitialStatus = true;
 
-    await pollStatus().asyncMap((status) async {
-      expect(status, validStatusMatcher);
+    await pollStatus()
+        .asyncMap((status) async {
+          expect(status, validStatusMatcher);
 
-      if (isInitialStatus) {
-        isInitialStatus = false;
+          if (isInitialStatus) {
+            isInitialStatus = false;
 
-        if (matchInitialStatus) {
-          expect(status, statusMatcher);
-        }
+            if (matchInitialStatus) {
+              expect(status, statusMatcher);
+            }
 
-        await fn();
-        return false;
-      }
+            await fn();
+            return false;
+          }
 
-      return _matches(status, statusMatcher);
-    }).firstWhere((isMatch) => isMatch);
+          return _matches(status, statusMatcher);
+        })
+        .firstWhere((isMatch) => isMatch);
   }
 
   /// Drives the status of this replicator to match [statusMatcher].
@@ -338,17 +339,19 @@ extension ReplicatorUtilsExtension on Replicator {
     validStatusMatcher ??= isNot(isErrorReplicatorStatus);
     var calledDriveFn = false;
 
-    await pollStatus().asyncMap((status) async {
-      expect(status, validStatusMatcher);
+    await pollStatus()
+        .asyncMap((status) async {
+          expect(status, validStatusMatcher);
 
-      final isMatch = _matches(status, statusMatcher);
-      if (!calledDriveFn && !isMatch) {
-        calledDriveFn = true;
-        await fn();
-      }
+          final isMatch = _matches(status, statusMatcher);
+          if (!calledDriveFn && !isMatch) {
+            calledDriveFn = true;
+            await fn();
+          }
 
-      return isMatch;
-    }).firstWhere((isMatch) => isMatch);
+          return isMatch;
+        })
+        .firstWhere((isMatch) => isMatch);
   }
 
   /// Calls [fn] once the status of this replicator matches [statusMatcher].
@@ -362,16 +365,18 @@ extension ReplicatorUtilsExtension on Replicator {
   }) async {
     validStatusMatcher ??= isNot(isErrorReplicatorStatus);
 
-    await pollStatus().asyncMap((status) async {
-      expect(status, validStatusMatcher);
+    await pollStatus()
+        .asyncMap((status) async {
+          expect(status, validStatusMatcher);
 
-      final isMatch = _matches(status, statusMatcher);
-      if (isMatch) {
-        await fn();
-      }
+          final isMatch = _matches(status, statusMatcher);
+          if (isMatch) {
+            await fn();
+          }
 
-      return isMatch;
-    }).firstWhere((isMatch) => isMatch);
+          return isMatch;
+        })
+        .firstWhere((isMatch) => isMatch);
   }
 
   /// Starts a one shot replicator and completes when it has stopped.
