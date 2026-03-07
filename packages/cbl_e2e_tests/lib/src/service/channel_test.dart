@@ -173,7 +173,10 @@ Future<Channel> openTestChannel() async {
       localTransport = IsolateChannel.connectReceive(receivePort);
       final isolate = await Isolate.spawn(
         testIsolateMain,
-        TestIsolateConfig(IsolateContext.instance, receivePort.sendPort),
+        TestIsolateConfig(
+          IsolateContext.instance.forSecondaryIsolate(),
+          receivePort.sendPort,
+        ),
       );
       addTearDown(isolate.kill);
   }

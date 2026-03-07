@@ -75,11 +75,11 @@ Future<ProcessResult> runProcess(
   );
 }
 
-/// Resolves an executable by looking it up in the pub cache bin
-/// directory, falling back to the executable name itself.
+/// Resolves an executable by looking it up in the pub cache bin directory,
+/// falling back to the executable name itself.
 String _resolveExecutable(String executable) {
-  final home = Platform.environment['HOME'] ??
-      Platform.environment['USERPROFILE'];
+  final home =
+      Platform.environment['HOME'] ?? Platform.environment['USERPROFILE'];
   if (home != null) {
     final pubCacheBin = '$home/.pub-cache/bin/$executable';
     if (File(pubCacheBin).existsSync()) {

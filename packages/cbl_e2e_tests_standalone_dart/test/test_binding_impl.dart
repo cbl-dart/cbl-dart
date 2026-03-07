@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:cbl/cbl.dart';
 import 'package:path/path.dart' as p;
 
@@ -17,7 +15,6 @@ final class StandaloneDartCblE2eTestBinding extends CblE2eTestBinding {
   @override
   Future<void> initCouchbaseLite() async {
     await CouchbaseLite.init();
-    Extension.enableVectorSearch();
   }
 
   @override

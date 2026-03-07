@@ -21,7 +21,12 @@ class InitContext {
 }
 
 class IsolateContext {
-  IsolateContext({this.libraries, this.bindings, this.initContext});
+  IsolateContext({
+    this.libraries,
+    this.bindings,
+    this.bindingsLibraries,
+    this.initContext,
+  });
 
   static IsolateContext? _instance;
 
@@ -44,8 +49,21 @@ class IsolateContext {
 
   final LibrariesConfiguration? libraries;
   final CBLBindings? bindings;
+  final BindingsLibraries? bindingsLibraries;
 
   final InitContext? initContext;
+
+  /// Returns a copy of this context that is safe to send to another isolate.
+  ///
+  /// [CBLBindings] cannot be sent across isolate boundaries because it contains
+  /// `NativeFinalizer` objects. This method strips [bindings] and keeps only
+  /// the serializable [bindingsLibraries] configuration, which allows the
+  /// secondary isolate to create its own [CBLBindings].
+  IsolateContext forSecondaryIsolate() => IsolateContext(
+    libraries: libraries,
+    bindingsLibraries: bindingsLibraries,
+    initContext: initContext,
+  );
 }
 
 /// Initializes this isolate for use of Couchbase Lite, and initializes the
@@ -77,7 +95,11 @@ Future<void> _initIsolate(IsolateContext context) async {
   IsolateContext.instance = context;
 
   CBLBindings.init(
-    instance: context.bindings,
+    instance:
+        context.bindings ??
+        (context.bindingsLibraries != null
+            ? CBLBindings(context.bindingsLibraries!)
+            : null),
     libraries: context.libraries,
     onTracedCall: tracingDelegateTracedNativeCallHandler,
   );
@@ -119,7 +141,7 @@ Future<void> _runPostIsolateInitTasks() async {
 }
 
 Future<T> runInSecondaryIsolate<T>(FutureOr<T> Function() fn) async {
-  final context = IsolateContext.instance;
+  final context = IsolateContext.instance.forSecondaryIsolate();
   return Isolate.run(() async {
     await initSecondaryIsolate(context);
     return fn();

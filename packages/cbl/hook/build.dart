@@ -55,7 +55,7 @@ Future<void> _build(BuildInput input, BuildOutputBuilder output) async {
   output.assets.code.add(
     CodeAsset(
       package: 'cbl',
-      name: 'package:cbl/src/bindings/cblite_native_assets.dart',
+      name: 'src/bindings/cblite_native_assets.dart',
       linkMode: DynamicLoadingBundled(),
       file: cbliteAssetPath,
     ),
@@ -66,7 +66,7 @@ Future<void> _build(BuildInput input, BuildOutputBuilder output) async {
   // CBL_Edition.h for the selected edition (community vs enterprise).
   final builder = CBuilder.library(
     name: 'cblitedart',
-    assetName: 'package:cbl/src/bindings/cblitedart_native_assets.dart',
+    assetName: 'src/bindings/cblitedart_native_assets.dart',
     sources: [
       'native/couchbase-lite-dart/src/CBL+Dart.cpp',
       'native/couchbase-lite-dart/src/Fleece+Dart.cpp',
@@ -114,16 +114,23 @@ Future<void> _build(BuildInput input, BuildOutputBuilder output) async {
 
   // 3. Optionally download vector search extension.
   if (edition == 'enterprise' && vectorSearch) {
-    final vectorSearchLibPath = await _downloadVectorSearch(
+    var vectorSearchLibPath = await _downloadVectorSearch(
       input: input,
       targetOS: targetOS,
       targetArchitecture: targetArchitecture,
     );
 
+    vectorSearchLibPath = await _thinIfNeeded(
+      vectorSearchLibPath,
+      targetOS: targetOS,
+      targetArchitecture: targetArchitecture,
+      outputDir: input.outputDirectory,
+    );
+
     output.assets.code.add(
       CodeAsset(
         package: 'cbl',
-        name: 'package:cbl/src/bindings/cblite_vector_search.dart',
+        name: 'src/bindings/cblite_vector_search.dart',
         linkMode: DynamicLoadingBundled(),
         file: vectorSearchLibPath,
       ),

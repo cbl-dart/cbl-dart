@@ -4,6 +4,12 @@ publish_to: none
 environment:
   sdk: ^3.10.0
 
+hooks:
+  user_defines:
+    cbl:
+      edition: enterprise
+      vector_search: true
+
 workspace:
   - packages/benchmark
   - packages/cbl

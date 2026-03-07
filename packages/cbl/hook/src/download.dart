@@ -125,7 +125,8 @@ final class Package {
       Library.vectorSearch => switch (config.os) {
         OS.linux || OS.android => 'lib',
         OS.windows => 'bin',
-        OS.iOS || OS.macOS => null,
+        OS.macOS => '.',
+        OS.iOS => null,
       },
     };
     return dir != null ? p.join(rootDir, dir) : null;

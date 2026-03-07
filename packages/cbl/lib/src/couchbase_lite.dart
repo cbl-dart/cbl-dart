@@ -48,17 +48,18 @@ abstract final class CouchbaseLite {
         // symbol resolution will fail and we get null.
         final vectorSearchPath = _tryGetVectorSearchPath();
 
+        final bindingsLibraries = BindingsLibraries(
+          enterpriseEdition: _cblDartIsEnterprise(),
+          vectorSearchLibraryPath: vectorSearchPath,
+          cblite: const cbliteNativeAssetsBridge(),
+          cblitedart: const cblitedartNativeAssetsBridge(),
+        );
+
         await initPrimaryIsolate(
           IsolateContext(
             initContext: context,
-            bindings: CBLBindings(
-              BindingsLibraries(
-                enterpriseEdition: _cblDartIsEnterprise(),
-                vectorSearchLibraryPath: vectorSearchPath,
-                cblite: const cbliteNativeAssetsBridge(),
-                cblitedart: const cblitedartNativeAssetsBridge(),
-              ),
-            ),
+            bindings: CBLBindings(bindingsLibraries),
+            bindingsLibraries: bindingsLibraries,
           ),
           autoEnableVectorSearch: true,
         );
@@ -70,7 +71,7 @@ abstract final class CouchbaseLite {
   /// [Isolate].
   ///
   /// This object can be safely passed from one [Isolate] to another.
-  static Object get context => IsolateContext.instance;
+  static Object get context => IsolateContext.instance.forSecondaryIsolate();
 
   /// Initializes the `cbl` package, for a secondary isolate.
   ///
@@ -98,7 +99,7 @@ external bool _cblDartIsEnterprise();
 /// assets symbol resolution. Returns null if the extension is not bundled.
 String? _tryGetVectorSearchPath() {
   try {
-    return vector_search.vectorSearchLibraryDir;
+    return vector_search.vectorSearchLibraryPath;
   } on Object {
     // The vector search extension is not bundled, so the @Native symbol
     // resolution fails. This is expected and not an error.

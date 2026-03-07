@@ -39,17 +39,16 @@ abstract class BaseCommand extends Command<void> {
   Future run() async => doRun();
 }
 
-/// Finds the project root by walking up from the current working
-/// directory, looking for a workspace root `pubspec.yaml`
-/// (one that contains a `workspace:` key).
+/// Finds the project root by walking up from the current working directory,
+/// looking for a workspace root `pubspec.yaml` (one that contains a
+/// `workspace:` key).
 String _findProjectRoot() {
   var dir = Directory.current;
   while (true) {
     final pubspec = File('${dir.path}/pubspec.yaml');
     if (pubspec.existsSync()) {
       final content = pubspec.readAsStringSync();
-      if (RegExp('^workspace:', multiLine: true)
-          .hasMatch(content)) {
+      if (RegExp('^workspace:', multiLine: true).hasMatch(content)) {
         return dir.path;
       }
     }
