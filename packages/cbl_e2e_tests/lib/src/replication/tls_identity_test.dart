@@ -332,14 +332,17 @@ void main() {
         attributes: const CertificateAttributes(commonName: 'Test'),
         expiration: futureExpiration,
       );
+      final created = identity.certificates.single.created;
+      // Certificates become valid at the start of the second one minute
+      // before the current time. Allow a 2-second tolerance for timing
+      // differences between certificate creation and DateTime.now().
+      final expected = DateTime.now()
+          .toUtc()
+          .subtract(const Duration(minutes: 1))
+          .copyWith(millisecond: 0, microsecond: 0);
       expect(
-        identity.certificates.single.created,
-        // Certificates become valid at the start of the second one minute
-        // before the current time.
-        DateTime.now()
-            .toUtc()
-            .subtract(const Duration(minutes: 1))
-            .copyWith(millisecond: 0, microsecond: 0),
+        created.difference(expected).inSeconds.abs(),
+        lessThanOrEqualTo(2),
       );
     });
 

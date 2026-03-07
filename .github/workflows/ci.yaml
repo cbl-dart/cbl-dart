@@ -176,14 +176,6 @@ jobs:
         shell: bash
         run: ./tools/ci-steps.sh runUnitTests
 
-      - name: Clean up broken symlinks
-        if: always()
-        shell: bash
-        run: |
-          # Remove broken symlinks that cause hashFiles('**/pubspec.lock') to
-          # fail in the flutter-action post-cache step.
-          find . -type l ! -exec test -e {} \; -delete 2>/dev/null || true
-
       - name: Upload coverage data
         if: ${{ matrix.dart == 'stable' }}
         env:
@@ -191,6 +183,14 @@ jobs:
         shell: bash
         run: |
           ./tools/ci-steps.sh uploadCoverageData "unit.${{ matrix.package }}"
+
+      - name: Clean up broken symlinks
+        if: always()
+        shell: bash
+        run: |
+          # Remove broken symlinks that cause hashFiles('**/pubspec.lock') to
+          # fail in the flutter-action post-cache step.
+          find . -type l ! -exec test -e {} \; -delete 2>/dev/null || true
 
   test-e2e:
     name: E2E tests
@@ -326,14 +326,6 @@ jobs:
         shell: bash
         run: ./tools/ci-steps.sh runE2ETests
 
-      - name: Clean up broken symlinks
-        if: always()
-        shell: bash
-        run: |
-          # Remove broken symlinks that cause hashFiles('**/pubspec.lock') to
-          # fail in the flutter-action post-cache step.
-          find . -type l ! -exec test -e {} \; -delete 2>/dev/null || true
-
       - name: Collect test results
         if: failure()
         shell: bash
@@ -354,3 +346,11 @@ jobs:
         shell: bash
         run: |
           ./tools/ci-steps.sh uploadCoverageData "e2e.cbl.${{ matrix.embedder }}.${{ matrix.os }}"
+
+      - name: Clean up broken symlinks
+        if: always()
+        shell: bash
+        run: |
+          # Remove broken symlinks that cause hashFiles('**/pubspec.lock') to
+          # fail in the flutter-action post-cache step.
+          find . -type l ! -exec test -e {} \; -delete 2>/dev/null || true
