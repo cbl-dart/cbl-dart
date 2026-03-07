@@ -25,6 +25,14 @@ macOSCouchbaseCouchJSFile="$macOSCouchbaseAppDir/Contents/Resources/couchbase-co
 syncGatewayMacOSLogFile="${RUNNER_TEMP:-/tmp}/sync-gateway-macos.log"
 syncGatewayWindowsLogFile="${RUNNER_TEMP:-/tmp}/sync-gateway-windows.log"
 
+function couchbaseQueryRequest() {
+    local statement="$1"
+
+    curl --silent --show-error -X POST "http://${couchbaseServerHost}:8093/query/service" \
+        -u "${couchbaseServerAdminUser}:${couchbaseServerAdminPass}" \
+        --data-urlencode "statement=${statement}"
+}
+
 function waitForService() {
     name="$1"
     url="$2"
@@ -138,9 +146,7 @@ function waitForCouchbaseQueryService() {
     while true; do
         echo "Attempt $attempt to query Couchbase Query Service"
         response="$(
-            curl --silent --show-error -X POST "http://${couchbaseServerHost}:8093/query/service" \
-                -u "${couchbaseServerAdminUser}:${couchbaseServerAdminPass}" \
-                --data-urlencode 'statement=SELECT 1;' 2>&1 || true
+            couchbaseQueryRequest 'SELECT 1;' 2>&1 || true
         )"
 
         if echo "$response" | grep -Eq '"status"[[:space:]]*:[[:space:]]*"success"'; then
@@ -161,6 +167,78 @@ function waitForCouchbaseQueryService() {
     done
 
     echo "Couchbase Query Service is reachable"
+    echo "::endgroup::"
+}
+
+function waitForCouchbaseQueryBucketDdl() {
+    local maxAttempts=30
+    local delayBetweenAttempts=2
+    local attempt=0
+    local probeIndex="sg_ci_query_ready_probe"
+    local createResponse
+    local buildResponse
+    local stateResponse
+    local dropResponse
+
+    echo "::group::Wait for Couchbase Query bucket DDL"
+
+    couchbaseQueryRequest "DROP INDEX \`${couchbaseServerBucket}\`.\`${probeIndex}\` USING GSI;" >/dev/null 2>&1 || true
+
+    while true; do
+        echo "Attempt $attempt to create and build a probe index through Query"
+
+        createResponse="$(
+            couchbaseQueryRequest "CREATE INDEX \`${probeIndex}\` ON \`${couchbaseServerBucket}\`(META().id) USING GSI WITH {\"num_replica\":0,\"defer_build\":true};" 2>&1 || true
+        )"
+        buildResponse=""
+        stateResponse=""
+
+        if echo "$createResponse" | grep -Eq '"status"[[:space:]]*:[[:space:]]*"success"' ||
+            echo "$createResponse" | grep -Fq "already exist"; then
+            buildResponse="$(
+                couchbaseQueryRequest "BUILD INDEX ON \`${couchbaseServerBucket}\`(\`${probeIndex}\`) USING GSI;" 2>&1 || true
+            )"
+            stateResponse="$(
+                couchbaseQueryRequest "SELECT RAW state FROM system:indexes WHERE keyspace_id = \"${couchbaseServerBucket}\" AND name = \"${probeIndex}\" LIMIT 1;" 2>&1 || true
+            )"
+
+            if echo "$stateResponse" | grep -Eq '"online"'; then
+                break
+            fi
+        fi
+
+        attempt=$((attempt + 1))
+        if ((attempt == maxAttempts)); then
+            echo "Couchbase Query bucket DDL was not ready after $maxAttempts attempts"
+            if [ -n "$createResponse" ]; then
+                echo "-- create index response --"
+                echo "$createResponse"
+            fi
+            if [ -n "$buildResponse" ]; then
+                echo "-- build index response --"
+                echo "$buildResponse"
+            fi
+            if [ -n "$stateResponse" ]; then
+                echo "-- index state response --"
+                echo "$stateResponse"
+            fi
+            dumpCouchbaseServerDiagnostics
+            exit 1
+        fi
+
+        sleep $delayBetweenAttempts
+    done
+
+    dropResponse="$(
+        couchbaseQueryRequest "DROP INDEX \`${couchbaseServerBucket}\`.\`${probeIndex}\` USING GSI;" 2>&1 || true
+    )"
+    if ! echo "$dropResponse" | grep -Eq '"status"[[:space:]]*:[[:space:]]*"success"' &&
+        ! echo "$dropResponse" | grep -Fq "not found"; then
+        echo "Failed to clean up Query readiness probe index:"
+        echo "$dropResponse"
+    fi
+
+    echo "Couchbase Query can create and build bucket indexes"
     echo "::endgroup::"
 }
 
@@ -217,6 +295,7 @@ function initCouchbaseServer() {
         -d "roles=bucket_full_access[${couchbaseServerBucket}],bucket_admin[${couchbaseServerBucket}]"
 
     waitForCouchbaseQueryService
+    waitForCouchbaseQueryBucketDdl
 
     echo "Couchbase Server initialization complete"
     echo "::endgroup::"
