@@ -10,13 +10,13 @@ preamble: |
   // ignore_for_file: unused_field
 headers:
   entry-points:
-    - ../../native/vendor/cblite/include/cbl/CouchbaseLite.h
-    - ../../native/vendor/cblite/include/fleece/Fleece.h
-    - ../../native/vendor/cblite/include/fleece/FLExpert.h
-    - ../../native/vendor/cblite/include/fleece/FLSlice.h
+    - native/vendor/cblite/include/cbl/CouchbaseLite.h
+    - native/vendor/cblite/include/fleece/Fleece.h
+    - native/vendor/cblite/include/fleece/FLExpert.h
+    - native/vendor/cblite/include/fleece/FLSlice.h
   include-directives:
-    - ../../native/vendor/cblite/include/cbl/**
-    - ../../native/vendor/cblite/include/fleece/**
+    - native/vendor/cblite/include/cbl/**
+    - native/vendor/cblite/include/fleece/**
 functions:
   rename:
     _FLBuf_Release: FLBuf_Release
@@ -44,7 +44,7 @@ enums:
     include:
       - '.*'
 compiler-opts:
-  - '-I../../native/vendor/cblite/include'
+  - '-Inative/vendor/cblite/include'
   # CBL uses a macro to define enums which is called CBL_ENUM.
   # On Apple systems the CBL aliases CF_ENUM to CBL_ENUM which seems to be a
   # problem for ffigen.

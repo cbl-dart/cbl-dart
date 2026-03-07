@@ -1,13 +1,17 @@
+import 'dart:ffi' as ffi;
+import 'dart:io';
 import 'dart:isolate';
 
 import 'bindings.dart';
+import 'bindings/cblite_native_assets_bridge.dart';
+import 'bindings/cblite_vector_search.dart' as vector_search;
+import 'bindings/cblitedart_native_assets_bridge.dart';
 import 'database/database.dart';
 import 'log.dart';
 import 'support/isolate.dart';
 import 'support/tracing.dart';
 import 'tracing.dart';
 
-export 'bindings.dart' show LibrariesConfiguration, LibraryConfiguration;
 export 'support/listener_token.dart' show ListenerToken;
 export 'support/resource.dart' show Resource, ClosableResource;
 export 'support/streams.dart' show AsyncListenStream;
@@ -16,17 +20,51 @@ export 'support/streams.dart' show AsyncListenStream;
 /// logging.
 abstract final class CouchbaseLite {
   /// Initializes the `cbl` package, for the main isolate.
-  static Future<void> init({
-    required LibrariesConfiguration libraries,
-    bool autoEnableVectorSearch = true,
-  }) => asyncOperationTracePoint(InitializeOp.new, () async {
-    await initPrimaryIsolate(
-      IsolateContext(libraries: libraries),
-      autoEnableVectorSearch: autoEnableVectorSearch,
-    );
+  ///
+  /// With native assets, libraries are loaded automatically by the Dart VM.
+  /// No manual library configuration is needed. The edition and optional
+  /// features are configured via user defines in `pubspec.yaml`:
+  ///
+  /// ```yaml
+  /// hooks:
+  ///   user_defines:
+  ///     cbl:
+  ///       edition: enterprise
+  ///       vector_search: true
+  /// ```
+  ///
+  /// If specified, [filesDir] is used to store files created by Couchbase Lite
+  /// by default. For example if a [Database] is opened or copied without
+  /// specifying a directory, a subdirectory in the directory specified here
+  /// will be used. If no [filesDir] directory is provided, the working
+  /// directory is used when opening and copying databases.
+  static Future<void> init({String? filesDir}) =>
+      asyncOperationTracePoint(InitializeOp.new, () async {
+        final context = filesDir == null ? null : await _initContext(filesDir);
 
-    _setupLogging();
-  });
+        // Try to discover the vector search library path. If the extension
+        // was bundled by the build hook, Native.addressOf will resolve the
+        // symbol and we can find the library directory. If not bundled, the
+        // symbol resolution will fail and we get null.
+        final vectorSearchPath = _tryGetVectorSearchPath();
+
+        await initPrimaryIsolate(
+          IsolateContext(
+            initContext: context,
+            bindings: CBLBindings(
+              BindingsLibraries(
+                enterpriseEdition: _cblDartIsEnterprise(),
+                vectorSearchLibraryPath: vectorSearchPath,
+                cblite: const cbliteNativeAssetsBridge(),
+                cblitedart: const cblitedartNativeAssetsBridge(),
+              ),
+            ),
+          ),
+          autoEnableVectorSearch: true,
+        );
+
+        _setupLogging();
+      });
 
   /// Context object to pass to [initSecondary], when initializing a secondary
   /// [Isolate].
@@ -45,6 +83,32 @@ abstract final class CouchbaseLite {
 
         await initSecondaryIsolate(context);
       });
+}
+
+/// Returns whether the cblitedart library was compiled with the enterprise
+/// edition of Couchbase Lite. This is determined by a compile-time define
+/// set by the build hook based on user defines.
+@ffi.Native<ffi.Bool Function()>(
+  symbol: 'CBLDart_IsEnterprise',
+  assetId: 'package:cbl/src/bindings/cblitedart_native_assets.dart',
+)
+external bool _cblDartIsEnterprise();
+
+/// Tries to resolve the vector search library directory path using native
+/// assets symbol resolution. Returns null if the extension is not bundled.
+String? _tryGetVectorSearchPath() {
+  try {
+    return vector_search.vectorSearchLibraryDir;
+  } catch (_) {
+    // The vector search extension is not bundled, so the @Native symbol
+    // resolution fails. This is expected and not an error.
+    return null;
+  }
+}
+
+Future<InitContext> _initContext(String filesDir) async {
+  await Directory(filesDir).create(recursive: true);
+  return InitContext(filesDir: filesDir, tempDir: filesDir);
 }
 
 void _setupLogging() {

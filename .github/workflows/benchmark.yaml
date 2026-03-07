@@ -57,10 +57,8 @@ jobs:
         run: dart pub global activate melos
 
       - name: Bootstrap repository
-        env:
-          PREFETCHED_PACKAGES_PASSWORD: ${{ secrets.PREFETCHED_PACKAGES_PASSWORD }}
         shell: bash
-        run: ./tools/dev-tools.sh bootstrap
+        run: melos bootstrap
 
       - name: Setup cbd
         run: melos activate:cbd

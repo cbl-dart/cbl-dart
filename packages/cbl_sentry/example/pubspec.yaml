@@ -10,7 +10,6 @@ resolution: workspace
 
 dependencies:
   cbl: ^3.6.0+2
-  cbl_dart: ^3.5.1
   cbl_sentry:
     path: ..
   sentry: ^8.0.2

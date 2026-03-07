@@ -14,7 +14,6 @@ function requireEnvVar() {
 # === Constants ===============================================================
 
 testResultsDir="test-results"
-cblFlutterPrebuiltPackage="cbl_flutter_prebuilt"
 embedder="$EMBEDDER"
 targetOs="$TARGET_OS"
 testPackage="$TEST_PACKAGE"
@@ -35,30 +34,6 @@ MINGW* | CYGWIN* | MSYS*)
 esac
 
 # === Steps ===================================================================
-
-function buildNativeLibraries() {
-    local target=
-
-    case "$targetOs" in
-    iOS)
-        target=ios
-        ;;
-    macOS)
-        target=macos
-        ;;
-    Android)
-        target=android
-        ;;
-    Ubuntu)
-        target=linux-x86_64
-        ;;
-    Windows)
-        target=windows-x86_64
-        ;;
-    esac
-
-    ./tools/dev-tools.sh prepareNativeLibraries enterprise debug "$target"
-}
 
 function startCouchbaseServices() {
     case "$(uname)" in
