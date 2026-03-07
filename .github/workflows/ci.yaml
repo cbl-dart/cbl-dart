@@ -210,12 +210,9 @@ jobs:
             os: iOS
           - embedder: standalone
             os: Android
-          # TODO: Get iOS tests to launch again in CI
-          - embedder: flutter
-            os: iOS
     runs-on: >-
       ${{ fromJSON('{
-        "iOS":"macos-14",
+        "iOS":"macos-15",
         "macOS":"macos-15",
         "Android":"blacksmith-4vcpu-ubuntu-2204",
         "Ubuntu":"blacksmith-4vcpu-ubuntu-2204",

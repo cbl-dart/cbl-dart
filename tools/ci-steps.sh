@@ -19,8 +19,8 @@ targetOs="$TARGET_OS"
 testPackage="$TEST_PACKAGE"
 testPackageDir="packages/$testPackage"
 testAppBundleId="com.terwesten.gabriel.cblE2eTestsFlutter"
-iosVersion="15-2"
-iosDevice="iPhone 13"
+iosVersion="18-4"
+iosDevice="iPhone 16"
 androidVersion="27"
 androidDevice="pixel_4"
 
@@ -158,7 +158,11 @@ function runE2ETests() {
         *)        buildTarget="$(echo "$device" | tr '[:upper:]' '[:lower:]')" ;;
         esac
         echo "Build target: $buildTarget"
-        flutter build "$buildTarget" --debug -v $DART_DEFINES 2>&1
+        local buildFlags=""
+        case "$targetOs" in
+        iOS) buildFlags="--simulator --no-codesign" ;;
+        esac
+        flutter build "$buildTarget" --debug $buildFlags -v $DART_DEFINES 2>&1
 
         # --- Diagnostic: check for native assets builder output ---
         echo "=== Native assets builder cache ==="
@@ -211,6 +215,12 @@ function runE2ETests() {
             find build/macos -type f \( -name '*.dylib' -o -name '*.framework' \) 2>/dev/null || echo "No dylib/framework files found"
             echo "--- Frameworks dir ---"
             ls -laR build/macos/Build/Products/Debug/*.app/Contents/Frameworks/ 2>/dev/null || echo "Frameworks/ not found"
+            ;;
+        iOS)
+            echo "--- iOS app bundle ---"
+            find build/ios -type f \( -name '*.dylib' -o -name '*.framework' \) 2>/dev/null || echo "No dylib/framework files found"
+            echo "--- Frameworks dir ---"
+            ls -laR build/ios/iphonesimulator/*.app/Frameworks/ 2>/dev/null || echo "Frameworks/ not found"
             ;;
         *)
             echo "(Bundle inspection not configured for $targetOs)"
