@@ -41,9 +41,6 @@ jobs:
       - name: Setup Melos
         run: dart pub global activate melos
 
-      - name: Setup cbd
-        run: melos activate:cbd
-
       - name: Install daco
         run: dart pub global activate daco
 
@@ -98,9 +95,6 @@ jobs:
       - name: Setup Melos
         run: dart pub global activate melos
 
-      - name: Setup cbd
-        run: melos activate:cbd
-
       - name: Bootstrap repository
         shell: bash
         run: melos bootstrap
@@ -144,16 +138,6 @@ jobs:
       - name: Bootstrap repository
         shell: bash
         run: melos bootstrap
-
-      - name: Setup cbd
-        run: melos activate:cbd
-
-      - name: Setup CMake and Ninja
-        uses: lukka/get-cmake@latest
-
-      - name: Build native libraries
-        shell: bash
-        run: ./tools/ci-steps.sh buildNativeLibraries
 
       - name: Run build_runner
         if: ${{ matrix.package == 'cbl_generator' }}
@@ -218,9 +202,6 @@ jobs:
         run: Set-MpPreference -DisableRealtimeMonitoring $true
         shell: powershell
 
-      - name: Setup CMake and Ninja
-        uses: lukka/get-cmake@latest
-
       - name: Select Java 17
         if: ${{ matrix.os == 'Android' }}
         run: echo "JAVA_HOME=$JAVA_HOME_17_X64" >> $GITHUB_ENV
@@ -282,13 +263,6 @@ jobs:
       - name: Bootstrap repository
         shell: bash
         run: melos bootstrap
-
-      - name: Setup cbd
-        run: melos activate:cbd
-
-      - name: Build native libraries
-        shell: bash
-        run: ./tools/ci-steps.sh buildNativeLibraries
 
       - name: Start Couchbase services
         shell: bash

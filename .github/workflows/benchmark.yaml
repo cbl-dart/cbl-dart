@@ -44,9 +44,6 @@ jobs:
       - name: Setup Bencher
         uses: bencherdev/bencher@main
 
-      - name: Setup CMake and Ninja
-        uses: lukka/get-cmake@latest
-
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -59,13 +56,6 @@ jobs:
       - name: Bootstrap repository
         shell: bash
         run: melos bootstrap
-
-      - name: Setup cbd
-        run: melos activate:cbd
-
-      - name: Build native libraries
-        shell: bash
-        run: ./tools/ci-steps.sh buildNativeLibraries
 
       - name: Run benchmarks
         working-directory: packages/benchmark
