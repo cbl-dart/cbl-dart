@@ -274,6 +274,7 @@ jobs:
           sudo apt-get install -y --no-install-recommends clang cmake ninja-build pkg-config libgtk-3-dev
 
       - name: Setup Flutter
+        if: matrix.embedder == 'flutter'
         uses: subosito/flutter-action@v2
         with:
           channel: ${{ env.flutter-channel }}

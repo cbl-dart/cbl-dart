@@ -40,7 +40,13 @@ abstract final class CouchbaseLite {
   /// directory is used when opening and copying databases.
   static Future<void> init({String? filesDir}) =>
       asyncOperationTracePoint(InitializeOp.new, () async {
-        final context = filesDir == null ? null : await _initContext(filesDir);
+        // On Android, filesDir is required. Auto-detect it from the package
+        // name if not explicitly provided.
+        if (filesDir == null && Platform.isAndroid) {
+          filesDir = await _resolveAndroidFilesDir();
+        }
+
+        final context = filesDir == null ? null : await _initContext(filesDir!);
 
         // Try to discover the vector search library path. If the extension
         // was bundled by the build hook, Native.addressOf will resolve the
@@ -105,6 +111,22 @@ String? _tryGetVectorSearchPath() {
     // resolution fails. This is expected and not an error.
     return null;
   }
+}
+
+/// Resolves the Android app's files directory from the package name.
+///
+/// Reads `/proc/self/cmdline` to determine the package name and constructs the
+/// standard app data path. This avoids depending on Flutter or any platform
+/// channel.
+Future<String> _resolveAndroidFilesDir() async {
+  final cmdlineBytes = File('/proc/self/cmdline').readAsBytesSync();
+  final nullIndex = cmdlineBytes.indexOf(0);
+  final packageName = String.fromCharCodes(
+    nullIndex == -1 ? cmdlineBytes : cmdlineBytes.sublist(0, nullIndex),
+  );
+  final dir = '/data/data/$packageName/files';
+  await Directory(dir).create(recursive: true);
+  return dir;
 }
 
 Future<InitContext> _initContext(String filesDir) async {

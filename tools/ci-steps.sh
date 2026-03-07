@@ -162,6 +162,31 @@ function runE2ETests() {
             ;;
         esac
 
+        # Build first so we can inspect the bundle before running.
+        echo "=== Building Flutter app for $targetOs ==="
+        flutter build "${device,,}" --debug $DART_DEFINES 2>&1 || true
+
+        # Diagnostic: inspect the built app bundle for native libraries.
+        echo "=== Inspecting Flutter app bundle for native libraries ==="
+        case "$targetOs" in
+        Ubuntu)
+            echo "--- Linux bundle (build/linux/) ---"
+            find build/linux/ -type f \( -name '*.so' -o -name '*.so.*' \) 2>/dev/null || echo "No .so files found"
+            echo "--- Full bundle lib dir ---"
+            ls -laR build/linux/x64/debug/bundle/lib/ 2>/dev/null || echo "bundle/lib/ not found"
+            ;;
+        Windows)
+            echo "--- Windows bundle (build/windows/) ---"
+            find build/windows/ -type f -name '*.dll' 2>/dev/null || echo "No .dll files found"
+            echo "--- Full runner dir ---"
+            ls -laR build/windows/x64/debug/runner/ 2>/dev/null || echo "runner/ not found"
+            ;;
+        *)
+            echo "(Bundle inspection not configured for $targetOs)"
+            ;;
+        esac
+        echo "=== End bundle inspection ==="
+
         # Note: We would like to collect coverage data from tests, but
         # `flutter drive` does not support the `--coverage` flag. While
         # `flutter test` does, it does not support the `--keep-app-running`

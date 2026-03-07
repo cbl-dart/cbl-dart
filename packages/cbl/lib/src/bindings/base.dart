@@ -527,6 +527,40 @@ final class BaseBindings extends Bindings {
     if (libraries.vectorSearchLibraryPath case final libraryPath?
         when systemSupportsVectorSearch) {
       final libraryDirectory = p.dirname(libraryPath);
+      final libraryFileName = p.basename(libraryPath);
+
+      // Diagnostic logging to debug vector search library naming issues.
+      // The C SDK expects a specific filename (e.g. libCouchbaseLiteVectorSearch.so
+      // on Linux) in the directory passed to CBL_EnableVectorSearch.
+      // If Dart's native asset bundler renamed the file, the C SDK won't find it.
+      // ignore: avoid_print
+      print(
+        '[CBL] enableVectorSearch: '
+        'resolvedLibraryPath=$libraryPath, '
+        'directory=$libraryDirectory, '
+        'fileName=$libraryFileName',
+      );
+
+      // List the actual files in the directory for diagnostics.
+      try {
+        final dir = io.Directory(libraryDirectory);
+        if (dir.existsSync()) {
+          final files = dir.listSync().map((e) => p.basename(e.path)).toList()
+            ..sort();
+          // ignore: avoid_print
+          print('[CBL] enableVectorSearch: files in directory: $files');
+        } else {
+          // ignore: avoid_print
+          print(
+            '[CBL] enableVectorSearch: '
+            'directory does not exist: $libraryDirectory',
+          );
+        }
+      } on Object catch (e) {
+        // ignore: avoid_print
+        print('[CBL] enableVectorSearch: error listing directory: $e');
+      }
+
       runWithSingleFLString(libraryDirectory, (flLibraryDirectory) {
         cblite.CBL_EnableVectorSearch(
           flLibraryDirectory,

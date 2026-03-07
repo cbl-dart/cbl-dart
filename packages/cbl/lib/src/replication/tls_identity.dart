@@ -824,8 +824,6 @@ abstract base class ExternalKeyPairDelegate {
         '$error\n'
         '$stackTrace',
       );
-
-      rethrow;
     } finally {
       CBLBindings.instance.base.completeCompleterWithBool(completer, success);
     }
@@ -868,8 +866,6 @@ abstract base class ExternalKeyPairDelegate {
         '$error\n'
         '$stackTrace',
       );
-
-      rethrow;
     } finally {
       CBLBindings.instance.base.completeCompleterWithBool(completer, success);
     }
@@ -913,8 +909,6 @@ abstract base class ExternalKeyPairDelegate {
         '$error\n'
         '$stackTrace',
       );
-
-      rethrow;
     } finally {
       CBLBindings.instance.base.completeCompleterWithBool(completer, success);
     }

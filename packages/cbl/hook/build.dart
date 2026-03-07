@@ -15,6 +15,20 @@ void main(List<String> args) async {
 }
 
 Future<void> _build(BuildInput input, BuildOutputBuilder output) async {
+  // Diagnostic logging for CI: confirm the build hook is running and show
+  // key configuration values.
+  // ignore: avoid_print
+  print('[cbl build hook] Running build hook.');
+  // ignore: avoid_print
+  print('[cbl build hook] targetOS: ${input.config.code.targetOS}');
+  // ignore: avoid_print
+  print(
+    '[cbl build hook] targetArchitecture: '
+    '${input.config.code.targetArchitecture}',
+  );
+  // ignore: avoid_print
+  print('[cbl build hook] outputDirectory: ${input.outputDirectory}');
+
   final edition = (input.userDefines['edition'] as String?) ?? 'community';
   final vectorSearch = input.userDefines['vector_search']?.toString() == 'true';
 
@@ -64,6 +78,8 @@ Future<void> _build(BuildInput input, BuildOutputBuilder output) async {
       file: cbliteAssetPath,
     ),
   );
+  // ignore: avoid_print
+  print('[cbl build hook] Registered cblite asset: $cbliteAssetPath');
 
   // 2. Compile cblitedart from source.
   // Use headers from the downloaded cblite package — they contain the correct
@@ -103,6 +119,8 @@ Future<void> _build(BuildInput input, BuildOutputBuilder output) async {
     cppLinkStdLib: targetOS == OS.android ? 'c++_static' : null,
   );
   await builder.run(input: input, output: output);
+  // ignore: avoid_print
+  print('[cbl build hook] Compiled and registered cblitedart asset.');
 
   // 3. Optionally download vector search extension.
   if (edition == 'enterprise' && vectorSearch) {
@@ -133,7 +151,44 @@ Future<void> _build(BuildInput input, BuildOutputBuilder output) async {
         file: Uri.file(vsDest),
       ),
     );
+    // ignore: avoid_print
+    print('[cbl build hook] Registered vector search asset: $vsDest');
+
+    // On Windows, the vector search library depends on runtime DLLs (e.g.
+    // the OpenMP runtime libomp140.*.dll) that are bundled in the archive
+    // alongside the main DLL. Copy and register any additional DLLs as code
+    // assets so they are available at runtime.
+    if (targetOS == OS.windows) {
+      final vsSourceDir = p.dirname(vectorSearchLibPath.toFilePath());
+      final vsMainName = p.basename(vectorSearchLibPath.toFilePath());
+      var depIndex = 0;
+      for (final entity in Directory(vsSourceDir).listSync()) {
+        if (entity is! File) {
+          continue;
+        }
+        final name = p.basename(entity.path);
+        if (!name.endsWith('.dll') || name == vsMainName) {
+          continue;
+        }
+        final depDest = p.join(libPath, name);
+        await entity.copy(depDest);
+        output.assets.code.add(
+          CodeAsset(
+            package: 'cbl',
+            name: 'src/bindings/vector_search_dep_$depIndex.dart',
+            linkMode: DynamicLoadingBundled(),
+            file: Uri.file(depDest),
+          ),
+        );
+        depIndex++;
+        // ignore: avoid_print
+        print('[cbl build hook] Registered vector search dependency: $name');
+      }
+    }
   }
+
+  // ignore: avoid_print
+  print('[cbl build hook] Build hook completed successfully.');
 }
 
 // === Download cblite ========================================================

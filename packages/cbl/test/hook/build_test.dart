@@ -152,6 +152,7 @@ void main() {
                   input: input,
                   output: output,
                   targetOS: target.os,
+                  targetArchitecture: target.arch,
                   vectorSearch: vectorSearch,
                 );
               },
@@ -163,16 +164,28 @@ void main() {
   }
 }
 
+/// Expected vector search dependency DLLs per Windows architecture.
+const _windowsVectorSearchDeps = <Architecture, List<String>>{
+  Architecture.x64: ['libomp140.x86_64.dll'],
+  Architecture.arm64: ['libomp140.aarch64.dll'],
+};
+
 void _checkAssets({
   required BuildInput input,
   required BuildOutput output,
   required OS targetOS,
+  required Architecture targetArchitecture,
   required bool vectorSearch,
 }) {
   final codeAssets = output.assets.code;
 
   // Verify the exact number of code assets.
-  final expectedAssetCount = vectorSearch ? 3 : 2;
+  // On Windows with vector search, additional dependency DLLs (e.g. the
+  // OpenMP runtime) are also registered as code assets.
+  final windowsVsDeps = vectorSearch && targetOS == OS.windows
+      ? _windowsVectorSearchDeps[targetArchitecture]?.length ?? 0
+      : 0;
+  final expectedAssetCount = (vectorSearch ? 3 : 2) + windowsVsDeps;
   expect(codeAssets, hasLength(expectedAssetCount));
 
   // Verify the lib staging directory exists.
@@ -259,6 +272,25 @@ void _checkAssets({
           File(p.join(libDir, 'CouchbaseLiteVectorSearch.dll')).existsSync(),
           isTrue,
         );
+        // Verify that vector search dependency DLLs (e.g. OpenMP runtime) are
+        // registered as code assets and exist on disk.
+        final expectedDeps = _windowsVectorSearchDeps[targetArchitecture] ?? [];
+        for (final depName in expectedDeps) {
+          expect(
+            File(p.join(libDir, depName)).existsSync(),
+            isTrue,
+            reason: 'Expected vector search dependency $depName in $libDir',
+          );
+        }
+        final depAssets = codeAssets.where(
+          (a) => a.id.contains('vector_search_dep_'),
+        );
+        expect(depAssets, hasLength(expectedDeps.length));
+        for (final dep in depAssets) {
+          expect(dep.linkMode, isA<DynamicLoadingBundled>());
+          expect(File.fromUri(dep.file!).existsSync(), isTrue);
+          expect(dep.file!.toFilePath(), startsWith(libDir));
+        }
       default:
         break;
     }
