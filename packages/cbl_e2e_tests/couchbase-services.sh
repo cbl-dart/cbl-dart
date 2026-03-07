@@ -14,6 +14,7 @@ couchbaseServerAdminPass="password"
 couchbaseServerBucket="db"
 sgRbacUser="sync_gateway"
 sgRbacPass="sync_gateway"
+macOSCouchbaseServerLogFile="${RUNNER_TEMP:-/tmp}/couchbase-server-macos.log"
 
 function waitForService() {
     name="$1"
@@ -57,6 +58,10 @@ function dumpCouchbaseServerDiagnostics() {
     case "$(uname)" in
     Darwin)
         ps aux | grep -i '[c]ouchbase' || true
+        if [ -f "$macOSCouchbaseServerLogFile" ]; then
+            echo "-- $macOSCouchbaseServerLogFile --"
+            tail -n 200 "$macOSCouchbaseServerLogFile" || true
+        fi
         ;;
     MINGW64* | MSYS* | CYGWIN*)
         powershell.exe -Command "\$service = Get-Service | Where-Object { \$_.Name -like 'CouchbaseServer*' -or \$_.DisplayName -like 'Couchbase Server*' } | Select-Object -First 1; if (\$null -eq \$service) { Write-Host 'No Couchbase service found'; exit 0 }; \$service | Format-List -Property Name,DisplayName,Status,StartType" || true
@@ -139,6 +144,7 @@ function startCouchbaseServerMacOS() {
     local cbsDmg="couchbase-server-enterprise_${couchbaseServerVersion}-macos_${arch}.dmg"
     local cbsUrl="https://packages.couchbase.com/releases/${couchbaseServerVersion}/${cbsDmg}"
     local cbsAppDir="/Applications/Couchbase Server.app"
+    local cbsExecutable="$cbsAppDir/Contents/MacOS/Couchbase Server"
 
     if [ ! -d "$cbsAppDir" ]; then
         echo "::group::Install Couchbase Server"
@@ -158,9 +164,13 @@ function startCouchbaseServerMacOS() {
         echo "::endgroup::"
     fi
 
-    # Launch the app bundle through Launch Services. This is the documented
-    # startup path on macOS and ensures the app bundle environment is set up.
-    open "$cbsAppDir"
+    if [ ! -x "$cbsExecutable" ]; then
+        echo "Could not find Couchbase Server executable at $cbsExecutable"
+        exit 1
+    fi
+
+    rm -f "$macOSCouchbaseServerLogFile"
+    nohup "$cbsExecutable" >"$macOSCouchbaseServerLogFile" 2>&1 </dev/null &
 }
 
 function startCouchbaseServerWindows() {
