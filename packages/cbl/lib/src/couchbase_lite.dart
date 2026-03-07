@@ -99,7 +99,7 @@ external bool _cblDartIsEnterprise();
 String? _tryGetVectorSearchPath() {
   try {
     return vector_search.vectorSearchLibraryDir;
-  } catch (_) {
+  } on Object {
     // The vector search extension is not bundled, so the @Native symbol
     // resolution fails. This is expected and not an error.
     return null;

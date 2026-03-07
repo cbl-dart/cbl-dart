@@ -298,7 +298,7 @@ dl.OS _mapOS(OS os) => switch (os) {
 /// Returns the list of architectures for the download URL.
 ///
 /// macOS and iOS packages are universal binaries containing all architectures,
-/// so we pass both to make [PackageConfig.isMultiArchitecture] true, which
+/// so we pass both to make `PackageConfig.isMultiArchitecture` true, which
 /// produces a target ID without an architecture suffix (e.g. just "macos").
 List<dl.Architecture> _architectures(dl.OS os, dl.Architecture arch) =>
     switch (os) {

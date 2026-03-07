@@ -53,6 +53,22 @@ melos:
       description: Analyzes all Dart files.
       run: dart analyze --fatal-infos
 
+    test:unit:
+      description: Runs unit tests (non-e2e).
+      exec: dart test
+      packageFilters:
+        scope:
+          - cbl
+          - cbl_generator
+          - cbl_sentry
+
+    quality-gates:
+      description: Runs formatting check, analyzer, and unit tests.
+      steps:
+        - formatting:check
+        - analyze
+        - test:unit
+
     test:setupCouchbaseClusterDocker:
       description: Sets up Couchbase services for testing in docker.
       exec: ./couchbase-services.sh setupDocker

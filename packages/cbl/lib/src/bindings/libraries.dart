@@ -18,7 +18,7 @@ String resolveLibraryPathFromAddress(Pointer<Void> address) {
     final info = calloc<_Dl_info>();
     try {
       if (_dladdr(address, info) == 0) {
-        throw StateError('dladdr failed to resolve address $address');
+        throw Exception('dladdr failed to resolve address $address');
       }
 
       return info.ref.dli_fname.toDartString();
@@ -37,7 +37,7 @@ String resolveLibraryPathFromAddress(Pointer<Void> address) {
             hModule,
           ) ==
           0) {
-        throw StateError(
+        throw Exception(
           'GetModuleHandleExA failed to resolve address $address',
         );
       }
@@ -46,7 +46,7 @@ String resolveLibraryPathFromAddress(Pointer<Void> address) {
       final path = calloc<Uint8>(maxPath);
       try {
         if (_GetModuleFileNameA(hModule.value, path.cast(), maxPath) == 0) {
-          throw StateError('GetModuleFileNameA failed to resolve module path');
+          throw Exception('GetModuleFileNameA failed to resolve module path');
         }
 
         return path.cast<Utf8>().toDartString();
@@ -151,7 +151,7 @@ class LibraryConfiguration {
 
     try {
       return resolveLibraryPathFromAddress(library.lookup(symbol));
-    } on StateError {
+    } on Exception {
       return null;
     }
   }
@@ -300,14 +300,14 @@ Pointer<Void> _AddDllDirectory(String directory) {
   final result = _AddDllDirectoryFn(directoryNativeStr);
   malloc.free(directoryNativeStr);
   if (result == nullptr) {
-    throw StateError('Failed to add DLL directory: $directory');
+    throw Exception('Failed to add DLL directory: $directory');
   }
   return result;
 }
 
 void _RemoveDllDirectory(Pointer<Void> cookie) {
   if (!_RemoveDllDirectoryFn(cookie)) {
-    throw StateError('Failed to remove DLL directory');
+    throw Exception('Failed to remove DLL directory');
   }
 }
 
