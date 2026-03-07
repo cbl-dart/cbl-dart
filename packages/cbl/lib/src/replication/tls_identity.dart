@@ -816,7 +816,7 @@ abstract base class ExternalKeyPairDelegate {
       output.cast<Uint8>().asTypedList(outputMaxLen).setAll(0, data);
       outputLen.value = data.length;
       success = true;
-    } catch (error, stackTrace) {
+    } on Object catch (error, stackTrace) {
       CBLBindings.instance.logging.logMessage(
         CBLLogDomain.listener,
         CBLLogLevel.error,
@@ -858,7 +858,7 @@ abstract base class ExternalKeyPairDelegate {
       outputLen.value = result.length;
 
       success = true;
-    } catch (error, stackTrace) {
+    } on Object catch (error, stackTrace) {
       CBLBindings.instance.logging.logMessage(
         CBLLogDomain.listener,
         CBLLogLevel.error,
@@ -901,7 +901,7 @@ abstract base class ExternalKeyPairDelegate {
       outSignature.cast<Uint8>().asTypedList(_keySizeInBytes).setAll(0, result);
 
       success = true;
-    } catch (error, stackTrace) {
+    } on Object catch (error, stackTrace) {
       CBLBindings.instance.logging.logMessage(
         CBLLogDomain.listener,
         CBLLogLevel.error,

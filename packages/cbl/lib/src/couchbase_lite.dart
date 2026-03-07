@@ -1,10 +1,10 @@
-import 'dart:ffi' as ffi;
 import 'dart:io';
 import 'dart:isolate';
 
 import 'bindings.dart';
 import 'bindings/cblite_native_assets_bridge.dart';
 import 'bindings/cblite_vector_search.dart' as vector_search;
+import 'bindings/cblitedart_native_assets.dart' as cblitedart_native;
 import 'bindings/cblitedart_native_assets_bridge.dart';
 import 'database/database.dart';
 import 'log.dart';
@@ -42,11 +42,13 @@ abstract final class CouchbaseLite {
       asyncOperationTracePoint(InitializeOp.new, () async {
         // On Android, filesDir is required. Auto-detect it from the package
         // name if not explicitly provided.
-        if (filesDir == null && Platform.isAndroid) {
-          filesDir = await _resolveAndroidFilesDir();
-        }
+        final resolvedFilesDir =
+            filesDir ??
+            (Platform.isAndroid ? await _resolveAndroidFilesDir() : null);
 
-        final context = filesDir == null ? null : await _initContext(filesDir!);
+        final context = resolvedFilesDir == null
+            ? null
+            : await _initContext(resolvedFilesDir);
 
         // Try to discover the vector search library path. If the extension
         // was bundled by the build hook, Native.addressOf will resolve the
@@ -55,7 +57,7 @@ abstract final class CouchbaseLite {
         final vectorSearchPath = _tryGetVectorSearchPath();
 
         final bindingsLibraries = BindingsLibraries(
-          enterpriseEdition: _cblDartIsEnterprise(),
+          enterpriseEdition: cblitedart_native.CBLDart_IsEnterprise(),
           vectorSearchLibraryPath: vectorSearchPath,
           cblite: const cbliteNativeAssetsBridge(),
           cblitedart: const cblitedartNativeAssetsBridge(),
@@ -91,15 +93,6 @@ abstract final class CouchbaseLite {
         await initSecondaryIsolate(context);
       });
 }
-
-/// Returns whether the cblitedart library was compiled with the enterprise
-/// edition of Couchbase Lite. This is determined by a compile-time define set
-/// by the build hook based on user defines.
-@ffi.Native<ffi.Bool Function()>(
-  symbol: 'CBLDart_IsEnterprise',
-  assetId: 'package:cbl/src/bindings/cblitedart_native_assets.dart',
-)
-external bool _cblDartIsEnterprise();
 
 /// Tries to resolve the vector search library directory path using native
 /// assets symbol resolution. Returns null if the extension is not bundled.

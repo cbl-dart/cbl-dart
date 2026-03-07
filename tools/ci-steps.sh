@@ -162,24 +162,70 @@ function runE2ETests() {
             ;;
         esac
 
-        # Build first so we can inspect the bundle before running.
-        echo "=== Building Flutter app for $targetOs ==="
-        flutter build "${device,,}" --debug $DART_DEFINES 2>&1 || true
+        # --- Diagnostic: Flutter native assets configuration ---
+        echo "=== Flutter config ==="
+        flutter config --list 2>&1 || true
+        echo "=== Flutter version ==="
+        flutter --version 2>&1 || true
 
-        # Diagnostic: inspect the built app bundle for native libraries.
+        # Build the app. Map device names to build sub-commands.
+        echo "=== Building Flutter app for $targetOs ==="
+        local buildTarget
+        case "$targetOs" in
+        Ubuntu)   buildTarget="linux" ;;
+        macOS)    buildTarget="macos" ;;
+        Windows)  buildTarget="windows" ;;
+        Android)  buildTarget="apk" ;;
+        iOS)      buildTarget="ios" ;;
+        *)        buildTarget="$(echo "$device" | tr '[:upper:]' '[:lower:]')" ;;
+        esac
+        echo "Build target: $buildTarget"
+        flutter build "$buildTarget" --debug $DART_DEFINES 2>&1 || true
+
+        # --- Diagnostic: check for native assets builder output ---
+        echo "=== Native assets builder cache ==="
+        # This directory contains the build hook output when Flutter invokes it.
+        find .dart_tool -path '*/native_assets_builder/*' -type f 2>/dev/null | head -50 || echo "No native_assets_builder directory found"
+        # Show the build output JSON if it exists (contains registered assets).
+        find .dart_tool -name 'build_output.json' 2>/dev/null | while read -r f; do
+            echo "--- $f ---"
+            cat "$f"
+            echo ""
+        done
+
+        # --- Diagnostic: inspect the built app bundle for native libraries ---
         echo "=== Inspecting Flutter app bundle for native libraries ==="
         case "$targetOs" in
         Ubuntu)
-            echo "--- Linux bundle (build/linux/) ---"
+            echo "--- Linux .so files ---"
             find build/linux/ -type f \( -name '*.so' -o -name '*.so.*' \) 2>/dev/null || echo "No .so files found"
             echo "--- Full bundle lib dir ---"
             ls -laR build/linux/x64/debug/bundle/lib/ 2>/dev/null || echo "bundle/lib/ not found"
             ;;
         Windows)
-            echo "--- Windows bundle (build/windows/) ---"
+            echo "--- Windows .dll files ---"
             find build/windows/ -type f -name '*.dll' 2>/dev/null || echo "No .dll files found"
             echo "--- Full runner dir ---"
-            ls -laR build/windows/x64/debug/runner/ 2>/dev/null || echo "runner/ not found"
+            ls -laR build/windows/x64/runner/Debug/ 2>/dev/null || echo "runner/Debug/ not found"
+            ;;
+        Android)
+            echo "--- APK native libs ---"
+            if command -v unzip &>/dev/null; then
+                local apk
+                apk=$(find build/app/outputs -name '*.apk' 2>/dev/null | head -1)
+                if [ -n "$apk" ]; then
+                    echo "APK: $apk"
+                    unzip -l "$apk" | grep -E '\.so$' || echo "No .so files in APK"
+                else
+                    echo "No APK found in build/app/outputs/"
+                fi
+            fi
+            ;;
+        macOS)
+            echo "--- macOS app bundle ---"
+            find build/macos -type f \( -name '*.dylib' -o -name '*.framework' \) 2>/dev/null || echo "No dylib/framework files found"
+            echo "--- Frameworks dir ---"
+            ls -laR build/macos/Build/Products/Debug/*.app/Contents/Frameworks/ 2>/dev/null || echo "Frameworks/ not found"
             ;;
         *)
             echo "(Bundle inspection not configured for $targetOs)"

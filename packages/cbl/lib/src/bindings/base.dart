@@ -529,10 +529,9 @@ final class BaseBindings extends Bindings {
       final libraryDirectory = p.dirname(libraryPath);
       final libraryFileName = p.basename(libraryPath);
 
-      // Diagnostic logging to debug vector search library naming issues.
-      // The C SDK expects a specific filename (e.g. libCouchbaseLiteVectorSearch.so
-      // on Linux) in the directory passed to CBL_EnableVectorSearch.
-      // If Dart's native asset bundler renamed the file, the C SDK won't find it.
+      // Diagnostic logging to debug vector search library naming.
+      // The C SDK expects a specific filename in the directory
+      // passed to CBL_EnableVectorSearch.
       // ignore: avoid_print
       print(
         '[CBL] enableVectorSearch: '
