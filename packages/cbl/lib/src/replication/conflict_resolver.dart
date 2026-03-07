@@ -54,8 +54,9 @@ abstract base class ConflictResolver {
   ///
   /// If this method throws an exception, the exception is reported as an
   /// unhandled error in the current zone and the conflict is resolved using the
-  /// [DefaultConflictResolver] strategy. An error is also logged through the
-  /// Couchbase Lite logging facility at error level.
+  /// native library's default conflict resolver. An error including the stack
+  /// trace is logged through the Couchbase Lite logging facility at error level
+  /// in the replicator domain.
   /// {@endtemplate}
   FutureOr<Document?> resolve(Conflict conflict);
 }

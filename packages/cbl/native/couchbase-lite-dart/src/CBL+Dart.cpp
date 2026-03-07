@@ -988,10 +988,8 @@ static const CBLDocument* CBLDart_ReplicatorConflictResolverWrapper(
         // conflict resolver. This avoids throwing C++ exceptions across the
         // C API boundary, which is undefined behavior between libraries with
         // potentially different C++ standard library versions.
-        CBL_Log(kCBLLogDomainReplicator, kCBLLogError,
-                "Custom conflict resolver threw an exception for doc '%.*s'; "
-                "falling back to default conflict resolver",
-                (int)documentID.size, (const char*)documentID.buf);
+        // Logging is handled on the Dart side where the stack trace is
+        // available.
         decision = CBLDefaultConflictResolver(nullptr, documentID,
                                               localDocument, remoteDocument);
         break;

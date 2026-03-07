@@ -531,7 +531,20 @@ AsyncCallback _createConflictResolverCallback(
     );
 
     final conflict = ConflictImpl(message.documentId, local, remote);
-    final resolved = await resolver.resolve(conflict) as DelegateDocument?;
+
+    DelegateDocument? resolved;
+    try {
+      resolved = await resolver.resolve(conflict) as DelegateDocument?;
+    } catch (error, stackTrace) {
+      CBLBindings.instance.logging.logMessage(
+        CBLLogDomain.replicator,
+        CBLLogLevel.error,
+        'Custom conflict resolver threw an exception for doc '
+        "'${message.documentId}'; falling back to default conflict "
+        'resolver.\n$error\n$stackTrace',
+      );
+      rethrow;
+    }
 
     FfiDocumentDelegate? resolvedDelegate;
     if (resolved != null) {
