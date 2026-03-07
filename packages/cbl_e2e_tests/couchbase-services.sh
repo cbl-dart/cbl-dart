@@ -4,7 +4,10 @@ set -e
 
 scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 dockerComposeFile="$scriptDir/docker-compose.yaml"
-couchbaseServerVersion=8.0.0
+# The host installers for Couchbase Server 8.0 are currently not starting
+# reliably on GitHub-hosted macOS and Windows runners. Keep native host-based
+# E2E startup on the stable 7.6 line; Docker-based Linux E2E still uses 8.0.
+couchbaseServerVersion=7.6.9
 syncGatewayVersion=4.0.3
 couchbaseServerAdminUser="Administrator"
 couchbaseServerAdminPass="password"
