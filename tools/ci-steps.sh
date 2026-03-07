@@ -121,7 +121,6 @@ function runE2ETests() {
         case "$targetOs" in
         iOS)
             device="iPhone"
-            DART_DEFINES="$DART_DEFINES --dart-define skipPeerSyncTest=true"
             ;;
         macOS)
             device="macOS"
