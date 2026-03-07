@@ -137,7 +137,7 @@ function waitForCouchbaseQueryService() {
         response="$(
             curl --silent --show-error -X POST http://localhost:8093/query/service \
                 -u "${couchbaseServerAdminUser}:${couchbaseServerAdminPass}" \
-                -d 'statement=SELECT 1;' 2>&1 || true
+                --data-urlencode 'statement=SELECT 1;' 2>&1 || true
         )"
 
         if echo "$response" | grep -q '"status":"success"'; then
