@@ -176,20 +176,10 @@ function initCouchbaseServer() {
         -d "password=${sgRbacPass}" \
         -d "roles=bucket_full_access[${couchbaseServerBucket}],bucket_admin[${couchbaseServerBucket}]"
 
-    echo "Waiting for Query service to be ready..."
-    local attempt=0
-    local maxAttempts=30
-    until curl -sf -X POST http://localhost:8093/query/service \
-        -u "${couchbaseServerAdminUser}:${couchbaseServerAdminPass}" \
-        -d 'statement=SELECT 1;' >/dev/null; do
-        echo "Attempt $attempt to connect to Query service"
-        attempt=$((attempt + 1))
-        if ((attempt == maxAttempts)); then
-            echo "Query service was not ready after $maxAttempts attempts"
-            exit 1
-        fi
-        sleep 2
-    done
+    waitForService \
+        "Couchbase Query Service" \
+        http://localhost:8093/admin/ping \
+        dumpCouchbaseServerDiagnostics
 
     echo "Couchbase Server initialization complete"
     echo "::endgroup::"
