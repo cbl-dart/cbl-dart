@@ -124,6 +124,43 @@ function waitForCouchbaseServer() {
         dumpCouchbaseServerDiagnostics
 }
 
+function waitForCouchbaseQueryService() {
+    local maxAttempts=30
+    local delayBetweenAttempts=2
+    local attempt=0
+    local response
+
+    echo "::group::Wait for Couchbase Query Service"
+
+    while true; do
+        echo "Attempt $attempt to query Couchbase Query Service"
+        response="$(
+            curl --silent --show-error -X POST http://localhost:8093/query/service \
+                -u "${couchbaseServerAdminUser}:${couchbaseServerAdminPass}" \
+                -d 'statement=SELECT 1;' 2>&1 || true
+        )"
+
+        if echo "$response" | grep -q '"status":"success"'; then
+            break
+        fi
+
+        attempt=$((attempt + 1))
+        if ((attempt == maxAttempts)); then
+            echo "Couchbase Query Service was not ready after $maxAttempts attempts"
+            if [ -n "$response" ]; then
+                echo "$response"
+            fi
+            dumpCouchbaseServerDiagnostics
+            exit 1
+        fi
+
+        sleep $delayBetweenAttempts
+    done
+
+    echo "Couchbase Query Service is reachable"
+    echo "::endgroup::"
+}
+
 function initCouchbaseServer() {
     echo "::group::Initialize Couchbase Server"
 
@@ -176,10 +213,7 @@ function initCouchbaseServer() {
         -d "password=${sgRbacPass}" \
         -d "roles=bucket_full_access[${couchbaseServerBucket}],bucket_admin[${couchbaseServerBucket}]"
 
-    waitForService \
-        "Couchbase Query Service" \
-        http://localhost:8093/admin/ping \
-        dumpCouchbaseServerDiagnostics
+    waitForCouchbaseQueryService
 
     echo "Couchbase Server initialization complete"
     echo "::endgroup::"
