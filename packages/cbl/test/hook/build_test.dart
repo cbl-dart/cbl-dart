@@ -19,7 +19,65 @@ typedef _Target = ({
   bool supportsVectorSearch,
 });
 
+// NOTE: These tests download real artifacts from the network. The build hook
+// has internal retry logic with exponential backoff, but network failures or
+// CDN slowness may cause intermittent test failures.
+
 void main() {
+  // --- Error-path tests ---
+
+  test('rejects invalid edition', () async {
+    await expectLater(
+      testCodeBuildHook(
+        mainMethod: hook.main,
+        targetOS: OS.macOS,
+        targetArchitecture: Architecture.arm64,
+        targetIOSSdk: IOSSdk.iPhoneOS,
+        userDefines: PackageUserDefines(
+          workspacePubspec: PackageUserDefinesSource(
+            defines: {'edition': 'foo'},
+            basePath: Directory.current.uri,
+          ),
+        ),
+        check: (input, output) {},
+      ),
+      throwsA(
+        isA<Exception>().having(
+          (e) => e.toString(),
+          'message',
+          contains('edition must be "community" or "enterprise"'),
+        ),
+      ),
+    );
+  });
+
+  test('rejects vector_search without enterprise edition', () async {
+    await expectLater(
+      testCodeBuildHook(
+        mainMethod: hook.main,
+        targetOS: OS.macOS,
+        targetArchitecture: Architecture.arm64,
+        targetIOSSdk: IOSSdk.iPhoneOS,
+        userDefines: PackageUserDefines(
+          workspacePubspec: PackageUserDefinesSource(
+            defines: {'edition': 'community', 'vector_search': true},
+            basePath: Directory.current.uri,
+          ),
+        ),
+        check: (input, output) {},
+      ),
+      throwsA(
+        isA<Exception>().having(
+          (e) => e.toString(),
+          'message',
+          contains('vector_search: true requires'),
+        ),
+      ),
+    );
+  });
+
+  // --- Build hook integration tests ---
+
   final targets = <_Target>[
     (
       os: OS.macOS,

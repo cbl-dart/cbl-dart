@@ -44,16 +44,12 @@ jobs:
       - name: Setup Bencher
         uses: bencherdev/bencher@main
 
-      - name: Cache Flutter SDK
-        uses: actions/cache@v4
-        with:
-          path: ${{ runner.tool_cache }}/flutter
-          key: flutter-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}
-
       - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+        uses: ./.github/actions/setup-flutter
         with:
-          flutter-version: 3.41.2
+          channel: stable
+          cache: true
+          pub-cache-hash-pattern: pubspec.lock
 
       - name: Setup Melos
         run: dart pub global activate melos

@@ -67,6 +67,14 @@ String _resolveAndroidDirectory(String? packageName) {
   return '/data/data/$name/files';
 }
 
+/// Android: Resolve the app's cache directory from the package name.
+///
+/// This is used as the temporary directory for Couchbase Lite on Android.
+String resolveAndroidCacheDirectory({String? packageName}) {
+  final name = packageName ?? _readAndroidPackageName();
+  return '/data/data/$name/cache';
+}
+
 /// Reads the Android package name from `/proc/self/cmdline`.
 ///
 /// Visible for testing.

@@ -20,6 +20,9 @@ DART_API_ALL_DL_SYMBOLS(DART_API_DL_DEFINITIONS)
 
 #undef DART_API_DL_DEFINITIONS
 
+// DartApiEntry::function is a function pointer, but we need to return it as
+// void* for the generic lookup. The reinterpret_cast below is the C++
+// equivalent of the implicit cast that the original C code relied on.
 using DartApiEntry_function = void*;
 
 static DartApiEntry_function FindFunctionPointer(const DartApiEntry* entries,

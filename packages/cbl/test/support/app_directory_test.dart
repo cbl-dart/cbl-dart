@@ -364,6 +364,16 @@ void main() {
     });
   });
 
+  group('resolveAndroidCacheDirectory', () {
+    test('returns /data/data/<packageName>/cache', () {
+      final result = resolveAndroidCacheDirectory(
+        packageName: 'com.example.myapp',
+      );
+
+      expect(result, '/data/data/com.example.myapp/cache');
+    });
+  });
+
   group('detectMacOSBundleId', () {
     late Directory tempDir;
 

@@ -32,17 +32,17 @@ Future<void> _build(BuildInput input, BuildOutputBuilder output) async {
   final edition = (input.userDefines['edition'] as String?) ?? 'community';
   final vectorSearch = input.userDefines['vector_search']?.toString() == 'true';
 
-  if (vectorSearch && edition != 'enterprise') {
-    throw Exception(
-      'cbl: vector_search: true requires '
-      'edition: enterprise in user_defines.',
-    );
-  }
-
   if (edition != 'community' && edition != 'enterprise') {
     throw Exception(
       'cbl: edition must be "community" or "enterprise", '
       'got "$edition".',
+    );
+  }
+
+  if (vectorSearch && edition != 'enterprise') {
+    throw Exception(
+      'cbl: vector_search: true requires '
+      'edition: enterprise in user_defines.',
     );
   }
 
