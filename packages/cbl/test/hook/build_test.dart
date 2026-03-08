@@ -15,7 +15,8 @@ typedef _Target = ({
   bool canRun,
 
   /// Whether the vector search extension is available for this target.
-  /// Vector search is only available for 64-bit architectures.
+  /// Vector search is supported on ARM64 and x86-64, but not on 32-bit ARM
+  /// or ia32.
   bool supportsVectorSearch,
 });
 
@@ -76,6 +77,30 @@ void main() {
     );
   });
 
+  test('skips vector_search on unsupported 32-bit ARM architecture', () async {
+    await testCodeBuildHook(
+      mainMethod: hook.main,
+      targetOS: OS.android,
+      targetArchitecture: Architecture.arm,
+      targetIOSSdk: IOSSdk.iPhoneOS,
+      userDefines: PackageUserDefines(
+        workspacePubspec: PackageUserDefinesSource(
+          defines: {'edition': 'enterprise', 'vector_search': true},
+          basePath: Directory.current.uri,
+        ),
+      ),
+      check: (input, output) {
+        _checkAssets(
+          input: input,
+          output: output,
+          targetOS: OS.android,
+          targetArchitecture: Architecture.arm,
+          vectorSearch: false,
+        );
+      },
+    );
+  });
+
   // --- Build hook integration tests ---
 
   final targets = <_Target>[
@@ -116,7 +141,7 @@ void main() {
       canRun: Platform.isMacOS,
       supportsVectorSearch: true,
     ),
-    // Vector search is only available for 64-bit architectures.
+    // Vector search is supported on ARM64 and x86-64, but not on 32-bit ARM.
     (
       os: OS.android,
       arch: Architecture.arm,

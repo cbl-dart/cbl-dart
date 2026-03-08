@@ -49,16 +49,14 @@ bool get vectorSearchLibraryBundled {
 
 /// Whether the current system supports vector search.
 ///
-/// Vector search requires a 64-bit architecture. On x86-64, the CPU must
-/// support the AVX2 instruction set.
+/// Vector search is supported on ARM64 and x86-64. On x86-64, the CPU must
+/// additionally support the AVX2 instruction set. 32-bit ARM and ia32
+/// architectures are not supported.
 ///
 /// This does not require Couchbase Lite to be initialized.
 bool get systemSupportsVectorSearch => switch (ffi.Abi.current()) {
-  ffi.Abi.androidArm ||
   ffi.Abi.androidArm64 ||
-  ffi.Abi.iosArm ||
   ffi.Abi.iosArm64 ||
-  ffi.Abi.linuxArm ||
   ffi.Abi.linuxArm64 ||
   ffi.Abi.macosArm64 ||
   ffi.Abi.windowsArm64 => true,

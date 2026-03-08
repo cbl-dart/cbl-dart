@@ -123,7 +123,8 @@ Future<void> _build(BuildInput input, BuildOutputBuilder output) async {
   print('[cbl build hook] Compiled and registered cblitedart asset.');
 
   // 3. Optionally download vector search extension.
-  // Vector search is only available for 64-bit architectures.
+  // Vector search is supported on ARM64 and x86-64, but not on 32-bit ARM
+  // or ia32.
   final vectorSearchSupported =
       targetArchitecture != Architecture.arm &&
       targetArchitecture != Architecture.ia32;
@@ -218,7 +219,6 @@ Future<({Uri libPath, String includeDir})> _downloadCblite({
   final architectures = _cbliteArchitectures(os, arch);
 
   final config = dl.DatabasePackageConfig(
-    library: dl.Library.cblite,
     os: os,
     architectures: architectures,
     release: release,
@@ -358,7 +358,7 @@ Uri _findLibrary(dl.Package package, dl.OS os) {
   if (dir.existsSync()) {
     for (final entity in dir.listSync()) {
       final name = p.basename(entity.path);
-      if (entity is File && name.contains(libraryName)) {
+      if (entity is File && name.startsWith(libraryName)) {
         return Uri.file(entity.path);
       }
     }

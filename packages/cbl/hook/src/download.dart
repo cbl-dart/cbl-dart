@@ -11,7 +11,6 @@ import 'package:path/path.dart' as p;
 
 enum Library {
   cblite,
-  cblitedart,
   vectorSearch;
 
   String libraryName(OS os) => switch (this) {
@@ -19,11 +18,6 @@ enum Library {
       OS.linux || OS.android || OS.macOS => 'libcblite',
       OS.windows => 'cblite',
       OS.iOS => 'CouchbaseLite',
-    },
-    cblitedart => switch (os) {
-      OS.linux || OS.android || OS.macOS => 'libcblitedart',
-      OS.windows => 'cblitedart',
-      OS.iOS => 'CouchbaseLiteDart',
     },
     vectorSearch => switch (os) {
       OS.android => 'libCouchbaseLiteVectorSearch',
@@ -105,7 +99,6 @@ final class Package {
   String get rootDir {
     final rootDirName = switch (config.library) {
       Library.cblite => 'libcblite-${config.version}',
-      Library.cblitedart => 'libcblitedart-${config.version}',
       Library.vectorSearch => null,
     };
     return rootDirName != null ? p.join(packageDir, rootDirName) : packageDir;
@@ -115,7 +108,7 @@ final class Package {
 
   String? get sharedLibrariesDir {
     final dir = switch (config.library) {
-      Library.cblite || Library.cblitedart => switch (config.os) {
+      Library.cblite => switch (config.os) {
         OS.android => p.join('lib', config.architectures.first._androidTriple),
         OS.macOS => 'lib',
         OS.linux => p.join('lib', config.architectures.first._linuxTriple),
@@ -137,13 +130,12 @@ final class Package {
 
 final class DatabasePackageConfig extends PackageConfig {
   DatabasePackageConfig({
-    required super.library,
     required super.os,
     required super.architectures,
     required super.release,
     required super.archiveFormat,
     required this.edition,
-  });
+  }) : super(library: Library.cblite);
 
   final Edition edition;
 
@@ -316,7 +308,9 @@ Future<T> _retryWithExponentialBackoff<T>(
     delay *= 2;
     attempt++;
   }
-  throw Exception('Stopping to retry after $maxAttempts failed attempts.');
+  throw Exception(
+    'Stopping to retry after $maxAttempts failed attempts for $operation.',
+  );
 }
 
 Future<void> _unpackArchive(

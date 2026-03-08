@@ -21,9 +21,8 @@ class InitContext {
 
 class IsolateContext {
   IsolateContext({
-    this.libraries,
+    required this.bindingsLibraries,
     this.bindings,
-    this.bindingsLibraries,
     this.initContext,
   });
 
@@ -46,20 +45,18 @@ class IsolateContext {
     return config;
   }
 
-  final LibrariesConfiguration? libraries;
   final CBLBindings? bindings;
-  final BindingsLibraries? bindingsLibraries;
+  final BindingsLibraries bindingsLibraries;
 
   final InitContext? initContext;
 
   /// Returns a copy of this context that is safe to send to another isolate.
   ///
   /// [CBLBindings] cannot be sent across isolate boundaries because it contains
-  /// `NativeFinalizer` objects. This method strips [bindings] and keeps only
-  /// the serializable [bindingsLibraries] configuration, which allows the
+  /// `NativeFinalizer` objects. This method strips [bindings] and keeps the
+  /// serializable [bindingsLibraries], which allows the
   /// secondary isolate to create its own [CBLBindings].
   IsolateContext forSecondaryIsolate() => IsolateContext(
-    libraries: libraries,
     bindingsLibraries: bindingsLibraries,
     initContext: initContext,
   );
@@ -84,12 +81,7 @@ Future<void> _initIsolate(IsolateContext context) async {
   IsolateContext.instance = context;
 
   CBLBindings.init(
-    instance:
-        context.bindings ??
-        (context.bindingsLibraries != null
-            ? CBLBindings(context.bindingsLibraries!)
-            : null),
-    libraries: context.libraries,
+    instance: context.bindings ?? CBLBindings(context.bindingsLibraries),
     onTracedCall: tracingDelegateTracedNativeCallHandler,
   );
 

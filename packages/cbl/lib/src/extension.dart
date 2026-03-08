@@ -23,8 +23,9 @@ enum VectorSearchStatus {
 
   /// The current system does not support vector search.
   ///
-  /// Vector search requires a 64-bit architecture. On x86-64, the CPU must
-  /// support the AVX2 instruction set.
+  /// Vector search is supported on ARM64 and x86-64. On x86-64, the CPU must
+  /// additionally support the AVX2 instruction set. 32-bit ARM and ia32
+  /// architectures are not supported.
   systemNotSupported,
 }
 
