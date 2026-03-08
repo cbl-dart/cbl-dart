@@ -130,7 +130,7 @@ jobs:
     runs-on: >-
       ${{ fromJSON('{
         "Ubuntu":"blacksmith-4vcpu-ubuntu-2204",
-        "macOS":"macos-15",
+        "macOS":"warp-macos-15-arm64-6x",
         "Windows":"windows-2025"
       }')[matrix.os] }}
     steps:
@@ -212,8 +212,8 @@ jobs:
             os: Android
     runs-on: >-
       ${{ fromJSON('{
-        "iOS":"macos-15",
-        "macOS":"macos-15",
+        "iOS":"warp-macos-15-arm64-6x",
+        "macOS":"warp-macos-15-arm64-6x",
         "Android":"blacksmith-4vcpu-ubuntu-2204",
         "Ubuntu":"blacksmith-4vcpu-ubuntu-2204",
         "Windows":"windows-2025"
