@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:code_assets/code_assets.dart';
 import 'package:hooks/hooks.dart';
+import 'package:http/http.dart' as http;
 import 'package:native_toolchain_c/native_toolchain_c.dart';
 import 'package:path/path.dart' as p;
 
@@ -236,7 +237,7 @@ Future<({Uri libPath, String includeDir})> _downloadCblite({
   );
 
   final loader = dl.RemotePackageLoader(cacheDir: cacheDir);
-  final package = await _retryOnce(() => loader.load(config));
+  final package = await _retryWithBackoff(() => loader.load(config));
 
   if (targetOS == OS.iOS) {
     return _findIOSFramework(package, input);
@@ -270,7 +271,7 @@ Future<Uri> _downloadVectorSearch({
   );
 
   final loader = dl.RemotePackageLoader(cacheDir: cacheDir);
-  final package = await _retryOnce(() => loader.load(config));
+  final package = await _retryWithBackoff(() => loader.load(config));
 
   if (targetOS == OS.iOS) {
     return _findIOSVectorSearchLibrary(package, input);
@@ -367,14 +368,40 @@ Uri _findLibrary(dl.Package package, dl.OS os) {
   throw Exception('Could not find $libraryName library in $libDir');
 }
 
-Future<T> _retryOnce<T>(Future<T> Function() fn) async {
-  try {
-    return await fn();
-  } on IOException {
-    return fn();
-  } on dl.HttpException {
-    return fn();
+Future<T> _retryWithBackoff<T>(Future<T> Function() fn) async {
+  const maxAttempts = 3;
+  for (var attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      return await fn();
+    } on IOException catch (e) {
+      if (attempt == maxAttempts) {
+        rethrow;
+      }
+      // ignore: avoid_print
+      print(
+        '[cbl build hook] Retry $attempt/$maxAttempts after IOException: $e',
+      );
+    } on dl.HttpException catch (e) {
+      if (attempt == maxAttempts) {
+        rethrow;
+      }
+      // ignore: avoid_print
+      print(
+        '[cbl build hook] Retry $attempt/$maxAttempts after HttpException: $e',
+      );
+    } on http.ClientException catch (e) {
+      if (attempt == maxAttempts) {
+        rethrow;
+      }
+      // ignore: avoid_print
+      print(
+        '[cbl build hook] Retry $attempt/$maxAttempts after ClientException: $e',
+      );
+    }
+    // Exponential backoff: 2s, 4s.
+    await Future<void>.delayed(Duration(seconds: 2 * attempt));
   }
+  throw StateError('Unreachable');
 }
 
 /// Stages cblite library files into the staging directory for linking and
