@@ -264,8 +264,12 @@ Future<Uint8List> _downloadUrl(
   String url, {
   Duration timeout = const Duration(minutes: 5),
 }) => _retryWithExponentialBackoff(
+  operation: 'download $url',
   timeout: timeout,
-  retryOn: (error) => error is HttpException && error.statusCode >= 500,
+  retryOn: (error) =>
+      (error is HttpException && error.statusCode >= 500) ||
+      error is SocketException ||
+      error is ClientException,
   () async {
     final response = await get(Uri.parse(url));
 
@@ -282,6 +286,7 @@ Future<Uint8List> _downloadUrl(
 
 Future<T> _retryWithExponentialBackoff<T>(
   Future<T> Function() fn, {
+  required String operation,
   Duration delay = const Duration(seconds: 1),
   int maxAttempts = 5,
   Duration timeout = const Duration(minutes: 5),
@@ -303,6 +308,8 @@ Future<T> _retryWithExponentialBackoff<T>(
       if (!retryOn(e)) {
         rethrow;
       }
+      // ignore: avoid_print
+      print('Retry ${attempt + 1}/$maxAttempts for $operation after error: $e');
     }
     await Future<void>.delayed(delay * random.nextDouble());
     // ignore: parameter_assignments

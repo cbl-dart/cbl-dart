@@ -19,7 +19,7 @@ targetOs="$TARGET_OS"
 testPackage="$TEST_PACKAGE"
 testPackageDir="packages/$testPackage"
 testAppBundleId="com.terwesten.gabriel.cblE2eTestsFlutter"
-iosVersion="18-5"
+iosVersion="18-4"
 iosDevice="iPhone 16"
 androidVersion="27"
 androidDevice="pixel_4"
@@ -47,9 +47,6 @@ function startVirtualDevices() {
 
     case "$targetOs" in
     iOS)
-        # Reset CoreSimulator daemon to avoid stale state on CI runners.
-        sudo killall -9 com.apple.CoreSimulator.CoreSimulatorService 2>/dev/null || true
-        sleep 3
         ./tools/apple-simulator.sh start -o "iOS-$iosVersion" -d "$iosDevice"
         ;;
     Android)
@@ -293,7 +290,8 @@ function runE2ETests() {
                     echo "WARNING: No Runner.app found — skipping pre-launch"
                 fi
             else
-                echo "WARNING: No booted simulator found"
+                echo "ERROR: No booted simulator found — aborting"
+                exit 1
             fi
             echo "=== End iOS simulator readiness ==="
         fi
