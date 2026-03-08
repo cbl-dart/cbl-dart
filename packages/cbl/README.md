@@ -62,7 +62,7 @@ dart pub add cbl
 ### Configure edition (optional)
 
 By default, the Community edition is used. To use the Enterprise edition,
-configure it in your workspace root `pubspec.yaml`:
+configure it in your package `pubspec.yaml`:
 
 ```yaml
 hooks:
@@ -70,6 +70,10 @@ hooks:
     cbl:
       edition: enterprise
 ```
+
+> [!NOTE]
+> If you are using a Dart pub workspace, `hooks.user_defines` are read from the
+> workspace root `pubspec.yaml`, so put this configuration there instead.
 
 ### Initialize
 
@@ -83,6 +87,10 @@ Future<void> main() async {
   // Start using Couchbase Lite ...
 }
 ```
+
+If you enabled vector search in `pubspec.yaml`, call
+`Extension.enableVectorSearch()` after initialization and before opening a
+database that uses vector search.
 
 ### Example
 

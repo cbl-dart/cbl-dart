@@ -36,7 +36,7 @@ This single package works for both standalone Dart apps and Flutter apps.
 ## Configure edition (optional)
 
 By default, the Community edition is used. To use the Enterprise edition,
-configure it in your workspace root `pubspec.yaml`:
+configure it in your package `pubspec.yaml`:
 
 ```yaml
 hooks:
@@ -44,6 +44,13 @@ hooks:
     cbl:
       edition: enterprise
 ```
+
+:::note
+
+If you are using a Dart pub workspace, `hooks.user_defines` are read from the
+workspace root `pubspec.yaml`, so put this configuration there instead.
+
+:::
 
 :::info
 
@@ -66,6 +73,18 @@ Future<void> main() async {
   // Start using Couchbase Lite ...
 }
 ```
+
+If you enabled vector search in `pubspec.yaml`, enable it explicitly after
+initialization and before opening a database that uses it:
+
+```dart
+final status = Extension.enableVectorSearch();
+if (status != VectorSearchStatus.enabled) {
+  // Handle the case where vector search could not be enabled.
+}
+```
+
+See [Vector Search](vector-search.mdx) for details.
 
 ## Platform requirements
 

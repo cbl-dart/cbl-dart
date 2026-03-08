@@ -1,3 +1,4 @@
+import 'dart:ffi' show Abi;
 import 'dart:io';
 
 import 'package:code_assets/code_assets.dart';
@@ -15,10 +16,11 @@ typedef _Target = ({
   bool canRun,
 
   /// Whether the vector search extension is available for this target.
-  /// Vector search is supported on ARM64 and x86-64, but not on 32-bit ARM
-  /// or ia32.
+  /// Vector search is supported on ARM64 and x86-64.
   bool supportsVectorSearch,
 });
+
+typedef _HostTarget = ({OS os, Architecture arch});
 
 // NOTE: These tests download real artifacts from the network. The build hook
 // has internal retry logic with exponential backoff, but network failures or
@@ -29,22 +31,19 @@ void main() {
 
   test('rejects invalid edition', () async {
     await expectLater(
-      testCodeBuildHook(
-        mainMethod: hook.main,
+      _runBuildHookDirect(
         targetOS: OS.macOS,
         targetArchitecture: Architecture.arm64,
-        targetIOSSdk: IOSSdk.iPhoneOS,
         userDefines: PackageUserDefines(
           workspacePubspec: PackageUserDefinesSource(
             defines: {'edition': 'foo'},
             basePath: Directory.current.uri,
           ),
         ),
-        check: (input, output) {},
       ),
       throwsA(
-        isA<Exception>().having(
-          (e) => e.toString(),
+        isA<BuildError>().having(
+          (e) => e.message,
           'message',
           contains('edition must be "community" or "enterprise"'),
         ),
@@ -54,22 +53,19 @@ void main() {
 
   test('rejects vector_search without enterprise edition', () async {
     await expectLater(
-      testCodeBuildHook(
-        mainMethod: hook.main,
+      _runBuildHookDirect(
         targetOS: OS.macOS,
         targetArchitecture: Architecture.arm64,
-        targetIOSSdk: IOSSdk.iPhoneOS,
         userDefines: PackageUserDefines(
           workspacePubspec: PackageUserDefinesSource(
             defines: {'edition': 'community', 'vector_search': true},
             basePath: Directory.current.uri,
           ),
         ),
-        check: (input, output) {},
       ),
       throwsA(
-        isA<Exception>().having(
-          (e) => e.toString(),
+        isA<BuildError>().having(
+          (e) => e.message,
           'message',
           contains('vector_search: true requires'),
         ),
@@ -77,29 +73,30 @@ void main() {
     );
   });
 
+  final hostTarget = _hostTarget();
+
   test(
-    'skips vector_search on unsupported 32-bit ARM architecture',
+    'uses community edition by default when no edition is specified',
+    skip: hostTarget == null
+        ? 'No supported host target is available for this platform.'
+        : null,
     timeout: const Timeout(Duration(minutes: 5)),
     () async {
+      final target = hostTarget!;
       await testCodeBuildHook(
         mainMethod: hook.main,
-        targetOS: OS.android,
-        targetArchitecture: Architecture.arm,
+        targetOS: target.os,
+        targetArchitecture: target.arch,
         targetIOSSdk: IOSSdk.iPhoneOS,
-        userDefines: PackageUserDefines(
-          workspacePubspec: PackageUserDefinesSource(
-            defines: {'edition': 'enterprise', 'vector_search': true},
-            basePath: Directory.current.uri,
-          ),
-        ),
         check: (input, output) {
           _checkAssets(
             input: input,
             output: output,
-            targetOS: OS.android,
-            targetArchitecture: Architecture.arm,
+            targetOS: target.os,
+            targetArchitecture: target.arch,
             vectorSearch: false,
           );
+          _expectCommunityEditionCache(input);
         },
       );
     },
@@ -145,10 +142,16 @@ void main() {
       canRun: Platform.isMacOS,
       supportsVectorSearch: true,
     ),
-    // Vector search is supported on ARM64 and x86-64, but not on 32-bit ARM.
     (
       os: OS.android,
       arch: Architecture.arm,
+      iosSdk: null,
+      canRun: Platform.isMacOS || Platform.isLinux || Platform.isWindows,
+      supportsVectorSearch: false,
+    ),
+    (
+      os: OS.android,
+      arch: Architecture.ia32,
       iosSdk: null,
       canRun: Platform.isMacOS || Platform.isLinux || Platform.isWindows,
       supportsVectorSearch: false,
@@ -201,17 +204,19 @@ void main() {
 
   for (final target in targets) {
     for (final edition in editions) {
-      for (final vectorSearch in [
+      for (final vectorSearchRequested in [
         false,
-        if (edition == 'enterprise' && target.supportsVectorSearch) true,
+        if (edition == 'enterprise') true,
       ]) {
+        final expectedVectorSearch =
+            vectorSearchRequested && target.supportsVectorSearch;
         final iosSdkLabel = target.iosSdk != null
             ? ', sdk: ${target.iosSdk}'
             : '';
         final description =
             '${target.os} ${target.arch} '
             '(edition: $edition, '
-            'vectorSearch: $vectorSearch$iosSdkLabel)';
+            'vectorSearch: $vectorSearchRequested$iosSdkLabel)';
 
         test(
           description,
@@ -229,7 +234,7 @@ void main() {
                 workspacePubspec: PackageUserDefinesSource(
                   defines: {
                     'edition': edition,
-                    if (vectorSearch) 'vector_search': true,
+                    if (vectorSearchRequested) 'vector_search': true,
                   },
                   basePath: Directory.current.uri,
                 ),
@@ -240,7 +245,7 @@ void main() {
                   output: output,
                   targetOS: target.os,
                   targetArchitecture: target.arch,
-                  vectorSearch: vectorSearch,
+                  vectorSearch: expectedVectorSearch,
                 );
               },
             );
@@ -256,6 +261,106 @@ const _windowsVectorSearchDeps = <Architecture, List<String>>{
   Architecture.x64: ['libomp140.x86_64.dll'],
   Architecture.arm64: ['libomp140.arm64.dll'],
 };
+
+_HostTarget? _hostTarget() {
+  final os = switch (Platform.operatingSystem) {
+    'macos' => OS.macOS,
+    'linux' => OS.linux,
+    'windows' => OS.windows,
+    _ => null,
+  };
+
+  final arch = switch (Abi.current()) {
+    Abi.macosArm64 || Abi.linuxArm64 || Abi.windowsArm64 => Architecture.arm64,
+    Abi.macosX64 || Abi.linuxX64 || Abi.windowsX64 => Architecture.x64,
+    _ => null,
+  };
+
+  if (os == null || arch == null) {
+    return null;
+  }
+
+  return (os: os, arch: arch);
+}
+
+Future<void> _runBuildHookDirect({
+  required OS targetOS,
+  required Architecture targetArchitecture,
+  PackageUserDefines? userDefines,
+  IOSSdk targetIOSSdk = IOSSdk.iPhoneOS,
+  int targetIOSVersion = 17,
+  int targetMacOSVersion = 13,
+  int targetAndroidNdkApi = 30,
+}) async {
+  final tempDir = await Directory.systemTemp.createTemp();
+
+  try {
+    final tempUri = Directory(
+      await tempDir.resolveSymbolicLinks(),
+    ).uri.normalizePath();
+    final outputDirectoryShared = tempUri.resolve('output_shared/');
+    final outputFile = tempUri.resolve('output.json');
+
+    await Directory.fromUri(outputDirectoryShared).create();
+
+    final inputBuilder = BuildInputBuilder()
+      ..setupShared(
+        packageRoot: Directory.current.uri,
+        packageName: 'cbl',
+        outputFile: outputFile,
+        outputDirectoryShared: outputDirectoryShared,
+        userDefines: userDefines,
+      )
+      ..setupBuildInput()
+      ..config.setupBuild(linkingEnabled: false);
+
+    CodeAssetExtension(
+      linkModePreference: LinkModePreference.dynamic,
+      targetArchitecture: targetArchitecture,
+      targetOS: targetOS,
+      iOS: targetOS == OS.iOS
+          ? IOSCodeConfig(
+              targetSdk: targetIOSSdk,
+              targetVersion: targetIOSVersion,
+            )
+          : null,
+      macOS: targetOS == OS.macOS
+          ? MacOSCodeConfig(targetVersion: targetMacOSVersion)
+          : null,
+      android: targetOS == OS.android
+          ? AndroidCodeConfig(targetNdkApi: targetAndroidNdkApi)
+          : null,
+    ).setupBuildInput(inputBuilder);
+
+    final input = inputBuilder.build();
+    final output = BuildOutputBuilder();
+
+    await hook.buildHook(input, output);
+  } finally {
+    tempDir.deleteSync(recursive: true);
+  }
+}
+
+void _expectCommunityEditionCache(BuildInput input) {
+  final sharedEntries = Directory(input.outputDirectoryShared.toFilePath())
+      .listSync()
+      .whereType<Directory>()
+      .map((dir) => p.basename(dir.path))
+      .toList();
+
+  expect(
+    sharedEntries.any((name) => name.startsWith('cblite-community-')),
+    isTrue,
+    reason: 'Expected a community cblite cache directory in $sharedEntries.',
+  );
+  expect(
+    sharedEntries.any((name) => name.startsWith('cblite-enterprise-')),
+    isFalse,
+    reason:
+        'Did not expect an enterprise cblite cache directory in '
+        '$sharedEntries.',
+  );
+}
 
 void _checkAssets({
   required BuildInput input,

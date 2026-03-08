@@ -11,38 +11,26 @@ const _cbliteRelease = '3.2.4';
 const _vectorSearchRelease = '1.0.0';
 
 void main(List<String> args) async {
-  await build(args, _build);
+  await build(args, buildHook);
 }
 
-Future<void> _build(BuildInput input, BuildOutputBuilder output) async {
-  // Diagnostic logging for CI: confirm the build hook is running and show
-  // key configuration values.
-  // ignore: avoid_print
-  print('[cbl build hook] Running build hook.');
-  // ignore: avoid_print
-  print('[cbl build hook] targetOS: ${input.config.code.targetOS}');
-  // ignore: avoid_print
-  print(
-    '[cbl build hook] targetArchitecture: '
-    '${input.config.code.targetArchitecture}',
-  );
-  // ignore: avoid_print
-  print('[cbl build hook] outputDirectory: ${input.outputDirectory}');
-
+Future<void> buildHook(BuildInput input, BuildOutputBuilder output) async {
   final edition = (input.userDefines['edition'] as String?) ?? 'community';
   final vectorSearch = input.userDefines['vector_search']?.toString() == 'true';
 
   if (edition != 'community' && edition != 'enterprise') {
-    throw Exception(
-      'cbl: edition must be "community" or "enterprise", '
-      'got "$edition".',
+    throw BuildError(
+      message:
+          'edition must be "community" or "enterprise", '
+          'got "$edition".',
     );
   }
 
   if (vectorSearch && edition != 'enterprise') {
-    throw Exception(
-      'cbl: vector_search: true requires '
-      'edition: enterprise in user_defines.',
+    throw BuildError(
+      message:
+          'vector_search: true requires '
+          'edition: enterprise in user_defines.',
     );
   }
 
@@ -78,12 +66,11 @@ Future<void> _build(BuildInput input, BuildOutputBuilder output) async {
       file: cbliteAssetPath,
     ),
   );
-  // ignore: avoid_print
-  print('[cbl build hook] Registered cblite asset: $cbliteAssetPath');
 
   // 2. Compile cblitedart from source.
-  // Use headers from the downloaded cblite package — they contain the correct
-  // CBL_Edition.h for the selected edition (community vs enterprise).
+  // Use headers from the downloaded cblite package — they contain the
+  // correct CBL_Edition.h for the selected edition (community vs
+  // enterprise).
   final builder = CBuilder.library(
     name: 'cblitedart',
     assetName: 'src/bindings/cblitedart_native_assets.dart',
@@ -119,23 +106,12 @@ Future<void> _build(BuildInput input, BuildOutputBuilder output) async {
     cppLinkStdLib: targetOS == OS.android ? 'c++_static' : null,
   );
   await builder.run(input: input, output: output);
-  // ignore: avoid_print
-  print('[cbl build hook] Compiled and registered cblitedart asset.');
 
   // 3. Optionally download vector search extension.
-  // Vector search is supported on ARM64 and x86-64, but not on 32-bit ARM
-  // or ia32.
+  // Vector search is supported on ARM64 and x86-64.
   final vectorSearchSupported =
       targetArchitecture != Architecture.arm &&
       targetArchitecture != Architecture.ia32;
-
-  if (edition == 'enterprise' && vectorSearch && !vectorSearchSupported) {
-    // ignore: avoid_print
-    print(
-      '[cbl build hook] Skipping vector search: '
-      'not available for $targetArchitecture.',
-    );
-  }
 
   if (edition == 'enterprise' && vectorSearch && vectorSearchSupported) {
     var vectorSearchLibPath = await _downloadVectorSearch(
@@ -165,8 +141,6 @@ Future<void> _build(BuildInput input, BuildOutputBuilder output) async {
         file: Uri.file(vsDest),
       ),
     );
-    // ignore: avoid_print
-    print('[cbl build hook] Registered vector search asset: $vsDest');
 
     // On Windows, the vector search library depends on runtime DLLs (e.g.
     // the OpenMP runtime libomp140.*.dll) that are bundled in the archive
@@ -195,14 +169,9 @@ Future<void> _build(BuildInput input, BuildOutputBuilder output) async {
           ),
         );
         depIndex++;
-        // ignore: avoid_print
-        print('[cbl build hook] Registered vector search dependency: $name');
       }
     }
   }
-
-  // ignore: avoid_print
-  print('[cbl build hook] Build hook completed successfully.');
 }
 
 // === Download cblite ========================================================
@@ -289,7 +258,7 @@ Future<({Uri libPath, String includeDir})> _findIOSFramework(
   final sliceDir = switch (targetSdk) {
     IOSSdk.iPhoneOS => 'ios-arm64',
     IOSSdk.iPhoneSimulator => 'ios-arm64_x86_64-simulator',
-    _ => throw UnsupportedError('Unsupported iOS SDK: $targetSdk'),
+    _ => throw BuildError(message: 'Unsupported iOS SDK: $targetSdk'),
   };
   final frameworkDir = p.join(
     package.packageDir,
@@ -322,7 +291,7 @@ Uri _findIOSVectorSearchLibrary(dl.Package package, BuildInput input) {
   final sliceDir = switch (targetSdk) {
     IOSSdk.iPhoneOS => 'ios-arm64',
     IOSSdk.iPhoneSimulator => 'ios-arm64_x86_64-simulator',
-    _ => throw UnsupportedError('Unsupported iOS SDK: $targetSdk'),
+    _ => throw BuildError(message: 'Unsupported iOS SDK: $targetSdk'),
   };
   final frameworkDir = p.join(
     package.packageDir,
@@ -336,7 +305,9 @@ Uri _findIOSVectorSearchLibrary(dl.Package package, BuildInput input) {
 Uri _findLibrary(dl.Package package, dl.OS os) {
   final libDir = package.sharedLibrariesDir;
   if (libDir == null) {
-    throw Exception('No shared libraries directory for ${package.libraryName}');
+    throw InfraError(
+      message: 'No shared libraries directory for ${package.libraryName}',
+    );
   }
 
   final libraryName = package.libraryName;
@@ -364,7 +335,7 @@ Uri _findLibrary(dl.Package package, dl.OS os) {
     }
   }
 
-  throw Exception('Could not find $libraryName library in $libDir');
+  throw InfraError(message: 'Could not find $libraryName library in $libDir');
 }
 
 /// Stages cblite library files into the staging directory for linking and
@@ -384,8 +355,8 @@ Future<Uri> _stageCblite(
       final arch = switch (targetArchitecture) {
         Architecture.arm64 => 'arm64',
         Architecture.x64 => 'x86_64',
-        _ => throw UnsupportedError(
-          'Unsupported macOS architecture: $targetArchitecture',
+        _ => throw BuildError(
+          message: 'Unsupported macOS architecture: $targetArchitecture',
         ),
       };
       final outputFile = p.join(stagingDir, 'libcblite.dylib');
@@ -397,7 +368,7 @@ Future<Uri> _stageCblite(
         outputFile,
       ]);
       if (result.exitCode != 0) {
-        throw Exception('lipo failed: ${result.stderr}');
+        throw InfraError(message: 'lipo failed: ${result.stderr}');
       }
       return Uri.file(outputFile);
 
@@ -437,8 +408,8 @@ Future<Uri> _stageCblite(
       final iosArch = switch (targetArchitecture) {
         Architecture.arm64 => 'arm64',
         Architecture.x64 => 'x86_64',
-        _ => throw UnsupportedError(
-          'Unsupported iOS architecture: $targetArchitecture',
+        _ => throw BuildError(
+          message: 'Unsupported iOS architecture: $targetArchitecture',
         ),
       };
       final dest = p.join(stagingDir, 'CouchbaseLite');
@@ -452,7 +423,9 @@ Future<Uri> _stageCblite(
           dest,
         ]);
         if (result.exitCode != 0) {
-          throw Exception('lipo thin failed for iOS: ${result.stderr}');
+          throw InfraError(
+            message: 'lipo thin failed for iOS: ${result.stderr}',
+          );
         }
       } else {
         await File(libFile).copy(dest);
@@ -460,7 +433,7 @@ Future<Uri> _stageCblite(
       return Uri.file(dest);
 
     default:
-      throw UnsupportedError('Unsupported OS: $targetOS');
+      throw BuildError(message: 'Unsupported OS: $targetOS');
   }
 }
 
@@ -473,8 +446,8 @@ Future<Uri> _lipoThin(
   final arch = switch (targetArchitecture) {
     Architecture.arm64 => 'arm64',
     Architecture.x64 => 'x86_64',
-    _ => throw UnsupportedError(
-      'Unsupported macOS architecture: $targetArchitecture',
+    _ => throw BuildError(
+      message: 'Unsupported macOS architecture: $targetArchitecture',
     ),
   };
 
@@ -496,7 +469,7 @@ Future<Uri> _lipoThin(
   ]);
 
   if (result.exitCode != 0) {
-    throw Exception('lipo failed: ${result.stderr}');
+    throw InfraError(message: 'lipo failed: ${result.stderr}');
   }
 
   return Uri.file(outputFile);
@@ -517,7 +490,7 @@ dl.OS _mapOS(OS os) => switch (os) {
   OS.macOS => dl.OS.macOS,
   OS.linux => dl.OS.linux,
   OS.windows => dl.OS.windows,
-  _ => throw Exception('Unsupported target OS: $os'),
+  _ => throw BuildError(message: 'Unsupported target OS: $os'),
 };
 
 /// Returns the list of architectures for the cblite download URL.
@@ -559,5 +532,5 @@ dl.Architecture _mapArchitecture(Architecture arch) => switch (arch) {
   Architecture.arm64 => dl.Architecture.arm64,
   Architecture.ia32 => dl.Architecture.ia32,
   Architecture.x64 => dl.Architecture.x64,
-  _ => throw Exception('Unsupported target architecture: $arch'),
+  _ => throw BuildError(message: 'Unsupported target architecture: $arch'),
 };

@@ -20,7 +20,7 @@ import 'libraries.dart';
 external void _extensionEntryPoint();
 
 /// Returns the file path of the vector search extension library, or `null` if
-/// the extension is not bundled or the path cannot be resolved.
+/// the extension is not bundled.
 ///
 /// Resolves the address of a known symbol back to its containing library path.
 String? get vectorSearchLibraryPath {
@@ -50,8 +50,7 @@ bool get vectorSearchLibraryBundled {
 /// Whether the current system supports vector search.
 ///
 /// Vector search is supported on ARM64 and x86-64. On x86-64, the CPU must
-/// additionally support the AVX2 instruction set. 32-bit ARM and ia32
-/// architectures are not supported.
+/// additionally support the AVX2 instruction set.
 ///
 /// This does not require Couchbase Lite to be initialized.
 bool get systemSupportsVectorSearch => switch (ffi.Abi.current()) {

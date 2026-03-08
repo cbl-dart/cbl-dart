@@ -24,7 +24,8 @@ abstract final class CouchbaseLite {
   ///
   /// With native assets, libraries are loaded automatically by the Dart VM. No
   /// manual library configuration is needed. The edition and optional features
-  /// are configured via user defines in `pubspec.yaml`:
+  /// are configured via `hooks.user_defines.cbl` in your package
+  /// `pubspec.yaml`:
   ///
   /// ```yaml
   /// hooks:
@@ -34,6 +35,9 @@ abstract final class CouchbaseLite {
   ///       vector_search: true
   /// ```
   ///
+  /// In a pub workspace, user defines are read from the workspace root
+  /// `pubspec.yaml`, so place this configuration there instead.
+  ///
   /// If specified, [filesDir] is used to store files created by Couchbase Lite
   /// by default. For example if a [Database] is opened or copied without
   /// specifying a directory, a subdirectory in the directory specified here
@@ -42,9 +46,9 @@ abstract final class CouchbaseLite {
   /// running during development (e.g. via `dart run`), the current working
   /// directory is used.
   ///
-  /// Vector search is not enabled automatically. To use vector search, call
-  /// [Extension.enableVectorSearch] after initialization and before opening a
-  /// database that uses it.
+  /// Vector search is not enabled automatically. If you enabled
+  /// `vector_search: true`, call [Extension.enableVectorSearch] after
+  /// initialization and before opening a database that uses vector search.
   static Future<void> init({String? filesDir}) =>
       asyncOperationTracePoint(InitializeOp.new, () async {
         final context = await _initContext(filesDir);

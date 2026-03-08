@@ -1,9 +1,9 @@
-import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:archive/archive_io.dart';
+import 'package:hooks/hooks.dart';
 import 'package:http/http.dart';
 import 'package:path/path.dart' as p;
 
@@ -140,24 +140,21 @@ final class DatabasePackageConfig extends PackageConfig {
   final Edition edition;
 
   @override
-  String get _archiveUrl => switch (library) {
-    Library.cblite => Uri(
-      scheme: 'https',
-      host: 'packages.couchbase.com',
-      pathSegments: [
-        'releases',
+  String get _archiveUrl => Uri(
+    scheme: 'https',
+    host: 'packages.couchbase.com',
+    pathSegments: [
+      'releases',
+      'couchbase-lite-c',
+      release,
+      [
         'couchbase-lite-c',
+        edition.name,
         release,
-        [
-          'couchbase-lite-c',
-          edition.name,
-          release,
-          '$targetId.${archiveFormat.extension}',
-        ].join('-'),
-      ],
-    ).toString(),
-    _ => throw UnsupportedError('$library'),
-  };
+        '$targetId.${archiveFormat.extension}',
+      ].join('-'),
+    ],
+  ).toString();
 }
 
 final class VectorSearchPackageConfig extends PackageConfig {
@@ -207,8 +204,21 @@ final class RemotePackageLoader {
   final String cacheDir;
 
   Future<Package> load(PackageConfig config) async {
-    final packageDir = await _packageDir(config);
-    return config._package(packageDir);
+    try {
+      final packageDir = await _packageDir(config);
+      return config._package(packageDir);
+    } catch (e, st) {
+      if (e is HookError) {
+        rethrow;
+      }
+      throw InfraError(
+        message:
+            'Failed to fetch ${config.library.name} ${config.release} '
+            'for ${config.targetId}.',
+        wrappedException: e,
+        wrappedTrace: st,
+      );
+    }
   }
 
   Future<String> _packageDir(PackageConfig config) async {
@@ -259,14 +269,14 @@ Future<Uint8List> _downloadUrl(
   operation: 'download $url',
   timeout: timeout,
   retryOn: (error) =>
-      (error is HttpException && error.statusCode >= 500) ||
+      (error is _HttpException && error.statusCode >= 500) ||
       error is SocketException ||
       error is ClientException,
   () async {
     final response = await get(Uri.parse(url));
 
     if (response.statusCode != 200) {
-      throw HttpException(
+      throw _HttpException(
         'Failed to download $url: ${response.statusCode} ${response.body}',
         response.statusCode,
       );
@@ -287,29 +297,37 @@ Future<T> _retryWithExponentialBackoff<T>(
   final start = DateTime.now();
   final random = Random();
   var attempt = 0;
+  Object? lastError;
+  StackTrace? lastTrace;
   while (attempt < maxAttempts) {
     final now = DateTime.now();
     final duration = now.difference(start);
     if (duration > timeout) {
-      throw TimeoutException(null, duration);
+      throw InfraError(
+        message: 'Timed out after $duration while trying to $operation.',
+      );
     }
 
     try {
       return await fn();
-    } catch (e) {
+    } catch (e, st) {
       if (!retryOn(e)) {
         rethrow;
       }
-      // ignore: avoid_print
-      print('Retry ${attempt + 1}/$maxAttempts for $operation after error: $e');
+      lastError = e;
+      lastTrace = st;
     }
     await Future<void>.delayed(delay * random.nextDouble());
     // ignore: parameter_assignments
     delay *= 2;
     attempt++;
   }
-  throw Exception(
-    'Stopping to retry after $maxAttempts failed attempts for $operation.',
+  throw InfraError(
+    message:
+        'Stopping after $maxAttempts failed attempts while trying '
+        'to $operation.',
+    wrappedException: lastError,
+    wrappedTrace: lastTrace,
   );
 }
 
@@ -355,8 +373,8 @@ extension on OS {
   };
 }
 
-final class HttpException implements Exception {
-  HttpException(this.message, this.statusCode);
+final class _HttpException implements Exception {
+  _HttpException(this.message, this.statusCode);
 
   final String message;
   final int statusCode;

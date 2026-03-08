@@ -5,15 +5,17 @@ import 'dart:io';
 
 import 'package:ffi/ffi.dart';
 
+import '../errors.dart';
+
 /// Resolves the file path of a loaded native library from the address of one of
 /// its symbols.
 ///
-/// Uses `dladdr` on POSIX platforms and `GetModuleHandleEx` +
-/// `GetModuleFileName` on Windows.
+/// Uses `dladdr` on POSIX platforms and `GetModuleHandleExA` +
+/// `GetModuleFileNameA` on Windows.
 ///
-/// Returns `null` if the path cannot be resolved. Logs errors via [print] since
-/// Couchbase Lite logging may not be initialized at this point.
-String? resolveLibraryPathFromAddress(Pointer<Void> address) {
+/// Throws a [DatabaseException] if the containing library path cannot be
+/// resolved.
+String resolveLibraryPathFromAddress(Pointer<Void> address) {
   if (Platform.isAndroid ||
       Platform.isLinux ||
       Platform.isMacOS ||
@@ -21,26 +23,28 @@ String? resolveLibraryPathFromAddress(Pointer<Void> address) {
     final info = calloc<_Dl_info>();
     try {
       if (_dladdr(address, info) == 0) {
-        _logResolveLibraryPathWarning(
-          'dladdr failed to resolve address $address.',
+        throw DatabaseException(
+          'dladdr could not find the image containing address $address.',
+          DatabaseErrorCode.notFound,
         );
-        return null;
       }
 
       final libraryPath = info.ref.dli_fname;
       if (libraryPath == nullptr) {
-        _logResolveLibraryPathWarning(
-          'dladdr returned a null library path for address $address.',
+        throw DatabaseException(
+          'dladdr resolved address $address but returned a null library path.',
+          DatabaseErrorCode.unexpectedError,
         );
-        return null;
       }
 
       return libraryPath.toDartString();
+    } on CouchbaseLiteException {
+      rethrow;
     } on Object catch (error) {
-      _logResolveLibraryPathWarning(
+      throw DatabaseException(
         'Unexpected POSIX error while resolving address $address: $error',
+        DatabaseErrorCode.unexpectedError,
       );
-      return null;
     } finally {
       calloc.free(info);
     }
@@ -56,29 +60,46 @@ String? resolveLibraryPathFromAddress(Pointer<Void> address) {
             hModule,
           ) ==
           0) {
-        _logResolveLibraryPathWarning(
-          'GetModuleHandleExA failed to resolve address $address.',
+        final errorCode = _GetLastError();
+        throw DatabaseException(
+          'GetModuleHandleExA could not resolve the module containing address '
+          '$address${_win32ErrorSuffix(errorCode)}',
+          DatabaseErrorCode.notFound,
         );
-        return null;
       }
 
-      const maxPath = 4096;
+      const maxPath = 32768;
       final path = calloc<Uint8>(maxPath);
       try {
-        if (_GetModuleFileNameA(hModule.value, path.cast(), maxPath) == 0) {
-          _logResolveLibraryPathWarning(
+        final pathLength = _GetModuleFileNameA(
+          hModule.value,
+          path.cast(),
+          maxPath,
+        );
+        if (pathLength == 0) {
+          final errorCode = _GetLastError();
+          throw DatabaseException(
             'GetModuleFileNameA failed to resolve the module path for '
-            'address $address.',
+            'address $address${_win32ErrorSuffix(errorCode)}',
+            DatabaseErrorCode.iOError,
           );
-          return null;
+        }
+        if (pathLength >= maxPath - 1 && path[maxPath - 1] != 0) {
+          throw DatabaseException(
+            'GetModuleFileNameA returned a truncated module path for '
+            'address $address.',
+            DatabaseErrorCode.memoryError,
+          );
         }
 
         return path.cast<Utf8>().toDartString();
+      } on CouchbaseLiteException {
+        rethrow;
       } on Object catch (error) {
-        _logResolveLibraryPathWarning(
+        throw DatabaseException(
           'Unexpected Windows error while resolving address $address: $error',
+          DatabaseErrorCode.unexpectedError,
         );
-        return null;
       } finally {
         calloc.free(path);
       }
@@ -87,15 +108,19 @@ String? resolveLibraryPathFromAddress(Pointer<Void> address) {
     }
   }
 
-  _logResolveLibraryPathWarning(
-    'resolveLibraryPathFromAddress is not supported on this platform.',
+  throw DatabaseException(
+    'Resolving a library path from an address is not supported on this '
+    'platform.',
+    DatabaseErrorCode.unsupported,
   );
-  return null;
 }
 
-void _logResolveLibraryPathWarning(String message) {
-  // ignore: avoid_print
-  print('[cbl] Warning: $message');
+String _win32ErrorSuffix(int errorCode) {
+  if (errorCode == 0) {
+    return '.';
+  }
+
+  return ' (Win32 error $errorCode).';
 }
 
 // === POSIX Dynamic Linking ===================================================
@@ -134,3 +159,6 @@ final _GetModuleFileNameA = _kernel32
       UnsignedLong Function(Pointer<Void>, Pointer<Utf8>, Uint32),
       int Function(Pointer<Void>, Pointer<Utf8>, int)
     >('GetModuleFileNameA');
+
+final _GetLastError = _kernel32
+    .lookupFunction<Uint32 Function(), int Function()>('GetLastError');

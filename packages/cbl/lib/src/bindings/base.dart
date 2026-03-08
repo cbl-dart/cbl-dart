@@ -2,7 +2,6 @@ import 'dart:ffi';
 import 'dart:io' as io;
 
 import 'package:ffi/ffi.dart';
-import 'package:path/path.dart' as p;
 
 import '../errors.dart';
 import 'bindings.dart';
@@ -505,41 +504,9 @@ final class BaseBindings extends Bindings {
   void enableVectorSearch() {
     if (vector_search.vectorSearchLibraryPath case final libraryPath?
         when vector_search.systemSupportsVectorSearch) {
-      final libraryDirectory = p.dirname(libraryPath);
-      final libraryFileName = p.basename(libraryPath);
-
-      // Diagnostic logging to debug vector search library naming.
-      // The C SDK expects a specific filename in the directory
-      // passed to CBL_EnableVectorSearch.
-      // ignore: avoid_print
-      print(
-        '[CBL] enableVectorSearch: '
-        'resolvedLibraryPath=$libraryPath, '
-        'directory=$libraryDirectory, '
-        'fileName=$libraryFileName',
-      );
-
-      // List the actual files in the directory for diagnostics.
-      try {
-        final dir = io.Directory(libraryDirectory);
-        if (dir.existsSync()) {
-          final files = dir.listSync().map((e) => p.basename(e.path)).toList()
-            ..sort();
-          // ignore: avoid_print
-          print('[CBL] enableVectorSearch: files in directory: $files');
-        } else {
-          // ignore: avoid_print
-          print(
-            '[CBL] enableVectorSearch: '
-            'directory does not exist: $libraryDirectory',
-          );
-        }
-      } on Object catch (e) {
-        // ignore: avoid_print
-        print('[CBL] enableVectorSearch: error listing directory: $e');
-      }
-
-      runWithSingleFLString(libraryDirectory, (flLibraryDirectory) {
+      runWithSingleFLString(io.File(libraryPath).parent.path, (
+        flLibraryDirectory,
+      ) {
         cblite.CBL_EnableVectorSearch(
           flLibraryDirectory,
           globalCBLError,

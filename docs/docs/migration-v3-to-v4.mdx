@@ -64,7 +64,7 @@ apps.
 In v3, the edition was selected by choosing a package (`cbl_flutter_ce` vs
 `cbl_flutter_ee`) or by passing it to `CouchbaseLiteDart.init()`.
 
-In v4, configure the edition in your workspace root `pubspec.yaml`:
+In v4, configure the edition in your package `pubspec.yaml`:
 
 ```yaml
 hooks:
@@ -72,6 +72,9 @@ hooks:
     cbl:
       edition: enterprise # or community (default)
 ```
+
+If you are using a Dart pub workspace, `hooks.user_defines` are read from the
+workspace root `pubspec.yaml`, so put this configuration there instead.
 
 If no edition is specified, the Community edition is used by default.
 
@@ -141,7 +144,7 @@ hooks:
 ```
 
 Vector search requires the Enterprise edition and is supported on ARM64 and
-x86-64. 32-bit ARM is not supported.
+x86-64.
 
 ## Conflict resolver exception handling
 
@@ -190,8 +193,9 @@ No manual steps are required.
    - `cbl_flutter`
    - `cbl_flutter_ce` or `cbl_flutter_ee`
 3. **Keep or add** the `cbl` dependency.
-4. **Configure edition** (if using Enterprise) in your workspace root
-   `pubspec.yaml` under `hooks.user_defines.cbl`.
+4. **Configure edition** (if using Enterprise) in `pubspec.yaml` under
+   `hooks.user_defines.cbl`. In a Dart pub workspace, use the workspace root
+   `pubspec.yaml`.
 5. **Update imports**:
    - Replace `import 'package:cbl_flutter/cbl_flutter.dart'` with
      `import 'package:cbl/cbl.dart'`.
