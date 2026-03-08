@@ -19,10 +19,14 @@ import 'libraries.dart';
 )
 external void _extensionEntryPoint();
 
-/// Returns the file path of the vector search extension library.
+/// Returns the file path of the vector search extension library, or `null` if
+/// the extension is not bundled or the path cannot be resolved.
 ///
 /// Resolves the address of a known symbol back to its containing library path.
-String get vectorSearchLibraryPath {
+String? get vectorSearchLibraryPath {
+  if (!vectorSearchLibraryBundled) {
+    return null;
+  }
   final address = ffi.Native.addressOf<ffi.NativeFunction<ffi.Void Function()>>(
     _extensionEntryPoint,
   ).cast<ffi.Void>();

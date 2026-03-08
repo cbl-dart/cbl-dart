@@ -10,57 +10,72 @@ import 'package:ffi/ffi.dart';
 ///
 /// Uses `dladdr` on POSIX platforms and `GetModuleHandleEx` +
 /// `GetModuleFileName` on Windows.
-String resolveLibraryPathFromAddress(Pointer<Void> address) {
-  if (Platform.isAndroid ||
-      Platform.isLinux ||
-      Platform.isMacOS ||
-      Platform.isIOS) {
-    final info = calloc<_Dl_info>();
-    try {
-      if (_dladdr(address, info) == 0) {
-        throw Exception('dladdr failed to resolve address $address');
-      }
-
-      return info.ref.dli_fname.toDartString();
-    } finally {
-      calloc.free(info);
-    }
-  }
-
-  if (Platform.isWindows) {
-    final hModule = calloc<Pointer<Void>>();
-    try {
-      if (_GetModuleHandleExA(
-            _GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
-                _GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
-            address.cast(),
-            hModule,
-          ) ==
-          0) {
-        throw Exception(
-          'GetModuleHandleExA failed to resolve address $address',
-        );
-      }
-
-      const maxPath = 4096;
-      final path = calloc<Uint8>(maxPath);
+///
+/// Returns `null` if the path cannot be resolved. Logs errors via [print] since
+/// Couchbase Lite logging may not be initialized at this point.
+String? resolveLibraryPathFromAddress(Pointer<Void> address) {
+  try {
+    if (Platform.isAndroid ||
+        Platform.isLinux ||
+        Platform.isMacOS ||
+        Platform.isIOS) {
+      final info = calloc<_Dl_info>();
       try {
-        if (_GetModuleFileNameA(hModule.value, path.cast(), maxPath) == 0) {
-          throw Exception('GetModuleFileNameA failed to resolve module path');
+        if (_dladdr(address, info) == 0) {
+          throw Exception('dladdr failed to resolve address $address');
         }
 
-        return path.cast<Utf8>().toDartString();
+        return info.ref.dli_fname.toDartString();
       } finally {
-        calloc.free(path);
+        calloc.free(info);
       }
-    } finally {
-      calloc.free(hModule);
     }
-  }
 
-  throw UnimplementedError(
-    'resolveLibraryPathFromAddress is not supported on this platform',
-  );
+    if (Platform.isWindows) {
+      final hModule = calloc<Pointer<Void>>();
+      try {
+        if (_GetModuleHandleExA(
+              _GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
+                  _GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+              address.cast(),
+              hModule,
+            ) ==
+            0) {
+          throw Exception(
+            'GetModuleHandleExA failed to resolve address $address',
+          );
+        }
+
+        const maxPath = 4096;
+        final path = calloc<Uint8>(maxPath);
+        try {
+          if (_GetModuleFileNameA(hModule.value, path.cast(), maxPath) == 0) {
+            throw Exception('GetModuleFileNameA failed to resolve module path');
+          }
+
+          return path.cast<Utf8>().toDartString();
+        } finally {
+          calloc.free(path);
+        }
+      } finally {
+        calloc.free(hModule);
+      }
+    }
+
+    // ignore: avoid_print
+    print(
+      '[cbl] Warning: resolveLibraryPathFromAddress is not supported on '
+      'this platform',
+    );
+    return null;
+  } on Object catch (error) {
+    // ignore: avoid_print
+    print(
+      '[cbl] Warning: Failed to resolve library path from address '
+      '$address: $error',
+    );
+    return null;
+  }
 }
 
 /// Configuration of a [DynamicLibrary], which can be used to load the
@@ -149,11 +164,7 @@ class LibraryConfiguration {
       return null;
     }
 
-    try {
-      return resolveLibraryPathFromAddress(library.lookup(symbol));
-    } on Exception {
-      return null;
-    }
+    return resolveLibraryPathFromAddress(library.lookup(symbol));
   }
 }
 

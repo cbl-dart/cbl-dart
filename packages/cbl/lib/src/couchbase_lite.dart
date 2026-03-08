@@ -48,19 +48,9 @@ abstract final class CouchbaseLite {
   /// database that uses it.
   static Future<void> init({String? filesDir}) =>
       asyncOperationTracePoint(InitializeOp.new, () async {
-        // Auto-detect the app files directory from the platform if not
-        // explicitly provided.
-        final resolvedFilesDir = filesDir ?? resolveAppFilesDirectory();
+        final context = await _initContext(filesDir);
 
-        final context = resolvedFilesDir == null
-            ? null
-            : await _initContext(resolvedFilesDir);
-
-        // Try to discover the vector search library path. If the extension
-        // was bundled by the build hook, Native.addressOf will resolve the
-        // symbol and we can find the library directory. If not bundled, the
-        // symbol resolution will fail and we get null.
-        final vectorSearchPath = _tryGetVectorSearchPath();
+        final vectorSearchPath = vector_search.vectorSearchLibraryPath;
 
         final bindingsLibraries = BindingsLibraries(
           enterpriseEdition: cblitedart_native.CBLDart_IsEnterprise(),
@@ -99,21 +89,25 @@ abstract final class CouchbaseLite {
       });
 }
 
-/// Tries to resolve the vector search library directory path using native
-/// assets symbol resolution. Returns null if the extension is not bundled.
-String? _tryGetVectorSearchPath() {
-  try {
-    return vector_search.vectorSearchLibraryPath;
-  } on Object {
-    // The vector search extension is not bundled, so the @Native symbol
-    // resolution fails. This is expected and not an error.
+Future<InitContext?> _initContext(String? filesDir) async {
+  // Auto-detect the app files directory from the platform if not
+  // explicitly provided.
+  final resolvedFilesDir = filesDir ?? resolveAppFilesDirectory();
+  if (resolvedFilesDir == null) {
     return null;
   }
-}
 
-Future<InitContext> _initContext(String filesDir) async {
-  await Directory(filesDir).create(recursive: true);
-  return InitContext(filesDir: filesDir, tempDir: filesDir);
+  await Directory(resolvedFilesDir).create(recursive: true);
+
+  String tempDir;
+  if (Platform.isAndroid) {
+    tempDir = resolveAndroidCacheDirectory();
+    await Directory(tempDir).create(recursive: true);
+  } else {
+    tempDir = resolvedFilesDir;
+  }
+
+  return InitContext(filesDir: resolvedFilesDir, tempDir: tempDir);
 }
 
 void _setupLogging() {
