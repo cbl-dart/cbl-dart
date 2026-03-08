@@ -145,11 +145,13 @@ void main() {
         replicatorType: ReplicatorType.push,
         continuous: true,
       );
+      addTearDown(pushRepl.close);
 
       final pullRepl = await pullDb.createTestReplicator(
         replicatorType: ReplicatorType.pull,
         continuous: true,
       );
+      addTearDown(pullRepl.close);
 
       final timestamp = DateTime.now().microsecondsSinceEpoch;
       final doc = MutableDocument.withId(
@@ -170,6 +172,7 @@ void main() {
         replicatorType: ReplicatorType.pull,
         continuous: true,
       );
+      addTearDown(pullRepl.close);
       await pullRepl.start();
 
       await pullDb.watchAllIds().first;
@@ -894,6 +897,7 @@ Future<void> autoPurgeTest({required bool enableAutoPurge}) async {
     continuous: true,
     enableAutoPurge: enableAutoPurge,
   );
+  addTearDown(replicator.close);
 
   await replicator.addDocumentReplicationListener((replication) {
     expect(replication.documents, hasLength(1));
