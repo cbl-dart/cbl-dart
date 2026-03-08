@@ -166,7 +166,7 @@ void main() {
         expect(result, '/home/user/snap/my-app/current');
       });
 
-      test('returns XDG_DATA_HOME/<flatpakId> for flatpak apps', () {
+      test('returns XDG_DATA_HOME for flatpak apps', () {
         final result = resolveAppFilesDirectory(
           resolvedExecutable: '/app/bin/my_app',
           environment: {
@@ -181,13 +181,7 @@ void main() {
           isWindows: false,
         );
 
-        expect(
-          result,
-          p.join(
-            '/home/user/.var/app/com.example.MyApp/data',
-            'com.example.MyApp',
-          ),
-        );
+        expect(result, '/home/user/.var/app/com.example.MyApp/data');
       });
 
       test('returns XDG_DATA_HOME/<appName> for compiled apps', () {

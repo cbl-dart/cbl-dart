@@ -177,13 +177,14 @@ String? _resolveLinuxDirectory(
     return snapUserData;
   }
 
-  // Flatpak container: XDG dirs are already redirected inside the sandbox.
+  // Flatpak container: XDG dirs are already redirected inside the sandbox,
+  // so use XDG_DATA_HOME directly instead of nesting the app id again.
   final flatpakId = environment['FLATPAK_ID'];
   if (flatpakId != null) {
     final xdgDataHome =
         environment['XDG_DATA_HOME'] ?? _xdgDataHomeDefault(environment);
     if (xdgDataHome != null) {
-      return p.join(xdgDataHome, flatpakId);
+      return xdgDataHome;
     }
   }
 

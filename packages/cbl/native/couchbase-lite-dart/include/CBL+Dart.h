@@ -38,7 +38,7 @@ enum CBLDartInitializeResult {
 /**
  * Initializes the native libraries.
  *
- * This function can be called multiple times and is thread save. The
+ * This function can be called multiple times and is thread safe. The
  * libraries are only initialized by the first call and subsequent calls are
  * NOOPs.
  */

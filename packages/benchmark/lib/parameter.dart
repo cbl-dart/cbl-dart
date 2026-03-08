@@ -28,7 +28,14 @@ class IntParameter extends BenchmarkParameter<int> {
   IntParameter({required super.name});
 
   @override
-  int decode(String value) => int.parse(value);
+  int decode(String value) {
+    if (value.isEmpty) {
+      throw FormatException(
+        'Environment variable $name is not set or empty.',
+      );
+    }
+    return int.parse(value);
+  }
 
   @override
   String encode(int value) => value.toString();

@@ -121,6 +121,8 @@ class MicroBenchmarkRunner extends BenchmarkRunnerBase {
     for (final line in stdout.trim().split('\n')) {
       final match = benchmarkResultRegExp.firstMatch(line);
       if (match == null) {
+        // Skip preamble lines (e.g. "Running build hooks..." from native
+        // assets).
         continue;
       }
       final name = match.group(1)!;

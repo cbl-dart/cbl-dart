@@ -76,12 +76,14 @@ platforms you want to support.
 ## Verify Installation
 
 To verify that Couchbase Lite is installed correctly, add the following code to
-your app and call `verify` after initializing Couchbase Lite:
+your app and call it after initializing Couchbase Lite:
 
 ```dart
 import 'package:cbl/cbl.dart';
 
 Future<void> run() async {
+  await CouchbaseLite.init();
+
   // Open the database (creating it if it doesn't exist).
   final database = await Database.openAsync('database');
 
