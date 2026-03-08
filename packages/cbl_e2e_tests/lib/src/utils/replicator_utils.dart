@@ -170,6 +170,10 @@ final isErrorReplicatorStatus = isReplicatorStatus.havingError(isNotNull);
 Matcher hasActivityLevel(ReplicatorActivityLevel activityLevel) =>
     isReplicatorStatus.having((it) => it.activity, 'activity', activityLevel);
 
+const _replicatorStatusPollInterval = Duration(milliseconds: 150);
+const _replicateOneShotTimeout = Duration(seconds: 10);
+const _replicateOneShotStopTimeout = Duration(seconds: 5);
+
 extension ReplicatorUtilsExtension on Replicator {
   /// Returns a stream of the [status]se of this replicator by polling it.
   ///
@@ -188,8 +192,13 @@ extension ReplicatorUtilsExtension on Replicator {
   Stream<ReplicatorStatus> pollStatus() async* {
     // ignore: literal_only_boolean_expressions
     while (true) {
-      yield await status;
-      await Future<void>.delayed(const Duration(milliseconds: 150));
+      final currentStatus = await _readStatusOrNull();
+      if (currentStatus == null) {
+        return;
+      }
+
+      yield currentStatus;
+      await Future<void>.delayed(_replicatorStatusPollInterval);
     }
   }
 
@@ -210,24 +219,30 @@ extension ReplicatorUtilsExtension on Replicator {
     validStatusMatcher ??= isNot(isErrorReplicatorStatus);
     var isInitialStatus = true;
 
-    await pollStatus()
-        .asyncMap((status) async {
-          expect(status, validStatusMatcher);
+    try {
+      await pollStatus()
+          .asyncMap((status) async {
+            expect(status, validStatusMatcher);
 
-          if (isInitialStatus) {
-            isInitialStatus = false;
+            if (isInitialStatus) {
+              isInitialStatus = false;
 
-            if (matchInitialStatus) {
-              expect(status, statusMatcher);
+              if (matchInitialStatus) {
+                expect(status, statusMatcher);
+              }
+
+              await fn();
+              return false;
             }
 
-            await fn();
-            return false;
-          }
-
-          return _matches(status, statusMatcher);
-        })
-        .firstWhere((isMatch) => isMatch);
+            return _matches(status, statusMatcher);
+          })
+          .firstWhere((isMatch) => isMatch);
+    } catch (error) {
+      if (!_isPollStreamCompletedError(error)) {
+        rethrow;
+      }
+    }
   }
 
   /// Drives the status of this replicator to match [statusMatcher].
@@ -245,19 +260,25 @@ extension ReplicatorUtilsExtension on Replicator {
     validStatusMatcher ??= isNot(isErrorReplicatorStatus);
     var calledDriveFn = false;
 
-    await pollStatus()
-        .asyncMap((status) async {
-          expect(status, validStatusMatcher);
+    try {
+      await pollStatus()
+          .asyncMap((status) async {
+            expect(status, validStatusMatcher);
 
-          final isMatch = _matches(status, statusMatcher);
-          if (!calledDriveFn && !isMatch) {
-            calledDriveFn = true;
-            await fn();
-          }
+            final isMatch = _matches(status, statusMatcher);
+            if (!calledDriveFn && !isMatch) {
+              calledDriveFn = true;
+              await fn();
+            }
 
-          return isMatch;
-        })
-        .firstWhere((isMatch) => isMatch);
+            return isMatch;
+          })
+          .firstWhere((isMatch) => isMatch);
+    } catch (error) {
+      if (!_isPollStreamCompletedError(error)) {
+        rethrow;
+      }
+    }
   }
 
   /// Calls [fn] once the status of this replicator matches [statusMatcher].
@@ -271,31 +292,119 @@ extension ReplicatorUtilsExtension on Replicator {
   }) async {
     validStatusMatcher ??= isNot(isErrorReplicatorStatus);
 
-    await pollStatus()
-        .asyncMap((status) async {
-          expect(status, validStatusMatcher);
+    try {
+      await pollStatus()
+          .asyncMap((status) async {
+            expect(status, validStatusMatcher);
 
-          final isMatch = _matches(status, statusMatcher);
-          if (isMatch) {
-            await fn();
-          }
+            final isMatch = _matches(status, statusMatcher);
+            if (isMatch) {
+              await fn();
+            }
 
-          return isMatch;
-        })
-        .firstWhere((isMatch) => isMatch);
+            return isMatch;
+          })
+          .firstWhere((isMatch) => isMatch);
+    } catch (error) {
+      if (!_isPollStreamCompletedError(error)) {
+        rethrow;
+      }
+    }
   }
 
   /// Starts a one shot replicator and completes when it has stopped.
-  Future<void> replicateOneShot() {
+  Future<void> replicateOneShot({
+    Duration timeout = _replicateOneShotTimeout,
+    Duration stopTimeout = _replicateOneShotStopTimeout,
+  }) async {
     assert(!config.continuous);
-    return doAndWaitForStatus(
-      hasActivityLevel(ReplicatorActivityLevel.stopped),
-      start,
-      matchInitialStatus: true,
-      validStatusMatcher: anything,
-    );
+
+    ReplicatorStatus? lastStatus;
+
+    try {
+      await doAndWaitForStatus(
+        hasActivityLevel(ReplicatorActivityLevel.stopped),
+        start,
+        matchInitialStatus: true,
+        validStatusMatcher: anything,
+      ).timeout(timeout);
+    } on TimeoutException {
+      lastStatus = await _readStatusOrNull();
+      await _stopAfterTimeout(stopTimeout);
+
+      throw TimeoutException(
+        'One-shot replication did not stop within ${timeout.inSeconds}s. '
+        'Last status: ${_describeReplicatorStatus(lastStatus)}.',
+      );
+    } catch (error) {
+      if (!_isClosedResourceError(error)) {
+        rethrow;
+      }
+    }
+  }
+
+  Future<ReplicatorStatus?> _readStatusOrNull() async {
+    try {
+      return await Future<ReplicatorStatus>.sync(() => status);
+    } catch (error) {
+      if (_isClosedResourceError(error)) {
+        return null;
+      }
+
+      rethrow;
+    }
+  }
+
+  Future<void> _stopAfterTimeout(Duration stopTimeout) async {
+    try {
+      await Future<void>.sync(stop);
+    } catch (error) {
+      if (!_isClosedResourceError(error)) {
+        rethrow;
+      }
+      return;
+    }
+
+    try {
+      await doAndWaitForStatus(
+        hasActivityLevel(ReplicatorActivityLevel.stopped),
+        () {},
+        validStatusMatcher: anything,
+      ).timeout(stopTimeout);
+    } on TimeoutException {
+      // The test has already failed with a timeout. Leave teardown to finish
+      // closing the replicator in the background.
+    } catch (error) {
+      if (!_isClosedResourceError(error)) {
+        rethrow;
+      }
+    }
   }
 }
 
 bool _matches(Object actual, Object expected) =>
     wrapMatcher(expected).matches(actual, <Object?, Object?>{});
+
+bool _isClosedResourceError(Object error) {
+  final message = _stateErrorMessage(error);
+  return message != null &&
+      message.startsWith('Resource has already been closed:');
+}
+
+bool _isPollStreamCompletedError(Object error) =>
+    _stateErrorMessage(error) == 'No element';
+
+String? _stateErrorMessage(Object error) =>
+    error is StateError ? error.message as String? : null;
+
+String _describeReplicatorStatus(ReplicatorStatus? status) {
+  if (status == null) {
+    return 'unavailable (replicator closed during teardown)';
+  }
+
+  final errorDescription = status.error?.toString() ?? 'none';
+  return 'activity=${status.activity.name}, '
+      'progress=${status.progress.progress}, '
+      'documents=${status.progress.completed}, '
+      'error=$errorDescription';
+}

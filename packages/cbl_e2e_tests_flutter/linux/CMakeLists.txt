@@ -70,6 +70,9 @@ include(flutter/generated_plugins.cmake)
 
 
 # === Installation ===
+message(STATUS "[native-assets-diag] PROJECT_DIR=${PROJECT_DIR}")
+message(STATUS "[native-assets-diag] PROJECT_BUILD_DIR=${PROJECT_BUILD_DIR}")
+message(STATUS "[native-assets-diag] CMAKE_CURRENT_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}")
 # By default, "installing" just makes a relocatable bundle in the build
 # directory.
 set(BUILD_BUNDLE_DIR "${PROJECT_BINARY_DIR}/bundle")
@@ -94,11 +97,29 @@ install(FILES "${FLUTTER_ICU_DATA_FILE}" DESTINATION "${INSTALL_BUNDLE_DATA_DIR}
 install(FILES "${FLUTTER_LIBRARY}" DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
   COMPONENT Runtime)
 
-if(PLUGIN_BUNDLED_LIBRARIES)
-  install(FILES "${PLUGIN_BUNDLED_LIBRARIES}"
+foreach(bundled_library ${PLUGIN_BUNDLED_LIBRARIES})
+  install(FILES "${bundled_library}"
     DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
     COMPONENT Runtime)
-endif()
+endforeach(bundled_library)
+
+# Copy the native assets provided by the build.dart from all packages.
+set(NATIVE_ASSETS_DIR "${PROJECT_BUILD_DIR}native_assets/linux/")
+message(STATUS "[native-assets-diag] NATIVE_ASSETS_DIR=${NATIVE_ASSETS_DIR}")
+message(STATUS "[native-assets-diag] INSTALL_BUNDLE_LIB_DIR=${INSTALL_BUNDLE_LIB_DIR}")
+install(CODE "
+  message(STATUS \"[native-assets-diag] install-time: checking NATIVE_ASSETS_DIR=${NATIVE_ASSETS_DIR}\")
+  if(EXISTS \"${NATIVE_ASSETS_DIR}\")
+    message(STATUS \"[native-assets-diag] Directory EXISTS\")
+    file(GLOB _na_files \"${NATIVE_ASSETS_DIR}*\")
+    message(STATUS \"[native-assets-diag] Files found: \${_na_files}\")
+  else()
+    message(STATUS \"[native-assets-diag] Directory DOES NOT EXIST\")
+  endif()
+  " COMPONENT Runtime)
+install(DIRECTORY "${NATIVE_ASSETS_DIR}"
+   DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
+   COMPONENT Runtime)
 
 # Fully re-copy the assets directory on each build to avoid having stale files
 # from a previous install.

@@ -7,10 +7,6 @@ import 'parameter.dart';
 import 'result.dart';
 import 'utils.dart';
 
-final _dartaotruntime = File(
-  Platform.executable,
-).parent.uri.resolve('dartaotruntime').toFilePath();
-
 abstract class BenchmarkRunnerBase {
   BenchmarkRunnerBase({required this.executionMode});
 
@@ -36,18 +32,23 @@ abstract class BenchmarkRunnerBase {
   ].join('_');
 
   /// Parameters to invoke the benchmark with.
-  List<DartDefine> get parameters => [];
+  List<MapEntry<String, String>> get parameters => [];
 
-  List<String> get _dartDefineOptions => DartDefine.commandLineOptions([
-    executionModeParameter.dartDefine(executionMode),
+  Map<String, String> get _environment => Map.fromEntries([
+    executionModeParameter.envEntry(executionMode),
     ...parameters,
   ]);
 
   String get _dartFile => '$_dartDirectory/$benchmark.dart';
 
-  String get _aotFile {
-    final fileName = invocationId.replaceAll(RegExp('[^a-zA-Z0-9]'), '_');
-    return '$_aotDirectory/$fileName.aot';
+  String get _aotBuildDir {
+    final dirName = invocationId.replaceAll(RegExp('[^a-zA-Z0-9]'), '_');
+    return '$_aotDirectory/$dirName';
+  }
+
+  String get _aotExecutable {
+    final extension = Platform.isWindows ? '.exe' : '';
+    return '$_aotBuildDir/bundle/bin/$benchmark$extension';
   }
 
   BenchmarkResults parseResults(String stdout);
@@ -59,11 +60,10 @@ abstract class BenchmarkRunnerBase {
       await Directory(_aotDirectory).create(recursive: true);
 
       final compileResult = await Process.run('dart', [
-        'compile',
-        'aot-snapshot',
-        _dartFile,
-        ..._dartDefineOptions,
-        '--output=$_aotFile',
+        'build',
+        'cli',
+        '--target=$_dartFile',
+        '--output=$_aotBuildDir',
       ]);
 
       if (compileResult.exitCode != 0) {
@@ -79,11 +79,14 @@ abstract class BenchmarkRunnerBase {
 
     final runResult = switch (executionMode) {
       ExecutionMode.jit => await Process.run('dart', [
-        ..._dartDefineOptions,
         'run',
         _dartFile,
-      ]),
-      ExecutionMode.aot => await Process.run(_dartaotruntime, [_aotFile]),
+      ], environment: _environment),
+      ExecutionMode.aot => await Process.run(
+        _aotExecutable,
+        [],
+        environment: _environment,
+      ),
     };
 
     if (runResult.exitCode != 0) {
@@ -116,7 +119,12 @@ class MicroBenchmarkRunner extends BenchmarkRunnerBase {
     final latencies = <String, double>{};
 
     for (final line in stdout.trim().split('\n')) {
-      final match = benchmarkResultRegExp.firstMatch(line)!;
+      final match = benchmarkResultRegExp.firstMatch(line);
+      if (match == null) {
+        // Skip preamble lines (e.g. "Running build hooks..." from native
+        // assets).
+        continue;
+      }
       final name = match.group(1)!;
       latencies[name] = double.parse(match.group(2)!) * 1000;
     }
@@ -161,17 +169,25 @@ class DatabaseBenchmarkRunner extends BenchmarkRunnerBase {
   ].join('_');
 
   @override
-  List<DartDefine> get parameters => [
-    apiTypeParameter.dartDefine(apiType),
-    fixtureParameter.dartDefine(fixture),
-    operationCountParameter.dartDefine(operationCount),
-    batchSizeParameter.dartDefine(batchSize),
+  List<MapEntry<String, String>> get parameters => [
+    apiTypeParameter.envEntry(apiType),
+    fixtureParameter.envEntry(fixture),
+    operationCountParameter.envEntry(operationCount),
+    batchSizeParameter.envEntry(batchSize),
   ];
 
   @override
-  BenchmarkResults parseResults(String stdout) => BenchmarkResults({
-    invocationId: BenchmarkResult.fromJson(
-      jsonDecode(stdout) as Map<String, Object?>,
-    ),
-  });
+  BenchmarkResults parseResults(String stdout) {
+    // Strip any output before the JSON object, such as "Running build hooks..."
+    // printed by the Dart native assets system.
+    final jsonStart = stdout.indexOf('{');
+    if (jsonStart == -1) {
+      throw FormatException('No JSON object found in benchmark output', stdout);
+    }
+    return BenchmarkResults({
+      invocationId: BenchmarkResult.fromJson(
+        jsonDecode(stdout.substring(jsonStart)) as Map<String, Object?>,
+      ),
+    });
+  }
 }

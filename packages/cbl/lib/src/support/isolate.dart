@@ -3,7 +3,6 @@ import 'dart:isolate';
 
 import '../bindings.dart';
 import '../document/common.dart';
-import '../extension.dart';
 import '../fleece/integration/integration.dart';
 import 'errors.dart';
 import 'tracing.dart';
@@ -21,7 +20,11 @@ class InitContext {
 }
 
 class IsolateContext {
-  IsolateContext({this.libraries, this.bindings, this.initContext});
+  IsolateContext({
+    required this.bindingsLibraries,
+    this.bindings,
+    this.initContext,
+  });
 
   static IsolateContext? _instance;
 
@@ -42,27 +45,28 @@ class IsolateContext {
     return config;
   }
 
-  final LibrariesConfiguration? libraries;
   final CBLBindings? bindings;
+  final BindingsLibraries bindingsLibraries;
 
   final InitContext? initContext;
+
+  /// Returns a copy of this context that is safe to send to another isolate.
+  ///
+  /// [CBLBindings] cannot be sent across isolate boundaries because it contains
+  /// `NativeFinalizer` objects. This method strips [bindings] and keeps the
+  /// serializable [bindingsLibraries], which allows the secondary isolate to
+  /// create its own [CBLBindings].
+  IsolateContext forSecondaryIsolate() => IsolateContext(
+    bindingsLibraries: bindingsLibraries,
+    initContext: initContext,
+  );
 }
 
 /// Initializes this isolate for use of Couchbase Lite, and initializes the
 /// native libraries.
-Future<void> initPrimaryIsolate(
-  IsolateContext context, {
-  required bool autoEnableVectorSearch,
-}) async {
+Future<void> initPrimaryIsolate(IsolateContext context) async {
   await _initIsolate(context);
   _bindings.initializeNativeLibraries(context.initContext?.toCbl());
-
-  if (autoEnableVectorSearch &&
-      _bindings.vectorSearchLibraryAvailable &&
-      _bindings.systemSupportsVectorSearch) {
-    Extension.enableVectorSearch();
-  }
-
   await _runPostIsolateInitTasks();
 }
 
@@ -77,8 +81,7 @@ Future<void> _initIsolate(IsolateContext context) async {
   IsolateContext.instance = context;
 
   CBLBindings.init(
-    instance: context.bindings,
-    libraries: context.libraries,
+    instance: context.bindings ?? CBLBindings(context.bindingsLibraries),
     onTracedCall: tracingDelegateTracedNativeCallHandler,
   );
 
@@ -119,7 +122,7 @@ Future<void> _runPostIsolateInitTasks() async {
 }
 
 Future<T> runInSecondaryIsolate<T>(FutureOr<T> Function() fn) async {
-  final context = IsolateContext.instance;
+  final context = IsolateContext.instance.forSecondaryIsolate();
   return Isolate.run(() async {
     await initSecondaryIsolate(context);
     return fn();

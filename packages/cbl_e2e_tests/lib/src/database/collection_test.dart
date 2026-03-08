@@ -6,6 +6,7 @@ import '../../test_binding_impl.dart';
 import '../test_binding.dart';
 import '../utils/api_variant.dart';
 import '../utils/database_utils.dart';
+import '../utils/vector_search_utils.dart';
 
 void main() {
   setupTestBinding();
@@ -601,6 +602,9 @@ void main() {
 
           expect(ids, documents.map((doc) => doc.id));
         },
+        skip: vectorSearchEnabled
+            ? null
+            : 'Vector search not available on this system',
       );
 
       apiTest('createIndex should work with ValueIndex', () async {

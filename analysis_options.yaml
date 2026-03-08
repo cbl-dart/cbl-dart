@@ -17,3 +17,4 @@ linter:
     require_trailing_commas: false
     avoid_classes_with_only_static_members: false
     avoid_redundant_argument_values: false
+    flutter_style_todos: false

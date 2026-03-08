@@ -2,11 +2,11 @@ import 'dart:ffi';
 import 'dart:io' as io;
 
 import 'package:ffi/ffi.dart';
-import 'package:path/path.dart' as p;
 
 import '../errors.dart';
 import 'bindings.dart';
 import 'cblite.dart' as cblite_lib;
+import 'cblite_vector_search.dart' as vector_search;
 import 'cblitedart.dart' as cblitedart_lib;
 import 'fleece.dart';
 import 'global.dart';
@@ -44,9 +44,7 @@ extension OptionIterable<T extends Option> on Iterable<T> {
 
 enum CBLDartInitializeResult {
   success(
-    cblitedart_lib
-        .CBLDartInitializeResult
-        .CBLDartInitializeResult_kCBLInitError,
+    cblitedart_lib.CBLDartInitializeResult.CBLDartInitializeResult_kSuccess,
   ),
   incompatibleDartVM(
     cblitedart_lib
@@ -460,26 +458,6 @@ final class BaseBindings extends Bindings {
     cblite.addresses.CBL_Release.cast(),
   );
 
-  bool get vectorSearchLibraryAvailable =>
-      libraries.vectorSearchLibraryPath != null;
-
-  bool get systemSupportsVectorSearch => switch (Abi.current()) {
-    Abi.androidArm ||
-    Abi.androidArm64 ||
-    Abi.iosArm ||
-    Abi.iosArm64 ||
-    Abi.linuxArm ||
-    Abi.linuxArm64 ||
-    Abi.macosArm64 ||
-    Abi.windowsArm64 => true,
-    Abi.linuxX64 ||
-    Abi.windowsX64 ||
-    Abi.iosX64 ||
-    Abi.macosX64 ||
-    Abi.androidX64 => cblitedart.CBLDart_CpuSupportsAVX2(),
-    _ => false,
-  };
-
   void initializeNativeLibraries([CBLInitContext? context]) {
     assert(!io.Platform.isAndroid || context != null);
 
@@ -524,10 +502,11 @@ final class BaseBindings extends Bindings {
   }
 
   void enableVectorSearch() {
-    if (libraries.vectorSearchLibraryPath case final libraryPath?
-        when systemSupportsVectorSearch) {
-      final libraryDirectory = p.dirname(libraryPath);
-      runWithSingleFLString(libraryDirectory, (flLibraryDirectory) {
+    if (vector_search.vectorSearchLibraryPath case final libraryPath?
+        when vector_search.systemSupportsVectorSearch) {
+      runWithSingleFLString(io.File(libraryPath).parent.path, (
+        flLibraryDirectory,
+      ) {
         cblite.CBL_EnableVectorSearch(
           flLibraryDirectory,
           globalCBLError,

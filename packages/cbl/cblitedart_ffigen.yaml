@@ -11,10 +11,10 @@ import:
 comments: false
 headers:
   entry-points:
-    - ../../native/couchbase-lite-dart/include/CBL+Dart.h
-    - ../../native/couchbase-lite-dart/include/Fleece+Dart.h
+    - native/couchbase-lite-dart/include/CBL+Dart.h
+    - native/couchbase-lite-dart/include/Fleece+Dart.h
   include-directives:
-    - '../../native/couchbase-lite-dart/include/*'
+    - 'native/couchbase-lite-dart/include/*'
 functions:
   expose-typedefs:
     include:
@@ -36,9 +36,9 @@ enums:
     include:
       - '.*'
 compiler-opts:
-  - '-I../../native/couchbase-lite-dart/include'
-  - '-I../../native/vendor/cblite/include'
-  - '-I../../native/vendor/dart/include'
+  - '-Inative/couchbase-lite-dart/include'
+  - '-Inative/vendor/cblite/include'
+  - '-Inative/vendor/dart/include'
   # CBL uses a macro to define enums which is called CBL_ENUM.
   # On Apple systems the CBL aliases CF_ENUM to CBL_ENUM which seems to be a
   # problem for ffigen.

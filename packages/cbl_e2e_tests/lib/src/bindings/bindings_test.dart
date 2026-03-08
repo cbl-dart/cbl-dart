@@ -1,4 +1,4 @@
-import 'package:cbl/src/bindings.dart';
+import 'package:cbl/src/bindings/cblite_vector_search.dart' as vector_search;
 
 import '../../test_binding_impl.dart';
 import '../test_binding.dart';
@@ -8,7 +8,7 @@ void main() {
 
   group('CBLBindings', () {
     test('find vector search library', () {
-      expect(CBLBindings.instance.libraries.vectorSearchLibraryPath, isNotNull);
+      expect(vector_search.vectorSearchLibraryPath, isNotNull);
     });
   });
 }

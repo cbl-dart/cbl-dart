@@ -6,6 +6,21 @@ scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 dockerComposeFile="$scriptDir/docker-compose.yaml"
 syncGatewayVersion=3.0.3
 
+function retry() {
+    local attempts=$1; shift
+    local delay=$1; shift
+    local n=0
+    until "$@"; do
+        n=$((n + 1))
+        if [ $n -ge $attempts ]; then
+            echo "Command failed after $n attempts: $*"
+            return 1
+        fi
+        echo "Attempt $n/$attempts failed, retrying in ${delay}s..."
+        sleep "$delay"
+    done
+}
+
 function waitForService() {
     name="$1"
     url="$2"
@@ -40,7 +55,12 @@ function waitForSyncGateway() {
 
 function startSyncGatewayMacOS {
     optDir="/opt"
-    syncGatewayZip="couchbase-sync-gateway-community_${syncGatewayVersion}_x86_64.zip"
+    arch="$(uname -m)"
+    case "$arch" in
+    arm64) syncGatewayArch="arm64" ;;
+    *)     syncGatewayArch="x86_64" ;;
+    esac
+    syncGatewayZip="couchbase-sync-gateway-community_${syncGatewayVersion}_${syncGatewayArch}.zip"
     syncGatewayUrl="https://packages.couchbase.com/releases/couchbase-sync-gateway/$syncGatewayVersion/$syncGatewayZip"
     syncGatewayInstallDir="$optDir/couchbase-sync-gateway"
     syncGatewayUser="sync_gateway"
@@ -49,7 +69,7 @@ function startSyncGatewayMacOS {
     if [ ! -d "$syncGatewayInstallDir" ]; then
         echo "::group::Install Sync Gateway"
 
-        curl "$syncGatewayUrl" -o "$syncGatewayZip"
+        retry 3 10 curl --fail "$syncGatewayUrl" -o "$syncGatewayZip"
         sudo unzip "$syncGatewayZip" -d "$optDir"
         rm "$syncGatewayZip"
 
@@ -74,7 +94,7 @@ function startSyncGatewayWindows {
 
     echo "::group::Install Sync Gateway"
 
-    curl "$syncGatewayUrl" -o "$syncGatewayMsi"
+    retry 3 10 curl --fail "$syncGatewayUrl" -o "$syncGatewayMsi"
 
     powershell.exe -Command "Start-Process msiexec.exe -Wait -ArgumentList '/i $syncGatewayMsi /passive'"
 
@@ -106,6 +126,10 @@ function setupDocker() {
 
 function teardownDocker() {
     docker compose -f "$dockerComposeFile" down
+}
+
+function logsSyncGateway() {
+    docker compose -f "$dockerComposeFile" logs --timestamps sync-gateway
 }
 
 "$@"

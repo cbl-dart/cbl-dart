@@ -18,8 +18,15 @@ Future<ProcessResult> runProcess(
       ..trace('$executable ${arguments.map((arg) => '"$arg"').join(' ')}');
   }
 
+  // Resolve the executable path. When run from a globally activated package,
+  // the default PATH may not include tools like `dart` or `daco`.
+  final resolvedExecutable = switch (executable) {
+    'dart' => Platform.resolvedExecutable,
+    _ => _resolveExecutable(executable),
+  };
+
   final process = await Process.start(
-    executable,
+    resolvedExecutable,
     arguments,
     workingDirectory: workingDirectory,
   );
@@ -66,6 +73,20 @@ Future<ProcessResult> runProcess(
     stdoutBuffer.toString(),
     stderrBuffer.toString(),
   );
+}
+
+/// Resolves an executable by looking it up in the pub cache bin directory,
+/// falling back to the executable name itself.
+String _resolveExecutable(String executable) {
+  final home =
+      Platform.environment['HOME'] ?? Platform.environment['USERPROFILE'];
+  if (home != null) {
+    final pubCacheBin = '$home/.pub-cache/bin/$executable';
+    if (File(pubCacheBin).existsSync()) {
+      return pubCacheBin;
+    }
+  }
+  return executable;
 }
 
 extension LoggerExtension on Logger {

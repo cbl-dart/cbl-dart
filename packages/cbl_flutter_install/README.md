@@ -1,1 +1,0 @@
-Internal package to install native libraries for the cbl_flutter plugin.

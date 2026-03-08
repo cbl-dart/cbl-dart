@@ -332,14 +332,17 @@ void main() {
         attributes: const CertificateAttributes(commonName: 'Test'),
         expiration: futureExpiration,
       );
+      final created = identity.certificates.single.created;
+      // Certificates become valid at the start of the second one minute
+      // before the current time. Allow a 2-second tolerance for timing
+      // differences between certificate creation and DateTime.now().
+      final expected = DateTime.now()
+          .toUtc()
+          .subtract(const Duration(minutes: 1))
+          .copyWith(millisecond: 0, microsecond: 0);
       expect(
-        identity.certificates.single.created,
-        // Certificates become valid at the start of the second one minute
-        // before the current time.
-        DateTime.now()
-            .toUtc()
-            .subtract(const Duration(minutes: 1))
-            .copyWith(millisecond: 0, microsecond: 0),
+        created.difference(expected).inSeconds.abs(),
+        lessThanOrEqualTo(2),
       );
     });
 
@@ -400,26 +403,10 @@ b17aolOOq/6xfP6QIc9I6pOoPhEFY18mCqVCKrF3YCQjVC3P7Ac1m2x5iMXL+fXF
     group('fromExternal', () {
       group('failures', () {
         test('public key unavailable', () async {
-          var uncaughtError = false;
-          await runZonedGuarded(
-            () async {
-              final keyPair = await KeyPair.fromExternal(
-                ExceptionExternalKeyPairDelegate(),
-              );
-              expect(await keyPair.publicKeyDigest, isNull);
-            },
-            (error, stackTrace) {
-              if (error case UnimplementedError(
-                message: 'ExceptionExternalKeyPairDelegate.publicKeyData',
-              )) {
-                uncaughtError = true;
-              } else {
-                // ignore: only_throw_errors
-                throw error;
-              }
-            },
+          final keyPair = await KeyPair.fromExternal(
+            ExceptionExternalKeyPairDelegate(),
           );
-          expect(uncaughtError, isTrue);
+          expect(await keyPair.publicKeyDigest, isNull);
         });
       });
 

@@ -8,7 +8,6 @@ import 'collection.dart';
 import 'database.dart';
 import 'document.dart';
 import 'fleece.dart';
-import 'libraries.dart';
 import 'logging.dart';
 import 'query.dart';
 import 'replicator.dart';
@@ -19,19 +18,11 @@ import 'url_endpoint_listener.dart';
 class BindingsLibraries {
   BindingsLibraries({
     required this.enterpriseEdition,
-    this.vectorSearchLibraryPath,
     required this.cblite,
     required this.cblitedart,
   });
 
-  BindingsLibraries.fromDynamicLibraries(DynamicLibraries dynamicLibraries)
-    : enterpriseEdition = dynamicLibraries.enterpriseEdition,
-      vectorSearchLibraryPath = dynamicLibraries.vectorSearchLibraryPath,
-      cblite = cblite_lib.cblite(dynamicLibraries.cbl),
-      cblitedart = cblitedart_lib.cblitedart(dynamicLibraries.cblDart);
-
   final bool enterpriseEdition;
-  final String? vectorSearchLibraryPath;
   final cblite_lib.cblite cblite;
   final cblitedart_lib.cblitedart cblitedart;
 }
@@ -65,13 +56,6 @@ final class CBLBindings extends Bindings {
       urlEndpointListener = UrlEndpointListenerBindings(libraries),
       fleece = FleeceBindings(libraries);
 
-  factory CBLBindings.fromLibraries(LibrariesConfiguration libraries) =>
-      CBLBindings(
-        BindingsLibraries.fromDynamicLibraries(
-          DynamicLibraries.fromConfig(libraries),
-        ),
-      );
-
   static CBLBindings? _instance;
 
   static CBLBindings get instance {
@@ -84,13 +68,12 @@ final class CBLBindings extends Bindings {
   }
 
   static void init({
-    CBLBindings? instance,
-    LibrariesConfiguration? libraries,
+    required CBLBindings instance,
     TracedCallHandler? onTracedCall,
   }) {
     assert(_instance == null, 'CBLBindings have already been initialized.');
 
-    _instance = instance ?? CBLBindings.fromLibraries(libraries!);
+    _instance = instance;
 
     if (onTracedCall != null) {
       _onTracedCall = onTracedCall;

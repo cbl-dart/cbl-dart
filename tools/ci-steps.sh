@@ -2,6 +2,28 @@
 
 set -e
 
+scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+workspaceDir="$(cd "$scriptDir/.." && pwd)"
+
+function isDebug() {
+    [[ "${RUNNER_DEBUG:-}" == "1" ]]
+}
+
+function retry() {
+    local attempts=$1; shift
+    local delay=$1; shift
+    local n=0
+    until "$@"; do
+        n=$((n + 1))
+        if [ $n -ge $attempts ]; then
+            echo "Command failed after $n attempts: $*"
+            return 1
+        fi
+        echo "Attempt $n/$attempts failed, retrying in ${delay}s..."
+        sleep "$delay"
+    done
+}
+
 function requireEnvVar() {
     local envVar="$1"
 
@@ -14,60 +36,33 @@ function requireEnvVar() {
 # === Constants ===============================================================
 
 testResultsDir="test-results"
-cblFlutterPrebuiltPackage="cbl_flutter_prebuilt"
 embedder="$EMBEDDER"
 targetOs="$TARGET_OS"
 testPackage="$TEST_PACKAGE"
 testPackageDir="packages/$testPackage"
 testAppBundleId="com.terwesten.gabriel.cblE2eTestsFlutter"
-iosVersion="15-2"
-iosDevice="iPhone 13"
+iosVersion="18-4"
+iosDevice="iPhone 16"
 androidVersion="27"
 androidDevice="pixel_4"
-
-case "$(uname)" in
-MINGW* | CYGWIN* | MSYS*)
-    melosBin="melos.bat"
-    ;;
-*)
-    melosBin="melos"
-    ;;
-esac
+syncGatewayLogFile="$workspaceDir/.tmp/sync-gateway.log"
 
 # === Steps ===================================================================
 
-function buildNativeLibraries() {
-    local target=
-
-    case "$targetOs" in
-    iOS)
-        target=ios
-        ;;
-    macOS)
-        target=macos
-        ;;
-    Android)
-        target=android
-        ;;
-    Ubuntu)
-        target=linux-x86_64
-        ;;
-    Windows)
-        target=windows-x86_64
-        ;;
-    esac
-
-    ./tools/dev-tools.sh prepareNativeLibraries enterprise debug "$target"
-}
-
 function startCouchbaseServices() {
+    mkdir -p "$(dirname "$syncGatewayLogFile")"
+
     case "$(uname)" in
     Darwin)
-        ./packages/cbl_e2e_tests/couchbase-services.sh startSyncGatewayMacOS &>/dev/null &
+        : >"$syncGatewayLogFile"
+        ./packages/cbl_e2e_tests/couchbase-services.sh startSyncGatewayMacOS \
+            >>"$syncGatewayLogFile" 2>&1 &
         ./packages/cbl_e2e_tests/couchbase-services.sh waitForSyncGateway
         ;;
     MINGW64* | MSYS* | CYGWIN*)
-        ./packages/cbl_e2e_tests/couchbase-services.sh startSyncGatewayWindows &>/dev/null &
+        : >"$syncGatewayLogFile"
+        ./packages/cbl_e2e_tests/couchbase-services.sh startSyncGatewayWindows \
+            >>"$syncGatewayLogFile" 2>&1 &
         ./packages/cbl_e2e_tests/couchbase-services.sh waitForSyncGateway
         ;;
     *)
@@ -174,16 +169,157 @@ function runE2ETests() {
             ;;
         esac
 
+        if isDebug; then
+            echo "=== Flutter config ==="
+            flutter config --list 2>&1 || true
+            echo "=== Flutter version ==="
+            flutter --version 2>&1 || true
+        fi
+
+        local verboseFlag=""
+        if isDebug; then verboseFlag="-v"; fi
+
+        # Build the app explicitly when needed:
+        # - iOS: always, because we need the bundle for simulator readiness
+        #   checks before flutter drive.
+        # - Debug mode: always, so we can inspect the bundle afterwards.
+        # Otherwise, let flutter drive handle the build implicitly.
+        local buildTarget
+        case "$targetOs" in
+        Ubuntu)   buildTarget="linux" ;;
+        macOS)    buildTarget="macos" ;;
+        Windows)  buildTarget="windows" ;;
+        Android)  buildTarget="apk" ;;
+        iOS)      buildTarget="ios" ;;
+        *)        buildTarget="$(echo "$device" | tr '[:upper:]' '[:lower:]')" ;;
+        esac
+        local buildFlags=""
+        case "$targetOs" in
+        iOS) buildFlags="--simulator --no-codesign" ;;
+        esac
+        local didExplicitBuild=false
+        if [ "$targetOs" = "iOS" ] || isDebug; then
+            echo "=== Building Flutter app for $targetOs ==="
+            flutter build "$buildTarget" --debug $buildFlags $verboseFlag $DART_DEFINES 2>&1
+            didExplicitBuild=true
+        fi
+
+        if isDebug; then
+            echo "=== Native assets builder cache ==="
+            find .dart_tool -path '*/native_assets_builder/*' -type f 2>/dev/null || echo "No native_assets_builder directory found"
+            find .dart_tool -path '*/hooks_runner/*' -type f 2>/dev/null || echo "No hooks_runner directory found"
+            find .dart_tool -name 'build_output.json' -o -name 'output.json' 2>/dev/null | while read -r f; do
+                echo "--- $f ---"
+                cat "$f"
+                echo ""
+            done
+
+            echo "=== Inspecting Flutter app bundle for native libraries ==="
+            case "$targetOs" in
+            Ubuntu)
+                find build/linux/ -type f \( -name '*.so' -o -name '*.so.*' \) 2>/dev/null || echo "No .so files found"
+                ls -laR build/linux/x64/debug/bundle/lib/ 2>/dev/null || echo "bundle/lib/ not found"
+                ls -laR build/native_assets/ 2>/dev/null || echo "build/native_assets/ not found"
+                ;;
+            Windows)
+                find build/windows/ -type f -name '*.dll' 2>/dev/null || echo "No .dll files found"
+                ls -laR build/windows/x64/runner/Debug/ 2>/dev/null || echo "runner/Debug/ not found"
+                ;;
+            Android)
+                if command -v unzip &>/dev/null; then
+                    local apk
+                    apk=$(find build/app/outputs -name '*.apk' 2>/dev/null | head -1)
+                    if [ -n "$apk" ]; then
+                        unzip -l "$apk" | grep -E '\.so$' || echo "No .so files in APK"
+                    fi
+                fi
+                ;;
+            macOS)
+                find build/macos -type f \( -name '*.dylib' -o -name '*.framework' \) 2>/dev/null || echo "No dylib/framework files found"
+                ls -laR build/macos/Build/Products/Debug/*.app/Contents/Frameworks/ 2>/dev/null || echo "Frameworks/ not found"
+                ;;
+            iOS)
+                find build/ios -type f \( -name '*.dylib' -o -name '*.framework' \) 2>/dev/null || echo "No dylib/framework files found"
+                ls -laR build/ios/iphonesimulator/*.app/Frameworks/ 2>/dev/null || echo "Frameworks/ not found"
+                ;;
+            esac
+            echo "=== End bundle inspection ==="
+        fi
+
+        # --- iOS: ensure simulator is fully ready before flutter drive ---
+        if [ "$targetOs" = "iOS" ]; then
+            echo "=== iOS simulator readiness ==="
+            local simId
+            simId=$(xcrun simctl list devices booted -j | jq -r '.devices[][] | select(.state == "Booted") | .udid' | head -1)
+            if [ -n "$simId" ]; then
+                echo "Booted simulator: $simId"
+
+                # Re-confirm boot status (blocks until truly ready).
+                echo "Waiting for simulator to be fully ready..."
+                xcrun simctl bootstatus "$simId" -b 2>&1 || true
+
+                # Wait for SpringBoard to be responsive — it can lag behind
+                # the "Booted" state and cause app launches to hang.
+                echo "Warming up SpringBoard..."
+                xcrun simctl launch "$simId" com.apple.springboard 2>/dev/null || true
+                sleep 5
+
+                if isDebug; then
+                    local appBundle
+                    appBundle=$(find build/ios -name "Runner.app" -path "*/iphonesimulator/*" -type d 2>/dev/null | head -1)
+                    if [ -n "$appBundle" ]; then
+                        echo "App bundle: $appBundle"
+
+                        echo "--- Framework architectures ---"
+                        for fw in "$appBundle"/Frameworks/*.framework/*; do
+                            if [ -f "$fw" ] && file "$fw" | grep -q "Mach-O"; then
+                                echo "$fw:"
+                                lipo -info "$fw" 2>&1 || true
+                            fi
+                        done
+
+                        echo "--- Code signing ---"
+                        codesign -dvv "$appBundle" 2>&1 || true
+
+                        echo "--- Pre-installing app ---"
+                        xcrun simctl install "$simId" "$appBundle" 2>&1 || true
+
+                        echo "--- Test-launching app ---"
+                        xcrun simctl launch --terminate-running-process "$simId" "$testAppBundleId" 2>&1 || true
+                        sleep 5
+
+                        echo "--- Checking if app process is alive ---"
+                        xcrun simctl spawn "$simId" launchctl list 2>&1 | grep -i "runner\|cbl" || echo "App not found in launchctl"
+
+                        echo "--- Recent crash logs ---"
+                        find ~/Library/Logs/DiagnosticReports -name "Runner*" -newer "$appBundle" 2>/dev/null || echo "No crash logs"
+
+                        echo "--- Terminate pre-launch ---"
+                        xcrun simctl terminate "$simId" "$testAppBundleId" 2>/dev/null || true
+                        sleep 2
+                    fi
+                fi
+            else
+                echo "ERROR: No booted simulator found — aborting"
+                exit 1
+            fi
+            echo "=== End iOS simulator readiness ==="
+        fi
+
         # Note: We would like to collect coverage data from tests, but
         # `flutter drive` does not support the `--coverage` flag. While
         # `flutter test` does, it does not support the `--keep-app-running`
         # flag, which we need to collect logs from devices.
+        local noBuildFlag=""
+        if [ "$didExplicitBuild" = true ]; then noBuildFlag="--no-build"; fi
         flutter drive \
             -d "$device" \
             $DART_DEFINES \
+            $noBuildFlag \
             --keep-app-running \
             --driver test_driver/integration_test.dart \
-            --target integration_test/e2e_test.dart
+            --target integration_test/e2e_test.dart \
+            $verboseFlag
         ;;
     esac
 }
@@ -206,8 +342,12 @@ function _collectFlutterIntegrationResponseData() {
 function _collectCrashReportsMacOS() {
     # Crash reports are generated by the OS.
     echo "Copying macOS DiagnosticReports..."
-    cp -a ~/Library/Logs/DiagnosticReports "$testResultsDir"
-    echo "Copied macOS DiagnosticReports"
+    if [ -d ~/Library/Logs/DiagnosticReports ]; then
+        cp -a ~/Library/Logs/DiagnosticReports "$testResultsDir"
+        echo "Copied macOS DiagnosticReports"
+    else
+        echo "No DiagnosticReports directory found"
+    fi
 }
 
 function _collectCrashReportsLinuxStandalone() {
@@ -263,7 +403,7 @@ function _collectCblLogsIosSimulator() {
 function _collectCblLogsMacOS() {
     echo "Collecting Couchbase Lite logs from macOS app"
 
-    local appDataContainer="~/Library/Containers/$testAppBundleId/Data"
+    local appDataContainer="$HOME/Library/Containers/$testAppBundleId/Data"
     local cblLogsDir="$appDataContainer/Library/Caches/cbl_flutter/logs"
 
     if [ ! -e "$cblLogsDir" ]; then
@@ -297,6 +437,27 @@ function _collectCblLogsLinux() {
     echo "Copied files"
 }
 
+function _collectSyncGatewayLogs() {
+    echo "Collecting Sync Gateway logs"
+
+    local outputFile="$testResultsDir/sync-gateway.log"
+
+    case "$(uname)" in
+    Darwin|MINGW64*|MSYS*|CYGWIN*)
+        if [ ! -e "$syncGatewayLogFile" ]; then
+            echo "Did not find Sync Gateway log file"
+            return 0
+        fi
+
+        cp -a "$syncGatewayLogFile" "$outputFile"
+        ;;
+    *)
+        ./packages/cbl_e2e_tests/couchbase-services.sh logsSyncGateway \
+            >"$outputFile" || true
+        ;;
+    esac
+}
+
 function collectTestResults() {
     requireEnvVar EMBEDDER
     requireEnvVar TARGET_OS
@@ -306,6 +467,8 @@ function collectTestResults() {
 
     # Wait for crash reports/core dumps.
     sleep 60
+
+    _collectSyncGatewayLogs
 
     case "$embedder" in
     standalone)
@@ -401,18 +564,18 @@ function uploadCoverageData() {
         ;;
     esac
 
-    # Install codecove uploader
+    # Install codecov uploader
     case "$OSTYPE" in
     linux*)
-        curl -Os https://cli.codecov.io/latest/linux/codecov
+        retry 3 10 curl --fail -Os https://cli.codecov.io/latest/linux/codecov
         chmod +x codecov
         ;;
     darwin*)
-        curl -Os https://cli.codecov.io/latest/macos/codecov
+        retry 3 10 curl --fail -Os https://cli.codecov.io/latest/macos/codecov
         chmod +x codecov
         ;;
     mingw* | msys* | cygwin*)
-        curl -Os https://cli.codecov.io/latest/windows/codecov.exe
+        retry 3 10 curl --fail -Os https://cli.codecov.io/latest/windows/codecov.exe
         ;;
     esac
 
