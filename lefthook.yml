@@ -1,0 +1,18 @@
+pre-commit:
+  commands:
+    dart-format:
+      glob: "*.dart"
+      run: daco format {staged_files}
+      stage_fixed: true
+    dart-fix:
+      glob: "*.dart"
+      run: echo {staged_files} | xargs -n1 dart fix --apply
+      stage_fixed: true
+    dart-analyze:
+      glob: "*.dart"
+      run: dart analyze --fatal-infos
+    docs-prettier:
+      root: "docs/"
+      glob: "*.{js,jsx,ts,tsx,md,mdx,json,css,scss,html,yaml,yml}"
+      run: npx prettier --write {staged_files}
+      stage_fixed: true

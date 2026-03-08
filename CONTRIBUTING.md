@@ -45,6 +45,10 @@ configured via `hooks.user_defines.cbl` in the workspace root `pubspec.yaml`.
   ```shell
   flutter pub global activate melos
   ```
+- [lefthook](https://github.com/evilmartians/lefthook) (Git hooks manager)
+  ```shell
+  brew install lefthook
+  ```
 
 ### Linux
 
@@ -79,6 +83,13 @@ configured via `hooks.user_defines.cbl` in the workspace root `pubspec.yaml`.
    ```shell
    melos bootstrap
    ```
+5. Install the Git hooks:
+   ```shell
+   lefthook install
+   ```
+   This sets up pre-commit hooks that automatically format Dart files, apply
+   auto-fixable analyzer issues, run the Dart analyzer, and format files in the
+   `docs/` folder with Prettier.
 
 Native libraries are downloaded and compiled automatically by the build hook on
 first run — no manual build step is required.
