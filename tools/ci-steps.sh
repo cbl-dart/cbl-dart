@@ -2,6 +2,9 @@
 
 set -e
 
+scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+workspaceDir="$(cd "$scriptDir/.." && pwd)"
+
 function isDebug() {
     [[ "${RUNNER_DEBUG:-}" == "1" ]]
 }
@@ -42,17 +45,24 @@ iosVersion="18-4"
 iosDevice="iPhone 16"
 androidVersion="27"
 androidDevice="pixel_4"
+syncGatewayLogFile="$workspaceDir/.tmp/sync-gateway.log"
 
 # === Steps ===================================================================
 
 function startCouchbaseServices() {
+    mkdir -p "$(dirname "$syncGatewayLogFile")"
+
     case "$(uname)" in
     Darwin)
-        ./packages/cbl_e2e_tests/couchbase-services.sh startSyncGatewayMacOS &
+        : >"$syncGatewayLogFile"
+        ./packages/cbl_e2e_tests/couchbase-services.sh startSyncGatewayMacOS \
+            >>"$syncGatewayLogFile" 2>&1 &
         ./packages/cbl_e2e_tests/couchbase-services.sh waitForSyncGateway
         ;;
     MINGW64* | MSYS* | CYGWIN*)
-        ./packages/cbl_e2e_tests/couchbase-services.sh startSyncGatewayWindows &
+        : >"$syncGatewayLogFile"
+        ./packages/cbl_e2e_tests/couchbase-services.sh startSyncGatewayWindows \
+            >>"$syncGatewayLogFile" 2>&1 &
         ./packages/cbl_e2e_tests/couchbase-services.sh waitForSyncGateway
         ;;
     *)
@@ -427,6 +437,27 @@ function _collectCblLogsLinux() {
     echo "Copied files"
 }
 
+function _collectSyncGatewayLogs() {
+    echo "Collecting Sync Gateway logs"
+
+    local outputFile="$testResultsDir/sync-gateway.log"
+
+    case "$(uname)" in
+    Darwin|MINGW64*|MSYS*|CYGWIN*)
+        if [ ! -e "$syncGatewayLogFile" ]; then
+            echo "Did not find Sync Gateway log file"
+            return 0
+        fi
+
+        cp -a "$syncGatewayLogFile" "$outputFile"
+        ;;
+    *)
+        ./packages/cbl_e2e_tests/couchbase-services.sh logsSyncGateway \
+            >"$outputFile" || true
+        ;;
+    esac
+}
+
 function collectTestResults() {
     requireEnvVar EMBEDDER
     requireEnvVar TARGET_OS
@@ -436,6 +467,8 @@ function collectTestResults() {
 
     # Wait for crash reports/core dumps.
     sleep 60
+
+    _collectSyncGatewayLogs
 
     case "$embedder" in
     standalone)

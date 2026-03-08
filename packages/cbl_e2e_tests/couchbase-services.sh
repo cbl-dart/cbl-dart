@@ -128,4 +128,8 @@ function teardownDocker() {
     docker compose -f "$dockerComposeFile" down
 }
 
+function logsSyncGateway() {
+    docker compose -f "$dockerComposeFile" logs --timestamps sync-gateway
+}
+
 "$@"
