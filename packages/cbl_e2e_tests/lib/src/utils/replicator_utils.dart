@@ -238,7 +238,7 @@ extension ReplicatorUtilsExtension on Replicator {
             return _matches(status, statusMatcher);
           })
           .firstWhere((isMatch) => isMatch);
-    } on StateError catch (error) {
+    } catch (error) {
       if (!_isPollStreamCompletedError(error)) {
         rethrow;
       }
@@ -274,7 +274,7 @@ extension ReplicatorUtilsExtension on Replicator {
             return isMatch;
           })
           .firstWhere((isMatch) => isMatch);
-    } on StateError catch (error) {
+    } catch (error) {
       if (!_isPollStreamCompletedError(error)) {
         rethrow;
       }
@@ -305,7 +305,7 @@ extension ReplicatorUtilsExtension on Replicator {
             return isMatch;
           })
           .firstWhere((isMatch) => isMatch);
-    } on StateError catch (error) {
+    } catch (error) {
       if (!_isPollStreamCompletedError(error)) {
         rethrow;
       }
@@ -336,7 +336,7 @@ extension ReplicatorUtilsExtension on Replicator {
         'One-shot replication did not stop within ${timeout.inSeconds}s. '
         'Last status: ${_describeReplicatorStatus(lastStatus)}.',
       );
-    } on StateError catch (error) {
+    } catch (error) {
       if (!_isClosedResourceError(error)) {
         rethrow;
       }
@@ -346,7 +346,7 @@ extension ReplicatorUtilsExtension on Replicator {
   Future<ReplicatorStatus?> _readStatusOrNull() async {
     try {
       return await Future<ReplicatorStatus>.sync(() => status);
-    } on StateError catch (error) {
+    } catch (error) {
       if (_isClosedResourceError(error)) {
         return null;
       }
@@ -357,8 +357,8 @@ extension ReplicatorUtilsExtension on Replicator {
 
   Future<void> _stopAfterTimeout(Duration stopTimeout) async {
     try {
-      await Future<void>.sync(() => stop());
-    } on StateError catch (error) {
+      await Future<void>.sync(stop);
+    } catch (error) {
       if (!_isClosedResourceError(error)) {
         rethrow;
       }
@@ -374,7 +374,7 @@ extension ReplicatorUtilsExtension on Replicator {
     } on TimeoutException {
       // The test has already failed with a timeout. Leave teardown to finish
       // closing the replicator in the background.
-    } on StateError catch (error) {
+    } catch (error) {
       if (!_isClosedResourceError(error)) {
         rethrow;
       }
@@ -385,11 +385,17 @@ extension ReplicatorUtilsExtension on Replicator {
 bool _matches(Object actual, Object expected) =>
     wrapMatcher(expected).matches(actual, <Object?, Object?>{});
 
-bool _isClosedResourceError(StateError error) =>
-    error.message.toString().startsWith('Resource has already been closed:');
+bool _isClosedResourceError(Object error) {
+  final message = _stateErrorMessage(error);
+  return message != null &&
+      message.startsWith('Resource has already been closed:');
+}
 
-bool _isPollStreamCompletedError(StateError error) =>
-    error.message.toString() == 'No element';
+bool _isPollStreamCompletedError(Object error) =>
+    _stateErrorMessage(error) == 'No element';
+
+String? _stateErrorMessage(Object error) =>
+    error is StateError ? error.message as String? : null;
 
 String _describeReplicatorStatus(ReplicatorStatus? status) {
   if (status == null) {

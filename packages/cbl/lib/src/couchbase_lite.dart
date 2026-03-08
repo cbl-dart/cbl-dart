@@ -7,6 +7,7 @@ import 'bindings/cblite_vector_search.dart' as vector_search;
 import 'bindings/cblitedart_native_assets.dart' as cblitedart_native;
 import 'bindings/cblitedart_native_assets_bridge.dart';
 import 'database/database.dart';
+import 'extension.dart';
 import 'log.dart';
 import 'support/app_directory.dart';
 import 'support/isolate.dart';
@@ -39,6 +40,10 @@ abstract final class CouchbaseLite {
   /// specifying a directory, a subdirectory in the directory specified here
   /// will be used. If no [filesDir] directory is provided, the working
   /// directory is used when opening and copying databases.
+  ///
+  /// Vector search is not enabled automatically. To use vector search, call
+  /// [Extension.enableVectorSearch] after initialization and before opening a
+  /// database that uses it.
   static Future<void> init({String? filesDir}) =>
       asyncOperationTracePoint(InitializeOp.new, () async {
         // Auto-detect the app files directory from the platform if not
@@ -75,7 +80,6 @@ abstract final class CouchbaseLite {
             bindings: CBLBindings(bindingsLibraries),
             bindingsLibraries: bindingsLibraries,
           ),
-          autoEnableVectorSearch: true,
         );
 
         _setupLogging();

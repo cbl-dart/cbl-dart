@@ -3,7 +3,6 @@ import 'dart:isolate';
 
 import '../bindings.dart';
 import '../document/common.dart';
-import '../extension.dart';
 import '../fleece/integration/integration.dart';
 import 'errors.dart';
 import 'tracing.dart';
@@ -68,19 +67,9 @@ class IsolateContext {
 
 /// Initializes this isolate for use of Couchbase Lite, and initializes the
 /// native libraries.
-Future<void> initPrimaryIsolate(
-  IsolateContext context, {
-  required bool autoEnableVectorSearch,
-}) async {
+Future<void> initPrimaryIsolate(IsolateContext context) async {
   await _initIsolate(context);
   _bindings.initializeNativeLibraries(context.initContext?.toCbl());
-
-  if (autoEnableVectorSearch &&
-      _bindings.vectorSearchLibraryAvailable &&
-      _bindings.systemSupportsVectorSearch) {
-    Extension.enableVectorSearch();
-  }
-
   await _runPostIsolateInitTasks();
 }
 

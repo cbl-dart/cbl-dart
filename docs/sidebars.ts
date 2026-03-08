@@ -19,6 +19,10 @@ export default {
     },
     {
       type: 'doc',
+      id: 'migration-v3-to-v4',
+    },
+    {
+      type: 'doc',
       id: 'general-concepts',
     },
     {
@@ -131,12 +135,7 @@ export default {
       label: 'References',
       collapsed: true,
       collapsible: false,
-      items: [
-        pubDevDocsLink('cbl'),
-        pubDevDocsLink('cbl_dart'),
-        pubDevDocsLink('cbl_flutter'),
-        pubDevDocsLink('cbl_sentry'),
-      ],
+      items: [pubDevDocsLink('cbl'), pubDevDocsLink('cbl_sentry')],
     },
   ],
 } satisfies SidebarsConfig

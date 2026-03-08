@@ -602,7 +602,7 @@ void main() {
 
           expect(ids, documents.map((doc) => doc.id));
         },
-        skip: vectorSearchAvailable
+        skip: vectorSearchEnabled
             ? null
             : 'Vector search not available on this system',
       );

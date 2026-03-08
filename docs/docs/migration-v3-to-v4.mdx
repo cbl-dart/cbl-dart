@@ -1,0 +1,206 @@
+---
+description: Migrating from Couchbase Lite for Dart v3 to v4
+related_content:
+  - name: Install
+    url: /install
+  - name: Vector Search
+    url: /vector-search
+---
+
+# Migration: v3 to v4
+
+## Overview
+
+Version 4 replaces the multi-package architecture with a single `cbl` package
+powered by
+[Dart native assets](https://dart.dev/interop/c-interop#native-assets). Native
+libraries are now downloaded and compiled automatically by the Dart build system
+-- no manual setup or separate platform packages are needed.
+
+## Package changes
+
+| v3 Package                       | v4 Replacement                                  |
+| -------------------------------- | ----------------------------------------------- |
+| `cbl`                            | `cbl` (unchanged)                               |
+| `cbl_dart`                       | `cbl` (merged)                                  |
+| `cbl_flutter`                    | `cbl` (merged)                                  |
+| `cbl_flutter_platform_interface` | Removed (no longer needed)                      |
+| `cbl_flutter_ce`                 | Removed (edition configured via `pubspec.yaml`) |
+| `cbl_flutter_ee`                 | Removed (edition configured via `pubspec.yaml`) |
+| `cbl_libcblite_api`              | Removed (handled by build hook)                 |
+| `cbl_libcblitedart_api`          | Removed (handled by build hook)                 |
+
+## Dependency changes
+
+### Before (v3) -- Flutter
+
+```yaml
+dependencies:
+  cbl: ...
+  cbl_flutter: ...
+  cbl_flutter_ce: ... # or cbl_flutter_ee
+```
+
+### Before (v3) -- Standalone Dart
+
+```yaml
+dependencies:
+  cbl: ...
+  cbl_dart: ...
+```
+
+### After (v4) -- Both Flutter and Standalone Dart
+
+```yaml
+dependencies:
+  cbl: ...
+```
+
+A single dependency is all that is needed for both Flutter and standalone Dart
+apps.
+
+## Edition configuration
+
+In v3, the edition was selected by choosing a package (`cbl_flutter_ce` vs
+`cbl_flutter_ee`) or by passing it to `CouchbaseLiteDart.init()`.
+
+In v4, configure the edition in your workspace root `pubspec.yaml`:
+
+```yaml
+hooks:
+  user_defines:
+    cbl:
+      edition: enterprise # or community (default)
+```
+
+If no edition is specified, the Community edition is used by default.
+
+## Initialization changes
+
+### Before (v3) -- Flutter
+
+```dart
+import 'package:cbl_flutter/cbl_flutter.dart';
+
+await CouchbaseLiteFlutter.init();
+```
+
+### Before (v3) -- Standalone Dart
+
+```dart
+import 'package:cbl_dart/cbl_dart.dart';
+
+await CouchbaseLiteDart.init(edition: Edition.enterprise);
+```
+
+### After (v4)
+
+```dart
+import 'package:cbl/cbl.dart';
+
+await CouchbaseLite.init();
+```
+
+The initialization API is now unified. There is no need to use different imports
+or classes depending on whether you are in a Flutter or standalone Dart context.
+
+## Vector search initialization
+
+In v3, vector search was automatically enabled during `api|CouchbaseLite.init`
+if the extension was available and the system supported it. The `init` methods
+accepted an `autoEnableVectorSearch` parameter to control this behavior.
+
+In v4, vector search is **never** enabled automatically.
+`autoEnableVectorSearch` has been removed. You must explicitly call
+`api|Extension.enableVectorSearch` after initialization and before opening a
+database that uses vector search:
+
+```dart
+await CouchbaseLite.init();
+
+final status = Extension.enableVectorSearch();
+if (status != VectorSearchStatus.enabled) {
+  // Handle the case where vector search could not be enabled.
+}
+```
+
+`api|Extension.enableVectorSearch` now returns a `api|enum:VectorSearchStatus`
+enum instead of throwing an exception when vector search is unavailable. See
+[Vector Search](./vector-search.mdx) for details on the status values.
+
+## Vector search configuration
+
+In v3, vector search setup was manual. In v4, enable it in `pubspec.yaml`:
+
+```yaml
+hooks:
+  user_defines:
+    cbl:
+      edition: enterprise
+      vector_search: true
+```
+
+Vector search requires the Enterprise edition and is only supported on 64-bit
+architectures.
+
+## Conflict resolver exception handling
+
+In v3, when a custom `api|ConflictResolver` threw an exception, the native layer
+would propagate a C++ exception across library boundaries. This was undefined
+behavior and caused crashes on some platforms (notably Windows).
+
+In v4, when a `api|ConflictResolver` throws:
+
+1. The exception is reported on the Dart side as an unhandled error in the
+   current zone (unchanged).
+2. On the native side, the `CBLDefaultConflictResolver` is called as a fallback
+   instead of propagating a C++ exception. This resolver uses timestamp-based
+   logic: the document with the newer timestamp wins, or if either side deleted
+   the document, the deletion wins.
+
+This means a throwing conflict resolver no longer causes cblite to report a
+conflict resolution error -- the conflict is silently resolved using the default
+strategy. Applications that relied on detecting conflict resolver failures
+should catch exceptions within their `api|ConflictResolver.resolve`
+implementation and handle them explicitly.
+
+## Dart SDK requirement
+
+Version 4 requires Dart SDK `^3.10.0` due to the use of Dart native assets.
+
+## Native library management
+
+In v3, native libraries had to be downloaded or built manually (for standalone
+Dart via `CouchbaseLiteDart.init`, for Flutter via prebuilt platform packages).
+
+In v4, the build hook at `packages/cbl/hook/build.dart` handles everything
+automatically:
+
+- Downloads `libcblite` for the target platform.
+- Compiles `libcblitedart` from source.
+- Optionally downloads the vector search extension.
+
+No manual steps are required.
+
+## Step-by-step migration checklist
+
+1. **Update Dart SDK** to `^3.10.0`.
+2. **Remove old packages** from your `pubspec.yaml`:
+   - `cbl_dart`
+   - `cbl_flutter`
+   - `cbl_flutter_ce` or `cbl_flutter_ee`
+3. **Keep or add** the `cbl` dependency.
+4. **Configure edition** (if using Enterprise) in your workspace root
+   `pubspec.yaml` under `hooks.user_defines.cbl`.
+5. **Update imports**:
+   - Replace `import 'package:cbl_flutter/cbl_flutter.dart'` with
+     `import 'package:cbl/cbl.dart'`.
+   - Replace `import 'package:cbl_dart/cbl_dart.dart'` with
+     `import 'package:cbl/cbl.dart'`.
+6. **Update initialization**:
+   - Replace `CouchbaseLiteFlutter.init()` with `api|CouchbaseLite.init`.
+   - Replace `CouchbaseLiteDart.init(...)` with `api|CouchbaseLite.init`.
+7. **Enable vector search** (if needed) via `pubspec.yaml` config and an
+   explicit call to `api|Extension.enableVectorSearch`.
+8. **Run your app** -- native libraries will be built automatically on first
+   run.

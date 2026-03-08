@@ -57,7 +57,7 @@ void main() {
           expect(updater, isNull);
         }
       },
-      skip: vectorSearchAvailable
+      skip: vectorSearchEnabled
           ? null
           : 'Vector search not available on this system',
     );
@@ -97,7 +97,7 @@ void main() {
           expect(updater, isNull);
         }
       },
-      skip: vectorSearchAvailable
+      skip: vectorSearchEnabled
           ? null
           : 'Vector search not available on this system',
     );

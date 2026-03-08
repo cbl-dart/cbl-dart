@@ -2,9 +2,66 @@
 description:
   Use Vector Search to build adaptive and user-focused applications using
   Generative AI.
+related_content:
+  - name: Install
+    url: /install
 ---
 
 # Vector Search
+
+:::note
+
+Vector search requires the **Enterprise edition** and is only supported on
+**64-bit architectures**.
+
+:::
+
+## Configuration
+
+To enable vector search, configure your workspace root `pubspec.yaml`:
+
+```yaml
+hooks:
+  user_defines:
+    cbl:
+      edition: enterprise
+      vector_search: true
+```
+
+The build hook will automatically download the required vector search extension
+library alongside the other native libraries.
+
+## Enabling vector search
+
+Vector search must be explicitly enabled after calling `api|CouchbaseLite.init`
+and before opening a database that uses it:
+
+```dart
+await CouchbaseLite.init();
+
+final status = Extension.enableVectorSearch();
+if (status != VectorSearchStatus.enabled) {
+  // Handle the case where vector search could not be enabled.
+  print('Vector search status: $status');
+}
+```
+
+You can also check the status without attempting to enable:
+
+```dart
+final status = Extension.vectorSearchStatus;
+```
+
+### `api|enum:VectorSearchStatus` values
+
+| Value                 | Meaning                                                                                                                                    |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `available`           | The vector search library is bundled and the system supports it. Call `Extension.enableVectorSearch()` to enable.                          |
+| `enabled`             | Vector search has been successfully enabled.                                                                                               |
+| `libraryNotAvailable` | The vector search library was not bundled. Set `vector_search: true` in `pubspec.yaml`.                                                    |
+| `systemNotSupported`  | The current system does not support vector search. Requires 64-bit architecture; on x86-64, the CPU must support the AVX2 instruction set. |
+
+## Usage
 
 Vector search is available but the Dart specific documentation for vector search
 is not available yet.

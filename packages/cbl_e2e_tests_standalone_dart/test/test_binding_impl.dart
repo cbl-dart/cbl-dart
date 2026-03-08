@@ -15,6 +15,8 @@ final class StandaloneDartCblE2eTestBinding extends CblE2eTestBinding {
   @override
   Future<void> initCouchbaseLite() async {
     await CouchbaseLite.init();
+    // ignore: unused_result
+    Extension.enableVectorSearch();
   }
 
   @override
