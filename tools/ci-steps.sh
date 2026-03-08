@@ -2,6 +2,25 @@
 
 set -e
 
+function isDebug() {
+    [[ "${RUNNER_DEBUG:-}" == "1" ]]
+}
+
+function retry() {
+    local attempts=$1; shift
+    local delay=$1; shift
+    local n=0
+    until "$@"; do
+        n=$((n + 1))
+        if [ $n -ge $attempts ]; then
+            echo "Command failed after $n attempts: $*"
+            return 1
+        fi
+        echo "Attempt $n/$attempts failed, retrying in ${delay}s..."
+        sleep "$delay"
+    done
+}
+
 function requireEnvVar() {
     local envVar="$1"
 
@@ -140,14 +159,21 @@ function runE2ETests() {
             ;;
         esac
 
-        # --- Diagnostic: Flutter native assets configuration ---
-        echo "=== Flutter config ==="
-        flutter config --list 2>&1 || true
-        echo "=== Flutter version ==="
-        flutter --version 2>&1 || true
+        if isDebug; then
+            echo "=== Flutter config ==="
+            flutter config --list 2>&1 || true
+            echo "=== Flutter version ==="
+            flutter --version 2>&1 || true
+        fi
 
-        # Build the app. Map device names to build sub-commands.
-        echo "=== Building Flutter app for $targetOs ==="
+        local verboseFlag=""
+        if isDebug; then verboseFlag="-v"; fi
+
+        # Build the app explicitly when needed:
+        # - iOS: always, because we need the bundle for simulator readiness
+        #   checks before flutter drive.
+        # - Debug mode: always, so we can inspect the bundle afterwards.
+        # Otherwise, let flutter drive handle the build implicitly.
         local buildTarget
         case "$targetOs" in
         Ubuntu)   buildTarget="linux" ;;
@@ -157,76 +183,58 @@ function runE2ETests() {
         iOS)      buildTarget="ios" ;;
         *)        buildTarget="$(echo "$device" | tr '[:upper:]' '[:lower:]')" ;;
         esac
-        echo "Build target: $buildTarget"
         local buildFlags=""
         case "$targetOs" in
         iOS) buildFlags="--simulator --no-codesign" ;;
         esac
-        flutter build "$buildTarget" --debug $buildFlags -v $DART_DEFINES 2>&1
+        local didExplicitBuild=false
+        if [ "$targetOs" = "iOS" ] || isDebug; then
+            echo "=== Building Flutter app for $targetOs ==="
+            flutter build "$buildTarget" --debug $buildFlags $verboseFlag $DART_DEFINES 2>&1
+            didExplicitBuild=true
+        fi
 
-        # --- Diagnostic: check for native assets builder output ---
-        echo "=== Native assets builder cache ==="
-        # This directory contains the build hook output when Flutter invokes it.
-        find .dart_tool -path '*/native_assets_builder/*' -type f 2>/dev/null || echo "No native_assets_builder directory found"
-        find .dart_tool -path '*/hooks_runner/*' -type f 2>/dev/null || echo "No hooks_runner directory found"
-        # Show the build output JSON if it exists (contains registered assets).
-        find .dart_tool -name 'build_output.json' -o -name 'output.json' 2>/dev/null | while read -r f; do
-            echo "--- $f ---"
-            cat "$f"
-            echo ""
-        done
+        if isDebug; then
+            echo "=== Native assets builder cache ==="
+            find .dart_tool -path '*/native_assets_builder/*' -type f 2>/dev/null || echo "No native_assets_builder directory found"
+            find .dart_tool -path '*/hooks_runner/*' -type f 2>/dev/null || echo "No hooks_runner directory found"
+            find .dart_tool -name 'build_output.json' -o -name 'output.json' 2>/dev/null | while read -r f; do
+                echo "--- $f ---"
+                cat "$f"
+                echo ""
+            done
 
-        # --- Diagnostic: inspect the built app bundle for native libraries ---
-        echo "=== Inspecting Flutter app bundle for native libraries ==="
-        case "$targetOs" in
-        Ubuntu)
-            echo "--- Linux .so files ---"
-            find build/linux/ -type f \( -name '*.so' -o -name '*.so.*' \) 2>/dev/null || echo "No .so files found"
-            echo "--- Full bundle lib dir ---"
-            ls -laR build/linux/x64/debug/bundle/lib/ 2>/dev/null || echo "bundle/lib/ not found"
-            echo "--- Native assets staging dir (build/native_assets/) ---"
-            ls -laR build/native_assets/ 2>/dev/null || echo "build/native_assets/ not found"
-            echo "--- CMake install log (cmake_install.cmake) ---"
-            grep -A2 'native_assets' build/linux/x64/debug/cmake_install.cmake 2>/dev/null || echo "No native_assets in cmake_install.cmake"
-            echo "--- generated_config.cmake PROJECT_DIR ---"
-            grep 'PROJECT_DIR' linux/flutter/ephemeral/generated_config.cmake 2>/dev/null || echo "generated_config.cmake not found"
-            ;;
-        Windows)
-            echo "--- Windows .dll files ---"
-            find build/windows/ -type f -name '*.dll' 2>/dev/null || echo "No .dll files found"
-            echo "--- Full runner dir ---"
-            ls -laR build/windows/x64/runner/Debug/ 2>/dev/null || echo "runner/Debug/ not found"
-            ;;
-        Android)
-            echo "--- APK native libs ---"
-            if command -v unzip &>/dev/null; then
-                local apk
-                apk=$(find build/app/outputs -name '*.apk' 2>/dev/null | head -1)
-                if [ -n "$apk" ]; then
-                    echo "APK: $apk"
-                    unzip -l "$apk" | grep -E '\.so$' || echo "No .so files in APK"
-                else
-                    echo "No APK found in build/app/outputs/"
+            echo "=== Inspecting Flutter app bundle for native libraries ==="
+            case "$targetOs" in
+            Ubuntu)
+                find build/linux/ -type f \( -name '*.so' -o -name '*.so.*' \) 2>/dev/null || echo "No .so files found"
+                ls -laR build/linux/x64/debug/bundle/lib/ 2>/dev/null || echo "bundle/lib/ not found"
+                ls -laR build/native_assets/ 2>/dev/null || echo "build/native_assets/ not found"
+                ;;
+            Windows)
+                find build/windows/ -type f -name '*.dll' 2>/dev/null || echo "No .dll files found"
+                ls -laR build/windows/x64/runner/Debug/ 2>/dev/null || echo "runner/Debug/ not found"
+                ;;
+            Android)
+                if command -v unzip &>/dev/null; then
+                    local apk
+                    apk=$(find build/app/outputs -name '*.apk' 2>/dev/null | head -1)
+                    if [ -n "$apk" ]; then
+                        unzip -l "$apk" | grep -E '\.so$' || echo "No .so files in APK"
+                    fi
                 fi
-            fi
-            ;;
-        macOS)
-            echo "--- macOS app bundle ---"
-            find build/macos -type f \( -name '*.dylib' -o -name '*.framework' \) 2>/dev/null || echo "No dylib/framework files found"
-            echo "--- Frameworks dir ---"
-            ls -laR build/macos/Build/Products/Debug/*.app/Contents/Frameworks/ 2>/dev/null || echo "Frameworks/ not found"
-            ;;
-        iOS)
-            echo "--- iOS app bundle ---"
-            find build/ios -type f \( -name '*.dylib' -o -name '*.framework' \) 2>/dev/null || echo "No dylib/framework files found"
-            echo "--- Frameworks dir ---"
-            ls -laR build/ios/iphonesimulator/*.app/Frameworks/ 2>/dev/null || echo "Frameworks/ not found"
-            ;;
-        *)
-            echo "(Bundle inspection not configured for $targetOs)"
-            ;;
-        esac
-        echo "=== End bundle inspection ==="
+                ;;
+            macOS)
+                find build/macos -type f \( -name '*.dylib' -o -name '*.framework' \) 2>/dev/null || echo "No dylib/framework files found"
+                ls -laR build/macos/Build/Products/Debug/*.app/Contents/Frameworks/ 2>/dev/null || echo "Frameworks/ not found"
+                ;;
+            iOS)
+                find build/ios -type f \( -name '*.dylib' -o -name '*.framework' \) 2>/dev/null || echo "No dylib/framework files found"
+                ls -laR build/ios/iphonesimulator/*.app/Frameworks/ 2>/dev/null || echo "Frameworks/ not found"
+                ;;
+            esac
+            echo "=== End bundle inspection ==="
+        fi
 
         # --- iOS: ensure simulator is fully ready before flutter drive ---
         if [ "$targetOs" = "iOS" ]; then
@@ -246,45 +254,40 @@ function runE2ETests() {
                 xcrun simctl launch "$simId" com.apple.springboard 2>/dev/null || true
                 sleep 5
 
-                # Verify the app bundle exists and inspect it.
-                local appBundle
-                appBundle=$(find build/ios -name "Runner.app" -path "*/iphonesimulator/*" -type d 2>/dev/null | head -1)
-                if [ -n "$appBundle" ]; then
-                    echo "App bundle: $appBundle"
+                if isDebug; then
+                    local appBundle
+                    appBundle=$(find build/ios -name "Runner.app" -path "*/iphonesimulator/*" -type d 2>/dev/null | head -1)
+                    if [ -n "$appBundle" ]; then
+                        echo "App bundle: $appBundle"
 
-                    echo "--- Framework architectures ---"
-                    for fw in "$appBundle"/Frameworks/*.framework/*; do
-                        if [ -f "$fw" ] && file "$fw" | grep -q "Mach-O"; then
-                            echo "$fw:"
-                            lipo -info "$fw" 2>&1 || true
-                        fi
-                    done
+                        echo "--- Framework architectures ---"
+                        for fw in "$appBundle"/Frameworks/*.framework/*; do
+                            if [ -f "$fw" ] && file "$fw" | grep -q "Mach-O"; then
+                                echo "$fw:"
+                                lipo -info "$fw" 2>&1 || true
+                            fi
+                        done
 
-                    echo "--- Code signing ---"
-                    codesign -dvv "$appBundle" 2>&1 || true
+                        echo "--- Code signing ---"
+                        codesign -dvv "$appBundle" 2>&1 || true
 
-                    # Pre-install the app and verify it launches before
-                    # handing off to flutter drive.
-                    echo "--- Pre-installing app ---"
-                    xcrun simctl install "$simId" "$appBundle" 2>&1 || true
+                        echo "--- Pre-installing app ---"
+                        xcrun simctl install "$simId" "$appBundle" 2>&1 || true
 
-                    echo "--- Test-launching app ---"
-                    xcrun simctl launch --terminate-running-process "$simId" "$testAppBundleId" 2>&1 || true
-                    sleep 5
+                        echo "--- Test-launching app ---"
+                        xcrun simctl launch --terminate-running-process "$simId" "$testAppBundleId" 2>&1 || true
+                        sleep 5
 
-                    echo "--- Checking if app process is alive ---"
-                    xcrun simctl spawn "$simId" launchctl list 2>&1 | grep -i "runner\|cbl" || echo "App not found in launchctl"
+                        echo "--- Checking if app process is alive ---"
+                        xcrun simctl spawn "$simId" launchctl list 2>&1 | grep -i "runner\|cbl" || echo "App not found in launchctl"
 
-                    echo "--- Recent crash logs ---"
-                    find ~/Library/Logs/DiagnosticReports -name "Runner*" -newer "$appBundle" 2>/dev/null || echo "No crash logs"
+                        echo "--- Recent crash logs ---"
+                        find ~/Library/Logs/DiagnosticReports -name "Runner*" -newer "$appBundle" 2>/dev/null || echo "No crash logs"
 
-                    # Clean up: terminate the test launch so flutter drive
-                    # starts fresh.
-                    echo "--- Terminate pre-launch ---"
-                    xcrun simctl terminate "$simId" "$testAppBundleId" 2>/dev/null || true
-                    sleep 2
-                else
-                    echo "WARNING: No Runner.app found — skipping pre-launch"
+                        echo "--- Terminate pre-launch ---"
+                        xcrun simctl terminate "$simId" "$testAppBundleId" 2>/dev/null || true
+                        sleep 2
+                    fi
                 fi
             else
                 echo "ERROR: No booted simulator found — aborting"
@@ -297,13 +300,16 @@ function runE2ETests() {
         # `flutter drive` does not support the `--coverage` flag. While
         # `flutter test` does, it does not support the `--keep-app-running`
         # flag, which we need to collect logs from devices.
+        local noBuildFlag=""
+        if [ "$didExplicitBuild" = true ]; then noBuildFlag="--no-build"; fi
         flutter drive \
             -d "$device" \
             $DART_DEFINES \
+            $noBuildFlag \
             --keep-app-running \
             --driver test_driver/integration_test.dart \
             --target integration_test/e2e_test.dart \
-            -v
+            $verboseFlag
         ;;
     esac
 }
@@ -525,18 +531,18 @@ function uploadCoverageData() {
         ;;
     esac
 
-    # Install codecove uploader
+    # Install codecov uploader
     case "$OSTYPE" in
     linux*)
-        curl -Os https://cli.codecov.io/latest/linux/codecov
+        retry 3 10 curl --fail -Os https://cli.codecov.io/latest/linux/codecov
         chmod +x codecov
         ;;
     darwin*)
-        curl -Os https://cli.codecov.io/latest/macos/codecov
+        retry 3 10 curl --fail -Os https://cli.codecov.io/latest/macos/codecov
         chmod +x codecov
         ;;
     mingw* | msys* | cygwin*)
-        curl -Os https://cli.codecov.io/latest/windows/codecov.exe
+        retry 3 10 curl --fail -Os https://cli.codecov.io/latest/windows/codecov.exe
         ;;
     esac
 
