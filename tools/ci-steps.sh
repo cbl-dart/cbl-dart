@@ -269,7 +269,8 @@ function runE2ETests() {
                     xcrun simctl install "$simId" "$appBundle" 2>&1 || true
 
                     echo "--- Test-launching app ---"
-                    timeout 30 xcrun simctl launch --terminate-running-process --console-pty "$simId" "$testAppBundleId" 2>&1 || true
+                    xcrun simctl launch --terminate-running-process "$simId" "$testAppBundleId" 2>&1 || true
+                    sleep 5
 
                     echo "--- Checking if app process is alive ---"
                     xcrun simctl spawn "$simId" launchctl list 2>&1 | grep -i "runner\|cbl" || echo "App not found in launchctl"
