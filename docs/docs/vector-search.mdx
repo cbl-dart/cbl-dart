@@ -11,8 +11,8 @@ related_content:
 
 :::note
 
-Vector search requires the **Enterprise edition** and is supported on
-**ARM64 and x86-64**. **32-bit ARM is not supported**.
+Vector search requires the **Enterprise edition** and is supported on **ARM64
+and x86-64**. **32-bit ARM is not supported**.
 
 :::
 
@@ -57,13 +57,13 @@ final status = Extension.vectorSearchStatus;
 
 ### `api|enum:VectorSearchStatus` values
 
-| Value                        | Meaning                                                                                                                                    |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `available`                  | The vector search library is bundled and the system supports it. Call `Extension.enableVectorSearch()` to enable.                          |
-| `enabled`                    | Vector search has been successfully enabled.                                                                                               |
-| `libraryNotAvailable`        | The vector search library was not bundled. Set `vector_search: true` in `pubspec.yaml`.                                                    |
-| `libraryPathNotResolvable`   | The file path of the vector search extension library could not be resolved.                                                                |
-| `systemNotSupported`         | The current system does not support vector search. Vector search is supported on ARM64 and x86-64. On x86-64, the CPU must additionally support the AVX2 instruction set. 32-bit ARM and ia32 architectures are not supported. |
+| Value                      | Meaning                                                                                                                                                                                                                        |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `available`                | The vector search library is bundled and the system supports it. Call `Extension.enableVectorSearch()` to enable.                                                                                                              |
+| `enabled`                  | Vector search has been successfully enabled.                                                                                                                                                                                   |
+| `libraryNotAvailable`      | The vector search library was not bundled. Set `vector_search: true` in `pubspec.yaml`.                                                                                                                                        |
+| `libraryPathNotResolvable` | The file path of the vector search extension library could not be resolved.                                                                                                                                                    |
+| `systemNotSupported`       | The current system does not support vector search. Vector search is supported on ARM64 and x86-64. On x86-64, the CPU must additionally support the AVX2 instruction set. 32-bit ARM and ia32 architectures are not supported. |
 
 ## Usage
 

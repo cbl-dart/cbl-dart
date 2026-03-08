@@ -30,9 +30,7 @@ class IntParameter extends BenchmarkParameter<int> {
   @override
   int decode(String value) {
     if (value.isEmpty) {
-      throw FormatException(
-        'Environment variable $name is not set or empty.',
-      );
+      throw FormatException('Environment variable $name is not set or empty.');
     }
     return int.parse(value);
   }

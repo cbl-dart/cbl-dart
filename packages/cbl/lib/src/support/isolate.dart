@@ -54,8 +54,8 @@ class IsolateContext {
   ///
   /// [CBLBindings] cannot be sent across isolate boundaries because it contains
   /// `NativeFinalizer` objects. This method strips [bindings] and keeps the
-  /// serializable [bindingsLibraries], which allows the
-  /// secondary isolate to create its own [CBLBindings].
+  /// serializable [bindingsLibraries], which allows the secondary isolate to
+  /// create its own [CBLBindings].
   IsolateContext forSecondaryIsolate() => IsolateContext(
     bindingsLibraries: bindingsLibraries,
     initContext: initContext,
