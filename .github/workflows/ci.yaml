@@ -18,8 +18,6 @@ concurrency:
 
 env:
   flutter-channel: stable
-  dart-version-stable: stable
-  dart-version-beta: beta
 
 jobs:
   formatting-dart:
@@ -35,12 +33,6 @@ jobs:
         with:
           channel: ${{ env.flutter-channel }}
           cache: true
-          # Custom pub cache key because the default pattern includes every
-          # pubspec.lock in the repo, which causes hashFiles to fail.
-          pub-cache-key: flutter-pub-:os:-:channel:-:version:-:arch:-${{ hashFiles('pubspec.lock') }}
-
-      - name: Setup Dart
-        uses: dart-lang/setup-dart@v1
 
       - name: Setup Melos
         run: dart pub global activate melos
@@ -76,11 +68,6 @@ jobs:
     name: Analyze Dart code
     timeout-minutes: 10
     runs-on: blacksmith-4vcpu-ubuntu-2204
-    strategy:
-      fail-fast: false
-      matrix:
-        dart: [stable, beta]
-    continue-on-error: ${{ matrix.dart != 'stable' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -92,14 +79,6 @@ jobs:
         with:
           channel: ${{ env.flutter-channel }}
           cache: true
-          # Custom pub cache key because the default pattern includes every
-          # pubspec.lock in the repo, which causes hashFiles to fail.
-          pub-cache-key: flutter-pub-:os:-:channel:-:version:-:arch:-${{ hashFiles('pubspec.lock') }}
-
-      - name: Setup Dart
-        uses: dart-lang/setup-dart@v1
-        with:
-          sdk: ${{ env[format('dart-version-{0}', matrix.dart)] }}
 
       - name: Setup Melos
         run: dart pub global activate melos
@@ -118,23 +97,19 @@ jobs:
       fail-fast: false
       matrix:
         package: [cbl, cbl_sentry, cbl_generator]
-        dart: [stable, beta]
         embedder: [standalone]
         os: [Ubuntu]
         include:
           - package: cbl
-            dart: stable
             embedder: standalone
             os: macOS
           - package: cbl
-            dart: stable
             embedder: standalone
             os: Windows
     env:
       EMBEDDER: ${{ matrix.embedder }}
       TARGET_OS: ${{ matrix.os }}
       TEST_PACKAGE: ${{ matrix.package }}
-    continue-on-error: ${{ matrix.dart != 'stable' }}
     runs-on: >-
       ${{ fromJSON('{
         "Ubuntu":"blacksmith-4vcpu-ubuntu-2204",
@@ -161,14 +136,6 @@ jobs:
         with:
           channel: ${{ env.flutter-channel }}
           cache: true
-          # Custom pub cache key because the default pattern includes every
-          # pubspec.lock in the repo, which causes hashFiles to fail.
-          pub-cache-key: flutter-pub-:os:-:channel:-:version:-:arch:-${{ hashFiles('pubspec.lock') }}
-
-      - name: Setup Dart
-        uses: dart-lang/setup-dart@v1
-        with:
-          sdk: ${{ env[format('dart-version-{0}', matrix.dart)] }}
 
       - name: Get dependencies
         run: dart pub get
@@ -187,7 +154,6 @@ jobs:
         run: ./tools/ci-steps.sh runUnitTests
 
       - name: Upload coverage data
-        if: ${{ matrix.dart == 'stable' }}
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         shell: bash
@@ -285,15 +251,6 @@ jobs:
         with:
           channel: ${{ env.flutter-channel }}
           cache: true
-          # Custom pub cache key because the default pattern includes every
-          # pubspec.lock in the repo, which causes hashFiles to fail.
-          pub-cache-key: flutter-pub-:os:-:channel:-:version:-:arch:-${{ hashFiles('pubspec.lock') }}
-
-      - name: Setup Dart
-        uses: dart-lang/setup-dart@v1
-        if: matrix.embedder == 'standalone'
-        with:
-          sdk: ${{ env.dart-version-stable }}
 
       - name: Enable Flutter native assets
         if: matrix.embedder == 'flutter'
