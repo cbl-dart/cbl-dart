@@ -3,6 +3,9 @@ library;
 
 import 'dart:ffi' as ffi;
 
+import 'cblitedart_native_assets.dart'
+    as cblitedart
+    show CBLDart_CpuSupportsAVX2;
 import 'libraries.dart';
 
 /// A known symbol from the vector search extension library.
@@ -25,3 +28,40 @@ String get vectorSearchLibraryPath {
   ).cast<ffi.Void>();
   return resolveLibraryPathFromAddress(address);
 }
+
+/// Whether the vector search extension library is bundled.
+///
+/// This does not require Couchbase Lite to be initialized.
+bool get vectorSearchLibraryBundled {
+  try {
+    ffi.Native.addressOf<ffi.NativeFunction<ffi.Void Function()>>(
+      _extensionEntryPoint,
+    );
+    return true;
+  } on Object {
+    return false;
+  }
+}
+
+/// Whether the current system supports vector search.
+///
+/// Vector search requires a 64-bit architecture. On x86-64, the CPU must
+/// support the AVX2 instruction set.
+///
+/// This does not require Couchbase Lite to be initialized.
+bool get systemSupportsVectorSearch => switch (ffi.Abi.current()) {
+  ffi.Abi.androidArm ||
+  ffi.Abi.androidArm64 ||
+  ffi.Abi.iosArm ||
+  ffi.Abi.iosArm64 ||
+  ffi.Abi.linuxArm ||
+  ffi.Abi.linuxArm64 ||
+  ffi.Abi.macosArm64 ||
+  ffi.Abi.windowsArm64 => true,
+  ffi.Abi.linuxX64 ||
+  ffi.Abi.windowsX64 ||
+  ffi.Abi.iosX64 ||
+  ffi.Abi.macosX64 ||
+  ffi.Abi.androidX64 => cblitedart.CBLDart_CpuSupportsAVX2(),
+  _ => false,
+};

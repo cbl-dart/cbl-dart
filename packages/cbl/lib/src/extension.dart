@@ -1,8 +1,7 @@
 import 'package:meta/meta.dart';
 
 import 'bindings.dart';
-
-final _binding = CBLBindings.instance.base;
+import 'bindings/cblite_vector_search.dart' as vector_search;
 
 /// Status of the vector search extension on the current system.
 enum VectorSearchStatus {
@@ -30,14 +29,16 @@ abstract final class Extension {
   static bool _vectorSearchEnabled = false;
 
   /// Returns the [VectorSearchStatus] of the vector search extension.
+  ///
+  /// Can be called before Couchbase Lite is initialized.
   static VectorSearchStatus get vectorSearchStatus {
     if (_vectorSearchEnabled) {
       return VectorSearchStatus.enabled;
     }
-    if (!_binding.vectorSearchLibraryAvailable) {
+    if (!vector_search.vectorSearchLibraryBundled) {
       return VectorSearchStatus.libraryNotAvailable;
     }
-    if (!_binding.systemSupportsVectorSearch) {
+    if (!vector_search.systemSupportsVectorSearch) {
       return VectorSearchStatus.systemNotSupported;
     }
     return VectorSearchStatus.available;
@@ -56,13 +57,14 @@ abstract final class Extension {
   /// enable.
   @useResult
   static VectorSearchStatus enableVectorSearch() {
-    if (!_binding.vectorSearchLibraryAvailable) {
+    final binding = CBLBindings.instance.base;
+    if (!binding.vectorSearchLibraryAvailable) {
       return VectorSearchStatus.libraryNotAvailable;
     }
-    if (!_binding.systemSupportsVectorSearch) {
+    if (!binding.systemSupportsVectorSearch) {
       return VectorSearchStatus.systemNotSupported;
     }
-    _binding.enableVectorSearch();
+    binding.enableVectorSearch();
     _vectorSearchEnabled = true;
     return VectorSearchStatus.enabled;
   }
