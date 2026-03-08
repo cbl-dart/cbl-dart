@@ -5,7 +5,11 @@ description:
 
 # Supported Platforms
 
-## Flutter
+:::note
+
+Couchbase Lite for Dart requires Dart SDK `^3.10.0`.
+
+:::
 
 | Platform | Version                |
 | -------: | :--------------------- |
@@ -15,23 +19,10 @@ description:
 |    Linux | >= Ubuntu 20.04 x86_64 |
 |  Windows | >= 10 x86_64           |
 
-### Default database directory
+## Default database directory
 
-When opening a database without specifying a directory,
-`api|path_provider|pkg:`'s `api|path_provider|fn:getApplicationSupportDirectory`
-is used to resolve it. See that function's documentation for the concrete
-locations on the various platforms.
-
-## Standalone Dart
-
-| Platform | Version                |
-| -------: | :--------------------- |
-|    macOS | >= 10.14               |
-|    Linux | >= Ubuntu 20.04 x86_64 |
-|  Windows | >= 10 x86_64           |
-
-### Default database directory
-
-When opening a database without specifying a directory, the current working
-directory will be used. `api|CouchbaseLite.init` allows you to specify a
-different default directory.
+When opening a database without specifying a directory, Couchbase Lite uses the
+platform's standard app data directory for mobile and deployed desktop
+applications. When running during development (e.g. via `dart run`), the current
+working directory is used. `api|CouchbaseLite.init` allows you to specify a
+different default directory via the `filesDir` parameter.

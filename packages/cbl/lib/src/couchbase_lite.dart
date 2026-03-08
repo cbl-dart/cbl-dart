@@ -38,8 +38,10 @@ abstract final class CouchbaseLite {
   /// If specified, [filesDir] is used to store files created by Couchbase Lite
   /// by default. For example if a [Database] is opened or copied without
   /// specifying a directory, a subdirectory in the directory specified here
-  /// will be used. If no [filesDir] directory is provided, the working
-  /// directory is used when opening and copying databases.
+  /// will be used. If [filesDir] is not provided, the platform's standard app
+  /// data directory is used for mobile and deployed desktop applications. When
+  /// running during development (e.g. via `dart run`), the current working
+  /// directory is used.
   ///
   /// Vector search is not enabled automatically. To use vector search, call
   /// [Extension.enableVectorSearch] after initialization and before opening a
@@ -47,15 +49,8 @@ abstract final class CouchbaseLite {
   static Future<void> init({String? filesDir}) =>
       asyncOperationTracePoint(InitializeOp.new, () async {
         // Auto-detect the app files directory from the platform if not
-        // explicitly provided. On Android, the package name is used to
-        // construct the standard app data path. On other platforms, the
-        // appropriate app directory is resolved based on app identity
-        // (bundle ID, XDG dirs, APPDATA, etc.).
-        final resolvedFilesDir =
-            filesDir ??
-            (Platform.isAndroid
-                ? await _resolveAndroidFilesDir()
-                : resolveAppFilesDirectory());
+        // explicitly provided.
+        final resolvedFilesDir = filesDir ?? resolveAppFilesDirectory();
 
         final context = resolvedFilesDir == null
             ? null
@@ -114,22 +109,6 @@ String? _tryGetVectorSearchPath() {
     // resolution fails. This is expected and not an error.
     return null;
   }
-}
-
-/// Resolves the Android app's files directory from the package name.
-///
-/// Reads `/proc/self/cmdline` to determine the package name and constructs the
-/// standard app data path. This avoids depending on Flutter or any platform
-/// channel.
-Future<String> _resolveAndroidFilesDir() async {
-  final cmdlineBytes = File('/proc/self/cmdline').readAsBytesSync();
-  final nullIndex = cmdlineBytes.indexOf(0);
-  final packageName = String.fromCharCodes(
-    nullIndex == -1 ? cmdlineBytes : cmdlineBytes.sublist(0, nullIndex),
-  );
-  final dir = '/data/data/$packageName/files';
-  await Directory(dir).create(recursive: true);
-  return dir;
 }
 
 Future<InitContext> _initContext(String filesDir) async {

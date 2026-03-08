@@ -4,11 +4,15 @@ import 'dart:io';
 import 'package:ffi/ffi.dart';
 import 'package:path/path.dart' as p;
 
-/// Resolves the appropriate application files directory for storing databases
+// TODO(https://github.com/cbl-dart/cbl-dart/issues/872): Use standard
+// platform APIs instead of heuristics.
+
+/// Resolves the platform's standard app data directory for storing databases
 /// and other app data.
 ///
-/// Returns `null` if no app identity can be detected, in which case callers
-/// should fall back to the current working directory.
+/// Returns the app data directory for mobile and deployed desktop applications.
+/// Returns `null` when running during development (e.g. via `dart run`), in
+/// which case callers should fall back to the current working directory.
 ///
 /// Parameters can be overridden for testing. When not provided, values are read
 /// from the current platform.
@@ -21,6 +25,7 @@ String? resolveAppFilesDirectory({
   bool? isLinux,
   bool? isWindows,
   String? iosHome,
+  String? androidPackageName,
 }) {
   resolvedExecutable ??= Platform.resolvedExecutable;
   environment ??= Platform.environment;
@@ -34,12 +39,13 @@ String? resolveAppFilesDirectory({
     return _resolveIOSDirectory(iosHome);
   } else if (isMacOS) {
     return _resolveMacOSDirectory(resolvedExecutable, environment);
+  } else if (isAndroid) {
+    return _resolveAndroidDirectory(androidPackageName);
   } else if (isLinux) {
     return _resolveLinuxDirectory(resolvedExecutable, environment);
   } else if (isWindows) {
     return _resolveWindowsDirectory(resolvedExecutable, environment);
   }
-  // Android is handled separately in CouchbaseLite.init().
   return null;
 }
 
@@ -49,6 +55,29 @@ String? resolveAppFilesDirectory({
 String _resolveIOSDirectory(String? iosHome) {
   final home = iosHome ?? _nsHomeDirectory();
   return p.join(home, 'Library', 'Application Support');
+}
+
+/// Android: Resolve the app's files directory from the package name.
+///
+/// Reads `/proc/self/cmdline` to determine the package name and constructs the
+/// standard app data path. This avoids depending on Flutter or any platform
+/// channel.
+String _resolveAndroidDirectory(String? packageName) {
+  final name = packageName ?? _readAndroidPackageName();
+  return '/data/data/$name/files';
+}
+
+/// Reads the Android package name from `/proc/self/cmdline`.
+///
+/// Visible for testing.
+String readAndroidPackageName() => _readAndroidPackageName();
+
+String _readAndroidPackageName() {
+  final cmdlineBytes = File('/proc/self/cmdline').readAsBytesSync();
+  final nullIndex = cmdlineBytes.indexOf(0);
+  return String.fromCharCodes(
+    nullIndex == -1 ? cmdlineBytes : cmdlineBytes.sublist(0, nullIndex),
+  );
 }
 
 /// macOS: Detect if running inside a `.app` bundle by checking the executable

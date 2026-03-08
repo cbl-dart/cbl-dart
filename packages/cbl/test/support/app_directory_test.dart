@@ -347,7 +347,7 @@ void main() {
     });
 
     group('Android', () {
-      test('returns null (handled separately)', () {
+      test('returns /data/data/<packageName>/files', () {
         final result = resolveAppFilesDirectory(
           resolvedExecutable: '/system/bin/app_process',
           environment: {},
@@ -356,9 +356,10 @@ void main() {
           isAndroid: true,
           isLinux: false,
           isWindows: false,
+          androidPackageName: 'com.example.myapp',
         );
 
-        expect(result, isNull);
+        expect(result, '/data/data/com.example.myapp/files');
       });
     });
   });
