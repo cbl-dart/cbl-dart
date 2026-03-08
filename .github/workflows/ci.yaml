@@ -115,7 +115,7 @@ jobs:
     runs-on: >-
       ${{ fromJSON('{
         "Ubuntu":"blacksmith-4vcpu-ubuntu-2204",
-        "macOS":"warp-macos-15-arm64-6x",
+        "macOS":"macos-15",
         "Windows":"windows-2025"
       }')[matrix.os] }}
     steps:
@@ -139,7 +139,6 @@ jobs:
           channel: ${{ env.flutter-channel }}
           cache: true
           pub-cache-hash-pattern: pubspec.lock
-          cache-provider: ${{ matrix.os == 'macOS' && 'warp' || 'github' }}
 
       - name: Get dependencies
         run: dart pub get
@@ -183,7 +182,8 @@ jobs:
           - embedder: standalone
             os: Android
     runs-on: >-
-      ${{ fromJSON('{
+      ${{ matrix.os == 'macOS' && matrix.embedder == 'standalone' && 'macos-15'
+       || fromJSON('{
         "iOS":"warp-macos-15-arm64-6x",
         "macOS":"warp-macos-15-arm64-6x",
         "Android":"blacksmith-4vcpu-ubuntu-2204",
@@ -256,7 +256,7 @@ jobs:
           channel: ${{ env.flutter-channel }}
           cache: true
           pub-cache-hash-pattern: pubspec.lock
-          cache-provider: ${{ (matrix.os == 'macOS' || matrix.os == 'iOS') && 'warp' || 'github' }}
+          cache-provider: ${{ ((matrix.os == 'macOS' || matrix.os == 'iOS') && matrix.embedder == 'flutter') && 'warp' || 'github' }}
 
       - name: Enable Flutter native assets
         if: matrix.embedder == 'flutter'
