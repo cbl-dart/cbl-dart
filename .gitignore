@@ -327,6 +327,9 @@ doc/api/
 ## Claude Code
 CLAUDE.local.md
 
+## Lefthook
+lefthook-local.yml
+
 ## AI Tools
 # Ignore for now while evaluating AI Tools.
 .agent-os/

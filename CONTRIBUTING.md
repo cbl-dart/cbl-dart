@@ -48,6 +48,10 @@ Two native libraries are required to enable Couchbase Lite for Dart.
   ```shell
   flutter pub global activate melos
   ```
+- [lefthook](https://github.com/evilmartians/lefthook) (Git hooks manager)
+  ```shell
+  brew install lefthook
+  ```
 
 ### Linux
 
@@ -90,6 +94,13 @@ Two native libraries are required to enable Couchbase Lite for Dart.
    ```shell
    melos bootstrap
    ```
+5. Install the Git hooks:
+   ```shell
+   lefthook install
+   ```
+   This sets up pre-commit hooks that automatically format Dart files, apply
+   auto-fixable analyzer issues, run the Dart analyzer, and format files in the
+   `docs/` folder with Prettier.
 
 ## Running tests
 
