@@ -31,6 +31,9 @@ hooks:
 The build hook will automatically download the required vector search extension
 library alongside the other native libraries.
 
+If `vector_search` is not set to `true`, the extension library is not bundled
+and does not occupy any space in your app bundle.
+
 ## Enabling vector search
 
 Vector search must be explicitly enabled after calling `api|CouchbaseLite.init`

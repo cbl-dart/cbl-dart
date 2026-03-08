@@ -17,6 +17,10 @@ It is fully featured:
 - **Observable** - Get notified of changes in database, queries and data sync.
 - **Data Sync** - Pull and push data from/to server with full control over
   synced data.
+- **Peer-to-Peer Sync** - Sync directly between devices without a server.
+  **Enterprise Edition**
+- **Vector Search** - Perform similarity searches using vector embeddings.
+  **Enterprise Edition**
 
 ---
 
@@ -35,18 +39,60 @@ discussion][discussions].
 
 ---
 
-This package provides the Couchbase Lite API independent of whether you want to
-use Couchbase Lite in a standalone Dart app or in a Flutter app.
+This is the single package for Couchbase Lite in Dart. It works for both
+standalone Dart apps and Flutter apps - no additional platform packages are
+needed. Native libraries are downloaded and compiled automatically via
+[Dart native assets](https://dart.dev/interop/c-interop#native-assets).
 
-To get started, go to the [**documentation**][docs].
+For the full documentation, go to [**cbl-dart.dev**][docs].
 
-Below is a sneak peak of what it's like to use Couchbase Lite.
+> [!IMPORTANT]
+> **Upgrading from v3?** See the [migration guide][migration-v3-to-v4] for upgrading to v4.
+
+## Getting started
+
+### Install
+
+Add the package as a dependency:
+
+```bash
+dart pub add cbl
+```
+
+### Configure edition (optional)
+
+By default, the Community edition is used. To use the Enterprise edition,
+configure it in your workspace root `pubspec.yaml`:
+
+```yaml
+hooks:
+  user_defines:
+    cbl:
+      edition: enterprise
+```
+
+### Initialize
+
+Initialize Couchbase Lite before using it:
 
 ```dart
 import 'package:cbl/cbl.dart';
 
-Future<void> run() async {
-  // Open the database (creating it if it doesn’t exist).
+Future<void> main() async {
+  await CouchbaseLite.init();
+  // Start using Couchbase Lite ...
+}
+```
+
+### Example
+
+```dart
+import 'package:cbl/cbl.dart';
+
+Future<void> main() async {
+  await CouchbaseLite.init();
+
+  // Open the database (creating it if it doesn't exist).
   final database = await Database.openAsync('database');
 
   // Create a collection, or return it if it already exists.
@@ -96,6 +142,11 @@ Future<void> run() async {
 }
 ```
 
+## Integrations
+
+- [**cbl_sentry**][cbl_sentry] -- Sentry integration for error reporting and
+  performance tracing.
+
 # 🤝 Contributing
 
 Pull requests are welcome. For major changes, please open an issue first to
@@ -128,3 +179,5 @@ valuable references for making decisions about how to approach this project.
 [issues]: https://github.com/cbl-dart/cbl-dart/issues
 [discussions]: https://github.com/cbl-dart/cbl-dart/discussions
 [docs]: https://cbl-dart.dev/
+[migration-v3-to-v4]: https://cbl-dart.dev/migration-v3-to-v4
+[cbl_sentry]: https://pub.dev/packages/cbl_sentry
