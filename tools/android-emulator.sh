@@ -170,7 +170,7 @@ function bugreport() {
     "$ANDROID_HOME/platform-tools/adb" \
         -s "$serialName" \
         bugreport \
-        >"$outputDirectory/bugreport"
+        "$outputDirectory"
 
     echo "Created bugreport"
 }

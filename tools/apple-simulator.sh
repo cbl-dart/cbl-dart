@@ -160,7 +160,7 @@ function copyData() {
 
     if [ ! -e "$filePath" ]; then
         echo "Could not find file"
-        exit 0
+        return 0
     fi
 
     echo "Copying data..."
