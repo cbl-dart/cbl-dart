@@ -77,29 +77,33 @@ void main() {
     );
   });
 
-  test('skips vector_search on unsupported 32-bit ARM architecture', () async {
-    await testCodeBuildHook(
-      mainMethod: hook.main,
-      targetOS: OS.android,
-      targetArchitecture: Architecture.arm,
-      targetIOSSdk: IOSSdk.iPhoneOS,
-      userDefines: PackageUserDefines(
-        workspacePubspec: PackageUserDefinesSource(
-          defines: {'edition': 'enterprise', 'vector_search': true},
-          basePath: Directory.current.uri,
+  test(
+    'skips vector_search on unsupported 32-bit ARM architecture',
+    timeout: const Timeout(Duration(minutes: 5)),
+    () async {
+      await testCodeBuildHook(
+        mainMethod: hook.main,
+        targetOS: OS.android,
+        targetArchitecture: Architecture.arm,
+        targetIOSSdk: IOSSdk.iPhoneOS,
+        userDefines: PackageUserDefines(
+          workspacePubspec: PackageUserDefinesSource(
+            defines: {'edition': 'enterprise', 'vector_search': true},
+            basePath: Directory.current.uri,
+          ),
         ),
-      ),
-      check: (input, output) {
-        _checkAssets(
-          input: input,
-          output: output,
-          targetOS: OS.android,
-          targetArchitecture: Architecture.arm,
-          vectorSearch: false,
-        );
-      },
-    );
-  });
+        check: (input, output) {
+          _checkAssets(
+            input: input,
+            output: output,
+            targetOS: OS.android,
+            targetArchitecture: Architecture.arm,
+            vectorSearch: false,
+          );
+        },
+      );
+    },
+  );
 
   // --- Build hook integration tests ---
 
