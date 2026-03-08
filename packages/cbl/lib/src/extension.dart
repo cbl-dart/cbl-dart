@@ -17,6 +17,10 @@ enum VectorSearchStatus {
   /// `hooks.user_defines.cbl` in `pubspec.yaml`.
   libraryNotAvailable,
 
+  /// The file path of the vector search extension library could not be
+  /// resolved.
+  libraryPathNotResolvable,
+
   /// The current system does not support vector search.
   ///
   /// Vector search requires a 64-bit architecture. On x86-64, the CPU must
@@ -38,6 +42,9 @@ abstract final class Extension {
     if (!vector_search.vectorSearchLibraryBundled) {
       return VectorSearchStatus.libraryNotAvailable;
     }
+    if (vector_search.vectorSearchLibraryPath == null) {
+      return VectorSearchStatus.libraryPathNotResolvable;
+    }
     if (!vector_search.systemSupportsVectorSearch) {
       return VectorSearchStatus.systemNotSupported;
     }
@@ -57,14 +64,11 @@ abstract final class Extension {
   /// enable.
   @useResult
   static VectorSearchStatus enableVectorSearch() {
-    final binding = CBLBindings.instance.base;
-    if (!binding.vectorSearchLibraryAvailable) {
-      return VectorSearchStatus.libraryNotAvailable;
+    final status = vectorSearchStatus;
+    if (status != VectorSearchStatus.available) {
+      return status;
     }
-    if (!binding.systemSupportsVectorSearch) {
-      return VectorSearchStatus.systemNotSupported;
-    }
-    binding.enableVectorSearch();
+    CBLBindings.instance.base.enableVectorSearch();
     _vectorSearchEnabled = true;
     return VectorSearchStatus.enabled;
   }
