@@ -40,7 +40,12 @@ function waitForSyncGateway() {
 
 function startSyncGatewayMacOS {
     optDir="/opt"
-    syncGatewayZip="couchbase-sync-gateway-community_${syncGatewayVersion}_x86_64.zip"
+    arch="$(uname -m)"
+    case "$arch" in
+    arm64) syncGatewayArch="arm64" ;;
+    *)     syncGatewayArch="x86_64" ;;
+    esac
+    syncGatewayZip="couchbase-sync-gateway-community_${syncGatewayVersion}_${syncGatewayArch}.zip"
     syncGatewayUrl="https://packages.couchbase.com/releases/couchbase-sync-gateway/$syncGatewayVersion/$syncGatewayZip"
     syncGatewayInstallDir="$optDir/couchbase-sync-gateway"
     syncGatewayUser="sync_gateway"

@@ -7,7 +7,6 @@ import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:cli_util/cli_logging.dart';
 import 'package:collection/collection.dart';
-import 'package:dart_style/dart_style.dart';
 import 'package:path/path.dart' as p;
 
 import '../ffigen_config.dart';
@@ -89,6 +88,7 @@ class _BindingsGenerator {
     await _findAndReplaceInBindings();
     await _fixNativeBindings();
     await _generateNativeAssetsBridge();
+    await _formatBindings();
   }
 
   Future<FfigenConfig> _loadFfigenConfig() =>
@@ -286,6 +286,35 @@ class _BindingsGenerator {
       },
     );
   }
+
+  Future<void> _formatBindings() async {
+    await logger.runWithProgress(
+      message: 'Formatting bindings from $ffigenConfig',
+      showTiming: true,
+      () async {
+        final ffigenConfig = await _loadFfigenConfig();
+        final files = [ffigenConfig.output!.bindings!];
+
+        // Also format the native assets bridge file if this generator
+        // produced one.
+        if (legacyBindings != null) {
+          files.add(
+            p.join(
+              packageDir,
+              'lib',
+              'src',
+              'bindings',
+              '${ffigenConfig.name}_native_assets_bridge.dart',
+            ),
+          );
+        }
+
+        for (final file in files) {
+          await runProcess('daco', ['format', file], logger: logger);
+        }
+      },
+    );
+  }
 }
 
 /// Collects the method names of all classes in the AST.
@@ -294,7 +323,9 @@ class _MethodNamesCollector extends RecursiveAstVisitor {
 
   @override
   void visitMethodDeclaration(MethodDeclaration node) {
-    final clazz = node.parent! as ClassDeclaration;
+    // The parent of a MethodDeclaration is the class body, and the parent of
+    // the class body is the ClassDeclaration.
+    final clazz = node.parent!.parent! as ClassDeclaration;
     methodsByClass
         .putIfAbsent(clazz.namePart.typeName.lexeme, () => [])
         .add(node.name.lexeme);
@@ -315,9 +346,7 @@ class _NativeAssetsBridgeGenerator extends RecursiveAstVisitor {
   String generate(CompilationUnit unit) {
     _buffer.clear();
     visitCompilationUnit(unit);
-    return DartFormatter(
-      languageVersion: DartFormatter.latestLanguageVersion,
-    ).format(_buffer.toString());
+    return _buffer.toString();
   }
 
   final StringBuffer _buffer = StringBuffer();

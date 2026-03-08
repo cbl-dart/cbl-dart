@@ -5,6 +5,64 @@ import 'dart:io';
 
 import 'package:ffi/ffi.dart';
 
+/// Resolves the file path of a loaded native library from the address of one of
+/// its symbols.
+///
+/// Uses `dladdr` on POSIX platforms and `GetModuleHandleEx` +
+/// `GetModuleFileName` on Windows.
+String resolveLibraryPathFromAddress(Pointer<Void> address) {
+  if (Platform.isAndroid ||
+      Platform.isLinux ||
+      Platform.isMacOS ||
+      Platform.isIOS) {
+    final info = calloc<_Dl_info>();
+    try {
+      if (_dladdr(address, info) == 0) {
+        throw Exception('dladdr failed to resolve address $address');
+      }
+
+      return info.ref.dli_fname.toDartString();
+    } finally {
+      calloc.free(info);
+    }
+  }
+
+  if (Platform.isWindows) {
+    final hModule = calloc<Pointer<Void>>();
+    try {
+      if (_GetModuleHandleExA(
+            _GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
+                _GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+            address.cast(),
+            hModule,
+          ) ==
+          0) {
+        throw Exception(
+          'GetModuleHandleExA failed to resolve address $address',
+        );
+      }
+
+      const maxPath = 4096;
+      final path = calloc<Uint8>(maxPath);
+      try {
+        if (_GetModuleFileNameA(hModule.value, path.cast(), maxPath) == 0) {
+          throw Exception('GetModuleFileNameA failed to resolve module path');
+        }
+
+        return path.cast<Utf8>().toDartString();
+      } finally {
+        calloc.free(path);
+      }
+    } finally {
+      calloc.free(hModule);
+    }
+  }
+
+  throw UnimplementedError(
+    'resolveLibraryPathFromAddress is not supported on this platform',
+  );
+}
+
 /// Configuration of a [DynamicLibrary], which can be used to load the
 /// `DynamicLibrary` at a later time.
 class LibraryConfiguration {
@@ -91,56 +149,11 @@ class LibraryConfiguration {
       return null;
     }
 
-    return _tryResolvePathFromSymbol(library.lookup(symbol));
-  }
-
-  String? _tryResolvePathFromSymbol(Pointer<Void> address) {
-    if (Platform.isAndroid ||
-        Platform.isLinux ||
-        Platform.isMacOS ||
-        Platform.isIOS) {
-      final info = calloc<_Dl_info>();
-      try {
-        if (_dladdr(address, info) == 0) {
-          return null;
-        }
-
-        return info.ref.dli_fname.toDartString();
-      } finally {
-        calloc.free(info);
-      }
+    try {
+      return resolveLibraryPathFromAddress(library.lookup(symbol));
+    } on Exception {
+      return null;
     }
-
-    if (Platform.isWindows) {
-      final hModule = calloc<Pointer<Void>>();
-      try {
-        if (_GetModuleHandleExA(
-              _GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
-                  _GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
-              address.cast(),
-              hModule,
-            ) ==
-            0) {
-          return null;
-        }
-
-        const maxPath = 4096;
-        final path = calloc<Uint8>(maxPath);
-        try {
-          if (_GetModuleFileNameA(hModule.value, path.cast(), maxPath) == 0) {
-            return null;
-          }
-
-          return path.cast<Utf8>().toDartString();
-        } finally {
-          calloc.free(path);
-        }
-      } finally {
-        calloc.free(hModule);
-      }
-    }
-
-    throw UnimplementedError();
   }
 }
 
@@ -287,14 +300,14 @@ Pointer<Void> _AddDllDirectory(String directory) {
   final result = _AddDllDirectoryFn(directoryNativeStr);
   malloc.free(directoryNativeStr);
   if (result == nullptr) {
-    throw StateError('Failed to add DLL directory: $directory');
+    throw Exception('Failed to add DLL directory: $directory');
   }
   return result;
 }
 
 void _RemoveDllDirectory(Pointer<Void> cookie) {
   if (!_RemoveDllDirectoryFn(cookie)) {
-    throw StateError('Failed to remove DLL directory');
+    throw Exception('Failed to remove DLL directory');
   }
 }
 

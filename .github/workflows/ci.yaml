@@ -24,6 +24,7 @@ env:
 jobs:
   formatting-dart:
     name: Formatting - Dart
+    timeout-minutes: 10
     runs-on: blacksmith-4vcpu-ubuntu-2204
     steps:
       - name: Checkout repository
@@ -34,15 +35,13 @@ jobs:
         with:
           channel: ${{ env.flutter-channel }}
           cache: true
+          cache-key: "flutter-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}"
 
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
 
       - name: Setup Melos
         run: dart pub global activate melos
-
-      - name: Setup cbd
-        run: melos activate:cbd
 
       - name: Install daco
         run: dart pub global activate daco
@@ -59,6 +58,7 @@ jobs:
 
   formatting-clang:
     name: Formatting - Clang
+    timeout-minutes: 10
     runs-on: blacksmith-4vcpu-ubuntu-2204
     steps:
       - name: Checkout repository
@@ -68,10 +68,11 @@ jobs:
         uses: jidicula/clang-format-action@v4.16.0
         with:
           clang-format-version: '21'
-          check-path: 'native/couchbase-lite-dart'
+          check-path: 'packages/cbl/native/couchbase-lite-dart'
 
   analyze-dart:
     name: Analyze Dart code
+    timeout-minutes: 10
     runs-on: blacksmith-4vcpu-ubuntu-2204
     strategy:
       fail-fast: false
@@ -89,6 +90,7 @@ jobs:
         with:
           channel: ${{ env.flutter-channel }}
           cache: true
+          cache-key: "flutter-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}"
 
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
@@ -98,21 +100,16 @@ jobs:
       - name: Setup Melos
         run: dart pub global activate melos
 
-      - name: Setup cbd
-        run: melos activate:cbd
-
       - name: Bootstrap repository
-        env:
-          PREFETCHED_PACKAGES_PASSWORD:
-            ${{ secrets.PREFETCHED_PACKAGES_PASSWORD }}
         shell: bash
-        run: ./tools/dev-tools.sh bootstrap
+        run: melos bootstrap
 
       - name: Analyze Dart code
         run: melos analyze
 
   test-dart-unit:
     name: Dart unit tests
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
@@ -120,60 +117,84 @@ jobs:
         dart: [stable, beta]
         embedder: [standalone]
         os: [Ubuntu]
+        include:
+          - package: cbl
+            dart: stable
+            embedder: standalone
+            os: macOS
+          - package: cbl
+            dart: stable
+            embedder: standalone
+            os: Windows
     env:
       EMBEDDER: ${{ matrix.embedder }}
       TARGET_OS: ${{ matrix.os }}
       TEST_PACKAGE: ${{ matrix.package }}
     continue-on-error: ${{ matrix.dart != 'stable' }}
-    runs-on: blacksmith-4vcpu-ubuntu-2204
+    runs-on: >-
+      ${{ fromJSON('{
+        "Ubuntu":"blacksmith-4vcpu-ubuntu-2204",
+        "macOS":"warp-macos-15-arm64-6x",
+        "Windows":"windows-2025"
+      }')[matrix.os] }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Disable Windows Defender
+        if: runner.os == 'Windows'
+        run: Set-MpPreference -DisableRealtimeMonitoring $true
+        shell: powershell
+
+      - name: Install Linux cross-compilation toolchain
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: ${{ env.flutter-channel }}
           cache: true
+          cache-key: "flutter-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}"
 
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
         with:
           sdk: ${{ env[format('dart-version-{0}', matrix.dart)] }}
 
-      - name: Setup Melos
-        run: dart pub global activate melos
+      - name: Get dependencies
+        run: dart pub get
 
       - name: Bootstrap repository
-        env:
-          PREFETCHED_PACKAGES_PASSWORD:
-            ${{ secrets.PREFETCHED_PACKAGES_PASSWORD }}
         shell: bash
-        run: ./tools/dev-tools.sh bootstrap
-
-      - name: Setup cbd
-        run: melos activate:cbd
-
-      - name: Setup CMake and Ninja
-        uses: lukka/get-cmake@latest
-
-      - name: Build native libraries
-        shell: bash
-        run: ./tools/ci-steps.sh buildNativeLibraries
+        run: dart run melos bootstrap
 
       - name: Run build_runner
         if: ${{ matrix.package == 'cbl_generator' }}
+        shell: bash
         run: ./tools/ci-steps.sh checkBuildRunnerOutput
 
       - name: Run tests
+        shell: bash
         run: ./tools/ci-steps.sh runUnitTests
 
       - name: Upload coverage data
         if: ${{ matrix.dart == 'stable' }}
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        shell: bash
         run: |
           ./tools/ci-steps.sh uploadCoverageData "unit.${{ matrix.package }}"
+
+      - name: Clean up broken symlinks
+        if: always()
+        shell: bash
+        run: |
+          # Remove broken symlinks that cause hashFiles('**/pubspec.lock') to
+          # fail in the flutter-action post-cache step.
+          find . -type l ! -exec test -e {} \; -delete 2>/dev/null || true
 
   test-e2e:
     name: E2E tests
@@ -193,16 +214,10 @@ jobs:
             os: iOS
           - embedder: standalone
             os: Android
-          # TODO: Get iOS tests to launch again in CI
-          - embedder: flutter
-            os: iOS
-    # Flutter + Ubuntu is flaky, likely because of a bug in CBL C, so we allow it to fail for now.
-    continue-on-error:
-      ${{ matrix.embedder == 'flutter' && matrix.os == 'Ubuntu' }}
     runs-on: >-
       ${{ fromJSON('{
-        "iOS":"macos-14",
-        "macOS":"macos-15",
+        "iOS":"warp-macos-15-arm64-6x",
+        "macOS":"warp-macos-15-arm64-6x",
         "Android":"blacksmith-4vcpu-ubuntu-2204",
         "Ubuntu":"blacksmith-4vcpu-ubuntu-2204",
         "Windows":"windows-2025"
@@ -224,9 +239,6 @@ jobs:
         run: Set-MpPreference -DisableRealtimeMonitoring $true
         shell: powershell
 
-      - name: Setup CMake and Ninja
-        uses: lukka/get-cmake@latest
-
       - name: Select Java 17
         if: ${{ matrix.os == 'Android' }}
         run: echo "JAVA_HOME=$JAVA_HOME_17_X64" >> $GITHUB_ENV
@@ -245,11 +257,11 @@ jobs:
 
       - name: Install Android Native Toolchain
         if: ${{ matrix.os == 'Android' }}
-        run: ./native/tools/android-sdk.sh installNativeToolchain
+        run: ./tools/android-sdk.sh installNativeToolchain
 
       - name: Install Android App Build Dependencies
         if: ${{ matrix.os == 'Android' }}
-        run: ./native/tools/android-sdk.sh installAppBuildDeps
+        run: ./tools/android-sdk.sh installAppBuildDeps
 
       - name: Setup Gradle
         if: ${{ matrix.os == 'Android' }}
@@ -268,13 +280,14 @@ jobs:
         if: matrix.os == 'Ubuntu' && matrix.embedder == 'flutter'
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends clang cmake ninja-build pkg-config libgtk-3-dev
+          sudo apt-get install -y --no-install-recommends clang cmake ninja-build pkg-config libgtk-3-dev lld
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: ${{ env.flutter-channel }}
           cache: true
+          cache-key: "flutter-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}"
 
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
@@ -282,22 +295,16 @@ jobs:
         with:
           sdk: ${{ env.dart-version-stable }}
 
-      - name: Setup Melos
-        run: dart pub global activate melos
+      - name: Enable Flutter native assets
+        if: matrix.embedder == 'flutter'
+        run: flutter config --enable-native-assets
+
+      - name: Get dependencies
+        run: dart pub get
 
       - name: Bootstrap repository
-        env:
-          PREFETCHED_PACKAGES_PASSWORD:
-            ${{ secrets.PREFETCHED_PACKAGES_PASSWORD }}
         shell: bash
-        run: ./tools/dev-tools.sh bootstrap
-
-      - name: Setup cbd
-        run: melos activate:cbd
-
-      - name: Build native libraries
-        shell: bash
-        run: ./tools/ci-steps.sh buildNativeLibraries
+        run: dart run melos bootstrap
 
       - name: Start Couchbase services
         shell: bash
@@ -317,12 +324,8 @@ jobs:
         run: ./tools/ci-steps.sh startVirtualDevices
 
       - name: Run tests
-        uses: nick-fields/retry@v3
-        with:
-          shell: bash
-          timeout_minutes: 20
-          max_attempts: 3
-          command: ./tools/ci-steps.sh runE2ETests
+        shell: bash
+        run: ./tools/ci-steps.sh runE2ETests
 
       - name: Collect test results
         if: failure()
@@ -345,282 +348,10 @@ jobs:
         run: |
           ./tools/ci-steps.sh uploadCoverageData "e2e.cbl.${{ matrix.embedder }}.${{ matrix.os }}"
 
-  test-e2e-cbl_flutter_prebuilt:
-    name: cbl_flutter_prebuilt E2E tests
-    timeout-minutes: 45
-    strategy:
-      fail-fast: false
-      matrix:
-        embedder: [flutter]
-        os:
-          - iOS
-          - macOS
-          - Android
-          - Ubuntu
-          - Windows
-        exclude:
-          # TODO: Get iOS tests to launch again in CI
-          - embedder: flutter
-            os: iOS
-    runs-on: >-
-      ${{ fromJSON('{
-        "iOS":"macos-14",
-        "macOS":"macos-15",
-        "Android":"blacksmith-4vcpu-ubuntu-2204",
-        "Ubuntu":"blacksmith-4vcpu-ubuntu-2204",
-        "Windows":"windows-2025"
-      }')[matrix.os] }}
-    env:
-      EMBEDDER: ${{ matrix.embedder }}
-      TARGET_OS: ${{ matrix.os }}
-      TEST_PACKAGE: cbl_flutter_prebuilt_e2e_tests
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Disable Windows Defender
-        if: runner.os == 'Windows'
-        run: Set-MpPreference -DisableRealtimeMonitoring $true
-        shell: powershell
-
-      - name: Select Java 17
-        if: ${{ matrix.os == 'Android' }}
-        run: echo "JAVA_HOME=$JAVA_HOME_17_X64" >> $GITHUB_ENV
-
-      - name: Cache Android NDK
-        if: ${{ matrix.os == 'Android' }}
-        uses: actions/cache@v4
-        with:
-          path: |
-            /usr/local/lib/android/sdk/ndk/28.2.13676358
-            /usr/local/lib/android/sdk/platforms/android-33
-            /usr/local/lib/android/sdk/platforms/android-36
-          key: android-ndk-28.2.13676358-platforms-33-36
-
-      - name: Install Android App Build Dependencies
-        if: ${{ matrix.os == 'Android' }}
-        run: ./native/tools/android-sdk.sh installAppBuildDeps
-
-      - name: Setup Gradle
-        if: ${{ matrix.os == 'Android' }}
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          cache-read-only: false
-
-      - name: Cache apt packages
-        if: matrix.os == 'Ubuntu'
-        uses: actions/cache@v4
-        with:
-          path: /var/cache/apt/archives
-          key: apt-flutter-linux-desktop-${{ runner.os }}
-
-      - name: Install Flutter Linux Desktop dependencies
-        if: matrix.os == 'Ubuntu'
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends clang cmake ninja-build pkg-config libgtk-3-dev
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: ${{ env.flutter-channel }}
-          cache: true
-
-      - name: Setup Melos
-        run: dart pub global activate melos
-
-      - name: Setup cbd
-        run: melos activate:cbd
-
-      - name: Bootstrap repository
-        env:
-          PREFETCHED_PACKAGES_PASSWORD:
-            ${{ secrets.PREFETCHED_PACKAGES_PASSWORD }}
-        shell: bash
-        run: ./tools/dev-tools.sh bootstrap
-
-      - name: Cache Android emulator
-        if: matrix.os == 'Android'
-        uses: actions/cache@v4
-        with:
-          path: |
-            /usr/local/lib/android/sdk/system-images/android-27
-          key: android-system-image-27-x86_64-v2
-
-      - name: Start virtual devices
-        shell: bash
-        run: ./tools/ci-steps.sh startVirtualDevices
-
-      - name: Run tests
-        uses: nick-fields/retry@v3
-        with:
-          shell: bash
-          timeout_minutes: 20
-          max_attempts: 3
-          command: ./tools/ci-steps.sh runE2ETests
-
-      - name: Collect test results
-        if: failure()
-        shell: bash
-        run: ./tools/ci-steps.sh collectTestResults
-
-      - name: Upload test results
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results-cbl_flutter_prebuilt-${{ matrix.os }}
-          path: test-results
-
-      - name: Upload coverage data
-        # Disabled until we figure out how to get coverage data from flutter tests
-        if: ${{ false }}
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      - name: Clean up broken symlinks
+        if: always()
         shell: bash
         run: |
-          ./tools/ci-steps.sh uploadCoverageData "e2e.prebuilt"
-
-  test-cbl_dart:
-    name: cbl_dart unit tests
-    strategy:
-      fail-fast: false
-      matrix:
-        package: [cbl_dart]
-        dart: [stable]
-        embedder: [standalone]
-        os: [macOS, Ubuntu, Windows]
-    env:
-      EMBEDDER: ${{ matrix.embedder }}
-      TARGET_OS: ${{ matrix.os }}
-      TEST_PACKAGE: ${{ matrix.package }}
-    continue-on-error: ${{ matrix.dart != 'stable' }}
-    runs-on: >-
-      ${{ fromJSON('{
-        "macOS":"macos-15",
-        "Ubuntu":"blacksmith-4vcpu-ubuntu-2204",
-        "Windows":"windows-2025"
-      }')[matrix.os] }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Disable Windows Defender
-        if: runner.os == 'Windows'
-        run: Set-MpPreference -DisableRealtimeMonitoring $true
-        shell: powershell
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: ${{ env.flutter-channel }}
-          cache: true
-
-      - name: Setup Dart
-        uses: dart-lang/setup-dart@v1
-        with:
-          sdk: ${{ env[format('dart-version-{0}', matrix.dart)] }}
-
-      - name: Setup Melos
-        run: dart pub global activate melos
-
-      - name: Bootstrap repository
-        env:
-          PREFETCHED_PACKAGES_PASSWORD:
-            ${{ secrets.PREFETCHED_PACKAGES_PASSWORD }}
-        shell: bash
-        run: ./tools/dev-tools.sh bootstrap
-
-      - name: Setup cbd
-        run: melos activate:cbd
-
-      - name: Run tests
-        shell: bash
-        run: ./tools/ci-steps.sh runUnitTests
-
-      - name: Upload coverage data
-        if: ${{ matrix.dart == 'stable' }}
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-        shell: bash
-        run: |
-          ./tools/ci-steps.sh uploadCoverageData "unit.${{ matrix.package }}"
-
-  build-libcblitedart-release:
-    name: build libcblitedart release
-    strategy:
-      fail-fast: false
-      matrix:
-        os:
-          - iOS
-          - macOS
-          - Android
-          - Ubuntu
-          - Windows
-    runs-on: >-
-      ${{ fromJSON('{
-        "iOS":"macos-14",
-        "macOS":"macos-14",
-        "Android":"blacksmith-4vcpu-ubuntu-2204",
-        "Ubuntu":"blacksmith-4vcpu-ubuntu-2204",
-        "Windows":"windows-2025"
-      }')[matrix.os] }}
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Disable Windows Defender
-        if: runner.os == 'Windows'
-        run: Set-MpPreference -DisableRealtimeMonitoring $true
-        shell: powershell
-
-      - name: Get CMake and Ninja
-        uses: lukka/get-cmake@latest
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          cache: true
-
-      - name: Setup Melos
-        run: dart pub global activate melos
-
-      - name: Setup CBL Dart dev tools
-        run: melos run activate:cbd
-
-      - name: Cache Android NDK and CMake
-        if: ${{ matrix.os == 'Android' }}
-        uses: actions/cache@v4
-        with:
-          path: |
-            /usr/local/lib/android/sdk/ndk/28.0.13004108
-            /usr/local/lib/android/sdk/cmake/3.18.1
-          key: android-ndk-28.0.13004108-cmake-3.18.1
-
-      - name: Install Android Native Toolchain
-        if: ${{ matrix.os == 'Android' }}
-        run: ./native/tools/android-sdk.sh installNativeToolchain
-
-      - name: Build release
-        shell: bash
-        run: |
-          TARGET=""
-
-          case ${{ matrix.os }} in
-            iOS)
-              TARGET="ios"
-              ;;
-            macOS)
-              TARGET="macos"
-              ;;
-            Android)
-              TARGET="android"
-              ;;
-            Ubuntu)
-              TARGET="linux-x86_64"
-              ;;
-            Windows)
-              TARGET="windows-x86_64"
-              ;;
-          esac
-
-          ./native/couchbase-lite-dart/tools/build_release.sh 0.0.0 $TARGET
+          # Remove broken symlinks that cause hashFiles('**/pubspec.lock') to
+          # fail in the flutter-action post-cache step.
+          find . -type l ! -exec test -e {} \; -delete 2>/dev/null || true

@@ -4,7 +4,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:cbl/cbl.dart';
-import 'package:cbl_flutter/cbl_flutter.dart';
 import 'package:flutter_test/flutter_test.dart' as ft;
 import 'package:integration_test/integration_test.dart';
 import 'package:path_provider/path_provider.dart';
@@ -27,8 +26,7 @@ final class FlutterCblE2eTestBinding extends CblE2eTestBinding {
 
   @override
   FutureOr<void> initCouchbaseLite() async {
-    await CouchbaseLiteFlutter.init(autoEnableVectorSearch: false);
-    Extension.enableVectorSearch();
+    await CouchbaseLite.init();
   }
 
   @override

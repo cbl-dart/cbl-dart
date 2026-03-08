@@ -113,6 +113,8 @@ files:
         name: CBLDart_GetLoadedFLValue
       c:@F@CBLDart_Initialize:
         name: CBLDart_Initialize
+      c:@F@CBLDart_IsEnterprise:
+        name: CBLDart_IsEnterprise
       c:@F@CBLDart_KnownSharedKeys_Delete:
         name: CBLDart_KnownSharedKeys_Delete
       c:@F@CBLDart_KnownSharedKeys_New:

@@ -59,7 +59,7 @@ final class CblWorker {
         IsolateWorker(
             debugName: 'CblWorker($debugName)',
             delegate: _ServiceWorkerDelegate(
-              context: IsolateContext.instance,
+              context: IsolateContext.instance.forSecondaryIsolate(),
               channel: receivePort.sendPort,
             ),
           )

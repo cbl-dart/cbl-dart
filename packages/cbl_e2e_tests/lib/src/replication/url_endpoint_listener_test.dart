@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cbl/cbl.dart';
 
 import '../../test_binding_impl.dart';
@@ -7,10 +9,16 @@ import '../utils/database_utils.dart';
 import '../utils/matchers.dart';
 import '../utils/replicator_utils.dart';
 
-// TODO(blaugold): fix tests on macOS + Flutter + CI
+// TODO: Fix peer-to-peer tests on macOS + Flutter + CI and iOS.
+// On iOS, the listener URLs use the machine's hostname which can't be resolved
+// from the iOS simulator.
 // ignore: do_not_use_environment
-const String? skipPeerSyncTest = bool.fromEnvironment('skipPeerSyncTest')
+const _skipPeerSyncTestEnv = bool.fromEnvironment('skipPeerSyncTest');
+
+final String? skipPeerSyncTest = _skipPeerSyncTestEnv
     ? 'Skipping test on macOS + Flutter + CI'
+    : Platform.isIOS
+    ? 'Listener URLs use machine hostname, unresolvable on iOS simulator'
     : null;
 
 void main() {

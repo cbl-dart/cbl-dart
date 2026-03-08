@@ -17,7 +17,6 @@ dependencies:
   cli_launcher: ^0.3.1
   cli_util: ^0.4.2
   collection: ^1.19.1
-  dart_style: ^3.1.0
   meta: ^1.16.0
   package_config: ^2.1.0
   path: ^1.9.1

@@ -44,30 +44,19 @@ jobs:
       - name: Setup Bencher
         uses: bencherdev/bencher@main
 
-      - name: Setup CMake and Ninja
-        uses: lukka/get-cmake@latest
-
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: 3.41.2
           cache: true
+          cache-key: "flutter-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}"
 
       - name: Setup Melos
         run: dart pub global activate melos
 
       - name: Bootstrap repository
-        env:
-          PREFETCHED_PACKAGES_PASSWORD: ${{ secrets.PREFETCHED_PACKAGES_PASSWORD }}
         shell: bash
-        run: ./tools/dev-tools.sh bootstrap
-
-      - name: Setup cbd
-        run: melos activate:cbd
-
-      - name: Build native libraries
-        shell: bash
-        run: ./tools/ci-steps.sh buildNativeLibraries
+        run: melos bootstrap
 
       - name: Run benchmarks
         working-directory: packages/benchmark

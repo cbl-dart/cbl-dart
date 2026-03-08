@@ -49,19 +49,35 @@ function requireOption() {
 function _getSimulatorInfo() {
     local os="$1"
     local device="$2"
+    local runtimeKey="com.apple.CoreSimulator.SimRuntime.$os"
 
-    xcrun simctl list -j |
+    local result
+    result=$(xcrun simctl list -j |
         jq \
-            ".devices[\"com.apple.CoreSimulator.SimRuntime.$os\"] \
+            ".devices[\"$runtimeKey\"] \
             | map(select(.name == \"$device\"))
-            | first"
+            | first")
+
+    if [ "$result" = "null" ] || [ -z "$result" ]; then
+        echo "ERROR: Could not find simulator for runtime '$runtimeKey' and device '$device'" >&2
+        echo "Available runtimes:" >&2
+        xcrun simctl list runtimes 2>&1 >&2
+        echo "Available devices:" >&2
+        xcrun simctl list devices available 2>&1 >&2
+        echo "null"
+        return 1
+    fi
+
+    echo "$result"
 }
 
 function _getSimulatorId() {
     local os="$1"
     local device="$2"
 
-    _getSimulatorInfo "$os" "$device" | jq -r '.udid'
+    local info
+    info=$(_getSimulatorInfo "$os" "$device") || return 1
+    echo "$info" | jq -r '.udid'
 }
 
 function start() {

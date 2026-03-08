@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:cli_util/cli_logging.dart';
@@ -15,7 +16,7 @@ abstract class BaseCommand extends Command<void> {
 
   late final Logger logger = verbose ? Logger.verbose() : Logger.standard();
 
-  late final projectLayout = ProjectLayout(runner!.projectDir);
+  late final projectLayout = ProjectLayout(_findProjectRoot());
 
   @visibleForOverriding
   Future<void> doRun();
@@ -36,4 +37,28 @@ abstract class BaseCommand extends Command<void> {
   @override
   @mustCallSuper
   Future run() async => doRun();
+}
+
+/// Finds the project root by walking up from the current working directory,
+/// looking for a workspace root `pubspec.yaml` (one that contains a
+/// `workspace:` key).
+String _findProjectRoot() {
+  var dir = Directory.current;
+  while (true) {
+    final pubspec = File('${dir.path}/pubspec.yaml');
+    if (pubspec.existsSync()) {
+      final content = pubspec.readAsStringSync();
+      if (RegExp('^workspace:', multiLine: true).hasMatch(content)) {
+        return dir.path;
+      }
+    }
+    final parent = dir.parent;
+    if (parent.path == dir.path) {
+      throw StateError(
+        'Could not find project root (no pubspec.yaml with '
+        '"workspace:" found).',
+      );
+    }
+    dir = parent;
+  }
 }
