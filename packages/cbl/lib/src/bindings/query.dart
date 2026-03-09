@@ -52,13 +52,11 @@ enum CBLDartIndexType {
 }
 
 final class QueryBindings {
-  const QueryBindings();
-
   static final _predictiveModelFinalizer = NativeFinalizer(
     cblitedart.addresses.CBLDart_PredictiveModel_Delete.cast(),
   );
 
-  Pointer<cblite.CBLQuery> create(
+  static Pointer<cblite.CBLQuery> create(
     Pointer<cblite.CBLDatabase> db,
     CBLQueryLanguage language,
     String queryString,
@@ -75,35 +73,38 @@ final class QueryBindings {
     ).checkError(errorSource: queryString),
   );
 
-  void setParameters(Pointer<cblite.CBLQuery> query, cblite.FLDict parameters) {
+  static void setParameters(
+    Pointer<cblite.CBLQuery> query,
+    cblite.FLDict parameters,
+  ) {
     cblite.CBLQuery_SetParameters(query, parameters);
   }
 
-  cblite.FLDict parameters(Pointer<cblite.CBLQuery> query) =>
+  static cblite.FLDict parameters(Pointer<cblite.CBLQuery> query) =>
       cblite.CBLQuery_Parameters(query);
 
-  Pointer<cblite.CBLResultSet> execute(Pointer<cblite.CBLQuery> query) =>
+  static Pointer<cblite.CBLResultSet> execute(Pointer<cblite.CBLQuery> query) =>
       nativeCallTracePoint(
         TracedNativeCall.queryExecute,
         () => cblite.CBLQuery_Execute(query, globalCBLError),
       ).checkError();
 
-  String explain(Pointer<cblite.CBLQuery> query) =>
+  static String explain(Pointer<cblite.CBLQuery> query) =>
       cblite.CBLQuery_Explain(query).toDartStringAndRelease()!;
 
-  int columnCount(Pointer<cblite.CBLQuery> query) =>
+  static int columnCount(Pointer<cblite.CBLQuery> query) =>
       cblite.CBLQuery_ColumnCount(query);
 
-  String columnName(Pointer<cblite.CBLQuery> query, int column) =>
+  static String columnName(Pointer<cblite.CBLQuery> query, int column) =>
       cblite.CBLQuery_ColumnName(query, column).toDartString()!;
 
-  Pointer<cblite.CBLListenerToken> addChangeListener(
+  static Pointer<cblite.CBLListenerToken> addChangeListener(
     Pointer<cblite.CBLDatabase> db,
     Pointer<cblite.CBLQuery> query,
     cblitedart.CBLDart_AsyncCallback listener,
   ) => cblitedart.CBLDart_CBLQuery_AddChangeListener(db, query, listener);
 
-  Pointer<cblite.CBLResultSet> copyCurrentResults(
+  static Pointer<cblite.CBLResultSet> copyCurrentResults(
     Pointer<cblite.CBLQuery> query,
     Pointer<cblite.CBLListenerToken> listenerToken,
   ) => cblite.CBLQuery_CopyCurrentResults(
@@ -112,7 +113,7 @@ final class QueryBindings {
     globalCBLError,
   ).checkError();
 
-  cblitedart.CBLDart_PredictiveModel createPredictiveModel(
+  static cblitedart.CBLDart_PredictiveModel createPredictiveModel(
     String name,
     cblitedart.CBLDart_PredictiveModel_PredictionSync predictionSync,
     cblitedart.CBLDart_PredictiveModel_PredictionAsync predictionAsync,
@@ -128,27 +129,25 @@ final class QueryBindings {
     ),
   );
 
-  void bindCBLDartPredictiveModelToDartObject(
+  static void bindCBLDartPredictiveModelToDartObject(
     Finalizable object,
     cblitedart.CBLDart_PredictiveModel model,
   ) => _predictiveModelFinalizer.attach(object, model.cast());
 
-  void unregisterPredictiveModel(String name) =>
+  static void unregisterPredictiveModel(String name) =>
       runWithSingleFLString(name, cblite.CBL_UnregisterPredictiveModel);
 }
 
 final class ResultSetBindings {
-  const ResultSetBindings();
-
-  bool next(Pointer<cblite.CBLResultSet> resultSet) =>
+  static bool next(Pointer<cblite.CBLResultSet> resultSet) =>
       cblite.CBLResultSet_Next(resultSet);
 
-  cblite.FLValue valueAtIndex(
+  static cblite.FLValue valueAtIndex(
     Pointer<cblite.CBLResultSet> resultSet,
     int index,
   ) => cblite.CBLResultSet_ValueAtIndex(resultSet, index);
 
-  cblite.FLValue valueForKey(
+  static cblite.FLValue valueForKey(
     Pointer<cblite.CBLResultSet> resultSet,
     String key,
   ) => runWithSingleFLString(
@@ -156,20 +155,19 @@ final class ResultSetBindings {
     (flKey) => cblite.CBLResultSet_ValueForKey(resultSet, flKey),
   );
 
-  cblite.FLArray resultArray(Pointer<cblite.CBLResultSet> resultSet) =>
+  static cblite.FLArray resultArray(Pointer<cblite.CBLResultSet> resultSet) =>
       cblite.CBLResultSet_ResultArray(resultSet);
 
-  cblite.FLDict resultDict(Pointer<cblite.CBLResultSet> resultSet) =>
+  static cblite.FLDict resultDict(Pointer<cblite.CBLResultSet> resultSet) =>
       cblite.CBLResultSet_ResultDict(resultSet);
 
-  Pointer<cblite.CBLQuery> getQuery(Pointer<cblite.CBLResultSet> resultSet) =>
-      cblite.CBLResultSet_GetQuery(resultSet);
+  static Pointer<cblite.CBLQuery> getQuery(
+    Pointer<cblite.CBLResultSet> resultSet,
+  ) => cblite.CBLResultSet_GetQuery(resultSet);
 }
 
 final class QueryIndexBindings {
-  const QueryIndexBindings();
-
-  Pointer<cblite.CBLIndexUpdater>? beginUpdate(
+  static Pointer<cblite.CBLIndexUpdater>? beginUpdate(
     Pointer<cblite.CBLQueryIndex> index,
     int limit,
   ) => cblite.CBLQueryIndex_BeginUpdate(
@@ -182,15 +180,15 @@ final class QueryIndexBindings {
 }
 
 final class IndexUpdaterBindings {
-  const IndexUpdaterBindings();
+  static cblite.FLValue value(
+    Pointer<cblite.CBLIndexUpdater> updater,
+    int index,
+  ) => cblite.CBLIndexUpdater_Value(updater, index);
 
-  cblite.FLValue value(Pointer<cblite.CBLIndexUpdater> updater, int index) =>
-      cblite.CBLIndexUpdater_Value(updater, index);
-
-  int count(Pointer<cblite.CBLIndexUpdater> updater) =>
+  static int count(Pointer<cblite.CBLIndexUpdater> updater) =>
       cblite.CBLIndexUpdater_Count(updater);
 
-  void setVector(
+  static void setVector(
     Pointer<cblite.CBLIndexUpdater> updater,
     int index,
     List<double>? vector,
@@ -211,9 +209,9 @@ final class IndexUpdaterBindings {
     });
   }
 
-  void skipVector(Pointer<cblite.CBLIndexUpdater> updater, int index) =>
+  static void skipVector(Pointer<cblite.CBLIndexUpdater> updater, int index) =>
       cblite.CBLIndexUpdater_SkipVector(updater, index);
 
-  void finish(Pointer<cblite.CBLIndexUpdater> updater) =>
+  static void finish(Pointer<cblite.CBLIndexUpdater> updater) =>
       cblite.CBLIndexUpdater_Finish(updater, globalCBLError).checkError();
 }

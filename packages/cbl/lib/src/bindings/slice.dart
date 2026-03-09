@@ -6,12 +6,10 @@ import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
 
-import 'bindings.dart';
 import 'cblite.dart' as cblite;
+import 'fleece.dart';
 import 'global.dart';
 import 'utils.dart';
-
-final _sliceBindings = CBLBindings.instance.fleece.slice;
 
 /// A contiguous area of native memory, whose lifetime is tied to some other
 /// object.
@@ -88,7 +86,7 @@ final class Slice implements Finalizable {
       ..size = other.size;
 
     try {
-      return _sliceBindings.compare(aFLSlice.ref, bFLSlice.ref);
+      return SliceBindings.compare(aFLSlice.ref, bFLSlice.ref);
     } finally {
       cachedSliceResultAllocator.free(bFLSlice);
     }
@@ -122,7 +120,7 @@ final class Slice implements Finalizable {
       ..size = other.size;
 
     try {
-      return _sliceBindings.equal(aFLSlice.ref, bFLSlice.ref);
+      return SliceBindings.equal(aFLSlice.ref, bFLSlice.ref);
     } finally {
       cachedSliceResultAllocator.free(bFLSlice);
     }
@@ -146,11 +144,11 @@ final class Slice implements Finalizable {
 /// nullable and are represented with `null`.
 final class SliceResult extends Slice {
   /// Creates an uninitialized [SliceResult] of [size].
-  SliceResult(int size) : this._fromFLSliceResult(_sliceBindings.create(size));
+  SliceResult(int size) : this._fromFLSliceResult(SliceBindings.create(size));
 
   /// Creates a [SliceResult] and copies the data from [slice] into it.
   SliceResult.fromSlice(Slice slice)
-    : this._fromFLSliceResult(_sliceBindings.copy(slice.makeGlobal().ref));
+    : this._fromFLSliceResult(SliceBindings.copy(slice.makeGlobal().ref));
 
   SliceResult._fromFLSliceResult(
     cblite.FLSliceResult slice, {
@@ -158,7 +156,7 @@ final class SliceResult extends Slice {
   }) : this._(slice.buf, slice.size, retain: retain);
 
   SliceResult._(super.buf, super.size, {bool retain = false}) : super._() {
-    _sliceBindings.bindToDartObject(this, buf: buf, retain: retain);
+    SliceBindings.bindToDartObject(this, buf: buf, retain: retain);
   }
 
   /// Returns a [SliceResult] which has the content and size of [list].
@@ -229,7 +227,7 @@ final class TransferableSliceResult {
       _size = sliceResult.size {
     // Retain the slice now, in case `sliceResult` is garbage collected
     // before this transferable slice result is materialized.
-    _sliceBindings.retainSliceResultByBuf(sliceResult.buf);
+    SliceBindings.retainSliceResultByBuf(sliceResult.buf);
   }
 
   final int _bufAddress;

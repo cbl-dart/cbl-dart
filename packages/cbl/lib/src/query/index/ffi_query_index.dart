@@ -7,8 +7,6 @@ import '../../support/resource.dart';
 import '../../support/utils.dart';
 import 'ffi_index_updater.dart';
 
-final _bindings = CBLBindings.instance.queryIndex;
-
 final class FfiQueryIndex
     with ClosableResourceMixin
     implements SyncQueryIndex, Finalizable {
@@ -17,10 +15,7 @@ final class FfiQueryIndex
     required this.collection,
     required this.name,
   }) {
-    CBLBindings.instance.base.bindCBLRefCountedToDartObject(
-      this,
-      pointer.cast(),
-    );
+    BaseBindings.bindCBLRefCountedToDartObject(this, pointer.cast());
     needsToBeClosedByParent = false;
     attachTo(collection);
   }
@@ -35,8 +30,9 @@ final class FfiQueryIndex
 
   @override
   SyncIndexUpdater? beginUpdate({required int limit}) => useSync(
-    () => _bindings
-        .beginUpdate(pointer, limit)
-        ?.let((updater) => FfiIndexUpdater.fromPointer(updater, index: this)),
+    () => QueryIndexBindings.beginUpdate(
+      pointer,
+      limit,
+    )?.let((updater) => FfiIndexUpdater.fromPointer(updater, index: this)),
   );
 }

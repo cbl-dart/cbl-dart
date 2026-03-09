@@ -294,13 +294,11 @@ final class DocumentReplicationsCallbackMessage {
 // === ReplicatorBindings ======================================================
 
 final class ReplicatorBindings {
-  const ReplicatorBindings();
-
   static final _finalizer = NativeFinalizer(
     cblitedart.addresses.CBLDart_CBLReplicator_Release.cast(),
   );
 
-  Pointer<cblite.CBLEndpoint> createEndpointWithUrl(String url) =>
+  static Pointer<cblite.CBLEndpoint> createEndpointWithUrl(String url) =>
       runWithSingleFLString(
         url,
         (flUrl) => cblite.CBLEndpoint_CreateWithURL(
@@ -309,15 +307,15 @@ final class ReplicatorBindings {
         ).checkError(),
       );
 
-  Pointer<cblite.CBLEndpoint> createEndpointWithLocalDB(
+  static Pointer<cblite.CBLEndpoint> createEndpointWithLocalDB(
     Pointer<cblite.CBLDatabase> database,
   ) => cblite.CBLEndpoint_CreateWithLocalDB(database);
 
-  void freeEndpoint(Pointer<cblite.CBLEndpoint> endpoint) {
+  static void freeEndpoint(Pointer<cblite.CBLEndpoint> endpoint) {
     cblite.CBLEndpoint_Free(endpoint);
   }
 
-  Pointer<cblite.CBLAuthenticator> createPasswordAuthenticator(
+  static Pointer<cblite.CBLAuthenticator> createPasswordAuthenticator(
     String username,
     String password,
   ) => withGlobalArena(
@@ -327,7 +325,7 @@ final class ReplicatorBindings {
     ),
   );
 
-  Pointer<cblite.CBLAuthenticator> createSessionAuthenticator(
+  static Pointer<cblite.CBLAuthenticator> createSessionAuthenticator(
     String sessionID,
     String? cookieName,
   ) => withGlobalArena(
@@ -337,15 +335,17 @@ final class ReplicatorBindings {
     ),
   );
 
-  Pointer<cblite.CBLAuthenticator> createClientCertificateAuthenticator(
+  static Pointer<cblite.CBLAuthenticator> createClientCertificateAuthenticator(
     Pointer<cblite.CBLTLSIdentity> pointer,
   ) => cblite.CBLAuth_CreateCertificate(pointer);
 
-  void freeAuthenticator(Pointer<cblite.CBLAuthenticator> authenticator) {
+  static void freeAuthenticator(
+    Pointer<cblite.CBLAuthenticator> authenticator,
+  ) {
     cblite.CBLAuth_Free(authenticator);
   }
 
-  Pointer<cblite.CBLReplicator> createReplicator(
+  static Pointer<cblite.CBLReplicator> createReplicator(
     CBLReplicatorConfiguration config,
   ) => withGlobalArena(
     () => cblitedart.CBLDart_CBLReplicator_Create(
@@ -354,46 +354,46 @@ final class ReplicatorBindings {
     ).checkError(),
   );
 
-  void bindToDartObject(
+  static void bindToDartObject(
     Finalizable object,
     Pointer<cblite.CBLReplicator> replicator,
   ) {
     _finalizer.attach(object, replicator.cast());
   }
 
-  void start(
+  static void start(
     Pointer<cblite.CBLReplicator> replicator, {
     required bool resetCheckpoint,
   }) {
     cblite.CBLReplicator_Start(replicator, resetCheckpoint);
   }
 
-  void stop(Pointer<cblite.CBLReplicator> replicator) {
+  static void stop(Pointer<cblite.CBLReplicator> replicator) {
     cblite.CBLReplicator_Stop(replicator);
   }
 
-  void setHostReachable(
+  static void setHostReachable(
     Pointer<cblite.CBLReplicator> replicator, {
     required bool reachable,
   }) {
     cblite.CBLReplicator_SetHostReachable(replicator, reachable);
   }
 
-  void setSuspended(
+  static void setSuspended(
     Pointer<cblite.CBLReplicator> replicator, {
     required bool suspended,
   }) {
     cblite.CBLReplicator_SetSuspended(replicator, suspended);
   }
 
-  CBLReplicatorStatus status(Pointer<cblite.CBLReplicator> replicator) =>
+  static CBLReplicatorStatus status(Pointer<cblite.CBLReplicator> replicator) =>
       cblite.CBLReplicator_Status(replicator).toCBLReplicatorStatus();
 
-  Pointer<cblite.CBLCert>? serverCertificate(
+  static Pointer<cblite.CBLCert>? serverCertificate(
     Pointer<cblite.CBLReplicator> replicator,
   ) => cblite.CBLReplicator_ServerCertificate(replicator).toNullable();
 
-  cblite.FLDict pendingDocumentIDs(
+  static cblite.FLDict pendingDocumentIDs(
     Pointer<cblite.CBLReplicator> replicator,
     Pointer<cblite.CBLCollection> collection,
   ) => cblite.CBLReplicator_PendingDocumentIDs2(
@@ -402,7 +402,7 @@ final class ReplicatorBindings {
     globalCBLError,
   ).checkError();
 
-  bool isDocumentPending(
+  static bool isDocumentPending(
     Pointer<cblite.CBLReplicator> replicator,
     String docID,
     Pointer<cblite.CBLCollection> collection,
@@ -416,7 +416,7 @@ final class ReplicatorBindings {
     ).checkError(),
   );
 
-  void addChangeListener(
+  static void addChangeListener(
     Pointer<cblite.CBLDatabase> db,
     Pointer<cblite.CBLReplicator> replicator,
     cblitedart.CBLDart_AsyncCallback listener,
@@ -428,7 +428,7 @@ final class ReplicatorBindings {
     );
   }
 
-  void addDocumentReplicationListener(
+  static void addDocumentReplicationListener(
     Pointer<cblite.CBLDatabase> db,
     Pointer<cblite.CBLReplicator> replicator,
     cblitedart.CBLDart_AsyncCallback listener,
@@ -440,7 +440,7 @@ final class ReplicatorBindings {
     );
   }
 
-  Pointer<cblitedart.CBLDart_ReplicatorConfiguration>
+  static Pointer<cblitedart.CBLDart_ReplicatorConfiguration>
   _createConfigurationStruct(CBLReplicatorConfiguration config) {
     final configStruct =
         globalArena<cblitedart.CBLDart_ReplicatorConfiguration>();
@@ -492,7 +492,7 @@ final class ReplicatorBindings {
     return configStruct;
   }
 
-  Pointer<cblite.CBLProxySettings> _createProxySettingsStruct(
+  static Pointer<cblite.CBLProxySettings> _createProxySettingsStruct(
     CBLProxySettings? settings,
   ) {
     if (settings == null) {

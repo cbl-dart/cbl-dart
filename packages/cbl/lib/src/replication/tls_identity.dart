@@ -12,14 +12,11 @@ import '../bindings.dart';
 import '../bindings/cblite.dart'
     hide CBLKeyUsages, CBLLogDomain, CBLLogLevel, CBLSignatureDigestAlgorithm;
 import '../bindings/cblitedart.dart' hide FLSlice, CBLCert, CBLKeyPair;
-import '../bindings/tls_identity.dart';
 import '../errors.dart';
 import '../support/edition.dart';
 import '../support/isolate.dart';
 import '../support/native_object.dart';
 import '../support/utils.dart';
-
-final _bindings = CBLBindings.instance.tlsIdentity;
 
 /// Encoded cryptographic data, such as certificates and keys.
 ///
@@ -439,104 +436,109 @@ final class _FfiCertificateAttributes extends CertificateAttributes {
 
   @override
   String get commonName =>
-      _certificate.attribute(_bindings.kCBLCertAttrKeyCommonName)!;
+      _certificate.attribute(TlsIdentityBindings.kCBLCertAttrKeyCommonName)!;
 
   @override
   String? get pseudonym =>
-      _certificate.attribute(_bindings.kCBLCertAttrKeyPseudonym);
+      _certificate.attribute(TlsIdentityBindings.kCBLCertAttrKeyPseudonym);
 
   @override
   String? get givenName =>
-      _certificate.attribute(_bindings.kCBLCertAttrKeyGivenName);
+      _certificate.attribute(TlsIdentityBindings.kCBLCertAttrKeyGivenName);
 
   @override
   String? get surname =>
-      _certificate.attribute(_bindings.kCBLCertAttrKeySurname);
+      _certificate.attribute(TlsIdentityBindings.kCBLCertAttrKeySurname);
 
   @override
   String? get organization =>
-      _certificate.attribute(_bindings.kCBLCertAttrKeyOrganization);
+      _certificate.attribute(TlsIdentityBindings.kCBLCertAttrKeyOrganization);
 
   @override
-  String? get organizationUnit =>
-      _certificate.attribute(_bindings.kCBLCertAttrKeyOrganizationUnit);
+  String? get organizationUnit => _certificate.attribute(
+    TlsIdentityBindings.kCBLCertAttrKeyOrganizationUnit,
+  );
 
   @override
   String? get postalAddress =>
-      _certificate.attribute(_bindings.kCBLCertAttrKeyPostalAddress);
+      _certificate.attribute(TlsIdentityBindings.kCBLCertAttrKeyPostalAddress);
 
   @override
   String? get locality =>
-      _certificate.attribute(_bindings.kCBLCertAttrKeyLocality);
+      _certificate.attribute(TlsIdentityBindings.kCBLCertAttrKeyLocality);
 
   @override
   String? get postalCode =>
-      _certificate.attribute(_bindings.kCBLCertAttrKeyPostalCode);
+      _certificate.attribute(TlsIdentityBindings.kCBLCertAttrKeyPostalCode);
 
   @override
-  String? get stateOrProvince =>
-      _certificate.attribute(_bindings.kCBLCertAttrKeyStateOrProvince);
+  String? get stateOrProvince => _certificate.attribute(
+    TlsIdentityBindings.kCBLCertAttrKeyStateOrProvince,
+  );
 
   @override
   String? get country =>
-      _certificate.attribute(_bindings.kCBLCertAttrKeyCountry);
+      _certificate.attribute(TlsIdentityBindings.kCBLCertAttrKeyCountry);
 
   @override
   String? get emailAddress =>
-      _certificate.attribute(_bindings.kCBLCertAttrKeyEmailAddress);
+      _certificate.attribute(TlsIdentityBindings.kCBLCertAttrKeyEmailAddress);
 
   @override
   String? get hostname =>
-      _certificate.attribute(_bindings.kCBLCertAttrKeyHostname);
+      _certificate.attribute(TlsIdentityBindings.kCBLCertAttrKeyHostname);
 
   @override
-  Uri? get url =>
-      _certificate.attribute(_bindings.kCBLCertAttrKeyURL)?.let(Uri.parse);
+  Uri? get url => _certificate
+      .attribute(TlsIdentityBindings.kCBLCertAttrKeyURL)
+      ?.let(Uri.parse);
 
   @override
   InternetAddress? get ipAddress => _certificate
-      .attribute(_bindings.kCBLCertAttrKeyIPAddress)
+      .attribute(TlsIdentityBindings.kCBLCertAttrKeyIPAddress)
       ?.let(_InternetAddressString.new)
       ?.address;
 
   @override
   OID? get registeredId => _certificate
-      .attribute(_bindings.kCBLCertAttrKeyRegisteredID)
+      .attribute(TlsIdentityBindings.kCBLCertAttrKeyRegisteredID)
       ?.let((oid) => OID._fromEncodedArcs(Uint8List.fromList(oid.codeUnits)));
 }
 
 extension _CertificateAttributesToMapExtension on CertificateAttributes {
   Map<String, String> _toAttributesMap() => {
-    _bindings.kCBLCertAttrKeyCommonName: commonName,
+    TlsIdentityBindings.kCBLCertAttrKeyCommonName: commonName,
     if (pseudonym case final pseudonym?)
-      _bindings.kCBLCertAttrKeyPseudonym: pseudonym,
+      TlsIdentityBindings.kCBLCertAttrKeyPseudonym: pseudonym,
     if (givenName case final givenName?)
-      _bindings.kCBLCertAttrKeyGivenName: givenName,
-    if (surname case final surname?) _bindings.kCBLCertAttrKeySurname: surname,
+      TlsIdentityBindings.kCBLCertAttrKeyGivenName: givenName,
+    if (surname case final surname?)
+      TlsIdentityBindings.kCBLCertAttrKeySurname: surname,
     if (organization case final organization?)
-      _bindings.kCBLCertAttrKeyOrganization: organization,
+      TlsIdentityBindings.kCBLCertAttrKeyOrganization: organization,
     if (organizationUnit case final organizationUnit?)
-      _bindings.kCBLCertAttrKeyOrganizationUnit: organizationUnit,
+      TlsIdentityBindings.kCBLCertAttrKeyOrganizationUnit: organizationUnit,
     if (postalAddress case final postalAddress?)
-      _bindings.kCBLCertAttrKeyPostalAddress: postalAddress,
+      TlsIdentityBindings.kCBLCertAttrKeyPostalAddress: postalAddress,
     if (locality case final locality?)
-      _bindings.kCBLCertAttrKeyLocality: locality,
+      TlsIdentityBindings.kCBLCertAttrKeyLocality: locality,
     if (postalCode case final postalCode?)
-      _bindings.kCBLCertAttrKeyPostalCode: postalCode,
+      TlsIdentityBindings.kCBLCertAttrKeyPostalCode: postalCode,
     if (stateOrProvince case final stateOrProvince?)
-      _bindings.kCBLCertAttrKeyStateOrProvince: stateOrProvince,
-    if (country case final country?) _bindings.kCBLCertAttrKeyCountry: country,
+      TlsIdentityBindings.kCBLCertAttrKeyStateOrProvince: stateOrProvince,
+    if (country case final country?)
+      TlsIdentityBindings.kCBLCertAttrKeyCountry: country,
     if (emailAddress case final emailAddress?)
-      _bindings.kCBLCertAttrKeyEmailAddress: emailAddress,
+      TlsIdentityBindings.kCBLCertAttrKeyEmailAddress: emailAddress,
     if (hostname case final hostname?)
-      _bindings.kCBLCertAttrKeyHostname: hostname,
-    if (url case final url?) _bindings.kCBLCertAttrKeyURL: url.toString(),
+      TlsIdentityBindings.kCBLCertAttrKeyHostname: hostname,
+    if (url case final url?)
+      TlsIdentityBindings.kCBLCertAttrKeyURL: url.toString(),
     if (ipAddress case final ipAddress?)
-      _bindings.kCBLCertAttrKeyIPAddress: _InternetAddressString.fromAddress(
-        ipAddress,
-      ).string,
+      TlsIdentityBindings.kCBLCertAttrKeyIPAddress:
+          _InternetAddressString.fromAddress(ipAddress).string,
     if (registeredId case final registeredId?)
-      _bindings.kCBLCertAttrKeyRegisteredID: String.fromCharCodes(
+      TlsIdentityBindings.kCBLCertAttrKeyRegisteredID: String.fromCharCodes(
         registeredId._encodedArcs,
       ),
   };
@@ -599,7 +601,7 @@ final class FfiCertificate implements Certificate, Finalizable {
 
   // ignore: prefer_constructors_over_static_methods
   static FfiCertificate _decode(CryptoData data) => FfiCertificate.fromPointer(
-    _bindings.certCreateWithData(data._data),
+    TlsIdentityBindings.certCreateWithData(data._data),
     adopt: true,
   );
 
@@ -644,33 +646,39 @@ final class FfiCertificate implements Certificate, Finalizable {
 
   final Pointer<CBLCert> pointer;
 
-  FfiCertificate? get _nextInChain => _bindings
-      .certNextInChain(pointer)
-      ?.let((pointer) => FfiCertificate.fromPointer(pointer, adopt: true));
+  FfiCertificate? get _nextInChain => TlsIdentityBindings.certNextInChain(
+    pointer,
+  )?.let((pointer) => FfiCertificate.fromPointer(pointer, adopt: true));
 
   @override
-  Future<KeyPair> get publicKey =>
-      FfiKeyPair.fromPointer(_bindings.certPublicKey(pointer), adopt: true);
+  Future<KeyPair> get publicKey => FfiKeyPair.fromPointer(
+    TlsIdentityBindings.certPublicKey(pointer),
+    adopt: true,
+  );
 
   @override
-  DateTime get created => _bindings.certValidTimespan(pointer).created;
+  DateTime get created =>
+      TlsIdentityBindings.certValidTimespan(pointer).created;
 
   @override
-  DateTime get expires => _bindings.certValidTimespan(pointer).expires;
+  DateTime get expires =>
+      TlsIdentityBindings.certValidTimespan(pointer).expires;
 
   @override
   late final CertificateAttributes attributes = _FfiCertificateAttributes(this);
 
   @override
-  PemData toPem() =>
-      PemData(_bindings.certData(pointer, pemEncoded: true).toDartString());
+  PemData toPem() => PemData(
+    TlsIdentityBindings.certData(pointer, pemEncoded: true).toDartString(),
+  );
 
   @override
-  DerData toDer() =>
-      DerData(_bindings.certData(pointer, pemEncoded: false).asTypedList());
+  DerData toDer() => DerData(
+    TlsIdentityBindings.certData(pointer, pemEncoded: false).asTypedList(),
+  );
 
   String? attribute(String key) =>
-      _bindings.certSubjectNameComponent(pointer, key);
+      TlsIdentityBindings.certSubjectNameComponent(pointer, key);
 
   List<FfiCertificate> toList() {
     if (_nextInChain == null) {
@@ -817,7 +825,7 @@ abstract base class ExternalKeyPairDelegate {
       outputLen.value = data.length;
       success = true;
     } on Object catch (error, stackTrace) {
-      CBLBindings.instance.logging.logMessage(
+      LoggingBindings.logMessage(
         CBLLogDomain.listener,
         CBLLogLevel.error,
         'Exception in ExternalKeyPairDelegate.publicKeyData:\n'
@@ -825,7 +833,7 @@ abstract base class ExternalKeyPairDelegate {
         '$stackTrace',
       );
     } finally {
-      CBLBindings.instance.base.completeCompleterWithBool(completer, success);
+      BaseBindings.completeCompleterWithBool(completer, success);
     }
   }
 
@@ -859,7 +867,7 @@ abstract base class ExternalKeyPairDelegate {
 
       success = true;
     } on Object catch (error, stackTrace) {
-      CBLBindings.instance.logging.logMessage(
+      LoggingBindings.logMessage(
         CBLLogDomain.listener,
         CBLLogLevel.error,
         'Exception in ExternalKeyPairDelegate.decrypt:\n'
@@ -867,7 +875,7 @@ abstract base class ExternalKeyPairDelegate {
         '$stackTrace',
       );
     } finally {
-      CBLBindings.instance.base.completeCompleterWithBool(completer, success);
+      BaseBindings.completeCompleterWithBool(completer, success);
     }
   }
 
@@ -902,7 +910,7 @@ abstract base class ExternalKeyPairDelegate {
 
       success = true;
     } on Object catch (error, stackTrace) {
-      CBLBindings.instance.logging.logMessage(
+      LoggingBindings.logMessage(
         CBLLogDomain.listener,
         CBLLogLevel.error,
         'Exception in ExternalKeyPairDelegate.sign:\n'
@@ -910,7 +918,7 @@ abstract base class ExternalKeyPairDelegate {
         '$stackTrace',
       );
     } finally {
-      CBLBindings.instance.base.completeCompleterWithBool(completer, success);
+      BaseBindings.completeCompleterWithBool(completer, success);
     }
   }
 }
@@ -977,7 +985,7 @@ final class FfiKeyPair implements KeyPair, Finalizable {
   ) async {
     useEnterpriseFeature(EnterpriseFeature.peerToPeerSync);
 
-    final pointer = _bindings.keyPairCreateWithExternalKey(
+    final pointer = TlsIdentityBindings.keyPairCreateWithExternalKey(
       keySizeInBits: delegate.keySizeInBits,
       delegate: delegate,
       publicKeyData: delegate._publicKeyDataCallable.nativeFunction,
@@ -995,7 +1003,7 @@ final class FfiKeyPair implements KeyPair, Finalizable {
     useEnterpriseFeature(EnterpriseFeature.peerToPeerSync);
 
     final pointer = await runInSecondaryIsolate(
-      () => _bindings.keyPairCreateWithPrivateKey(
+      () => TlsIdentityBindings.keyPairCreateWithPrivateKey(
         privateKey._data,
         password: password,
       ),
@@ -1011,7 +1019,7 @@ final class FfiKeyPair implements KeyPair, Finalizable {
   Future<String?> get publicKeyDigest async {
     final pointer = this.pointer;
     return _publicKeyDigest = await runInSecondaryIsolate(
-      () => _bindings.keyPairPublicKeyDigest(pointer),
+      () => TlsIdentityBindings.keyPairPublicKeyDigest(pointer),
     );
   }
 
@@ -1019,7 +1027,7 @@ final class FfiKeyPair implements KeyPair, Finalizable {
   Future<DerData?> get publicKeyData async {
     final pointer = this.pointer;
     final data = await runInSecondaryIsolate(
-      () => _bindings.keyPairPublicKeyData(pointer),
+      () => TlsIdentityBindings.keyPairPublicKeyData(pointer),
     );
     return data?.let(DerData.new);
   }
@@ -1028,7 +1036,7 @@ final class FfiKeyPair implements KeyPair, Finalizable {
   Future<DerData?> get privateKeyData async {
     final pointer = this.pointer;
     final data = await runInSecondaryIsolate(
-      () => _bindings.keyPairPrivateKeyData(pointer),
+      () => TlsIdentityBindings.keyPairPrivateKeyData(pointer),
     );
     return data?.let(DerData.new);
   }
@@ -1160,7 +1168,7 @@ final class FfiTlsIdentity implements TlsIdentity, Finalizable {
     bool adopt = false,
   }) {
     final certificateChain = FfiCertificate.fromPointer(
-      _bindings.identityCertificates(pointer),
+      TlsIdentityBindings.identityCertificates(pointer),
       adopt: false,
     );
     final certificates = certificateChain.toList();
@@ -1183,7 +1191,10 @@ final class FfiTlsIdentity implements TlsIdentity, Finalizable {
     ).pointer;
 
     return FfiTlsIdentity.fromPointer(
-      _bindings.withKeyPairAndCerts(keyPairPointer, certificateChainPointer),
+      TlsIdentityBindings.withKeyPairAndCerts(
+        keyPairPointer,
+        certificateChainPointer,
+      ),
       adopt: true,
     );
   }
@@ -1218,13 +1229,13 @@ final class FfiTlsIdentity implements TlsIdentity, Finalizable {
     return FfiTlsIdentity.fromPointer(
       await runInSecondaryIsolate(
         () => keyPairPointer != null
-            ? _bindings.createWithKeyPair(
+            ? TlsIdentityBindings.createWithKeyPair(
                 cblKeyUsages,
                 attributesMap,
                 validityDuration,
                 keyPairPointer,
               )
-            : _bindings.create(
+            : TlsIdentityBindings.create(
                 cblKeyUsages,
                 attributesMap,
                 validityDuration,
@@ -1240,7 +1251,7 @@ final class FfiTlsIdentity implements TlsIdentity, Finalizable {
     _checkPersistedIdentitySupport();
 
     final pointer = await runInSecondaryIsolate(
-      () => _bindings.withLabel(label),
+      () => TlsIdentityBindings.withLabel(label),
     );
     if (pointer == null) {
       return null;
@@ -1258,7 +1269,7 @@ final class FfiTlsIdentity implements TlsIdentity, Finalizable {
     final certificatePointer = FfiCertificate.combined(certificates).pointer;
     return FfiTlsIdentity.fromPointer(
       await runInSecondaryIsolate(
-        () => _bindings.withCerts(certificatePointer),
+        () => TlsIdentityBindings.withCerts(certificatePointer),
       ),
       adopt: true,
     );
@@ -1267,7 +1278,9 @@ final class FfiTlsIdentity implements TlsIdentity, Finalizable {
   static Future<void> deleteIdentity(String label) async {
     useEnterpriseFeature(EnterpriseFeature.peerToPeerSync);
     _checkPersistedIdentitySupport();
-    await runInSecondaryIsolate(() => _bindings.deleteWithLabel(label));
+    await runInSecondaryIsolate(
+      () => TlsIdentityBindings.deleteWithLabel(label),
+    );
   }
 
   static void _checkPersistedIdentitySupport() {
@@ -1285,7 +1298,7 @@ final class FfiTlsIdentity implements TlsIdentity, Finalizable {
   final List<Certificate> certificates;
 
   @override
-  DateTime get expires => _bindings.identityExpiration(pointer);
+  DateTime get expires => TlsIdentityBindings.identityExpiration(pointer);
 
   @override
   String toString() => [

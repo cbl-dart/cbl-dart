@@ -6,7 +6,7 @@ import '../encoder.dart';
 import 'collection.dart';
 import 'delegate.dart';
 
-MDelegate get _delegate => MDelegate.instance!;
+MDelegate get _delegate => MDelegate.instance;
 
 final _emptyNative = Object();
 

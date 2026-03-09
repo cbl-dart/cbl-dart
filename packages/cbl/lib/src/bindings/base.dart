@@ -4,7 +4,6 @@ import 'dart:io' as io;
 import 'package:ffi/ffi.dart';
 
 import '../errors.dart';
-import 'bindings.dart';
 import 'cblite.dart' as cblite;
 import 'cblite_vector_search.dart' as vector_search;
 import 'cblitedart.dart' as cblitedart;
@@ -14,8 +13,6 @@ import 'utils.dart';
 
 export 'cblite.dart' show CBLListenerToken;
 export 'cblitedart.dart' show CBLDart_Completer;
-
-final _baseBinds = CBLBindings.instance.base;
 
 // === Option ==================================================================
 
@@ -308,7 +305,7 @@ extension CBLErrorPointerExt on Pointer<cblite.CBLError> {
   }) {
     final domain = CBLErrorDomain.fromValue(ref.domain);
     final code = ref.code.toErrorCode(domain);
-    final message = _baseBinds.getErrorMessage(this)!;
+    final message = BaseBindings.getErrorMessage(this)!;
     return createCouchbaseLiteException(
       domain: domain,
       code: code,
@@ -444,15 +441,13 @@ extension CheckErrorBoolExt on bool {
 // === BaseBindings ============================================================
 
 final class BaseBindings {
-  const BaseBindings();
-
   static final isolateId = cblitedart.CBLDart_AllocateIsolateId();
 
   static final _refCountedFinalizer = NativeFinalizer(
     cblite.addresses.CBL_Release.cast(),
   );
 
-  void initializeNativeLibraries([CBLInitContext? context]) {
+  static void initializeNativeLibraries([CBLInitContext? context]) {
     assert(!io.Platform.isAndroid || context != null);
 
     withZoneArena(() {
@@ -495,7 +490,7 @@ final class BaseBindings {
     });
   }
 
-  void enableVectorSearch() {
+  static void enableVectorSearch() {
     if (vector_search.vectorSearchLibraryPath case final libraryPath?
         when vector_search.systemSupportsVectorSearch) {
       runWithSingleFLString(io.File(libraryPath).parent.path, (
@@ -509,31 +504,31 @@ final class BaseBindings {
     }
   }
 
-  void bindCBLRefCountedToDartObject(
+  static void bindCBLRefCountedToDartObject(
     Finalizable object,
     Pointer<cblite.CBLRefCounted> refCounted,
   ) {
     _refCountedFinalizer.attach(object, refCounted.cast());
   }
 
-  void retainRefCounted(Pointer<cblite.CBLRefCounted> refCounted) {
+  static void retainRefCounted(Pointer<cblite.CBLRefCounted> refCounted) {
     cblite.CBL_Retain(refCounted);
   }
 
-  void releaseRefCounted(Pointer<cblite.CBLRefCounted> refCounted) {
+  static void releaseRefCounted(Pointer<cblite.CBLRefCounted> refCounted) {
     cblite.CBL_Release(refCounted);
   }
 
-  String? getErrorMessage(Pointer<cblite.CBLError> error) =>
+  static String? getErrorMessage(Pointer<cblite.CBLError> error) =>
       cblite.CBLError_Message(
         error,
       ).toDartStringAndRelease(allowMalformed: true);
 
-  void removeListener(Pointer<cblite.CBLListenerToken> token) {
+  static void removeListener(Pointer<cblite.CBLListenerToken> token) {
     cblite.CBLListener_Remove(token);
   }
 
-  T runWithIsolateId<T>(T Function() body) {
+  static T runWithIsolateId<T>(T Function() body) {
     cblitedart.CBLDart_SetCurrentIsolateId(isolateId);
     try {
       return body();
@@ -544,12 +539,12 @@ final class BaseBindings {
     }
   }
 
-  void completeCompleterWithPointer(
+  static void completeCompleterWithPointer(
     cblitedart.CBLDart_Completer completer,
     Pointer<Void> result,
   ) => cblitedart.CBLDart_Completer_Complete(completer, result.address);
 
-  void completeCompleterWithBool(
+  static void completeCompleterWithBool(
     cblitedart.CBLDart_Completer completer,
     // ignore: avoid_positional_boolean_parameters
     bool result,

@@ -9,8 +9,6 @@ import '../fleece/encoder.dart';
 import '../fleece/integration/integration.dart';
 import '../support/edition.dart';
 
-final _bindings = CBLBindings.instance.query;
-
 /// Interface for a machine learning model that can be used in a [Query].
 ///
 /// {@macro cbl.EncryptionKey.enterpriseFeature}
@@ -131,7 +129,7 @@ final class PredictionImpl implements Prediction {
   @override
   void unregisterModel(String name) {
     useEnterpriseFeature(EnterpriseFeature.prediction);
-    _bindings.unregisterPredictiveModel(name);
+    QueryBindings.unregisterPredictiveModel(name);
   }
 }
 
@@ -143,13 +141,13 @@ typedef _CBLPredictionFunctionAsync =
 
 class _FfiPredictiveModel implements Finalizable {
   _FfiPredictiveModel(this._name, this._model) {
-    final model = _bindings.createPredictiveModel(
+    final model = QueryBindings.createPredictiveModel(
       _name,
       _predictionSyncCallable.nativeFunction,
       _predictionAsyncCallable.nativeFunction,
       _unregisteredCallable.nativeFunction,
     );
-    _bindings.bindCBLDartPredictiveModelToDartObject(this, model);
+    QueryBindings.bindCBLDartPredictiveModelToDartObject(this, model);
   }
 
   final String _name;
@@ -183,14 +181,12 @@ class _FfiPredictiveModel implements Finalizable {
       );
 
       // The caller is responsible for releasing the returned value.
-      CBLBindings.instance.fleece.value.retain(
-        outputMutableDict.pointer.cast(),
-      );
+      ValueBindings.retain(outputMutableDict.pointer.cast());
 
       return outputMutableDict.pointer.cast();
       // ignore: avoid_catches_without_on_clauses
     } catch (error, stackTrace) {
-      CBLBindings.instance.logging.logMessage(
+      LoggingBindings.logMessage(
         CBLLogDomain.database,
         CBLLogLevel.error,
         'Uncaught exception in predictive model:\n'
@@ -204,10 +200,7 @@ class _FfiPredictiveModel implements Finalizable {
 
   void _predictionAsync(FLDict input, CBLDart_Completer completer) {
     final result = _predictionSync(input);
-    CBLBindings.instance.base.completeCompleterWithPointer(
-      completer,
-      result.cast(),
-    );
+    BaseBindings.completeCompleterWithPointer(completer, result.cast());
   }
 
   void _unregistered() {

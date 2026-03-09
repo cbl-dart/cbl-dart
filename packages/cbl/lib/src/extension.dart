@@ -69,7 +69,7 @@ abstract final class Extension {
     if (status != VectorSearchStatus.available) {
       return status;
     }
-    CBLBindings.instance.base.enableVectorSearch();
+    BaseBindings.enableVectorSearch();
     _vectorSearchEnabled = true;
     return VectorSearchStatus.enabled;
   }

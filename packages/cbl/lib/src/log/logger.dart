@@ -108,8 +108,6 @@ extension LogLevelExt on LogLevel {
   CBLLogLevel toCBLLogLevel() => CBLLogLevel.values[index];
 }
 
-final _bindings = CBLBindings.instance.logging;
-
 Logger? _logger;
 void Function(List<Object?>)? _loggerCallback;
 AsyncCallback? _callback;
@@ -155,7 +153,7 @@ void _cleanUpLogger() {
 }
 
 void _updateLogLevel() =>
-    _bindings.setCallbackLevel(_logger!._level.toCBLLogLevel());
+    LoggingBindings.setCallbackLevel(_logger!._level.toCBLLogLevel());
 
 void _setupCallback() {
   if (_callback != null) {
@@ -168,18 +166,22 @@ void _setupCallback() {
   );
 
   // Try to set callback as the current global callback.
-  if (!_bindings.setCallback(_callback!.pointer)) {
+  if (!LoggingBindings.setCallback(_callback!.pointer)) {
     _cleanUpCallback();
     throw StateError('Another isolate has already set a custom Logger.');
   }
 }
 
 void _cleanUpCallback() {
-  _bindings.setCallback(nullptr);
+  LoggingBindings.setCallback(nullptr);
   _callback?.close();
   _callback = null;
 }
 
 void cblLogMessage(LogDomain domain, LogLevel level, String message) {
-  _bindings.logMessage(domain.toCBLLogDomain(), level.toCBLLogLevel(), message);
+  LoggingBindings.logMessage(
+    domain.toCBLLogDomain(),
+    level.toCBLLogLevel(),
+    message,
+  );
 }

@@ -6,13 +6,11 @@ import 'cblitedart.dart' as cblitedart;
 export 'cblitedart.dart' show CBLDart_AsyncCallback;
 
 final class AsyncCallbackBindings {
-  const AsyncCallbackBindings();
-
   static final _finalizer = NativeFinalizer(
     cblitedart.addresses.CBLDart_AsyncCallback_Delete.cast(),
   );
 
-  cblitedart.CBLDart_AsyncCallback create(
+  static cblitedart.CBLDart_AsyncCallback create(
     int id,
     Finalizable callbackObject,
     SendPort sendPort, {
@@ -27,11 +25,14 @@ final class AsyncCallbackBindings {
     return result;
   }
 
-  void close(cblitedart.CBLDart_AsyncCallback callback) {
+  static void close(cblitedart.CBLDart_AsyncCallback callback) {
     cblitedart.CBLDart_AsyncCallback_Close(callback);
   }
 
-  void callForTest(cblitedart.CBLDart_AsyncCallback callback, int result) {
+  static void callForTest(
+    cblitedart.CBLDart_AsyncCallback callback,
+    int result,
+  ) {
     cblitedart.CBLDart_AsyncCallback_CallForTest(callback, result);
   }
 }

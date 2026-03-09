@@ -10,8 +10,6 @@ void main() {
   setupTestBinding();
 
   group('AsyncCallback', () {
-    late final bindings = CBLBindings.instance.asyncCallback;
-
     test('propagates error to Zone in which it was created', () {
       final callback = runZonedGuarded(
         () => AsyncCallback(
@@ -26,7 +24,7 @@ void main() {
 
       addTearDown(callback.close);
 
-      bindings.callForTest(callback.pointer, 0);
+      AsyncCallbackBindings.callForTest(callback.pointer, 0);
     });
   });
 }

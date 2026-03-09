@@ -9,7 +9,6 @@ export 'bindings/base.dart'
         checkError,
         throwError,
         IntErrorCodeExt;
-export 'bindings/bindings.dart';
 export 'bindings/blob.dart';
 export 'bindings/collection.dart';
 export 'bindings/data.dart';
@@ -35,6 +34,8 @@ export 'bindings/slice.dart'
         sliceResultAllocator,
         SingleSliceResultAllocator,
         SliceResultAllocator;
+export 'bindings/tls_identity.dart';
 export 'bindings/tracing.dart'
     show cblIncludeTracePoints, TracedNativeCall, TracedCallHandler;
+export 'bindings/url_endpoint_listener.dart';
 export 'bindings/utils.dart' show cblReachabilityFence;

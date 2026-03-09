@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:isolate';
 
-import 'bindings.dart';
 import 'database/database.dart';
 import 'extension.dart';
 import 'log.dart';
@@ -50,9 +49,7 @@ abstract final class CouchbaseLite {
       asyncOperationTracePoint(InitializeOp.new, () async {
         final context = await _initContext(filesDir);
 
-        await initPrimaryIsolate(
-          IsolateContext(initContext: context, bindings: const CBLBindings()),
-        );
+        await initPrimaryIsolate(IsolateContext(initContext: context));
 
         _setupLogging();
       });

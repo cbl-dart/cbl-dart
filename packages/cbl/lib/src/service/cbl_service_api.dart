@@ -497,7 +497,7 @@ final class CreateReplicator extends Request<int> implements SendAware {
         case final ClientCertificateAuthenticator authenticator) {
       final identity = authenticator.identity as FfiTlsIdentity;
       _certificateAuthenticatorIdentityPointer = identity.pointer;
-      CBLBindings.instance.base.retainRefCounted(
+      BaseBindings.retainRefCounted(
         _certificateAuthenticatorIdentityPointer!.cast(),
       );
       _authenticator = null;
@@ -717,7 +717,7 @@ final class SendableValue implements SendAware {
     _encodedValue?.willSend();
 
     if (_value case final value?) {
-      CBLBindings.instance.fleece.value.retain(value.pointer);
+      ValueBindings.retain(value.pointer);
       _valuePointer = value.pointer;
       _value = null;
     }
@@ -841,7 +841,7 @@ final class SendableCertificate implements SendAware {
   @override
   void willSend() {
     _pointer = (_certificate! as FfiCertificate).pointer;
-    CBLBindings.instance.base.retainRefCounted(_pointer!.cast());
+    BaseBindings.retainRefCounted(_pointer!.cast());
     _certificate = null;
   }
 

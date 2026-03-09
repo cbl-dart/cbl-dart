@@ -29,8 +29,6 @@ import 'replicator.dart';
 import 'replicator_change.dart';
 import 'tls_identity.dart';
 
-final _bindings = CBLBindings.instance.replicator;
-
 final class FfiReplicator
     with ClosableResourceMixin
     implements SyncReplicator, Finalizable {
@@ -42,7 +40,7 @@ final class FfiReplicator
   }) : _config = config,
        _database = database,
        _closeCallbacks = closeCallbacks {
-    _bindings.bindToDartObject(this, pointer);
+    ReplicatorBindings.bindToDartObject(this, pointer);
     attachTo(_database);
   }
 
@@ -155,7 +153,7 @@ final class FfiReplicator
     );
 
     try {
-      final pointer = _bindings.createReplicator(ffiConfig);
+      final pointer = ReplicatorBindings.createReplicator(ffiConfig);
 
       cblReachabilityFence(fleeceContainers);
 
@@ -171,9 +169,9 @@ final class FfiReplicator
       closeCallbacks();
       rethrow;
     } finally {
-      _bindings.freeEndpoint(endpoint);
+      ReplicatorBindings.freeEndpoint(endpoint);
       if (authenticator != null) {
-        _bindings.freeAuthenticator(authenticator);
+        ReplicatorBindings.freeAuthenticator(authenticator);
       }
     }
   }
@@ -201,14 +199,14 @@ final class FfiReplicator
   ReplicatorStatus get status => useSync(() => _status);
 
   ReplicatorStatus get _status =>
-      _bindings.status(pointer).toReplicatorStatus();
+      ReplicatorBindings.status(pointer).toReplicatorStatus();
 
   @override
   Certificate? get serverCertificate => useSync(() {
     useEnterpriseFeature(EnterpriseFeature.peerToPeerSync);
-    return _bindings
-        .serverCertificate(pointer)
-        ?.let((pointer) => FfiCertificate.fromPointer(pointer, adopt: true));
+    return ReplicatorBindings.serverCertificate(
+      pointer,
+    )?.let((pointer) => FfiCertificate.fromPointer(pointer, adopt: true));
   });
 
   @override
@@ -238,7 +236,7 @@ final class FfiReplicator
       }
     });
 
-    _bindings.start(pointer, resetCheckpoint: reset);
+    ReplicatorBindings.start(pointer, resetCheckpoint: reset);
   });
 
   @override
@@ -269,7 +267,7 @@ final class FfiReplicator
       break;
     }
 
-    _bindings.stop(pointer);
+    ReplicatorBindings.stop(pointer);
   }
 
   @override
@@ -288,7 +286,11 @@ final class FfiReplicator
       return null;
     }, debugName: 'FfiReplicator.addChangeListener');
 
-    _bindings.addChangeListener(database.pointer, pointer, callback.pointer);
+    ReplicatorBindings.addChangeListener(
+      database.pointer,
+      pointer,
+      callback.pointer,
+    );
 
     return FfiListenerToken(callback);
   }
@@ -322,7 +324,7 @@ final class FfiReplicator
       return null;
     }, debugName: 'FfiReplicator.addDocumentReplicationListener');
 
-    _bindings.addDocumentReplicationListener(
+    ReplicatorBindings.addDocumentReplicationListener(
       database.pointer,
       pointer,
       callback.pointer,
@@ -367,7 +369,7 @@ final class FfiReplicator
     covariant FfiCollection collection,
   ) => useSync(() {
     final dict = fl.Dict.fromPointer(
-      _bindings.pendingDocumentIDs(pointer, collection.pointer),
+      ReplicatorBindings.pendingDocumentIDs(pointer, collection.pointer),
       adopt: true,
     );
     return dict.keys.toSet();
@@ -378,7 +380,11 @@ final class FfiReplicator
     String documentId,
     covariant FfiCollection collection,
   ) => useSync(
-    () => _bindings.isDocumentPending(pointer, documentId, collection.pointer),
+    () => ReplicatorBindings.isDocumentPending(
+      pointer,
+      documentId,
+      collection.pointer,
+    ),
   );
 
   @override
@@ -447,10 +453,10 @@ extension on ReplicatorConfiguration {
   Pointer<CBLEndpoint> createEndpoint() {
     final target = this.target;
     if (target is UrlEndpoint) {
-      return _bindings.createEndpointWithUrl(target.url.toString());
+      return ReplicatorBindings.createEndpointWithUrl(target.url.toString());
     } else if (target is DatabaseEndpoint) {
       final db = target.database as FfiDatabase;
-      return _bindings.createEndpointWithLocalDB(db.pointer);
+      return ReplicatorBindings.createEndpointWithLocalDB(db.pointer);
     } else {
       throw UnimplementedError('Endpoint type is not implemented: $target');
     }
@@ -463,17 +469,17 @@ extension on ReplicatorConfiguration {
     }
 
     if (authenticator is BasicAuthenticator) {
-      return _bindings.createPasswordAuthenticator(
+      return ReplicatorBindings.createPasswordAuthenticator(
         authenticator.username,
         authenticator.password,
       );
     } else if (authenticator is SessionAuthenticator) {
-      return _bindings.createSessionAuthenticator(
+      return ReplicatorBindings.createSessionAuthenticator(
         authenticator.sessionId,
         authenticator.cookieName,
       );
     } else if (authenticator is ClientCertificateAuthenticator) {
-      return _bindings.createClientCertificateAuthenticator(
+      return ReplicatorBindings.createClientCertificateAuthenticator(
         (authenticator.identity as FfiTlsIdentity).pointer,
       );
     } else {
@@ -536,7 +542,7 @@ AsyncCallback _createConflictResolverCallback(
     try {
       resolved = await resolver.resolve(conflict) as DelegateDocument?;
     } catch (error, stackTrace) {
-      CBLBindings.instance.logging.logMessage(
+      LoggingBindings.logMessage(
         CBLLogDomain.replicator,
         CBLLogLevel.error,
         'Custom conflict resolver threw an exception for doc '
@@ -558,9 +564,7 @@ AsyncCallback _createConflictResolverCallback(
         // caller balances with a release. This must happen on the Dart
         // side, because `resolvedDelegate` can be garbage collected before
         // the document pointer makes it back to the native side.
-        CBLBindings.instance.base.retainRefCounted(
-          resolvedDelegate.pointer.cast(),
-        );
+        BaseBindings.retainRefCounted(resolvedDelegate.pointer.cast());
       } else {
         resolvedDelegate = resolved.delegate as FfiDocumentDelegate;
       }

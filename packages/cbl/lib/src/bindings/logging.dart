@@ -132,9 +132,11 @@ final class CBLLogFileConfiguration {
 }
 
 final class LoggingBindings {
-  const LoggingBindings();
-
-  void logMessage(CBLLogDomain domain, CBLLogLevel level, String message) {
+  static void logMessage(
+    CBLLogDomain domain,
+    CBLLogLevel level,
+    String message,
+  ) {
     runWithSingleFLString(
       message,
       (flMessage) =>
@@ -142,21 +144,21 @@ final class LoggingBindings {
     );
   }
 
-  CBLLogLevel consoleLevel() =>
+  static CBLLogLevel consoleLevel() =>
       CBLLogLevel.fromValue(cblite.CBLLog_ConsoleLevel());
 
-  void setConsoleLevel(CBLLogLevel logLevel) {
+  static void setConsoleLevel(CBLLogLevel logLevel) {
     cblite.CBLLog_SetConsoleLevel(logLevel.value);
   }
 
-  void setCallbackLevel(CBLLogLevel logLevel) {
+  static void setCallbackLevel(CBLLogLevel logLevel) {
     cblitedart.CBLDart_CBLLog_SetCallbackLevel(logLevel.value);
   }
 
-  bool setCallback(cblitedart.CBLDart_AsyncCallback callback) =>
+  static bool setCallback(cblitedart.CBLDart_AsyncCallback callback) =>
       cblitedart.CBLDart_CBLLog_SetCallback(callback);
 
-  void setFileLogConfiguration(CBLLogFileConfiguration? config) {
+  static void setFileLogConfiguration(CBLLogFileConfiguration? config) {
     withGlobalArena(() {
       cblitedart.CBLDart_CBLLog_SetFileConfig(
         _logFileConfig(config),
@@ -165,16 +167,16 @@ final class LoggingBindings {
     });
   }
 
-  CBLLogFileConfiguration? getLogFileConfiguration() =>
+  static CBLLogFileConfiguration? getLogFileConfiguration() =>
       cblitedart.CBLDart_CBLLog_GetFileConfig()
           .toNullable()
           ?.ref
           .toCBLLogFileConfiguration();
 
-  bool setSentryBreadcrumbs({required bool enabled}) =>
+  static bool setSentryBreadcrumbs({required bool enabled}) =>
       cblitedart.CBLDart_CBLLog_SetSentryBreadcrumbs(enabled);
 
-  Pointer<cblite.CBLLogFileConfiguration> _logFileConfig(
+  static Pointer<cblite.CBLLogFileConfiguration> _logFileConfig(
     CBLLogFileConfiguration? config,
   ) {
     if (config == null) {

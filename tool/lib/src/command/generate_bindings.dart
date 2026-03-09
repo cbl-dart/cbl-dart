@@ -1,7 +1,5 @@
 // ignore_for_file: cascade_invocations
 
-import 'dart:io';
-
 import 'package:cli_util/cli_logging.dart';
 import 'package:path/path.dart' as p;
 
@@ -48,7 +46,6 @@ class _BindingsGenerator {
 
   Future<void> generate() async {
     await _runFfigen();
-    await _fixNativeBindings();
     await _formatBindings();
   }
 
@@ -66,65 +63,6 @@ class _BindingsGenerator {
           workingDirectory: packageDir,
           logger: logger,
         );
-      },
-    );
-  }
-
-  Future<void> _fixNativeBindings() async {
-    await logger.runWithProgress(
-      message: 'Fixing native bindings from $ffigenConfig',
-      showTiming: true,
-      () async {
-        const symbols = [
-          'CBLConcurrencyControl',
-          'CBLDart_IsolateId',
-          'CBLDistanceMetric',
-          'CBLLogDomain',
-          'CBLLogLevel',
-          'CBLMaintenanceType',
-          'CBLQueryLanguage',
-          'CBLReplicatorType',
-          'CBLScalarQuantizerType',
-          'CBLSeekBase',
-          'CBLTimestamp',
-          'Dart_Port',
-          'FLTimestamp',
-        ];
-
-        final ffigenConfig = await _loadFfigenConfig();
-        final bindingsFile = File(ffigenConfig.output!.bindings!);
-        final bindingsLines = await bindingsFile.readAsLines();
-        final newBindingsLines = <String>[];
-
-        final bindingsLinesIterator = bindingsLines.iterator;
-        var inExternalBlock = false;
-        while (bindingsLinesIterator.moveNext()) {
-          var line = bindingsLinesIterator.current;
-          var isPointerParameter = false;
-
-          if (line.startsWith('external')) {
-            inExternalBlock = true;
-          }
-
-          if (line.contains('ffi.Pointer')) {
-            isPointerParameter = true;
-          }
-
-          if (inExternalBlock && !isPointerParameter) {
-            for (final symbol in symbols) {
-              line = line.replaceAll('imp1.$symbol', 'imp1.Dart$symbol');
-              line = line.replaceAll('imp2.$symbol', 'imp2.Dart$symbol');
-            }
-          }
-
-          if (line.endsWith(';')) {
-            inExternalBlock = false;
-          }
-
-          newBindingsLines.add(line);
-        }
-
-        await bindingsFile.writeAsString(newBindingsLines.join('\n'));
       },
     );
   }
