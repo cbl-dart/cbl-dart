@@ -16,6 +16,15 @@ projectDir="$(cd "$scriptDir/.." && pwd)"
 
 cd "$projectDir"
 
+mainRepoDir="$(git rev-parse --path-format=absolute --git-common-dir)"
+mainRepoDir="$(cd "$mainRepoDir/.." && pwd)"
+
+if [ -f "$mainRepoDir/.claude/settings.local.json" ]; then
+  echo "Symlinking .claude/settings.local.json..."
+  mkdir -p .claude
+  ln -sf "$mainRepoDir/.claude/settings.local.json" .claude/settings.local.json
+fi
+
 echo "Bootstrapping packages..."
 melos bootstrap
 
