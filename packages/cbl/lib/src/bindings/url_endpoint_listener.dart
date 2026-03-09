@@ -3,55 +3,54 @@ import 'dart:ffi';
 import '../bindings.dart';
 import '../fleece/containers.dart';
 import 'base.dart';
-import 'cblite.dart' as cblite_lib;
-import 'cblitedart.dart' as cblitedart_lib;
+import 'cblite.dart' as cblite;
+import 'cblitedart.dart' as cblitedart;
 import 'global.dart';
 import 'utils.dart';
 
-final class UrlEndpointListenerBindings extends Bindings {
-  UrlEndpointListenerBindings(super.libraries);
+final class UrlEndpointListenerBindings {
+  const UrlEndpointListenerBindings();
 
-  late final _authenticatorFinalizer = NativeFinalizer(
+  static final _authenticatorFinalizer = NativeFinalizer(
     cblite.addresses.CBLListenerAuth_Free.cast(),
   );
 
   void bindAuthenticatorToDartObject(
     Finalizable object,
-    Pointer<cblite_lib.CBLListenerAuthenticator> pointer,
+    Pointer<cblite.CBLListenerAuthenticator> pointer,
   ) {
     _authenticatorFinalizer.attach(object, pointer.cast());
   }
 
-  Pointer<cblite_lib.CBLListenerAuthenticator> createPasswordAuthenticator(
-    cblitedart_lib.CBLDartListenerPasswordAuthCallback handler,
+  Pointer<cblite.CBLListenerAuthenticator> createPasswordAuthenticator(
+    cblitedart.CBLDartListenerPasswordAuthCallback handler,
   ) => cblite.CBLListenerAuth_CreatePassword(
     cblitedart.addresses.CBLDart_ListenerPasswordAuthCallbackTrampoline,
     handler.cast(),
   );
 
-  Pointer<cblite_lib.CBLListenerAuthenticator> createCertificateAuthenticator(
-    cblitedart_lib.CBLDartListenerCertAuthCallback handler,
+  Pointer<cblite.CBLListenerAuthenticator> createCertificateAuthenticator(
+    cblitedart.CBLDartListenerCertAuthCallback handler,
   ) => cblite.CBLListenerAuth_CreateCertificate(
     cblitedart.addresses.CBLDart_ListenerCertAuthCallbackTrampoline,
     handler.cast(),
   );
 
-  Pointer<cblite_lib.CBLListenerAuthenticator>
-  createCertificateAuthenticatorWithRoots(Pointer<cblite_lib.CBLCert> roots) =>
+  Pointer<cblite.CBLListenerAuthenticator>
+  createCertificateAuthenticatorWithRoots(Pointer<cblite.CBLCert> roots) =>
       cblite.CBLListenerAuth_CreateCertificateWithRootCerts(roots);
 
-  Pointer<cblite_lib.CBLURLEndpointListener> create({
+  Pointer<cblite.CBLURLEndpointListener> create({
     required List<Pointer<CBLCollection>> collections,
     int? port,
     String? networkInterface,
     required bool disableTls,
-    Pointer<cblite_lib.CBLTLSIdentity>? tlsIdentity,
-    Pointer<cblite_lib.CBLListenerAuthenticator>? authenticator,
+    Pointer<cblite.CBLTLSIdentity>? tlsIdentity,
+    Pointer<cblite.CBLListenerAuthenticator>? authenticator,
     required bool enableDeltaSync,
     required bool readOnly,
   }) => withGlobalArena(() {
-    final config =
-        globalArena<cblite_lib.CBLURLEndpointListenerConfiguration>();
+    final config = globalArena<cblite.CBLURLEndpointListenerConfiguration>();
 
     final collectionsArray = globalArena<Pointer<CBLCollection>>(
       collections.length,
@@ -76,12 +75,12 @@ final class UrlEndpointListenerBindings extends Bindings {
     ).checkError();
   });
 
-  int? port(Pointer<cblite_lib.CBLURLEndpointListener> pointer) {
+  int? port(Pointer<cblite.CBLURLEndpointListener> pointer) {
     final port = cblite.CBLURLEndpointListener_Port(pointer);
     return port == 0 ? null : port;
   }
 
-  List<Uri>? urls(Pointer<cblite_lib.CBLURLEndpointListener> pointer) =>
+  List<Uri>? urls(Pointer<cblite.CBLURLEndpointListener> pointer) =>
       cblite.CBLURLEndpointListener_Urls(pointer)
           .toNullable()
           ?.let((pointer) => MutableArray.fromPointer(pointer, adopt: true))
@@ -90,17 +89,17 @@ final class UrlEndpointListenerBindings extends Bindings {
                 array.map((value) => Uri.parse(value.asString!)).toList(),
           );
 
-  Pointer<cblite_lib.CBLTLSIdentity>? tlsIdentity(
-    Pointer<cblite_lib.CBLURLEndpointListener> pointer,
+  Pointer<cblite.CBLTLSIdentity>? tlsIdentity(
+    Pointer<cblite.CBLURLEndpointListener> pointer,
   ) => cblite.CBLURLEndpointListener_TLSIdentity(pointer).toNullable();
 
-  cblite_lib.CBLConnectionStatus connectionStatus(
-    Pointer<cblite_lib.CBLURLEndpointListener> pointer,
+  cblite.CBLConnectionStatus connectionStatus(
+    Pointer<cblite.CBLURLEndpointListener> pointer,
   ) => cblite.CBLURLEndpointListener_Status(pointer);
 
-  void start(Pointer<cblite_lib.CBLURLEndpointListener> pointer) =>
+  void start(Pointer<cblite.CBLURLEndpointListener> pointer) =>
       cblite.CBLURLEndpointListener_Start(pointer, globalCBLError).checkError();
 
-  void stop(Pointer<cblite_lib.CBLURLEndpointListener> pointer) =>
+  void stop(Pointer<cblite.CBLURLEndpointListener> pointer) =>
       cblite.CBLURLEndpointListener_Stop(pointer);
 }

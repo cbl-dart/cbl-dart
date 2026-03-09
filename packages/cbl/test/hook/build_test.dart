@@ -386,7 +386,7 @@ void _checkAssets({
   expect(Directory(libDir).existsSync(), isTrue);
 
   // --- cblite asset ---
-  const cbliteId = 'package:cbl/src/bindings/cblite_native_assets.dart';
+  const cbliteId = 'package:cbl/src/bindings/cblite.dart';
   final cbliteAsset = codeAssets.singleWhere((a) => a.id == cbliteId);
   expect(cbliteAsset.linkMode, isA<DynamicLoadingBundled>());
   expect(File.fromUri(cbliteAsset.file!).existsSync(), isTrue);
@@ -414,7 +414,7 @@ void _checkAssets({
   }
 
   // --- cblitedart asset ---
-  const cblitedartId = 'package:cbl/src/bindings/cblitedart_native_assets.dart';
+  const cblitedartId = 'package:cbl/src/bindings/cblitedart.dart';
   final cblitedartAsset = codeAssets.singleWhere((a) => a.id == cblitedartId);
   expect(cblitedartAsset.linkMode, isA<DynamicLoadingBundled>());
   expect(File.fromUri(cblitedartAsset.file!).existsSync(), isTrue);

@@ -1,4 +1,4 @@
-import '../bindings.dart';
+import '../bindings/cblitedart.dart' as cblitedart;
 
 enum Edition { community, enterprise }
 
@@ -22,7 +22,7 @@ enum EnterpriseFeature {
 
 Edition get activeEdition =>
     _activeEditionOverride ??
-    (CBLBindings.instance.libraries.enterpriseEdition
+    (cblitedart.CBLDart_IsEnterprise()
         ? Edition.enterprise
         : Edition.community);
 

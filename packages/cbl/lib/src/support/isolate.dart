@@ -20,11 +20,7 @@ class InitContext {
 }
 
 class IsolateContext {
-  IsolateContext({
-    required this.bindingsLibraries,
-    this.bindings,
-    this.initContext,
-  });
+  IsolateContext({this.bindings, this.initContext});
 
   static IsolateContext? _instance;
 
@@ -46,20 +42,16 @@ class IsolateContext {
   }
 
   final CBLBindings? bindings;
-  final BindingsLibraries bindingsLibraries;
 
   final InitContext? initContext;
 
   /// Returns a copy of this context that is safe to send to another isolate.
   ///
   /// [CBLBindings] cannot be sent across isolate boundaries because it contains
-  /// `NativeFinalizer` objects. This method strips [bindings] and keeps the
-  /// serializable [bindingsLibraries], which allows the secondary isolate to
-  /// create its own [CBLBindings].
-  IsolateContext forSecondaryIsolate() => IsolateContext(
-    bindingsLibraries: bindingsLibraries,
-    initContext: initContext,
-  );
+  /// `NativeFinalizer` objects. This method strips [bindings], which allows the
+  /// secondary isolate to create its own [CBLBindings].
+  IsolateContext forSecondaryIsolate() =>
+      IsolateContext(initContext: initContext);
 }
 
 /// Initializes this isolate for use of Couchbase Lite, and initializes the
@@ -81,7 +73,7 @@ Future<void> _initIsolate(IsolateContext context) async {
   IsolateContext.instance = context;
 
   CBLBindings.init(
-    instance: context.bindings ?? CBLBindings(context.bindingsLibraries),
+    instance: context.bindings ?? const CBLBindings(),
     onTracedCall: tracingDelegateTracedNativeCallHandler,
   );
 

@@ -2,9 +2,6 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'bindings.dart';
-import 'bindings/cblite_native_assets_bridge.dart';
-import 'bindings/cblitedart_native_assets.dart' as cblitedart_native;
-import 'bindings/cblitedart_native_assets_bridge.dart';
 import 'database/database.dart';
 import 'extension.dart';
 import 'log.dart';
@@ -53,18 +50,8 @@ abstract final class CouchbaseLite {
       asyncOperationTracePoint(InitializeOp.new, () async {
         final context = await _initContext(filesDir);
 
-        final bindingsLibraries = BindingsLibraries(
-          enterpriseEdition: cblitedart_native.CBLDart_IsEnterprise(),
-          cblite: const cbliteNativeAssetsBridge(),
-          cblitedart: const cblitedartNativeAssetsBridge(),
-        );
-
         await initPrimaryIsolate(
-          IsolateContext(
-            initContext: context,
-            bindings: CBLBindings(bindingsLibraries),
-            bindingsLibraries: bindingsLibraries,
-          ),
+          IsolateContext(initContext: context, bindings: const CBLBindings()),
         );
 
         _setupLogging();

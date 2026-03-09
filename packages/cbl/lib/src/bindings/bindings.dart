@@ -2,8 +2,6 @@ import '../support/errors.dart';
 import 'async_callback.dart';
 import 'base.dart';
 import 'blob.dart';
-import 'cblite.dart' as cblite_lib;
-import 'cblitedart.dart' as cblitedart_lib;
 import 'collection.dart';
 import 'database.dart';
 import 'document.dart';
@@ -15,46 +13,8 @@ import 'tls_identity.dart';
 import 'tracing.dart';
 import 'url_endpoint_listener.dart';
 
-class BindingsLibraries {
-  BindingsLibraries({
-    required this.enterpriseEdition,
-    required this.cblite,
-    required this.cblitedart,
-  });
-
-  final bool enterpriseEdition;
-  final cblite_lib.cblite cblite;
-  final cblitedart_lib.cblitedart cblitedart;
-}
-
-abstract base class Bindings {
-  Bindings(this.libraries)
-    : cblite = libraries.cblite,
-      cblitedart = libraries.cblitedart;
-
-  final BindingsLibraries libraries;
-  final cblite_lib.cblite cblite;
-  final cblitedart_lib.cblitedart cblitedart;
-}
-
-final class CBLBindings extends Bindings {
-  CBLBindings(super.libraries)
-    : base = BaseBindings(libraries),
-      asyncCallback = AsyncCallbackBindings(libraries),
-      logging = LoggingBindings(libraries),
-      database = DatabaseBindings(libraries),
-      collection = CollectionBindings(libraries),
-      document = DocumentBindings(libraries),
-      mutableDocument = MutableDocumentBindings(libraries),
-      query = QueryBindings(libraries),
-      resultSet = ResultSetBindings(libraries),
-      queryIndex = QueryIndexBindings(libraries),
-      indexUpdater = IndexUpdaterBindings(libraries),
-      blobs = BlobsBindings(libraries),
-      replicator = ReplicatorBindings(libraries),
-      tlsIdentity = TlsIdentityBindings(libraries),
-      urlEndpointListener = UrlEndpointListenerBindings(libraries),
-      fleece = FleeceBindings(libraries);
+final class CBLBindings {
+  const CBLBindings();
 
   static CBLBindings? _instance;
 
@@ -80,22 +40,24 @@ final class CBLBindings extends Bindings {
     }
   }
 
-  final BaseBindings base;
-  final AsyncCallbackBindings asyncCallback;
-  final LoggingBindings logging;
-  final DatabaseBindings database;
-  final CollectionBindings collection;
-  final DocumentBindings document;
-  final MutableDocumentBindings mutableDocument;
-  final QueryBindings query;
-  final ResultSetBindings resultSet;
-  final QueryIndexBindings queryIndex;
-  final IndexUpdaterBindings indexUpdater;
-  final BlobsBindings blobs;
-  final ReplicatorBindings replicator;
-  final TlsIdentityBindings tlsIdentity;
-  final UrlEndpointListenerBindings urlEndpointListener;
-  final FleeceBindings fleece;
+  BaseBindings get base => const BaseBindings();
+  AsyncCallbackBindings get asyncCallback => const AsyncCallbackBindings();
+  LoggingBindings get logging => const LoggingBindings();
+  DatabaseBindings get database => const DatabaseBindings();
+  CollectionBindings get collection => const CollectionBindings();
+  DocumentBindings get document => const DocumentBindings();
+  MutableDocumentBindings get mutableDocument =>
+      const MutableDocumentBindings();
+  QueryBindings get query => const QueryBindings();
+  ResultSetBindings get resultSet => const ResultSetBindings();
+  QueryIndexBindings get queryIndex => const QueryIndexBindings();
+  IndexUpdaterBindings get indexUpdater => const IndexUpdaterBindings();
+  BlobsBindings get blobs => const BlobsBindings();
+  ReplicatorBindings get replicator => const ReplicatorBindings();
+  TlsIdentityBindings get tlsIdentity => const TlsIdentityBindings();
+  UrlEndpointListenerBindings get urlEndpointListener =>
+      const UrlEndpointListenerBindings();
+  FleeceBindings get fleece => const FleeceBindings();
 }
 
 set _onTracedCall(TracedCallHandler value) => onTracedCall = value;

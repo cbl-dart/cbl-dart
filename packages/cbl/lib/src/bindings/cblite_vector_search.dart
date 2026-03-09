@@ -3,9 +3,7 @@ library;
 
 import 'dart:ffi' as ffi;
 
-import 'cblitedart_native_assets.dart'
-    as cblitedart
-    show CBLDart_CpuSupportsAVX2;
+import 'cblitedart.dart' as cblitedart show CBLDart_CpuSupportsAVX2;
 import 'libraries.dart';
 
 /// A known symbol from the vector search extension library.
