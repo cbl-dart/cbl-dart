@@ -5,9 +5,6 @@ import 'dart:math';
 import '../bindings.dart';
 import 'encoder.dart';
 
-final _dictBinds = CBLBindings.instance.fleece.dict;
-final _dictKeyBinds = CBLBindings.instance.fleece.dictKey;
-
 /// A Fleece dictionary key for efficient decoding and encoding of dictionaries.
 abstract final class DictKey {
   /// Returns the value associated with this key in the given dictionary.
@@ -23,7 +20,7 @@ final class _DartStringDictKey extends DictKey {
   final String key;
 
   @override
-  FLValue? getValue(FLDict dict) => _dictBinds.get(dict, key);
+  FLValue? getValue(FLDict dict) => DictBindings.get(dict, key);
 
   @override
   void encodeTo(FleeceEncoder encoder) {
@@ -57,7 +54,7 @@ final class _OptimizedDictKey extends DictKey {
       ..buf = utf8String.cast()
       ..size = encodedString.size;
 
-    _dictKeyBinds.init(flDictKey.ref, flStringRef);
+    DictKeyBindings.init(flDictKey.ref, flStringRef);
 
     return _OptimizedDictKey._(memory, flDictKey, flStringRef);
   }
@@ -87,9 +84,9 @@ final class _OptimizedDictKey extends DictKey {
     // use them.
     // https://github.com/cbl-dart/cbl-dart/issues/329
     // https://github.com/couchbase/couchbase-lite-C/issues/287
-    // final flValue = _dictKeyBinds.getWithKey(dict, _flDictKey);
+    // final flValue = DictKeyBindings.getWithKey(dict, _flDictKey);
 
-    final flValue = _dictBinds.getWithFLString(dict, _flString);
+    final flValue = DictBindings.getWithFLString(dict, _flString);
     cblReachabilityFence(_memory);
     return flValue;
   }

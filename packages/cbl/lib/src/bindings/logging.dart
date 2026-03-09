@@ -5,28 +5,27 @@ import 'dart:typed_data';
 import 'package:meta/meta.dart';
 
 import 'base.dart';
-import 'bindings.dart';
-import 'cblite.dart' as cblite_lib;
-import 'cblitedart.dart' as cblitedart_lib;
+import 'cblite.dart' as cblite;
+import 'cblitedart.dart' as cblitedart;
 import 'fleece.dart';
 import 'global.dart';
 import 'utils.dart';
 
 enum CBLLogDomain {
-  database(cblite_lib.kCBLLogDomainDatabase),
-  query(cblite_lib.kCBLLogDomainQuery),
-  replicator(cblite_lib.kCBLLogDomainReplicator),
-  network(cblite_lib.kCBLLogDomainNetwork),
-  listener(cblite_lib.kCBLLogDomainListener);
+  database(cblite.kCBLLogDomainDatabase),
+  query(cblite.kCBLLogDomainQuery),
+  replicator(cblite.kCBLLogDomainReplicator),
+  network(cblite.kCBLLogDomainNetwork),
+  listener(cblite.kCBLLogDomainListener);
 
   const CBLLogDomain(this.value);
 
   factory CBLLogDomain.fromValue(int value) => switch (value) {
-    cblite_lib.kCBLLogDomainDatabase => database,
-    cblite_lib.kCBLLogDomainQuery => query,
-    cblite_lib.kCBLLogDomainReplicator => replicator,
-    cblite_lib.kCBLLogDomainNetwork => network,
-    cblite_lib.kCBLLogDomainListener => listener,
+    cblite.kCBLLogDomainDatabase => database,
+    cblite.kCBLLogDomainQuery => query,
+    cblite.kCBLLogDomainReplicator => replicator,
+    cblite.kCBLLogDomainNetwork => network,
+    cblite.kCBLLogDomainListener => listener,
     _ => throw ArgumentError('Unknown log domain: $value'),
   };
 
@@ -34,22 +33,22 @@ enum CBLLogDomain {
 }
 
 enum CBLLogLevel {
-  debug(cblite_lib.kCBLLogDebug),
-  verbose(cblite_lib.kCBLLogVerbose),
-  info(cblite_lib.kCBLLogInfo),
-  warning(cblite_lib.kCBLLogWarning),
-  error(cblite_lib.kCBLLogError),
-  none(cblite_lib.kCBLLogNone);
+  debug(cblite.kCBLLogDebug),
+  verbose(cblite.kCBLLogVerbose),
+  info(cblite.kCBLLogInfo),
+  warning(cblite.kCBLLogWarning),
+  error(cblite.kCBLLogError),
+  none(cblite.kCBLLogNone);
 
   const CBLLogLevel(this.value);
 
   factory CBLLogLevel.fromValue(int value) => switch (value) {
-    cblite_lib.kCBLLogDebug => debug,
-    cblite_lib.kCBLLogVerbose => verbose,
-    cblite_lib.kCBLLogInfo => info,
-    cblite_lib.kCBLLogWarning => warning,
-    cblite_lib.kCBLLogError => error,
-    cblite_lib.kCBLLogNone => none,
+    cblite.kCBLLogDebug => debug,
+    cblite.kCBLLogVerbose => verbose,
+    cblite.kCBLLogInfo => info,
+    cblite.kCBLLogWarning => warning,
+    cblite.kCBLLogError => error,
+    cblite.kCBLLogNone => none,
     _ => throw ArgumentError('Unknown log level: $value'),
   };
 
@@ -71,7 +70,7 @@ final class LogCallbackMessage {
   final String message;
 }
 
-extension on cblite_lib.CBLLogFileConfiguration {
+extension on cblite.CBLLogFileConfiguration {
   CBLLogFileConfiguration toCBLLogFileConfiguration() =>
       CBLLogFileConfiguration(
         level: CBLLogLevel.fromValue(level),
@@ -132,10 +131,12 @@ final class CBLLogFileConfiguration {
       usePlainText.hashCode;
 }
 
-final class LoggingBindings extends Bindings {
-  LoggingBindings(super.libraries);
-
-  void logMessage(CBLLogDomain domain, CBLLogLevel level, String message) {
+final class LoggingBindings {
+  static void logMessage(
+    CBLLogDomain domain,
+    CBLLogLevel level,
+    String message,
+  ) {
     runWithSingleFLString(
       message,
       (flMessage) =>
@@ -143,21 +144,21 @@ final class LoggingBindings extends Bindings {
     );
   }
 
-  CBLLogLevel consoleLevel() =>
+  static CBLLogLevel consoleLevel() =>
       CBLLogLevel.fromValue(cblite.CBLLog_ConsoleLevel());
 
-  void setConsoleLevel(CBLLogLevel logLevel) {
+  static void setConsoleLevel(CBLLogLevel logLevel) {
     cblite.CBLLog_SetConsoleLevel(logLevel.value);
   }
 
-  void setCallbackLevel(CBLLogLevel logLevel) {
+  static void setCallbackLevel(CBLLogLevel logLevel) {
     cblitedart.CBLDart_CBLLog_SetCallbackLevel(logLevel.value);
   }
 
-  bool setCallback(cblitedart_lib.CBLDart_AsyncCallback callback) =>
+  static bool setCallback(cblitedart.CBLDart_AsyncCallback callback) =>
       cblitedart.CBLDart_CBLLog_SetCallback(callback);
 
-  void setFileLogConfiguration(CBLLogFileConfiguration? config) {
+  static void setFileLogConfiguration(CBLLogFileConfiguration? config) {
     withGlobalArena(() {
       cblitedart.CBLDart_CBLLog_SetFileConfig(
         _logFileConfig(config),
@@ -166,23 +167,23 @@ final class LoggingBindings extends Bindings {
     });
   }
 
-  CBLLogFileConfiguration? getLogFileConfiguration() =>
+  static CBLLogFileConfiguration? getLogFileConfiguration() =>
       cblitedart.CBLDart_CBLLog_GetFileConfig()
           .toNullable()
           ?.ref
           .toCBLLogFileConfiguration();
 
-  bool setSentryBreadcrumbs({required bool enabled}) =>
+  static bool setSentryBreadcrumbs({required bool enabled}) =>
       cblitedart.CBLDart_CBLLog_SetSentryBreadcrumbs(enabled);
 
-  Pointer<cblite_lib.CBLLogFileConfiguration> _logFileConfig(
+  static Pointer<cblite.CBLLogFileConfiguration> _logFileConfig(
     CBLLogFileConfiguration? config,
   ) {
     if (config == null) {
       return nullptr;
     }
 
-    final result = globalArena<cblite_lib.CBLLogFileConfiguration>();
+    final result = globalArena<cblite.CBLLogFileConfiguration>();
 
     result.ref
       ..level = config.level.value

@@ -10,8 +10,6 @@ import '../bindings.dart';
 typedef AsyncCallbackHandler =
     FutureOr<Object?> Function(List<Object?> arguments);
 
-final _bindings = CBLBindings.instance.asyncCallback;
-
 var _nextId = 0;
 int _generateId() => _nextId++;
 
@@ -34,7 +32,12 @@ class AsyncCallback implements Finalizable {
   }) {
     _receivePort = ReceivePort();
 
-    pointer = _bindings.create(_id, this, _receivePort.sendPort, debug: debug);
+    pointer = AsyncCallbackBindings.create(
+      _id,
+      this,
+      _receivePort.sendPort,
+      debug: debug,
+    );
 
     _receivePort.cast<List<Object?>>().listen(_messageHandler);
 
@@ -85,7 +88,7 @@ class AsyncCallback implements Finalizable {
     }
     _debugLog('closing');
     _closed = true;
-    _bindings.close(pointer);
+    AsyncCallbackBindings.close(pointer);
     _receivePort.close();
   }
 

@@ -6,12 +6,10 @@ import 'dart:typed_data';
 import '../bindings.dart';
 import 'containers.dart';
 
-final _decoderBinds = CBLBindings.instance.fleece.decoder;
-
 /// Returns a string which shows how values are encoded in the Fleece [data].
 ///
 /// This method exists for debugging and learning purposes.
-String dumpData(Data data) => _decoderBinds.dumpData(data);
+String dumpData(Data data) => FleeceDecoderBindings.dumpData(data);
 
 // === SharedKeysTable =========================================================
 
@@ -46,7 +44,7 @@ final class NoopSharedKeysTable extends SharedKeysTable {
 
 final class _SharedKeysTable extends SharedKeysTable implements Finalizable {
   _SharedKeysTable() : super._() {
-    _knownSharedKeys = _decoderBinds.createKnownSharedKeys(this);
+    _knownSharedKeys = FleeceDecoderBindings.createKnownSharedKeys(this);
   }
 
   /// The value [CBLDart_LoadedDictKey.sharedKey] has when the key is not
@@ -202,7 +200,7 @@ final class DictIterator implements Iterator<Null>, Finalizable {
     bool preLoad = true,
     bool partiallyConsumable = true,
   }) : _sharedKeysTable = sharedKeysTable {
-    _iterator = _decoderBinds.dictIteratorBegin(
+    _iterator = FleeceDecoderBindings.dictIteratorBegin(
       partiallyConsumable ? this : null,
       dict,
       _sharedKeysTable?._knownSharedKeys ?? nullptr,
@@ -220,7 +218,7 @@ final class DictIterator implements Iterator<Null>, Finalizable {
   Null get current => null;
 
   @override
-  bool moveNext() => _decoderBinds.dictIteratorNext(_iterator);
+  bool moveNext() => FleeceDecoderBindings.dictIteratorNext(_iterator);
 }
 
 // ignore: prefer_void_to_null
@@ -230,7 +228,7 @@ final class ArrayIterator implements Iterator<Null>, Finalizable {
     Pointer<CBLDart_LoadedFLValue>? valueOut,
     bool partiallyConsumable = true,
   }) {
-    _iterator = _decoderBinds.arrayIteratorBegin(
+    _iterator = FleeceDecoderBindings.arrayIteratorBegin(
       partiallyConsumable ? this : null,
       array,
       valueOut ?? nullptr,
@@ -243,7 +241,7 @@ final class ArrayIterator implements Iterator<Null>, Finalizable {
   Null get current => null;
 
   @override
-  bool moveNext() => _decoderBinds.arrayIteratorNext(_iterator);
+  bool moveNext() => FleeceDecoderBindings.arrayIteratorNext(_iterator);
 }
 
 // === Decoder =================================================================
@@ -275,7 +273,7 @@ final class FleeceDecoder extends Converter<Data, Object?> {
       throw ArgumentError('Invalid Fleece data');
     }
 
-    _decoderBinds.getLoadedValue(root.pointer);
+    FleeceDecoderBindings.getLoadedValue(root.pointer);
 
     final listener = _BuildDartObjectListener();
     _FleeceListenerDecoder(
@@ -318,7 +316,7 @@ class RecursiveFleeceDecoder extends Converter<Data, Object?> {
       throw ArgumentError('Invalid Fleece data');
     }
 
-    _decoderBinds.getLoadedValue(root.pointer);
+    FleeceDecoderBindings.getLoadedValue(root.pointer);
 
     return _decodeGlobalLoadedValue(sharedStringsTable ?? SharedStringsTable());
   }
@@ -342,7 +340,7 @@ class RecursiveFleeceDecoder extends Converter<Data, Object?> {
         // ignore: omit_local_variable_types
         final FLArray array = value.value.cast();
         return List<Object?>.generate(value.collectionSize, (index) {
-          _decoderBinds.getLoadedValueFromArray(array, index);
+          FleeceDecoderBindings.getLoadedValueFromArray(array, index);
           return _decodeGlobalLoadedValue(sharedStringsTable);
         });
       case FLValueType.dict:
@@ -519,7 +517,7 @@ final class _ArrayIndexLoader extends _FleeceValueLoader {
   @override
   bool loadValue() {
     if (_i < _length) {
-      _decoderBinds.getLoadedValueFromArray(_array, _i);
+      FleeceDecoderBindings.getLoadedValueFromArray(_array, _i);
       _i++;
       return true;
     } else {

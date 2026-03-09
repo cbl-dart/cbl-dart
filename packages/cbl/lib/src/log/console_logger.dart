@@ -13,12 +13,11 @@ abstract final class ConsoleLogger {
   set level(LogLevel value);
 }
 
-final _bindings = CBLBindings.instance.logging;
-
 final class ConsoleLoggerImpl extends ConsoleLogger {
   @override
-  LogLevel get level => _bindings.consoleLevel().toLogLevel();
+  LogLevel get level => LoggingBindings.consoleLevel().toLogLevel();
 
   @override
-  set level(LogLevel value) => _bindings.setConsoleLevel(value.toCBLLogLevel());
+  set level(LogLevel value) =>
+      LoggingBindings.setConsoleLevel(value.toCBLLogLevel());
 }

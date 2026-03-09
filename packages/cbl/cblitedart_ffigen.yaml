@@ -8,6 +8,8 @@ output:
 import:
   symbol-files:
     - package:cbl/src/bindings/cblite_symbols.yaml
+ffi-native:
+  asset-id: 'package:cbl/src/bindings/cblitedart.dart'
 comments: false
 headers:
   entry-points:

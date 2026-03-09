@@ -38,8 +38,6 @@ import 'document_change.dart';
 import 'ffi_blob_store.dart';
 import 'scope.dart';
 
-final _bindings = CBLBindings.instance.database;
-
 final class FfiDatabase
     with DatabaseBase<FfiDocumentDelegate>, ClosableResourceMixin
     implements SyncDatabase, BlobStoreHolder, Finalizable {
@@ -56,7 +54,7 @@ final class FfiDatabase
     return FfiDatabase._(
       // Make a copy of the configuration, since its mutable.
       config: DatabaseConfiguration.from(config),
-      pointer: _bindings.open(name, config.toCBLDatabaseConfiguration()),
+      pointer: DatabaseBindings.open(name, config.toCBLDatabaseConfiguration()),
       typedDataAdapter: typedDataAdapter,
     );
   }
@@ -66,22 +64,22 @@ final class FfiDatabase
     required this.pointer,
     required this.typedDataAdapter,
   }) : _config = config {
-    _bindings.bindToDartObject(this, pointer);
-    name = _bindings.name(pointer);
-    _path = _bindings.path(pointer);
+    DatabaseBindings.bindToDartObject(this, pointer);
+    name = DatabaseBindings.name(pointer);
+    _path = DatabaseBindings.path(pointer);
   }
 
   static void remove(String name, {String? directory}) =>
-      _bindings.deleteDatabase(name, directory);
+      DatabaseBindings.deleteDatabase(name, directory);
 
   static bool exists(String name, {String? directory}) =>
-      _bindings.databaseExists(name, directory);
+      DatabaseBindings.databaseExists(name, directory);
 
   static void copy({
     required String from,
     required String name,
     DatabaseConfiguration? config,
-  }) => _bindings.copyDatabase(
+  }) => DatabaseBindings.copyDatabase(
     _formatCopyFromPath(from),
     name,
     config?.toCBLDatabaseConfiguration(),
@@ -134,7 +132,7 @@ final class FfiDatabase
   @override
   List<SyncScope> get scopes => useSync(() {
     final scopeNames = fl.MutableArray.fromPointer(
-      _collectionBindings.databaseScopeNames(pointer),
+      CollectionBindings.databaseScopeNames(pointer),
       adopt: true,
     );
     return scopeNames.map((name) => scope(name.asString!)).nonNulls.toList();
@@ -142,7 +140,7 @@ final class FfiDatabase
 
   @override
   SyncScope? scope(String name) => useSync(() {
-    final scopePointer = _collectionBindings.databaseScope(pointer, name);
+    final scopePointer = CollectionBindings.databaseScope(pointer, name);
 
     if (scopePointer == null) {
       return null;
@@ -169,7 +167,7 @@ final class FfiDatabase
     String name, [
     String scope = Scope.defaultName,
   ]) => useSync(() {
-    final collectionPointer = _collectionBindings.databaseCreateCollection(
+    final collectionPointer = CollectionBindings.databaseCreateCollection(
       pointer,
       name,
       scope,
@@ -184,16 +182,15 @@ final class FfiDatabase
   @override
   void deleteCollection(String name, [String scope = Scope.defaultName]) =>
       useSync(
-        () =>
-            _collectionBindings.databaseDeleteCollection(pointer, name, scope),
+        () => CollectionBindings.databaseDeleteCollection(pointer, name, scope),
       );
 
   @override
-  void beginTransaction() => _bindings.beginTransaction(pointer);
+  void beginTransaction() => DatabaseBindings.beginTransaction(pointer);
 
   @override
   void endTransaction({required bool commit}) =>
-      _bindings.endTransaction(pointer, commit: commit);
+      DatabaseBindings.endTransaction(pointer, commit: commit);
 
   @override
   Document? document(String id) => defaultCollection.document(id);
@@ -324,9 +321,9 @@ final class FfiDatabase
   @override
   Future<void> performClose() async {
     if (_deleteOnClose) {
-      _bindings.delete(pointer);
+      DatabaseBindings.delete(pointer);
     } else {
-      _bindings.close(pointer);
+      DatabaseBindings.close(pointer);
     }
   }
 
@@ -342,12 +339,12 @@ final class FfiDatabase
 
   @override
   void performMaintenance(MaintenanceType type) => useSync(() {
-    _bindings.performMaintenance(pointer, type.toCBLMaintenanceType());
+    DatabaseBindings.performMaintenance(pointer, type.toCBLMaintenanceType());
   });
 
   @override
   void changeEncryptionKey(EncryptionKey? newKey) => useSync(() {
-    _bindings.changeEncryptionKey(
+    DatabaseBindings.changeEncryptionKey(
       pointer,
       (newKey as EncryptionKeyImpl?)?.cblKey,
     );
@@ -374,8 +371,6 @@ final class FfiDatabase
   String toString() => 'FfiDatabase($name)';
 }
 
-final _collectionBindings = CBLBindings.instance.collection;
-
 final class FfiScope
     with ScopeBase, ClosableResourceMixin
     implements SyncScope, Finalizable {
@@ -384,10 +379,7 @@ final class FfiScope
     required this.pointer,
     required this.database,
   }) {
-    CBLBindings.instance.base.bindCBLRefCountedToDartObject(
-      this,
-      pointer.cast(),
-    );
+    BaseBindings.bindCBLRefCountedToDartObject(this, pointer.cast());
     needsToBeClosedByParent = false;
     attachTo(database);
   }
@@ -403,7 +395,7 @@ final class FfiScope
   @override
   List<SyncCollection> get collections => useSync(() {
     final collectionNames = fl.MutableArray.fromPointer(
-      _collectionBindings.scopeCollectionNames(pointer),
+      CollectionBindings.scopeCollectionNames(pointer),
       adopt: true,
     );
     return collectionNames
@@ -414,10 +406,7 @@ final class FfiScope
 
   @override
   SyncCollection? collection(String name) => useSync(() {
-    final collectionPointer = _collectionBindings.scopeCollection(
-      pointer,
-      name,
-    );
+    final collectionPointer = CollectionBindings.scopeCollection(pointer, name);
 
     if (collectionPointer == null) {
       return null;
@@ -438,10 +427,7 @@ final class FfiCollection
     required this.pointer,
     required this.scope,
   }) {
-    CBLBindings.instance.base.bindCBLRefCountedToDartObject(
-      this,
-      pointer.cast(),
-    );
+    BaseBindings.bindCBLRefCountedToDartObject(this, pointer.cast());
     needsToBeClosedByParent = false;
     attachTo(scope);
   }
@@ -460,13 +446,13 @@ final class FfiCollection
   FfiDatabase get database => scope.database;
 
   @override
-  int get count => useSync(() => _collectionBindings.count(pointer));
+  int get count => useSync(() => CollectionBindings.count(pointer));
 
   @override
   Document? document(String id) => syncOperationTracePoint(
     () => GetDocumentOp(this, id),
     () => useSync(() {
-      final documentPointer = _collectionBindings.getDocument(pointer, id);
+      final documentPointer = CollectionBindings.getDocument(pointer, id);
 
       if (documentPointer == null) {
         return null;
@@ -500,7 +486,7 @@ final class FfiCollection
         );
 
         return _catchConflictException(() {
-          _collectionBindings.saveDocumentWithConcurrencyControl(
+          CollectionBindings.saveDocumentWithConcurrencyControl(
             pointer,
             delegate.pointer.cast(),
             concurrencyControl.toCBLConcurrencyControl(),
@@ -559,7 +545,7 @@ final class FfiCollection
         );
 
         return _catchConflictException(() {
-          _collectionBindings.deleteDocumentWithConcurrencyControl(
+          CollectionBindings.deleteDocumentWithConcurrencyControl(
             pointer,
             delegate.pointer.cast(),
             concurrencyControl.toCBLConcurrencyControl(),
@@ -596,35 +582,33 @@ final class FfiCollection
   @override
   void purgeDocumentById(String id) => useSync(
     () => database.runInTransactionSync(() {
-      _collectionBindings.purgeDocumentByID(pointer, id);
+      CollectionBindings.purgeDocumentByID(pointer, id);
     }),
   );
 
   @override
   void setDocumentExpiration(String id, DateTime? expiration) => useSync(() {
-    _collectionBindings.setDocumentExpiration(pointer, id, expiration);
+    CollectionBindings.setDocumentExpiration(pointer, id, expiration);
   });
 
   @override
   DateTime? getDocumentExpiration(String id) =>
-      useSync(() => _collectionBindings.getDocumentExpiration(pointer, id));
+      useSync(() => CollectionBindings.getDocumentExpiration(pointer, id));
 
   @override
   List<String> get indexes => useSync(
     () => fl.Array.fromPointer(
-      _collectionBindings.indexNames(pointer),
+      CollectionBindings.indexNames(pointer),
       adopt: true,
     ).toObject().cast<String>(),
   );
 
   @override
   QueryIndex? index(String name) => useSync(
-    () => _collectionBindings
-        .index(pointer, name)
-        ?.let(
-          (pointer) =>
-              FfiQueryIndex.fromPointer(pointer, collection: this, name: name),
-        ),
+    () => CollectionBindings.index(pointer, name)?.let(
+      (pointer) =>
+          FfiQueryIndex.fromPointer(pointer, collection: this, name: name),
+    ),
   );
 
   @override
@@ -634,13 +618,13 @@ final class FfiCollection
     }
 
     useSync(() {
-      _collectionBindings.createIndex(pointer, name, index.toCBLIndexSpec());
+      CollectionBindings.createIndex(pointer, name, index.toCBLIndexSpec());
     });
   }
 
   @override
   void deleteIndex(String name) =>
-      useSync(() => _collectionBindings.deleteIndex(pointer, name));
+      useSync(() => CollectionBindings.deleteIndex(pointer, name));
 
   @override
   ListenerToken addChangeListener(CollectionChangeListener listener) =>
@@ -654,7 +638,7 @@ final class FfiCollection
       return null;
     }, debugName: 'FfiCollection.addChangeListener');
 
-    _collectionBindings.addChangeListener(
+    CollectionBindings.addChangeListener(
       database.pointer,
       pointer,
       callback.pointer,
@@ -681,7 +665,7 @@ final class FfiCollection
       return null;
     }, debugName: 'FfiCollection.addDocumentChangeListener');
 
-    _collectionBindings.addDocumentChangeListener(
+    CollectionBindings.addDocumentChangeListener(
       database.pointer,
       pointer,
       id,

@@ -17,8 +17,6 @@ import 'endpoint.dart';
 import 'replicator.dart';
 import 'tls_identity.dart';
 
-final _bindings = CBLBindings.instance.urlEndpointListener;
-
 /// Authenticates peer [Replicator]s connecting to a [UrlEndpointListener].
 ///
 /// {@macro cbl.EncryptionKey.enterpriseFeature}
@@ -37,7 +35,7 @@ final class FfiListenAuthenticator
   FfiListenAuthenticator.fromPointer(this.pointer, {NativeCallable? callable})
     : _callable = callable {
     _callable?.keepIsolateAlive = false;
-    _bindings.bindAuthenticatorToDartObject(this, pointer);
+    UrlEndpointListenerBindings.bindAuthenticatorToDartObject(this, pointer);
   }
 
   final Pointer<CBLListenerAuthenticator> pointer;
@@ -108,7 +106,7 @@ final class _ListenerPasswordAuthenticator extends FfiListenAuthenticator
         );
         // ignore: avoid_catches_without_on_clauses
       } catch (error, stackTrace) {
-        CBLBindings.instance.logging.logMessage(
+        LoggingBindings.logMessage(
           CBLLogDomain.listener,
           CBLLogLevel.error,
           'Exception in ListenerPasswordAuthenticator:\n'
@@ -117,7 +115,7 @@ final class _ListenerPasswordAuthenticator extends FfiListenAuthenticator
         );
         rethrow;
       } finally {
-        CBLBindings.instance.base.completeCompleterWithBool(completer, result);
+        BaseBindings.completeCompleterWithBool(completer, result);
       }
     }
 
@@ -127,7 +125,9 @@ final class _ListenerPasswordAuthenticator extends FfiListenAuthenticator
         );
 
     return _ListenerPasswordAuthenticator.fromPointer(
-      _bindings.createPasswordAuthenticator(callable.nativeFunction),
+      UrlEndpointListenerBindings.createPasswordAuthenticator(
+        callable.nativeFunction,
+      ),
       callable: callable,
     );
   }
@@ -194,7 +194,7 @@ final class _ListenerCertificateAuthenticator extends FfiListenAuthenticator
         result = await handler(FfiCertificate.fromPointer(certificate));
         // ignore: avoid_catches_without_on_clauses
       } catch (error, stackTrace) {
-        CBLBindings.instance.logging.logMessage(
+        LoggingBindings.logMessage(
           CBLLogDomain.listener,
           CBLLogLevel.error,
           'Exception in ListenerCertificateAuthenticator:\n'
@@ -203,7 +203,7 @@ final class _ListenerCertificateAuthenticator extends FfiListenAuthenticator
         );
         rethrow;
       } finally {
-        CBLBindings.instance.base.completeCompleterWithBool(completer, result);
+        BaseBindings.completeCompleterWithBool(completer, result);
       }
     }
 
@@ -213,7 +213,9 @@ final class _ListenerCertificateAuthenticator extends FfiListenAuthenticator
         );
 
     return _ListenerCertificateAuthenticator.fromPointer(
-      _bindings.createCertificateAuthenticator(callable.nativeFunction),
+      UrlEndpointListenerBindings.createCertificateAuthenticator(
+        callable.nativeFunction,
+      ),
       callable: callable,
     );
   }
@@ -234,7 +236,7 @@ final class _ListenerCertificateAuthenticatorFromRoots
     useEnterpriseFeature(EnterpriseFeature.peerToPeerSync);
 
     return _ListenerCertificateAuthenticatorFromRoots.fromPointer(
-      _bindings.createCertificateAuthenticatorWithRoots(
+      UrlEndpointListenerBindings.createCertificateAuthenticatorWithRoots(
         FfiCertificate.combined(certificates.cast()).pointer,
       ),
       certificates: certificates,
@@ -499,7 +501,7 @@ final class FfiUrlEndpointListener implements UrlEndpointListener, Finalizable {
     required bool enableDeltaSync,
     required bool readOnly,
   }) async => runInSecondaryIsolate(
-    () => _bindings.create(
+    () => UrlEndpointListenerBindings.create(
       collections: collections,
       port: port,
       networkInterface: networkInterface,
@@ -522,19 +524,19 @@ final class FfiUrlEndpointListener implements UrlEndpointListener, Finalizable {
       UrlEndpointListenerConfiguration.from(_config);
 
   @override
-  int? get port => _bindings.port(_pointer);
+  int? get port => UrlEndpointListenerBindings.port(_pointer);
 
   @override
-  List<Uri>? get urls => _bindings.urls(_pointer);
+  List<Uri>? get urls => UrlEndpointListenerBindings.urls(_pointer);
 
   @override
-  TlsIdentity? get tlsIdentity => _bindings
-      .tlsIdentity(_pointer)
-      ?.let((pointer) => FfiTlsIdentity.fromPointer(pointer, adopt: false));
+  TlsIdentity? get tlsIdentity => UrlEndpointListenerBindings.tlsIdentity(
+    _pointer,
+  )?.let((pointer) => FfiTlsIdentity.fromPointer(pointer, adopt: false));
 
   @override
   ConnectionStatus get connectionStatus {
-    final status = _bindings.connectionStatus(_pointer);
+    final status = UrlEndpointListenerBindings.connectionStatus(_pointer);
     return ConnectionStatus(
       connectionCount: status.connectionCount,
       activeConnectionCount: status.activeConnectionCount,
@@ -544,14 +546,18 @@ final class FfiUrlEndpointListener implements UrlEndpointListener, Finalizable {
   @override
   Future<void> start() async {
     final pointer = _pointer;
-    await runInSecondaryIsolate(() => _bindings.start(pointer));
+    await runInSecondaryIsolate(
+      () => UrlEndpointListenerBindings.start(pointer),
+    );
     _authenticator?._onListenerStarted();
   }
 
   @override
   Future<void> stop() async {
     final pointer = _pointer;
-    await runInSecondaryIsolate(() => _bindings.stop(pointer));
+    await runInSecondaryIsolate(
+      () => UrlEndpointListenerBindings.stop(pointer),
+    );
     _authenticator?._onListenerStopped();
   }
 

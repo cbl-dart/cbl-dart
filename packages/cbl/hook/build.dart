@@ -61,7 +61,7 @@ Future<void> buildHook(BuildInput input, BuildOutputBuilder output) async {
   output.assets.code.add(
     CodeAsset(
       package: 'cbl',
-      name: 'src/bindings/cblite_native_assets.dart',
+      name: 'src/bindings/cblite.dart',
       linkMode: DynamicLoadingBundled(),
       file: cbliteAssetPath,
     ),
@@ -73,7 +73,7 @@ Future<void> buildHook(BuildInput input, BuildOutputBuilder output) async {
   // enterprise).
   final builder = CBuilder.library(
     name: 'cblitedart',
-    assetName: 'src/bindings/cblitedart_native_assets.dart',
+    assetName: 'src/bindings/cblitedart.dart',
     sources: [
       'native/couchbase-lite-dart/src/CBL+Dart.cpp',
       'native/couchbase-lite-dart/src/Fleece+Dart.cpp',

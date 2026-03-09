@@ -4,8 +4,6 @@ import '../encoder.dart';
 import 'collection.dart';
 import 'value.dart';
 
-final _arrayBindings = CBLBindings.instance.fleece.array;
-
 final class MArray extends MCollection {
   MArray() : _array = null, _values = [];
 
@@ -165,5 +163,5 @@ final class MArray extends MCollection {
   }
 
   MValue _loadMValue(int index) =>
-      _arrayBindings.get(_array!, index).let(MValue.withValue);
+      ArrayBindings.get(_array!, index).let(MValue.withValue);
 }

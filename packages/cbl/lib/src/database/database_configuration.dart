@@ -100,9 +100,7 @@ final class EncryptionKeyImpl implements EncryptionKey {
   // ignore: prefer_constructors_over_static_methods
   static EncryptionKeyImpl passwordSync(String password) {
     useEnterpriseFeature(EnterpriseFeature.databaseEncryption);
-    final key = CBLBindings.instance.database.encryptionKeyFromPassword(
-      password,
-    );
+    final key = DatabaseBindings.encryptionKeyFromPassword(password);
     return EncryptionKeyImpl(key);
   }
 

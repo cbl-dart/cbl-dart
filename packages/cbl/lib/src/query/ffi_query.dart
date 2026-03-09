@@ -28,9 +28,6 @@ import 'result.dart';
 import 'result_set.dart';
 import 'select_result.dart';
 
-final _baseBindings = CBLBindings.instance.base;
-final _bindings = CBLBindings.instance.query;
-
 base class FfiQuery extends QueryBase implements SyncQuery, Finalizable {
   FfiQuery({
     FfiDatabase? super.database,
@@ -69,7 +66,7 @@ base class FfiQuery extends QueryBase implements SyncQuery, Finalizable {
     () => ExecuteQueryOp(this),
     () => useSync(
       () => FfiResultSet(
-        _baseBindings.runWithIsolateId(() => _bindings.execute(_pointer)),
+        BaseBindings.runWithIsolateId(() => QueryBindings.execute(_pointer)),
         query: this,
         columnNames: _columnNames,
       ),
@@ -77,7 +74,7 @@ base class FfiQuery extends QueryBase implements SyncQuery, Finalizable {
   );
 
   @override
-  String explain() => useSync(() => _bindings.explain(_pointer));
+  String explain() => useSync(() => QueryBindings.explain(_pointer));
 
   @override
   ListenerToken addChangeListener(
@@ -94,7 +91,7 @@ base class FfiQuery extends QueryBase implements SyncQuery, Finalizable {
         // The native side sends no arguments. When the native side
         // notifies the listener it has to copy the current query
         // result set.
-        _bindings.copyCurrentResults(_pointer, listenerToken),
+        QueryBindings.copyCurrentResults(_pointer, listenerToken),
         query: this,
         columnNames: _columnNames,
       );
@@ -104,7 +101,7 @@ base class FfiQuery extends QueryBase implements SyncQuery, Finalizable {
       return null;
     }, debugName: 'FfiQuery.addChangeListener');
 
-    listenerToken = _bindings.addChangeListener(
+    listenerToken = QueryBindings.addChangeListener(
       database.pointer,
       _pointer,
       callback.pointer,
@@ -141,13 +138,13 @@ base class FfiQuery extends QueryBase implements SyncQuery, Finalizable {
 
   void _performPrepare() {
     syncOperationTracePoint(() => PrepareQueryOp(this), () {
-      _pointer = _bindings.create(database!.pointer, language, definition!);
+      _pointer = QueryBindings.create(database!.pointer, language, definition!);
 
       bindCBLRefCountedToDartObject(this, pointer: _pointer);
 
       _columnNames = List.generate(
-        _bindings.columnCount(_pointer),
-        (index) => _bindings.columnName(_pointer, index),
+        QueryBindings.columnCount(_pointer),
+        (index) => QueryBindings.columnName(_pointer, index),
       );
     });
   }
@@ -165,7 +162,7 @@ base class FfiQuery extends QueryBase implements SyncQuery, Finalizable {
     });
     final doc = fl.Doc.fromResultData(data, FLTrust.trusted);
     final dict = doc.root.asDict!;
-    _bindings.setParameters(_pointer, dict.pointer.cast());
+    QueryBindings.setParameters(_pointer, dict.pointer.cast());
   }
 }
 
@@ -237,8 +234,6 @@ final class ResultSetIterator
     bindCBLRefCountedToDartObject(this, pointer: _pointer);
   }
 
-  static final _bindings = CBLBindings.instance.resultSet;
-
   final bool encodeArray;
   final Pointer<CBLResultSet> _pointer;
   var _isDone = false;
@@ -251,7 +246,7 @@ final class ResultSetIterator
   fl.Array get current {
     assert(_current != null || !_isDone);
     final result = _current ??= fl.Array.fromPointer(
-      _bindings.resultArray(_pointer),
+      ResultSetBindings.resultArray(_pointer),
     );
     return result;
   }
@@ -262,7 +257,7 @@ final class ResultSetIterator
       return false;
     }
     _current = null;
-    _isDone = !_bindings.next(_pointer);
+    _isDone = !ResultSetBindings.next(_pointer);
     return !_isDone;
   }
 }

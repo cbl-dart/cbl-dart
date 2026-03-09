@@ -122,19 +122,17 @@ abstract final class FileLogger {
 
 // === Impl ====================================================================
 
-final _bindings = CBLBindings.instance.logging;
-
 final class FileLoggerImpl extends FileLogger {
   @override
   LogFileConfiguration? get config =>
-      _bindings.getLogFileConfiguration()?.toLogFileConfiguration();
+      LoggingBindings.getLogFileConfiguration()?.toLogFileConfiguration();
 
   @override
   set config(LogFileConfiguration? config) => _update(config);
 
   @override
   LogLevel get level =>
-      _bindings.getLogFileConfiguration()?.level.toLogLevel() ?? _level;
+      LoggingBindings.getLogFileConfiguration()?.level.toLogLevel() ?? _level;
   LogLevel _level = LogLevel.none;
 
   @override
@@ -144,7 +142,7 @@ final class FileLoggerImpl extends FileLogger {
   }
 
   void _update(LogFileConfiguration? config) {
-    final oldConfig = _bindings.getLogFileConfiguration();
+    final oldConfig = LoggingBindings.getLogFileConfiguration();
 
     CBLLogFileConfiguration? newConfig;
     if (config != null) {
@@ -164,7 +162,7 @@ final class FileLoggerImpl extends FileLogger {
     }
 
     if (oldConfig != newConfig) {
-      _bindings.setFileLogConfiguration(newConfig);
+      LoggingBindings.setFileLogConfiguration(newConfig);
     }
   }
 }

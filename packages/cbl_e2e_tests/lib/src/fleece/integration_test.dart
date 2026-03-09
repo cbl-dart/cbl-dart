@@ -9,9 +9,6 @@ import '../test_binding.dart';
 import '../utils/fleece_coding.dart';
 import '../utils/matchers.dart';
 
-final _arrayBinds = CBLBindings.instance.fleece.array;
-final _dictBinds = CBLBindings.instance.fleece.dict;
-
 void main() {
   setupTestBinding();
 
@@ -19,7 +16,7 @@ void main() {
     // The previous delegate needs to be restored because
     // `CouchbaseLite.init called once for all tests, which is
     // where the MDelegate implementation for CouchbaseList is set up.
-    MDelegate? previousDelegate;
+    late MDelegate previousDelegate;
 
     setUpAll(() {
       previousDelegate = MDelegate.instance;
@@ -74,7 +71,7 @@ void main() {
 
         expect(
           array.get(0),
-          MValue.withValue(_arrayBinds.get(flValue.cast(), 0)),
+          MValue.withValue(ArrayBindings.get(flValue.cast(), 0)),
         );
         array.remove(0);
         expect(array.get(0), isNull);
@@ -111,7 +108,7 @@ void main() {
         expect(root.isMutated, isFalse);
         expect(array.isMutated, isFalse);
         expect(value.isMutated, isFalse);
-        expect(value, MValue.withValue(_arrayBinds.get(flValue.cast(), 0)));
+        expect(value, MValue.withValue(ArrayBindings.get(flValue.cast(), 0)));
 
         array.set(0, 1);
 
@@ -205,7 +202,7 @@ void main() {
 
         expect(
           dict.get('a'),
-          MValue.withValue(_dictBinds.get(flValue.cast(), 'a')!),
+          MValue.withValue(DictBindings.get(flValue.cast(), 'a')!),
         );
         dict.remove('a');
         expect(dict.get('a'), isNull);
@@ -222,7 +219,7 @@ void main() {
         expect(root.isMutated, isFalse);
         expect(dict.isMutated, isFalse);
         expect(value!.isMutated, isFalse);
-        expect(value, MValue.withValue(_dictBinds.get(flValue.cast(), 'a')!));
+        expect(value, MValue.withValue(DictBindings.get(flValue.cast(), 'a')!));
 
         dict.set('a', false);
 
@@ -265,7 +262,7 @@ void main() {
         final flValue = root.values.first.value!;
 
         expect(Map.fromEntries(dict.iterable), {
-          'a': mValue(value: _dictBinds.get(flValue.cast(), 'a')),
+          'a': mValue(value: DictBindings.get(flValue.cast(), 'a')),
         });
       });
 
@@ -276,7 +273,7 @@ void main() {
         dict.set('b', true);
 
         expect(Map.fromEntries(dict.iterable), {
-          'a': mValue(value: _dictBinds.get(flValue.cast(), 'a')),
+          'a': mValue(value: DictBindings.get(flValue.cast(), 'a')),
           'b': mValue(hasNative: true),
         });
       });

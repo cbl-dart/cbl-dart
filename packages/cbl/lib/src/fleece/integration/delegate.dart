@@ -3,6 +3,7 @@ import 'dart:ffi';
 import 'dart:typed_data';
 
 import '../../bindings.dart';
+import '../../document/common.dart' show CblMDelegate;
 import '../decoder.dart';
 import '../encoder.dart';
 import 'array.dart';
@@ -10,10 +11,8 @@ import 'collection.dart';
 import 'dict.dart';
 import 'value.dart';
 
-final _decoderBinds = CBLBindings.instance.fleece.decoder;
-
 abstract base class MDelegate {
-  static MDelegate? instance;
+  static MDelegate instance = CblMDelegate();
 
   MCollection? collectionFromNative(Object? native);
 
@@ -37,7 +36,7 @@ final class SimpleMDelegate extends MDelegate {
 
   @override
   Object? toNative(MValue value, MCollection parent, void Function() cacheIt) {
-    _decoderBinds.getLoadedValue(value.value!);
+    FleeceDecoderBindings.getLoadedValue(value.value!);
 
     final flValue = globalLoadedFLValue.ref;
     switch (FLValueType.fromValue(flValue.type)) {

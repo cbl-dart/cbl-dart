@@ -1,19 +1,16 @@
 import 'dart:ffi';
 import 'dart:isolate';
 
-import 'bindings.dart';
-import 'cblitedart.dart' as cblitedart_lib;
+import 'cblitedart.dart' as cblitedart;
 
 export 'cblitedart.dart' show CBLDart_AsyncCallback;
 
-final class AsyncCallbackBindings extends Bindings {
-  AsyncCallbackBindings(super.libraries);
-
-  late final _finalizer = NativeFinalizer(
+final class AsyncCallbackBindings {
+  static final _finalizer = NativeFinalizer(
     cblitedart.addresses.CBLDart_AsyncCallback_Delete.cast(),
   );
 
-  cblitedart_lib.CBLDart_AsyncCallback create(
+  static cblitedart.CBLDart_AsyncCallback create(
     int id,
     Finalizable callbackObject,
     SendPort sendPort, {
@@ -28,11 +25,14 @@ final class AsyncCallbackBindings extends Bindings {
     return result;
   }
 
-  void close(cblitedart_lib.CBLDart_AsyncCallback callback) {
+  static void close(cblitedart.CBLDart_AsyncCallback callback) {
     cblitedart.CBLDart_AsyncCallback_Close(callback);
   }
 
-  void callForTest(cblitedart_lib.CBLDart_AsyncCallback callback, int result) {
+  static void callForTest(
+    cblitedart.CBLDart_AsyncCallback callback,
+    int result,
+  ) {
     cblitedart.CBLDart_AsyncCallback_CallForTest(callback, result);
   }
 }

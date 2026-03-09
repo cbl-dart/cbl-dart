@@ -2,12 +2,9 @@ import 'dart:async';
 import 'dart:isolate';
 
 import '../bindings.dart';
-import '../document/common.dart';
-import '../fleece/integration/integration.dart';
+import '../bindings/tracing.dart' show onTracedCall;
 import 'errors.dart';
 import 'tracing.dart';
-
-final _bindings = CBLBindings.instance.base;
 
 class InitContext {
   InitContext({required this.filesDir, required this.tempDir});
@@ -20,11 +17,7 @@ class InitContext {
 }
 
 class IsolateContext {
-  IsolateContext({
-    required this.bindingsLibraries,
-    this.bindings,
-    this.initContext,
-  });
+  IsolateContext({this.initContext});
 
   static IsolateContext? _instance;
 
@@ -45,47 +38,31 @@ class IsolateContext {
     return config;
   }
 
-  final CBLBindings? bindings;
-  final BindingsLibraries bindingsLibraries;
-
   final InitContext? initContext;
 
   /// Returns a copy of this context that is safe to send to another isolate.
-  ///
-  /// [CBLBindings] cannot be sent across isolate boundaries because it contains
-  /// `NativeFinalizer` objects. This method strips [bindings] and keeps the
-  /// serializable [bindingsLibraries], which allows the secondary isolate to
-  /// create its own [CBLBindings].
-  IsolateContext forSecondaryIsolate() => IsolateContext(
-    bindingsLibraries: bindingsLibraries,
-    initContext: initContext,
-  );
+  IsolateContext forSecondaryIsolate() =>
+      IsolateContext(initContext: initContext);
 }
 
 /// Initializes this isolate for use of Couchbase Lite, and initializes the
 /// native libraries.
 Future<void> initPrimaryIsolate(IsolateContext context) async {
-  await _initIsolate(context);
-  _bindings.initializeNativeLibraries(context.initContext?.toCbl());
+  _initIsolate(context);
+  BaseBindings.initializeNativeLibraries(context.initContext?.toCbl());
   await _runPostIsolateInitTasks();
 }
 
 /// Initializes this isolate for use of Couchbase Lite, after another primary
 /// isolate has been initialized.
 Future<void> initSecondaryIsolate(IsolateContext context) async {
-  await _initIsolate(context);
+  _initIsolate(context);
   await _runPostIsolateInitTasks();
 }
 
-Future<void> _initIsolate(IsolateContext context) async {
+void _initIsolate(IsolateContext context) {
   IsolateContext.instance = context;
-
-  CBLBindings.init(
-    instance: context.bindings ?? CBLBindings(context.bindingsLibraries),
-    onTracedCall: tracingDelegateTracedNativeCallHandler,
-  );
-
-  MDelegate.instance = CblMDelegate();
+  onTracedCall = tracingDelegateTracedNativeCallHandler;
 }
 
 typedef PostIsolateInitTask = FutureOr<void> Function();

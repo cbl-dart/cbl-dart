@@ -20,14 +20,12 @@ export '../bindings.dart' show FLCopyFlags, FLTrust;
 /// the range [0...2047]
 final class SharedKeys implements Finalizable {
   /// Creates new empty [SharedKeys].
-  SharedKeys() : this.fromPointer(_bindings.create(), adopt: true);
+  SharedKeys() : this.fromPointer(SharedKeysBindings.create(), adopt: true);
 
   /// Creates [SharedKeys] from an exiting native instance.
   SharedKeys.fromPointer(this.pointer, {bool adopt = false}) {
-    _bindings.bindToDartObject(this, pointer, retain: !adopt);
+    SharedKeysBindings.bindToDartObject(this, pointer, retain: !adopt);
   }
-
-  static final _bindings = CBLBindings.instance.fleece.sharedKeys;
 
   final FLSharedKeys pointer;
 
@@ -35,7 +33,7 @@ final class SharedKeys implements Finalizable {
   ///
   /// This number increases whenever the mapping is changed, and never
   /// decreases.
-  int get count => _bindings.count(pointer);
+  int get count => SharedKeysBindings.count(pointer);
 }
 
 // === Doc =====================================================================
@@ -49,7 +47,7 @@ final class Doc implements Finalizable {
     FLTrust trust, {
     SharedKeys? sharedKeys,
   }) {
-    final docPointer = _bindings.fromResultData(
+    final docPointer = DocBindings.fromResultData(
       data,
       trust,
       sharedKeys?.pointer,
@@ -62,29 +60,27 @@ final class Doc implements Finalizable {
   /// The data is first encoded into Fleece, and the Fleece data is kept by the
   /// doc.
   factory Doc.fromJson(String json) =>
-      Doc.fromPointer(_bindings.fromJson(json));
+      Doc.fromPointer(DocBindings.fromJson(json));
 
   /// Creates an [Doc] based on a [pointer] to the the native value.
   ///
   /// Note: Does not retain the native doc.
   Doc.fromPointer(this.pointer) {
-    _bindings.bindToDartObject(this, pointer);
+    DocBindings.bindToDartObject(this, pointer);
   }
-
-  static final _bindings = CBLBindings.instance.fleece.doc;
 
   final FLDoc pointer;
 
   /// Returns the data owned by the document, if any, else `null`.
-  SliceResult? get allocedData => _bindings.getAllocedData(pointer);
+  SliceResult? get allocedData => DocBindings.getAllocedData(pointer);
 
   /// Returns the root value in the [Doc], usually an [Dict].
-  Value get root => Value.fromPointer(_bindings.getRoot(pointer));
+  Value get root => Value.fromPointer(DocBindings.getRoot(pointer));
 
   /// Returns the [SharedKeys] used by this [Doc], as specified when it was
   /// created.
   SharedKeys? get sharedKeys =>
-      _bindings.getSharedKeys(pointer)?.let(SharedKeys.fromPointer);
+      DocBindings.getSharedKeys(pointer)?.let(SharedKeys.fromPointer);
 }
 
 // === Value ===================================================================
@@ -152,11 +148,9 @@ final class Value implements Finalizable {
          'only an object which is ref counted can be adopted',
        ) {
     if (isRefCounted) {
-      _bindings.bindToDartObject(this, value: pointer, retain: !adopt);
+      ValueBindings.bindToDartObject(this, value: pointer, retain: !adopt);
     }
   }
-
-  static final _bindings = CBLBindings.instance.fleece.value;
 
   final FLValue pointer;
 
@@ -166,10 +160,10 @@ final class Value implements Finalizable {
 
   /// Looks up the Doc containing the Value, or null if the Value was created
   /// without a Doc.
-  Doc? get doc => _bindings.findDoc(pointer)?.let(Doc.fromPointer);
+  Doc? get doc => ValueBindings.findDoc(pointer)?.let(Doc.fromPointer);
 
   /// Returns the data type of an arbitrary Value.
-  ValueType get type => _bindings.getType(pointer).toValueType();
+  ValueType get type => ValueBindings.getType(pointer).toValueType();
 
   /// Whether this value represents an `undefined` value.
   bool get isUndefined => type == ValueType.undefined;
@@ -178,31 +172,31 @@ final class Value implements Finalizable {
   bool get isNull => type == ValueType.null_;
 
   /// Returns true if the value is non-null and represents an integer.
-  bool get isInteger => _bindings.isInteger(pointer);
+  bool get isInteger => ValueBindings.isInteger(pointer);
 
   /// Returns true if the value is non-null and represents a 64-bit
   /// floating-point number.
-  bool get isDouble => _bindings.isDouble(pointer);
+  bool get isDouble => ValueBindings.isDouble(pointer);
 
   /// Returns a value coerced to boolean. This will be true unless the value is
   /// undefined, null, false, or zero.
-  bool get asBool => _bindings.asBool(pointer);
+  bool get asBool => ValueBindings.asBool(pointer);
 
   /// Returns a value coerced to an integer. True and false are returned as 1
   /// and 0, and floating-point numbers are rounded. All other types are
   /// returned as 0.
-  int get asInt => _bindings.asInt(pointer);
+  int get asInt => ValueBindings.asInt(pointer);
 
   /// Returns a value coerced to a 64-bit floating point number. True and false
   /// are returned as 1.0 and 0.0, and integers are converted to float. All
   /// other types are returned as 0.0.
-  double get asDouble => _bindings.asDouble(pointer);
+  double get asDouble => ValueBindings.asDouble(pointer);
 
   /// Returns the exact contents of a string value, or null for all other types.
-  String? get asString => _bindings.asString(pointer);
+  String? get asString => ValueBindings.asString(pointer);
 
   /// Returns the exact contents of a data value, or null for all other types.
-  Uint8List? get asData => _bindings.asData(pointer)?.toTypedList();
+  Uint8List? get asData => ValueBindings.asData(pointer)?.toTypedList();
 
   /// If a Value represents an array, returns it as a [Array], else null.
   Array? get asArray =>
@@ -215,12 +209,12 @@ final class Value implements Finalizable {
   /// Returns a string representation of any scalar value. Data values are
   /// returned in raw form. Arrays and dictionaries don't have a representation
   /// and will return null.
-  String? get scalarToString => _bindings.scalarToString(pointer);
+  String? get scalarToString => ValueBindings.scalarToString(pointer);
 
   /// Encodes a Fleece value as JSON (or a JSON fragment.) Any Data values will
   /// become base64-encoded JSON strings.
   String toJson({bool json5 = false, bool canonical = true}) =>
-      _bindings.toJSONX(pointer, json5: json5, canonical: canonical);
+      ValueBindings.toJSONX(pointer, json5: json5, canonical: canonical);
 
   Object? toObject() {
     switch (type) {
@@ -248,7 +242,7 @@ final class Value implements Finalizable {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is Value && _bindings.isEqual(pointer, other.pointer);
+      other is Value && ValueBindings.isEqual(pointer, other.pointer);
 
   @override
   int get hashCode {
@@ -300,16 +294,14 @@ final class Array extends Value with ListMixin<Value> {
   Array.fromPointer(FLArray pointer, {super.isRefCounted, super.adopt})
     : super.fromPointer(pointer.cast());
 
-  static final _bindings = CBLBindings.instance.fleece.array;
-
   @override
-  int get length => _bindings.count(pointer.cast());
+  int get length => ArrayBindings.count(pointer.cast());
 
   @override
   set length(int length) => throw _immutableValueException();
 
   @override
-  bool get isEmpty => _bindings.isEmpty(pointer.cast());
+  bool get isEmpty => ArrayBindings.isEmpty(pointer.cast());
 
   @override
   Value get first => this[0];
@@ -319,14 +311,14 @@ final class Array extends Value with ListMixin<Value> {
 
   /// If the array is mutable, returns it cast to [MutableArray], else null.
   MutableArray? get asMutable =>
-      _bindings.asMutable(pointer.cast())?.let(MutableArray.fromPointer);
+      ArrayBindings.asMutable(pointer.cast())?.let(MutableArray.fromPointer);
 
   @override
   List<Object?> toObject() => map((element) => element.toObject()).toList();
 
   @override
   Value operator [](int index) => Value.fromPointer(
-    _bindings.get(pointer.cast(), index),
+    ArrayBindings.get(pointer.cast(), index),
     isRefCounted: false,
   );
 
@@ -342,7 +334,10 @@ final class Array extends Value with ListMixin<Value> {
 final class MutableArray extends Array {
   /// Creates a new empty [MutableArray].
   factory MutableArray([Iterable<Object?>? from]) {
-    final result = MutableArray.fromPointer(_bindings.create(), adopt: true);
+    final result = MutableArray.fromPointer(
+      MutableArrayBindings.create(),
+      adopt: true,
+    );
 
     if (from != null) {
       result.addAll(from);
@@ -368,23 +363,21 @@ final class MutableArray extends Array {
     Array source, {
     FLCopyFlags flags = FLCopyFlags.defaultCopy,
   }) => MutableArray.fromPointer(
-    _bindings.mutableCopy(source.pointer.cast(), flags),
+    MutableArrayBindings.mutableCopy(source.pointer.cast(), flags),
     adopt: true,
   );
-
-  static final _bindings = CBLBindings.instance.fleece.mutableArray;
 
   /// If the Array was created by [MutableArray.mutableCopy], returns the
   /// original source Array.
   Array? get source =>
-      _bindings.getSource(pointer.cast())?.let(Array.fromPointer);
+      MutableArrayBindings.getSource(pointer.cast())?.let(Array.fromPointer);
 
   /// Returns true if the [Array] has been changed from the source it was copied
   /// from.
-  bool get isChanged => _bindings.isChanged(pointer.cast());
+  bool get isChanged => MutableArrayBindings.isChanged(pointer.cast());
 
   @override
-  set length(int length) => _bindings.resize(pointer.cast(), length);
+  set length(int length) => MutableArrayBindings.resize(pointer.cast(), length);
 
   @override
   set first(Object? value) => this[0] = value;
@@ -395,12 +388,12 @@ final class MutableArray extends Array {
   @override
   void operator []=(int index, Object? value) {
     RangeError.checkValidIndex(index, this);
-    _setSlotValue(_bindings.set(pointer.cast(), index), value);
+    _setSlotValue(MutableArrayBindings.set(pointer.cast(), index), value);
   }
 
   @override
   void add(Object? element) =>
-      _setSlotValue(_bindings.append(pointer.cast()), element);
+      _setSlotValue(MutableArrayBindings.append(pointer.cast()), element);
 
   @override
   void addAll(Iterable<Object?> iterable) {
@@ -415,7 +408,7 @@ final class MutableArray extends Array {
   @override
   void removeRange(int start, int end) {
     RangeError.checkValidRange(start, end, length);
-    _bindings.remove(pointer.cast(), start, end - start);
+    MutableArrayBindings.remove(pointer.cast(), start, end - start);
   }
 
   /// Inserts a contiguous range of JSON `null` values into the array.
@@ -424,7 +417,7 @@ final class MutableArray extends Array {
   /// is the number of items to insert.
   void insertNulls(int start, int count) {
     RangeError.checkValidIndex(start, this, 'start');
-    _bindings.insert(pointer.cast(), start, count);
+    MutableArrayBindings.insert(pointer.cast(), start, count);
   }
 
   /// Convenience function for getting an dict-valued property in mutable form.
@@ -433,9 +426,10 @@ final class MutableArray extends Array {
   /// - If the value is a mutable dict, returns it.
   /// - If the value is an immutable dict, this function makes a mutable copy,
   ///   assigns the copy as the property value, and returns the copy.
-  MutableDict? mutableDict(int index) => _bindings
-      .getMutableDict(pointer.cast(), index)
-      ?.let(MutableDict.fromPointer);
+  MutableDict? mutableDict(int index) => MutableArrayBindings.getMutableDict(
+    pointer.cast(),
+    index,
+  )?.let(MutableDict.fromPointer);
 
   /// Convenience function for getting a array-valued property in mutable form.
   ///
@@ -443,9 +437,10 @@ final class MutableArray extends Array {
   /// - If the value is a mutable array, returns it.
   /// - If the value is an immutable array, this function makes a mutable copy,
   ///   assigns the copy as the property value, and returns the copy.
-  MutableArray? mutableArray(int index) => _bindings
-      .getMutableArray(pointer.cast(), index)
-      ?.let(MutableArray.fromPointer);
+  MutableArray? mutableArray(int index) => MutableArrayBindings.getMutableArray(
+    pointer.cast(),
+    index,
+  )?.let(MutableArray.fromPointer);
 }
 
 // === Dict ====================================================================
@@ -456,30 +451,28 @@ final class Dict extends Value with MapMixin<String, Value> {
   Dict.fromPointer(FLDict pointer, {super.isRefCounted, super.adopt})
     : super.fromPointer(pointer.cast());
 
-  static final _bindings = CBLBindings.instance.fleece.dict;
-
   /// Returns the number of items in a dictionary.
   @override
-  int get length => _bindings.count(pointer.cast());
+  int get length => DictBindings.count(pointer.cast());
 
   /// Returns true if a dictionary is empty. Depending on the dictionary's
   /// representation, this can be faster than `count == 0`.
   @override
-  bool get isEmpty => _bindings.isEmpty(pointer.cast());
+  bool get isEmpty => DictBindings.isEmpty(pointer.cast());
 
   @override
   bool get isNotEmpty => !isEmpty;
 
   /// If the dictionary is mutable, returns it cast to [MutableDict], else null.
   MutableDict? get asMutable =>
-      _bindings.asMutable(pointer.cast())?.let(MutableDict.fromPointer);
+      DictBindings.asMutable(pointer.cast())?.let(MutableDict.fromPointer);
 
   @override
   late final Iterable<String> keys = _DictKeyIterable(this);
 
   @override
   Value operator [](Object? key) => Value.fromPointer(
-    _bindings.get(pointer.cast(), assertKey(key)) ?? nullptr,
+    DictBindings.get(pointer.cast(), assertKey(key)) ?? nullptr,
     isRefCounted: false,
   );
 
@@ -545,7 +538,10 @@ final class _DictKeyIterator implements Iterator<String> {
 final class MutableDict extends Dict {
   /// Creates a new empty [MutableDict].
   factory MutableDict([Map<String, Object?>? from]) {
-    final result = MutableDict.fromPointer(_bindings.create(), adopt: true);
+    final result = MutableDict.fromPointer(
+      MutableDictBindings.create(),
+      adopt: true,
+    );
 
     if (from != null) {
       result.addAll(from);
@@ -574,24 +570,22 @@ final class MutableDict extends Dict {
     Dict source, {
     FLCopyFlags flags = FLCopyFlags.defaultCopy,
   }) => MutableDict.fromPointer(
-    _bindings.mutableCopy(source.pointer.cast(), flags),
+    MutableDictBindings.mutableCopy(source.pointer.cast(), flags),
     adopt: true,
   );
-
-  static final _bindings = CBLBindings.instance.fleece.mutableDict;
 
   /// If the Dict was created by [MutableDict.mutableCopy], returns the original
   /// source Dict.
   Dict? get source =>
-      _bindings.getSource(pointer.cast())?.let(Dict.fromPointer);
+      MutableDictBindings.getSource(pointer.cast())?.let(Dict.fromPointer);
 
   /// Returns true if the Dict has been changed from the source it was copied
   /// from.
-  bool get isChanged => _bindings.isChanged(pointer.cast());
+  bool get isChanged => MutableDictBindings.isChanged(pointer.cast());
 
   @override
   void operator []=(String key, Object? value) =>
-      _setSlotValue(_bindings.set(pointer.cast(), key), value);
+      _setSlotValue(MutableDictBindings.set(pointer.cast(), key), value);
 
   @override
   void addAll(Map<String, Object?> other) {
@@ -601,7 +595,7 @@ final class MutableDict extends Dict {
   }
 
   @override
-  void clear() => _bindings.removeAll(pointer.cast());
+  void clear() => MutableDictBindings.removeAll(pointer.cast());
 
   @override
   Value? remove(Object? key) {
@@ -609,7 +603,7 @@ final class MutableDict extends Dict {
 
     final value = this[stringKey];
 
-    _bindings.remove(pointer.cast(), stringKey);
+    MutableDictBindings.remove(pointer.cast(), stringKey);
 
     return value;
   }
@@ -620,9 +614,10 @@ final class MutableDict extends Dict {
   /// - If the value is a mutable dict, returns it.
   /// - If the value is an immutable dict, this function makes a mutable copy,
   ///   assigns the copy as the property value, and returns the copy.
-  MutableDict? mutableDict(String key) => _bindings
-      .getMutableDict(pointer.cast(), key)
-      ?.let(MutableDict.fromPointer);
+  MutableDict? mutableDict(String key) => MutableDictBindings.getMutableDict(
+    pointer.cast(),
+    key,
+  )?.let(MutableDict.fromPointer);
 
   /// Convenience function for getting a array-valued property in mutable form.
   ///
@@ -630,9 +625,10 @@ final class MutableDict extends Dict {
   /// - If the value is a mutable array, returns it.
   /// - If the value is an immutable array, this function makes a mutable copy,
   ///   assigns the copy as the property value, and returns the copy.
-  MutableArray? mutableArray(String key) => _bindings
-      .getMutableArray(pointer.cast(), key)
-      ?.let(MutableArray.fromPointer);
+  MutableArray? mutableArray(String key) => MutableDictBindings.getMutableArray(
+    pointer.cast(),
+    key,
+  )?.let(MutableArray.fromPointer);
 }
 
 // === SlotSetter ==============================================================
@@ -666,8 +662,6 @@ abstract final class SlotSetter {
 }
 
 final class _DefaultSlotSetter implements SlotSetter {
-  late final _slotBindings = CBLBindings.instance.fleece.slot;
-
   @override
   bool canSetValue(Object? value) =>
       value == null ||
@@ -686,19 +680,19 @@ final class _DefaultSlotSetter implements SlotSetter {
     value = _recursivelyConvertCollectionsToFleece(value);
 
     if (value == null) {
-      _slotBindings.setNull(slot);
+      SlotBindings.setNull(slot);
     } else if (value is bool) {
-      _slotBindings.setBool(slot, value);
+      SlotBindings.setBool(slot, value);
     } else if (value is int) {
-      _slotBindings.setInt(slot, value);
+      SlotBindings.setInt(slot, value);
     } else if (value is double) {
-      _slotBindings.setDouble(slot, value);
+      SlotBindings.setDouble(slot, value);
     } else if (value is String) {
-      _slotBindings.setString(slot, value);
+      SlotBindings.setString(slot, value);
     } else if (value is Uint8List) {
-      _slotBindings.setData(slot, value.toData());
+      SlotBindings.setData(slot, value.toData());
     } else if (value is Value) {
-      _slotBindings.setValue(slot, value.pointer);
+      SlotBindings.setValue(slot, value.pointer);
     }
   }
 

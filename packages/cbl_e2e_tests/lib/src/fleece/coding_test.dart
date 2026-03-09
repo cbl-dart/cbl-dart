@@ -8,9 +8,6 @@ import '../../test_binding_impl.dart';
 import '../test_binding.dart';
 import '../utils/fleece_coding.dart';
 
-final _decoderBinds = CBLBindings.instance.fleece.decoder;
-final _valueBinds = CBLBindings.instance.fleece.value;
-
 void main() {
   setupTestBinding();
 
@@ -35,9 +32,9 @@ void main() {
         final sliceResult = data.toSliceResult();
         final sharedStringsTable = SharedStringsTable();
 
-        final flValue = _valueBinds.fromData(sliceResult, FLTrust.trusted)!;
+        final flValue = ValueBindings.fromData(sliceResult, FLTrust.trusted)!;
         for (var i = 0; i < 4; i++) {
-          _decoderBinds.getLoadedValueFromArray(flValue.cast(), i);
+          FleeceDecoderBindings.getLoadedValueFromArray(flValue.cast(), i);
           sharedStringsTable.decode(StringSource.value);
         }
 
