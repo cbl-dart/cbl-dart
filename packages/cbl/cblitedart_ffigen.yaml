@@ -33,6 +33,21 @@ functions:
       - CBLDart_ListenerCertAuthCallbackTrampoline
       - CBLDart_ListenerPasswordAuthCallbackTrampoline
       - CBLDart_PredictiveModel_Delete
+  leaf:
+    include:
+      - '.*'
+    exclude:
+      # Functions that call Dart VM APIs.
+      - CBLDart_Initialize
+      - CBLDartKeyPair_CreateWithExternalKey
+      # Functions that interact with Dart ports.
+      - CBLDart_AsyncCallback_New
+      - CBLDart_AsyncCallback_Delete
+      - CBLDart_AsyncCallback_Close
+      - CBLDart_AsyncCallback_CallForTest
+      - CBLDart_PredictiveModel_Delete
+      - CBLDart_ListenerPasswordAuthCallbackTrampoline
+      - CBLDart_ListenerCertAuthCallbackTrampoline
 enums:
   as-int:
     include:

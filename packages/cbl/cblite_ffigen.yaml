@@ -35,6 +35,13 @@ functions:
       - FLEncoder_Free
       - FLSharedKeys_Release
       - FLValue_Release
+  leaf:
+    include:
+      - '.*'
+    exclude:
+      # Functions that synchronously invoke callback parameters.
+      - CBLDatabase_SaveDocumentWithConflictHandler
+      - CBLCollection_SaveDocumentWithConflictHandler
 structs:
   member-rename:
     FLDictKey:
