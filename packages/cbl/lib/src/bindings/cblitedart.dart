@@ -9,39 +9,39 @@ import 'dart:ffi' as ffi;
 import 'package:cbl/src/bindings/cblite.dart' as imp$1;
 import '' as self;
 
-@ffi.Native<NativeCBLDart_FLSliceResult_RetainByBuf>()
+@ffi.Native<NativeCBLDart_FLSliceResult_RetainByBuf>(isLeaf: true)
 external void CBLDart_FLSliceResult_RetainByBuf(ffi.Pointer<ffi.Void> buf);
 
-@ffi.Native<NativeCBLDart_FLSliceResult_ReleaseByBuf>()
+@ffi.Native<NativeCBLDart_FLSliceResult_ReleaseByBuf>(isLeaf: true)
 external void CBLDart_FLSliceResult_ReleaseByBuf(ffi.Pointer<ffi.Void> buf);
 
-@ffi.Native<NativeCBLDart_KnownSharedKeys_New>()
+@ffi.Native<NativeCBLDart_KnownSharedKeys_New>(isLeaf: true)
 external ffi.Pointer<KnownSharedKeys> CBLDart_KnownSharedKeys_New();
 
-@ffi.Native<NativeCBLDart_KnownSharedKeys_Delete>()
+@ffi.Native<NativeCBLDart_KnownSharedKeys_Delete>(isLeaf: true)
 external void CBLDart_KnownSharedKeys_Delete(ffi.Pointer<KnownSharedKeys> keys);
 
-@ffi.Native<NativeCBLDart_GetLoadedFLValue>()
+@ffi.Native<NativeCBLDart_GetLoadedFLValue>(isLeaf: true)
 external void CBLDart_GetLoadedFLValue(
   imp$1.FLValue value,
   ffi.Pointer<CBLDart_LoadedFLValue> out,
 );
 
-@ffi.Native<NativeCBLDart_FLArray_GetLoadedFLValue>()
+@ffi.Native<NativeCBLDart_FLArray_GetLoadedFLValue>(isLeaf: true)
 external void CBLDart_FLArray_GetLoadedFLValue(
   imp$1.FLArray array,
   int index,
   ffi.Pointer<CBLDart_LoadedFLValue> out,
 );
 
-@ffi.Native<NativeCBLDart_FLDict_GetLoadedFLValue>()
+@ffi.Native<NativeCBLDart_FLDict_GetLoadedFLValue>(isLeaf: true)
 external void CBLDart_FLDict_GetLoadedFLValue(
   imp$1.FLDict dict,
   imp$1.FLString key,
   ffi.Pointer<CBLDart_LoadedFLValue> out,
 );
 
-@ffi.Native<NativeCBLDart_FLDictIterator_Begin>()
+@ffi.Native<NativeCBLDart_FLDictIterator_Begin>(isLeaf: true)
 external ffi.Pointer<CBLDart_FLDictIterator> CBLDart_FLDictIterator_Begin(
   imp$1.FLDict dict,
   ffi.Pointer<KnownSharedKeys> knownSharedKeys,
@@ -51,44 +51,44 @@ external ffi.Pointer<CBLDart_FLDictIterator> CBLDart_FLDictIterator_Begin(
   bool preLoad,
 );
 
-@ffi.Native<NativeCBLDart_FLDictIterator_Delete>()
+@ffi.Native<NativeCBLDart_FLDictIterator_Delete>(isLeaf: true)
 external void CBLDart_FLDictIterator_Delete(
   ffi.Pointer<CBLDart_FLDictIterator> iterator,
 );
 
-@ffi.Native<NativeCBLDart_FLDictIterator_Next>()
+@ffi.Native<NativeCBLDart_FLDictIterator_Next>(isLeaf: true)
 external bool CBLDart_FLDictIterator_Next(
   ffi.Pointer<CBLDart_FLDictIterator> iterator,
 );
 
-@ffi.Native<NativeCBLDart_FLArrayIterator_Begin>()
+@ffi.Native<NativeCBLDart_FLArrayIterator_Begin>(isLeaf: true)
 external ffi.Pointer<CBLDart_FLArrayIterator> CBLDart_FLArrayIterator_Begin(
   imp$1.FLArray array,
   ffi.Pointer<CBLDart_LoadedFLValue> valueOut,
   bool deleteOnDone,
 );
 
-@ffi.Native<NativeCBLDart_FLArrayIterator_Delete>()
+@ffi.Native<NativeCBLDart_FLArrayIterator_Delete>(isLeaf: true)
 external void CBLDart_FLArrayIterator_Delete(
   ffi.Pointer<CBLDart_FLArrayIterator> iterator,
 );
 
-@ffi.Native<NativeCBLDart_FLArrayIterator_Next>()
+@ffi.Native<NativeCBLDart_FLArrayIterator_Next>(isLeaf: true)
 external bool CBLDart_FLArrayIterator_Next(
   ffi.Pointer<CBLDart_FLArrayIterator> iterator,
 );
 
-@ffi.Native<NativeCBLDart_FLEncoder_WriteArrayValue>()
+@ffi.Native<NativeCBLDart_FLEncoder_WriteArrayValue>(isLeaf: true)
 external bool CBLDart_FLEncoder_WriteArrayValue(
   imp$1.FLEncoder encoder,
   imp$1.FLArray array,
   int index,
 );
 
-@ffi.Native<NativeCBLDart_CpuSupportsAVX2>()
+@ffi.Native<NativeCBLDart_CpuSupportsAVX2>(isLeaf: true)
 external bool CBLDart_CpuSupportsAVX2();
 
-@ffi.Native<NativeCBLDart_IsEnterprise>()
+@ffi.Native<NativeCBLDart_IsEnterprise>(isLeaf: true)
 external bool CBLDart_IsEnterprise();
 
 @ffi.Native<NativeCBLDart_Initialize>()
@@ -117,41 +117,41 @@ external void CBLDart_AsyncCallback_CallForTest(
   int argument,
 );
 
-@ffi.Native<NativeCBLDart_Completer_Complete>()
+@ffi.Native<NativeCBLDart_Completer_Complete>(isLeaf: true)
 external void CBLDart_Completer_Complete(
   CBLDart_Completer completer,
   int result,
 );
 
-@ffi.Native<NativeCBLDart_AllocateIsolateId>()
+@ffi.Native<NativeCBLDart_AllocateIsolateId>(isLeaf: true)
 external int CBLDart_AllocateIsolateId();
 
-@ffi.Native<NativeCBLDart_SetCurrentIsolateId>()
+@ffi.Native<NativeCBLDart_SetCurrentIsolateId>(isLeaf: true)
 external void CBLDart_SetCurrentIsolateId(int isolateId);
 
-@ffi.Native<NativeCBLDart_GetCurrentIsolateId>()
+@ffi.Native<NativeCBLDart_GetCurrentIsolateId>(isLeaf: true)
 external int CBLDart_GetCurrentIsolateId();
 
-@ffi.Native<NativeCBLDart_CBLLog_SetCallback>()
+@ffi.Native<NativeCBLDart_CBLLog_SetCallback>(isLeaf: true)
 external bool CBLDart_CBLLog_SetCallback(CBLDart_AsyncCallback callback);
 
-@ffi.Native<NativeCBLDart_CBLLog_SetCallbackLevel>()
+@ffi.Native<NativeCBLDart_CBLLog_SetCallbackLevel>(isLeaf: true)
 external void CBLDart_CBLLog_SetCallbackLevel(imp$1.DartCBLLogLevel level);
 
-@ffi.Native<NativeCBLDart_CBLLog_SetFileSink>()
+@ffi.Native<NativeCBLDart_CBLLog_SetFileSink>(isLeaf: true)
 external void CBLDart_CBLLog_SetFileSink(ffi.Pointer<CBLFileLogSink> sink);
 
-@ffi.Native<NativeCBLDart_CBLLog_GetFileSink>()
+@ffi.Native<NativeCBLDart_CBLLog_GetFileSink>(isLeaf: true)
 external ffi.Pointer<CBLFileLogSink> CBLDart_CBLLog_GetFileSink();
 
-@ffi.Native<NativeCBLDart_CBLLog_SetSentryBreadcrumbs>()
+@ffi.Native<NativeCBLDart_CBLLog_SetSentryBreadcrumbs>(isLeaf: true)
 external bool CBLDart_CBLLog_SetSentryBreadcrumbs(bool enabled);
 
-@ffi.Native<NativeCBLDart_CBLDatabaseConfiguration_Default>()
+@ffi.Native<NativeCBLDart_CBLDatabaseConfiguration_Default>(isLeaf: true)
 external CBLDart_CBLDatabaseConfiguration
 CBLDart_CBLDatabaseConfiguration_Default();
 
-@ffi.Native<NativeCBLDart_CBL_CopyDatabase>()
+@ffi.Native<NativeCBLDart_CBL_CopyDatabase>(isLeaf: true)
 external bool CBLDart_CBL_CopyDatabase(
   imp$1.FLString fromPath,
   imp$1.FLString toName,
@@ -159,24 +159,24 @@ external bool CBLDart_CBL_CopyDatabase(
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDart_CBLDatabase_Open>()
+@ffi.Native<NativeCBLDart_CBLDatabase_Open>(isLeaf: true)
 external ffi.Pointer<CBLDatabase> CBLDart_CBLDatabase_Open(
   imp$1.FLString name,
   ffi.Pointer<CBLDart_CBLDatabaseConfiguration> config,
   ffi.Pointer<CBLError> errorOut,
 );
 
-@ffi.Native<NativeCBLDart_CBLDatabase_Release>()
+@ffi.Native<NativeCBLDart_CBLDatabase_Release>(isLeaf: true)
 external void CBLDart_CBLDatabase_Release(ffi.Pointer<CBLDatabase> database);
 
-@ffi.Native<NativeCBLDart_CBLDatabase_Close>()
+@ffi.Native<NativeCBLDart_CBLDatabase_Close>(isLeaf: true)
 external bool CBLDart_CBLDatabase_Close(
   ffi.Pointer<CBLDatabase> database,
   bool andDelete,
   ffi.Pointer<CBLError> errorOut,
 );
 
-@ffi.Native<NativeCBLDart_CBLCollection_AddDocumentChangeListener>()
+@ffi.Native<NativeCBLDart_CBLCollection_AddDocumentChangeListener>(isLeaf: true)
 external void CBLDart_CBLCollection_AddDocumentChangeListener(
   ffi.Pointer<CBLDatabase> db,
   ffi.Pointer<CBLCollection> collection,
@@ -184,14 +184,14 @@ external void CBLDart_CBLCollection_AddDocumentChangeListener(
   CBLDart_AsyncCallback listener,
 );
 
-@ffi.Native<NativeCBLDart_CBLCollection_AddChangeListener>()
+@ffi.Native<NativeCBLDart_CBLCollection_AddChangeListener>(isLeaf: true)
 external void CBLDart_CBLCollection_AddChangeListener(
   ffi.Pointer<CBLDatabase> db,
   ffi.Pointer<CBLCollection> collection,
   CBLDart_AsyncCallback listener,
 );
 
-@ffi.Native<NativeCBLDart_CBLCollection_CreateIndex>()
+@ffi.Native<NativeCBLDart_CBLCollection_CreateIndex>(isLeaf: true)
 external bool CBLDart_CBLCollection_CreateIndex(
   ffi.Pointer<CBLCollection> collection,
   imp$1.FLString name,
@@ -199,14 +199,14 @@ external bool CBLDart_CBLCollection_CreateIndex(
   ffi.Pointer<CBLError> errorOut,
 );
 
-@ffi.Native<NativeCBLDart_CBLQuery_AddChangeListener>()
+@ffi.Native<NativeCBLDart_CBLQuery_AddChangeListener>(isLeaf: true)
 external ffi.Pointer<CBLListenerToken> CBLDart_CBLQuery_AddChangeListener(
   ffi.Pointer<CBLDatabase> db,
   ffi.Pointer<CBLQuery> query,
   CBLDart_AsyncCallback listener,
 );
 
-@ffi.Native<NativeCBLDart_PredictiveModel_New>()
+@ffi.Native<NativeCBLDart_PredictiveModel_New>(isLeaf: true)
 external CBLDart_PredictiveModel CBLDart_PredictiveModel_New(
   imp$1.FLString name,
   int isolateId,
@@ -218,32 +218,34 @@ external CBLDart_PredictiveModel CBLDart_PredictiveModel_New(
 @ffi.Native<NativeCBLDart_PredictiveModel_Delete>()
 external void CBLDart_PredictiveModel_Delete(CBLDart_PredictiveModel model);
 
-@ffi.Native<NativeCBLDart_CBLBlobReader_Read>()
+@ffi.Native<NativeCBLDart_CBLBlobReader_Read>(isLeaf: true)
 external FLSliceResult CBLDart_CBLBlobReader_Read(
   ffi.Pointer<CBLBlobReadStream> stream,
   int bufferSize,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDart_CBLReplicator_Create>()
+@ffi.Native<NativeCBLDart_CBLReplicator_Create>(isLeaf: true)
 external ffi.Pointer<CBLReplicator> CBLDart_CBLReplicator_Create(
   ffi.Pointer<CBLDart_ReplicatorConfiguration> config,
   ffi.Pointer<CBLError> errorOut,
 );
 
-@ffi.Native<NativeCBLDart_CBLReplicator_Release>()
+@ffi.Native<NativeCBLDart_CBLReplicator_Release>(isLeaf: true)
 external void CBLDart_CBLReplicator_Release(
   ffi.Pointer<CBLReplicator> replicator,
 );
 
-@ffi.Native<NativeCBLDart_CBLReplicator_AddChangeListener>()
+@ffi.Native<NativeCBLDart_CBLReplicator_AddChangeListener>(isLeaf: true)
 external void CBLDart_CBLReplicator_AddChangeListener(
   ffi.Pointer<CBLDatabase> db,
   ffi.Pointer<CBLReplicator> replicator,
   CBLDart_AsyncCallback listenerId,
 );
 
-@ffi.Native<NativeCBLDart_CBLReplicator_AddDocumentReplicationListener>()
+@ffi.Native<NativeCBLDart_CBLReplicator_AddDocumentReplicationListener>(
+  isLeaf: true,
+)
 external void CBLDart_CBLReplicator_AddDocumentReplicationListener(
   ffi.Pointer<CBLDatabase> db,
   ffi.Pointer<CBLReplicator> replicator,
