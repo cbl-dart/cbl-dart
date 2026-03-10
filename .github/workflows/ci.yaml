@@ -167,7 +167,7 @@ jobs:
     name: E2E tests
     timeout-minutes: 15
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         embedder: [standalone, flutter]
         os:

@@ -35,6 +35,42 @@ functions:
       - FLEncoder_Free
       - FLSharedKeys_Release
       - FLValue_Release
+  # Leaf functions bypass some of the Dart-to-native calling overhead, but have
+  # constraints:
+  #
+  # Hard: Must not call back into Dart or use any Dart VM APIs.
+  # Soft: Should be short-running and non-blocking. A blocking leaf call delays
+  #       GC and isolate group synchronization until it returns.
+  #
+  # Functions that only *store* callbacks for later async invocation are safe to
+  # mark as leaf. Functions that *synchronously invoke* callbacks are not.
+  leaf:
+    include:
+      - '.*'
+    exclude:
+      # Functions that synchronously invoke callback parameters.
+      - CBLDatabase_SaveDocumentWithConflictHandler
+      - CBLCollection_SaveDocumentWithConflictHandler
+      # Query execution can synchronously invoke predictive model callbacks.
+      - CBLQuery_Execute
+      - CBLResultSet_Next
+      # Synchronously fires all buffered listener callbacks.
+      - CBLDatabase_SendNotifications
+      # Synchronously invokes the unregistered callback of the predictive model.
+      - CBL_UnregisterPredictiveModel
+      # May synchronously invoke external key callbacks (publicKeyData,
+      # decrypt, sign, free) registered via CBLKeyPair_CreateWithExternalKey.
+      - CBLKeyPair_PublicKeyDigest
+      - CBLKeyPair_PublicKeyData
+      - CBLKeyPair_PrivateKeyData
+      - CBLTLSIdentity_CreateIdentityWithKeyPair
+      - CBLTLSIdentity_IdentityWithKeyPairAndCerts
+      # May synchronously invoke external key callbacks via TLS identity.
+      - CBLURLEndpointListener_Create
+      - CBLURLEndpointListener_Start
+      # Synchronously invoke the custom log callback.
+      - CBL_Log
+      - CBL_LogMessage
 structs:
   member-rename:
     FLDictKey:

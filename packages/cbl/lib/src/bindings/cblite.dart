@@ -10,25 +10,25 @@ library;
 import 'dart:ffi' as ffi;
 import '' as self;
 
-@ffi.Native<NativeCBLError_Message>()
+@ffi.Native<NativeCBLError_Message>(isLeaf: true)
 external FLSliceResult CBLError_Message(ffi.Pointer<CBLError> outError);
 
-@ffi.Native<NativeCBL_Now>()
+@ffi.Native<NativeCBL_Now>(isLeaf: true)
 external int CBL_Now();
 
-@ffi.Native<NativeCBL_Retain>()
+@ffi.Native<NativeCBL_Retain>(isLeaf: true)
 external ffi.Pointer<CBLRefCounted> CBL_Retain(ffi.Pointer<CBLRefCounted> arg0);
 
-@ffi.Native<NativeCBL_Release>()
+@ffi.Native<NativeCBL_Release>(isLeaf: true)
 external void CBL_Release(ffi.Pointer<CBLRefCounted> arg0);
 
-@ffi.Native<NativeCBL_InstanceCount>()
+@ffi.Native<NativeCBL_InstanceCount>(isLeaf: true)
 external int CBL_InstanceCount();
 
-@ffi.Native<NativeCBL_DumpInstances>()
+@ffi.Native<NativeCBL_DumpInstances>(isLeaf: true)
 external void CBL_DumpInstances();
 
-@ffi.Native<NativeCBLListener_Remove>()
+@ffi.Native<NativeCBLListener_Remove>(isLeaf: true)
 external void CBLListener_Remove(ffi.Pointer<CBLListenerToken> arg0);
 
 @ffi.Native<FLSlice>()
@@ -43,40 +43,40 @@ external final FLSlice kCBLBlobLengthProperty;
 @ffi.Native<FLSlice>()
 external final FLSlice kCBLBlobContentTypeProperty;
 
-@ffi.Native<NativeFLDict_IsBlob>()
+@ffi.Native<NativeFLDict_IsBlob>(isLeaf: true)
 external bool FLDict_IsBlob(FLDict arg0);
 
-@ffi.Native<NativeFLDict_GetBlob>()
+@ffi.Native<NativeFLDict_GetBlob>(isLeaf: true)
 external ffi.Pointer<CBLBlob> FLDict_GetBlob(FLDict blobDict);
 
-@ffi.Native<NativeCBLBlob_Length>()
+@ffi.Native<NativeCBLBlob_Length>(isLeaf: true)
 external int CBLBlob_Length(ffi.Pointer<CBLBlob> arg0);
 
-@ffi.Native<NativeCBLBlob_ContentType>()
+@ffi.Native<NativeCBLBlob_ContentType>(isLeaf: true)
 external FLString CBLBlob_ContentType(ffi.Pointer<CBLBlob> arg0);
 
-@ffi.Native<NativeCBLBlob_Digest>()
+@ffi.Native<NativeCBLBlob_Digest>(isLeaf: true)
 external FLString CBLBlob_Digest(ffi.Pointer<CBLBlob> arg0);
 
-@ffi.Native<NativeCBLBlob_Properties>()
+@ffi.Native<NativeCBLBlob_Properties>(isLeaf: true)
 external FLDict CBLBlob_Properties(ffi.Pointer<CBLBlob> arg0);
 
-@ffi.Native<NativeCBLBlob_CreateJSON>()
+@ffi.Native<NativeCBLBlob_CreateJSON>(isLeaf: true)
 external FLStringResult CBLBlob_CreateJSON(ffi.Pointer<CBLBlob> blob);
 
-@ffi.Native<NativeCBLBlob_Content>()
+@ffi.Native<NativeCBLBlob_Content>(isLeaf: true)
 external FLSliceResult CBLBlob_Content(
   ffi.Pointer<CBLBlob> blob,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLBlob_OpenContentStream>()
+@ffi.Native<NativeCBLBlob_OpenContentStream>(isLeaf: true)
 external ffi.Pointer<CBLBlobReadStream> CBLBlob_OpenContentStream(
   ffi.Pointer<CBLBlob> blob,
   ffi.Pointer<CBLError> arg1,
 );
 
-@ffi.Native<NativeCBLBlobReader_Read>()
+@ffi.Native<NativeCBLBlobReader_Read>(isLeaf: true)
 external int CBLBlobReader_Read(
   ffi.Pointer<CBLBlobReadStream> stream,
   ffi.Pointer<ffi.Void> dst,
@@ -84,7 +84,7 @@ external int CBLBlobReader_Read(
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLBlobReader_Seek>()
+@ffi.Native<NativeCBLBlobReader_Seek>(isLeaf: true)
 external int CBLBlobReader_Seek(
   ffi.Pointer<CBLBlobReadStream> stream,
   int offset,
@@ -92,34 +92,34 @@ external int CBLBlobReader_Seek(
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLBlobReader_Position>()
+@ffi.Native<NativeCBLBlobReader_Position>(isLeaf: true)
 external int CBLBlobReader_Position(ffi.Pointer<CBLBlobReadStream> stream);
 
-@ffi.Native<NativeCBLBlobReader_Close>()
+@ffi.Native<NativeCBLBlobReader_Close>(isLeaf: true)
 external void CBLBlobReader_Close(ffi.Pointer<CBLBlobReadStream> arg0);
 
-@ffi.Native<NativeCBLBlob_Equals>()
+@ffi.Native<NativeCBLBlob_Equals>(isLeaf: true)
 external bool CBLBlob_Equals(
   ffi.Pointer<CBLBlob> blob,
   ffi.Pointer<CBLBlob> anotherBlob,
 );
 
-@ffi.Native<NativeCBLBlob_CreateWithData>()
+@ffi.Native<NativeCBLBlob_CreateWithData>(isLeaf: true)
 external ffi.Pointer<CBLBlob> CBLBlob_CreateWithData(
   FLString contentType,
   FLSlice contents,
 );
 
-@ffi.Native<NativeCBLBlobWriter_Create>()
+@ffi.Native<NativeCBLBlobWriter_Create>(isLeaf: true)
 external ffi.Pointer<CBLBlobWriteStream> CBLBlobWriter_Create(
   ffi.Pointer<CBLDatabase> db,
   ffi.Pointer<CBLError> arg1,
 );
 
-@ffi.Native<NativeCBLBlobWriter_Close>()
+@ffi.Native<NativeCBLBlobWriter_Close>(isLeaf: true)
 external void CBLBlobWriter_Close(ffi.Pointer<CBLBlobWriteStream> arg0);
 
-@ffi.Native<NativeCBLBlobWriter_Write>()
+@ffi.Native<NativeCBLBlobWriter_Write>(isLeaf: true)
 external bool CBLBlobWriter_Write(
   ffi.Pointer<CBLBlobWriteStream> writer,
   ffi.Pointer<ffi.Void> data,
@@ -127,23 +127,23 @@ external bool CBLBlobWriter_Write(
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLBlob_CreateWithStream>()
+@ffi.Native<NativeCBLBlob_CreateWithStream>(isLeaf: true)
 external ffi.Pointer<CBLBlob> CBLBlob_CreateWithStream(
   FLString contentType,
   ffi.Pointer<CBLBlobWriteStream> writer,
 );
 
-@ffi.Native<NativeFLSlot_SetBlob>()
+@ffi.Native<NativeFLSlot_SetBlob>(isLeaf: true)
 external void FLSlot_SetBlob(FLSlot slot, ffi.Pointer<CBLBlob> blob);
 
-@ffi.Native<NativeCBLDatabase_GetBlob>()
+@ffi.Native<NativeCBLDatabase_GetBlob>(isLeaf: true)
 external ffi.Pointer<CBLBlob> CBLDatabase_GetBlob(
   ffi.Pointer<CBLDatabase> db,
   FLDict properties,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_SaveBlob>()
+@ffi.Native<NativeCBLDatabase_SaveBlob>(isLeaf: true)
 external bool CBLDatabase_SaveBlob(
   ffi.Pointer<CBLDatabase> db,
   ffi.Pointer<CBLBlob> blob,
@@ -153,21 +153,21 @@ external bool CBLDatabase_SaveBlob(
 @ffi.Native<FLSlice>()
 external final FLSlice kCBLTypeProperty;
 
-@ffi.Native<NativeCBLDatabase_GetDocument>()
+@ffi.Native<NativeCBLDatabase_GetDocument>(isLeaf: true)
 external ffi.Pointer<CBLDocument> CBLDatabase_GetDocument(
   ffi.Pointer<CBLDatabase> database,
   FLString docID,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_SaveDocument>()
+@ffi.Native<NativeCBLDatabase_SaveDocument>(isLeaf: true)
 external bool CBLDatabase_SaveDocument(
   ffi.Pointer<CBLDatabase> db,
   ffi.Pointer<CBLDocument> doc,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_SaveDocumentWithConcurrencyControl>()
+@ffi.Native<NativeCBLDatabase_SaveDocumentWithConcurrencyControl>(isLeaf: true)
 external bool CBLDatabase_SaveDocumentWithConcurrencyControl(
   ffi.Pointer<CBLDatabase> db,
   ffi.Pointer<CBLDocument> doc,
@@ -184,14 +184,16 @@ external bool CBLDatabase_SaveDocumentWithConflictHandler(
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_DeleteDocument>()
+@ffi.Native<NativeCBLDatabase_DeleteDocument>(isLeaf: true)
 external bool CBLDatabase_DeleteDocument(
   ffi.Pointer<CBLDatabase> db,
   ffi.Pointer<CBLDocument> document,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_DeleteDocumentWithConcurrencyControl>()
+@ffi.Native<NativeCBLDatabase_DeleteDocumentWithConcurrencyControl>(
+  isLeaf: true,
+)
 external bool CBLDatabase_DeleteDocumentWithConcurrencyControl(
   ffi.Pointer<CBLDatabase> db,
   ffi.Pointer<CBLDocument> document,
@@ -199,84 +201,84 @@ external bool CBLDatabase_DeleteDocumentWithConcurrencyControl(
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_PurgeDocument>()
+@ffi.Native<NativeCBLDatabase_PurgeDocument>(isLeaf: true)
 external bool CBLDatabase_PurgeDocument(
   ffi.Pointer<CBLDatabase> db,
   ffi.Pointer<CBLDocument> document,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_PurgeDocumentByID>()
+@ffi.Native<NativeCBLDatabase_PurgeDocumentByID>(isLeaf: true)
 external bool CBLDatabase_PurgeDocumentByID(
   ffi.Pointer<CBLDatabase> database,
   FLString docID,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_GetMutableDocument>()
+@ffi.Native<NativeCBLDatabase_GetMutableDocument>(isLeaf: true)
 external ffi.Pointer<CBLDocument> CBLDatabase_GetMutableDocument(
   ffi.Pointer<CBLDatabase> database,
   FLString docID,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDocument_Create>()
+@ffi.Native<NativeCBLDocument_Create>(isLeaf: true)
 external ffi.Pointer<CBLDocument> CBLDocument_Create();
 
-@ffi.Native<NativeCBLDocument_CreateWithID>()
+@ffi.Native<NativeCBLDocument_CreateWithID>(isLeaf: true)
 external ffi.Pointer<CBLDocument> CBLDocument_CreateWithID(FLString docID);
 
-@ffi.Native<NativeCBLDocument_MutableCopy>()
+@ffi.Native<NativeCBLDocument_MutableCopy>(isLeaf: true)
 external ffi.Pointer<CBLDocument> CBLDocument_MutableCopy(
   ffi.Pointer<CBLDocument> original,
 );
 
-@ffi.Native<NativeCBLDocument_ID>()
+@ffi.Native<NativeCBLDocument_ID>(isLeaf: true)
 external FLString CBLDocument_ID(ffi.Pointer<CBLDocument> arg0);
 
-@ffi.Native<NativeCBLDocument_RevisionID>()
+@ffi.Native<NativeCBLDocument_RevisionID>(isLeaf: true)
 external FLString CBLDocument_RevisionID(ffi.Pointer<CBLDocument> arg0);
 
-@ffi.Native<NativeCBLDocument_Sequence>()
+@ffi.Native<NativeCBLDocument_Sequence>(isLeaf: true)
 external int CBLDocument_Sequence(ffi.Pointer<CBLDocument> arg0);
 
-@ffi.Native<NativeCBLDocument_Collection>()
+@ffi.Native<NativeCBLDocument_Collection>(isLeaf: true)
 external ffi.Pointer<CBLCollection> CBLDocument_Collection(
   ffi.Pointer<CBLDocument> arg0,
 );
 
-@ffi.Native<NativeCBLDocument_Properties>()
+@ffi.Native<NativeCBLDocument_Properties>(isLeaf: true)
 external FLDict CBLDocument_Properties(ffi.Pointer<CBLDocument> arg0);
 
-@ffi.Native<NativeCBLDocument_MutableProperties>()
+@ffi.Native<NativeCBLDocument_MutableProperties>(isLeaf: true)
 external FLMutableDict CBLDocument_MutableProperties(
   ffi.Pointer<CBLDocument> arg0,
 );
 
-@ffi.Native<NativeCBLDocument_SetProperties>()
+@ffi.Native<NativeCBLDocument_SetProperties>(isLeaf: true)
 external void CBLDocument_SetProperties(
   ffi.Pointer<CBLDocument> arg0,
   FLMutableDict properties,
 );
 
-@ffi.Native<NativeCBLDocument_CreateJSON>()
+@ffi.Native<NativeCBLDocument_CreateJSON>(isLeaf: true)
 external FLSliceResult CBLDocument_CreateJSON(ffi.Pointer<CBLDocument> arg0);
 
-@ffi.Native<NativeCBLDocument_SetJSON>()
+@ffi.Native<NativeCBLDocument_SetJSON>(isLeaf: true)
 external bool CBLDocument_SetJSON(
   ffi.Pointer<CBLDocument> arg0,
   FLSlice json,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_GetDocumentExpiration>()
+@ffi.Native<NativeCBLDatabase_GetDocumentExpiration>(isLeaf: true)
 external int CBLDatabase_GetDocumentExpiration(
   ffi.Pointer<CBLDatabase> db,
   FLSlice docID,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_SetDocumentExpiration>()
+@ffi.Native<NativeCBLDatabase_SetDocumentExpiration>(isLeaf: true)
 external bool CBLDatabase_SetDocumentExpiration(
   ffi.Pointer<CBLDatabase> db,
   FLSlice docID,
@@ -284,7 +286,7 @@ external bool CBLDatabase_SetDocumentExpiration(
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_AddDocumentChangeListener>()
+@ffi.Native<NativeCBLDatabase_AddDocumentChangeListener>(isLeaf: true)
 external ffi.Pointer<CBLListenerToken> CBLDatabase_AddDocumentChangeListener(
   ffi.Pointer<CBLDatabase> db,
   FLString docID,
@@ -292,45 +294,45 @@ external ffi.Pointer<CBLListenerToken> CBLDatabase_AddDocumentChangeListener(
   ffi.Pointer<ffi.Void> context,
 );
 
-@ffi.Native<NativeCBLVectorEncoding_CreateNone>()
+@ffi.Native<NativeCBLVectorEncoding_CreateNone>(isLeaf: true)
 external ffi.Pointer<CBLVectorEncoding> CBLVectorEncoding_CreateNone();
 
-@ffi.Native<NativeCBLVectorEncoding_CreateScalarQuantizer>()
+@ffi.Native<NativeCBLVectorEncoding_CreateScalarQuantizer>(isLeaf: true)
 external ffi.Pointer<CBLVectorEncoding> CBLVectorEncoding_CreateScalarQuantizer(
   int type,
 );
 
-@ffi.Native<NativeCBLVectorEncoding_CreateProductQuantizer>()
+@ffi.Native<NativeCBLVectorEncoding_CreateProductQuantizer>(isLeaf: true)
 external ffi.Pointer<CBLVectorEncoding>
 CBLVectorEncoding_CreateProductQuantizer(int subquantizers, int bits);
 
-@ffi.Native<NativeCBLVectorEncoding_Free>()
+@ffi.Native<NativeCBLVectorEncoding_Free>(isLeaf: true)
 external void CBLVectorEncoding_Free(ffi.Pointer<CBLVectorEncoding> arg0);
 
 @ffi.Native<FLString>()
 external final FLString kCBLDefaultCollectionName;
 
-@ffi.Native<NativeCBLDatabase_ScopeNames>()
+@ffi.Native<NativeCBLDatabase_ScopeNames>(isLeaf: true)
 external FLMutableArray CBLDatabase_ScopeNames(
   ffi.Pointer<CBLDatabase> db,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_CollectionNames>()
+@ffi.Native<NativeCBLDatabase_CollectionNames>(isLeaf: true)
 external FLMutableArray CBLDatabase_CollectionNames(
   ffi.Pointer<CBLDatabase> db,
   FLString scopeName,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_Scope>()
+@ffi.Native<NativeCBLDatabase_Scope>(isLeaf: true)
 external ffi.Pointer<CBLScope> CBLDatabase_Scope(
   ffi.Pointer<CBLDatabase> db,
   FLString scopeName,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_Collection>()
+@ffi.Native<NativeCBLDatabase_Collection>(isLeaf: true)
 external ffi.Pointer<CBLCollection> CBLDatabase_Collection(
   ffi.Pointer<CBLDatabase> db,
   FLString collectionName,
@@ -338,7 +340,7 @@ external ffi.Pointer<CBLCollection> CBLDatabase_Collection(
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_CreateCollection>()
+@ffi.Native<NativeCBLDatabase_CreateCollection>(isLeaf: true)
 external ffi.Pointer<CBLCollection> CBLDatabase_CreateCollection(
   ffi.Pointer<CBLDatabase> db,
   FLString collectionName,
@@ -346,7 +348,7 @@ external ffi.Pointer<CBLCollection> CBLDatabase_CreateCollection(
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_DeleteCollection>()
+@ffi.Native<NativeCBLDatabase_DeleteCollection>(isLeaf: true)
 external bool CBLDatabase_DeleteCollection(
   ffi.Pointer<CBLDatabase> db,
   FLString collectionName,
@@ -354,52 +356,54 @@ external bool CBLDatabase_DeleteCollection(
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_DefaultScope>()
+@ffi.Native<NativeCBLDatabase_DefaultScope>(isLeaf: true)
 external ffi.Pointer<CBLScope> CBLDatabase_DefaultScope(
   ffi.Pointer<CBLDatabase> db,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_DefaultCollection>()
+@ffi.Native<NativeCBLDatabase_DefaultCollection>(isLeaf: true)
 external ffi.Pointer<CBLCollection> CBLDatabase_DefaultCollection(
   ffi.Pointer<CBLDatabase> db,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLCollection_Scope>()
+@ffi.Native<NativeCBLCollection_Scope>(isLeaf: true)
 external ffi.Pointer<CBLScope> CBLCollection_Scope(
   ffi.Pointer<CBLCollection> collection,
 );
 
-@ffi.Native<NativeCBLCollection_Name>()
+@ffi.Native<NativeCBLCollection_Name>(isLeaf: true)
 external FLString CBLCollection_Name(ffi.Pointer<CBLCollection> collection);
 
-@ffi.Native<NativeCBLCollection_FullName>()
+@ffi.Native<NativeCBLCollection_FullName>(isLeaf: true)
 external FLString CBLCollection_FullName(ffi.Pointer<CBLCollection> collection);
 
-@ffi.Native<NativeCBLCollection_Database>()
+@ffi.Native<NativeCBLCollection_Database>(isLeaf: true)
 external ffi.Pointer<CBLDatabase> CBLCollection_Database(
   ffi.Pointer<CBLCollection> collection,
 );
 
-@ffi.Native<NativeCBLCollection_Count>()
+@ffi.Native<NativeCBLCollection_Count>(isLeaf: true)
 external int CBLCollection_Count(ffi.Pointer<CBLCollection> collection);
 
-@ffi.Native<NativeCBLCollection_GetDocument>()
+@ffi.Native<NativeCBLCollection_GetDocument>(isLeaf: true)
 external ffi.Pointer<CBLDocument> CBLCollection_GetDocument(
   ffi.Pointer<CBLCollection> collection,
   FLString docID,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLCollection_SaveDocument>()
+@ffi.Native<NativeCBLCollection_SaveDocument>(isLeaf: true)
 external bool CBLCollection_SaveDocument(
   ffi.Pointer<CBLCollection> collection,
   ffi.Pointer<CBLDocument> doc,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLCollection_SaveDocumentWithConcurrencyControl>()
+@ffi.Native<NativeCBLCollection_SaveDocumentWithConcurrencyControl>(
+  isLeaf: true,
+)
 external bool CBLCollection_SaveDocumentWithConcurrencyControl(
   ffi.Pointer<CBLCollection> collection,
   ffi.Pointer<CBLDocument> doc,
@@ -416,14 +420,16 @@ external bool CBLCollection_SaveDocumentWithConflictHandler(
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLCollection_DeleteDocument>()
+@ffi.Native<NativeCBLCollection_DeleteDocument>(isLeaf: true)
 external bool CBLCollection_DeleteDocument(
   ffi.Pointer<CBLCollection> collection,
   ffi.Pointer<CBLDocument> document,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLCollection_DeleteDocumentWithConcurrencyControl>()
+@ffi.Native<NativeCBLCollection_DeleteDocumentWithConcurrencyControl>(
+  isLeaf: true,
+)
 external bool CBLCollection_DeleteDocumentWithConcurrencyControl(
   ffi.Pointer<CBLCollection> collection,
   ffi.Pointer<CBLDocument> document,
@@ -431,28 +437,28 @@ external bool CBLCollection_DeleteDocumentWithConcurrencyControl(
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLCollection_PurgeDocument>()
+@ffi.Native<NativeCBLCollection_PurgeDocument>(isLeaf: true)
 external bool CBLCollection_PurgeDocument(
   ffi.Pointer<CBLCollection> collection,
   ffi.Pointer<CBLDocument> document,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLCollection_PurgeDocumentByID>()
+@ffi.Native<NativeCBLCollection_PurgeDocumentByID>(isLeaf: true)
 external bool CBLCollection_PurgeDocumentByID(
   ffi.Pointer<CBLCollection> collection,
   FLString docID,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLCollection_GetDocumentExpiration>()
+@ffi.Native<NativeCBLCollection_GetDocumentExpiration>(isLeaf: true)
 external int CBLCollection_GetDocumentExpiration(
   ffi.Pointer<CBLCollection> collection,
   FLSlice docID,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLCollection_SetDocumentExpiration>()
+@ffi.Native<NativeCBLCollection_SetDocumentExpiration>(isLeaf: true)
 external bool CBLCollection_SetDocumentExpiration(
   ffi.Pointer<CBLCollection> collection,
   FLSlice docID,
@@ -460,14 +466,14 @@ external bool CBLCollection_SetDocumentExpiration(
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLCollection_GetMutableDocument>()
+@ffi.Native<NativeCBLCollection_GetMutableDocument>(isLeaf: true)
 external ffi.Pointer<CBLDocument> CBLCollection_GetMutableDocument(
   ffi.Pointer<CBLCollection> collection,
   FLString docID,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLCollection_CreateValueIndex>()
+@ffi.Native<NativeCBLCollection_CreateValueIndex>(isLeaf: true)
 external bool CBLCollection_CreateValueIndex(
   ffi.Pointer<CBLCollection> collection,
   FLString name,
@@ -475,7 +481,7 @@ external bool CBLCollection_CreateValueIndex(
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLCollection_CreateFullTextIndex>()
+@ffi.Native<NativeCBLCollection_CreateFullTextIndex>(isLeaf: true)
 external bool CBLCollection_CreateFullTextIndex(
   ffi.Pointer<CBLCollection> collection,
   FLString name,
@@ -483,7 +489,7 @@ external bool CBLCollection_CreateFullTextIndex(
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLCollection_CreateArrayIndex>()
+@ffi.Native<NativeCBLCollection_CreateArrayIndex>(isLeaf: true)
 external bool CBLCollection_CreateArrayIndex(
   ffi.Pointer<CBLCollection> collection,
   FLString name,
@@ -491,7 +497,7 @@ external bool CBLCollection_CreateArrayIndex(
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLCollection_CreateVectorIndex>()
+@ffi.Native<NativeCBLCollection_CreateVectorIndex>(isLeaf: true)
 external bool CBLCollection_CreateVectorIndex(
   ffi.Pointer<CBLCollection> collection,
   FLString name,
@@ -499,34 +505,34 @@ external bool CBLCollection_CreateVectorIndex(
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLCollection_DeleteIndex>()
+@ffi.Native<NativeCBLCollection_DeleteIndex>(isLeaf: true)
 external bool CBLCollection_DeleteIndex(
   ffi.Pointer<CBLCollection> collection,
   FLString name,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLCollection_GetIndexNames>()
+@ffi.Native<NativeCBLCollection_GetIndexNames>(isLeaf: true)
 external FLMutableArray CBLCollection_GetIndexNames(
   ffi.Pointer<CBLCollection> collection,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLCollection_GetIndex>()
+@ffi.Native<NativeCBLCollection_GetIndex>(isLeaf: true)
 external ffi.Pointer<CBLQueryIndex> CBLCollection_GetIndex(
   ffi.Pointer<CBLCollection> collection,
   FLString name,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLCollection_AddChangeListener>()
+@ffi.Native<NativeCBLCollection_AddChangeListener>(isLeaf: true)
 external ffi.Pointer<CBLListenerToken> CBLCollection_AddChangeListener(
   ffi.Pointer<CBLCollection> collection,
   CBLCollectionChangeListener listener,
   ffi.Pointer<ffi.Void> context,
 );
 
-@ffi.Native<NativeCBLCollection_AddDocumentChangeListener>()
+@ffi.Native<NativeCBLCollection_AddDocumentChangeListener>(isLeaf: true)
 external ffi.Pointer<CBLListenerToken> CBLCollection_AddDocumentChangeListener(
   ffi.Pointer<CBLCollection> collection,
   FLString docID,
@@ -534,31 +540,31 @@ external ffi.Pointer<CBLListenerToken> CBLCollection_AddDocumentChangeListener(
   ffi.Pointer<ffi.Void> context,
 );
 
-@ffi.Native<NativeCBL_EnableVectorSearch>()
+@ffi.Native<NativeCBL_EnableVectorSearch>(isLeaf: true)
 external bool CBL_EnableVectorSearch(
   FLString path,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabaseConfiguration_Default>()
+@ffi.Native<NativeCBLDatabaseConfiguration_Default>(isLeaf: true)
 external CBLDatabaseConfiguration CBLDatabaseConfiguration_Default();
 
-@ffi.Native<NativeCBLEncryptionKey_FromPassword>()
+@ffi.Native<NativeCBLEncryptionKey_FromPassword>(isLeaf: true)
 external bool CBLEncryptionKey_FromPassword(
   ffi.Pointer<CBLEncryptionKey> key,
   FLString password,
 );
 
-@ffi.Native<NativeCBLEncryptionKey_FromPasswordOld>()
+@ffi.Native<NativeCBLEncryptionKey_FromPasswordOld>(isLeaf: true)
 external bool CBLEncryptionKey_FromPasswordOld(
   ffi.Pointer<CBLEncryptionKey> key,
   FLString password,
 );
 
-@ffi.Native<NativeCBL_DatabaseExists>()
+@ffi.Native<NativeCBL_DatabaseExists>(isLeaf: true)
 external bool CBL_DatabaseExists(FLString name, FLString inDirectory);
 
-@ffi.Native<NativeCBL_CopyDatabase>()
+@ffi.Native<NativeCBL_CopyDatabase>(isLeaf: true)
 external bool CBL_CopyDatabase(
   FLString fromPath,
   FLString toName,
@@ -566,74 +572,74 @@ external bool CBL_CopyDatabase(
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBL_DeleteDatabase>()
+@ffi.Native<NativeCBL_DeleteDatabase>(isLeaf: true)
 external bool CBL_DeleteDatabase(
   FLString name,
   FLString inDirectory,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_Open>()
+@ffi.Native<NativeCBLDatabase_Open>(isLeaf: true)
 external ffi.Pointer<CBLDatabase> CBLDatabase_Open(
   FLSlice name,
   ffi.Pointer<CBLDatabaseConfiguration> config,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_Close>()
+@ffi.Native<NativeCBLDatabase_Close>(isLeaf: true)
 external bool CBLDatabase_Close(
   ffi.Pointer<CBLDatabase> arg0,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_Delete>()
+@ffi.Native<NativeCBLDatabase_Delete>(isLeaf: true)
 external bool CBLDatabase_Delete(
   ffi.Pointer<CBLDatabase> arg0,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_BeginTransaction>()
+@ffi.Native<NativeCBLDatabase_BeginTransaction>(isLeaf: true)
 external bool CBLDatabase_BeginTransaction(
   ffi.Pointer<CBLDatabase> arg0,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_EndTransaction>()
+@ffi.Native<NativeCBLDatabase_EndTransaction>(isLeaf: true)
 external bool CBLDatabase_EndTransaction(
   ffi.Pointer<CBLDatabase> arg0,
   bool commit,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_ChangeEncryptionKey>()
+@ffi.Native<NativeCBLDatabase_ChangeEncryptionKey>(isLeaf: true)
 external bool CBLDatabase_ChangeEncryptionKey(
   ffi.Pointer<CBLDatabase> arg0,
   ffi.Pointer<CBLEncryptionKey> newKey,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_PerformMaintenance>()
+@ffi.Native<NativeCBLDatabase_PerformMaintenance>(isLeaf: true)
 external bool CBLDatabase_PerformMaintenance(
   ffi.Pointer<CBLDatabase> db,
   int type,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_Name>()
+@ffi.Native<NativeCBLDatabase_Name>(isLeaf: true)
 external FLString CBLDatabase_Name(ffi.Pointer<CBLDatabase> arg0);
 
-@ffi.Native<NativeCBLDatabase_Path>()
+@ffi.Native<NativeCBLDatabase_Path>(isLeaf: true)
 external FLStringResult CBLDatabase_Path(ffi.Pointer<CBLDatabase> arg0);
 
-@ffi.Native<NativeCBLDatabase_Count>()
+@ffi.Native<NativeCBLDatabase_Count>(isLeaf: true)
 external int CBLDatabase_Count(ffi.Pointer<CBLDatabase> arg0);
 
-@ffi.Native<NativeCBLDatabase_Config>()
+@ffi.Native<NativeCBLDatabase_Config>(isLeaf: true)
 external CBLDatabaseConfiguration CBLDatabase_Config(
   ffi.Pointer<CBLDatabase> arg0,
 );
 
-@ffi.Native<NativeCBLDatabase_CreateValueIndex>()
+@ffi.Native<NativeCBLDatabase_CreateValueIndex>(isLeaf: true)
 external bool CBLDatabase_CreateValueIndex(
   ffi.Pointer<CBLDatabase> db,
   FLString name,
@@ -641,7 +647,7 @@ external bool CBLDatabase_CreateValueIndex(
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_CreateFullTextIndex>()
+@ffi.Native<NativeCBLDatabase_CreateFullTextIndex>(isLeaf: true)
 external bool CBLDatabase_CreateFullTextIndex(
   ffi.Pointer<CBLDatabase> db,
   FLString name,
@@ -649,24 +655,24 @@ external bool CBLDatabase_CreateFullTextIndex(
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_DeleteIndex>()
+@ffi.Native<NativeCBLDatabase_DeleteIndex>(isLeaf: true)
 external bool CBLDatabase_DeleteIndex(
   ffi.Pointer<CBLDatabase> db,
   FLString name,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLDatabase_GetIndexNames>()
+@ffi.Native<NativeCBLDatabase_GetIndexNames>(isLeaf: true)
 external FLArray CBLDatabase_GetIndexNames(ffi.Pointer<CBLDatabase> db);
 
-@ffi.Native<NativeCBLDatabase_AddChangeListener>()
+@ffi.Native<NativeCBLDatabase_AddChangeListener>(isLeaf: true)
 external ffi.Pointer<CBLListenerToken> CBLDatabase_AddChangeListener(
   ffi.Pointer<CBLDatabase> db,
   CBLDatabaseChangeListener listener,
   ffi.Pointer<ffi.Void> context,
 );
 
-@ffi.Native<NativeCBLDatabase_BufferNotifications>()
+@ffi.Native<NativeCBLDatabase_BufferNotifications>(isLeaf: true)
 external void CBLDatabase_BufferNotifications(
   ffi.Pointer<CBLDatabase> db,
   CBLNotificationsReadyCallback callback,
@@ -724,40 +730,40 @@ external final FLString kCBLCertAttrKeyIPAddress;
 @ffi.Native<FLString>()
 external final FLString kCBLCertAttrKeyRegisteredID;
 
-@ffi.Native<NativeCBLCert_CreateWithData>()
+@ffi.Native<NativeCBLCert_CreateWithData>(isLeaf: true)
 external ffi.Pointer<CBLCert> CBLCert_CreateWithData(
   FLSlice certData,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLCert_CertNextInChain>()
+@ffi.Native<NativeCBLCert_CertNextInChain>(isLeaf: true)
 external ffi.Pointer<CBLCert> CBLCert_CertNextInChain(
   ffi.Pointer<CBLCert> cert,
 );
 
-@ffi.Native<NativeCBLCert_Data>()
+@ffi.Native<NativeCBLCert_Data>(isLeaf: true)
 external FLSliceResult CBLCert_Data(ffi.Pointer<CBLCert> cert, bool pemEncoded);
 
-@ffi.Native<NativeCBLCert_SubjectName>()
+@ffi.Native<NativeCBLCert_SubjectName>(isLeaf: true)
 external FLSliceResult CBLCert_SubjectName(ffi.Pointer<CBLCert> cert);
 
-@ffi.Native<NativeCBLCert_SubjectNameComponent>()
+@ffi.Native<NativeCBLCert_SubjectNameComponent>(isLeaf: true)
 external FLSliceResult CBLCert_SubjectNameComponent(
   ffi.Pointer<CBLCert> cert,
   FLString attributeKey,
 );
 
-@ffi.Native<NativeCBLCert_ValidTimespan>()
+@ffi.Native<NativeCBLCert_ValidTimespan>(isLeaf: true)
 external void CBLCert_ValidTimespan(
   ffi.Pointer<CBLCert> cert,
   ffi.Pointer<CBLTimestamp> outCreated,
   ffi.Pointer<CBLTimestamp> outExpires,
 );
 
-@ffi.Native<NativeCBLCert_PublicKey>()
+@ffi.Native<NativeCBLCert_PublicKey>(isLeaf: true)
 external ffi.Pointer<CBLKeyPair> CBLCert_PublicKey(ffi.Pointer<CBLCert> arg0);
 
-@ffi.Native<NativeCBLKeyPair_CreateWithExternalKey>()
+@ffi.Native<NativeCBLKeyPair_CreateWithExternalKey>(isLeaf: true)
 external ffi.Pointer<CBLKeyPair> CBLKeyPair_CreateWithExternalKey(
   int keySizeInBits,
   ffi.Pointer<ffi.Void> externalKey,
@@ -765,7 +771,7 @@ external ffi.Pointer<CBLKeyPair> CBLKeyPair_CreateWithExternalKey(
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLKeyPair_CreateWithPrivateKeyData>()
+@ffi.Native<NativeCBLKeyPair_CreateWithPrivateKeyData>(isLeaf: true)
 external ffi.Pointer<CBLKeyPair> CBLKeyPair_CreateWithPrivateKeyData(
   FLSlice privateKeyData,
   FLSlice passwordOrNull,
@@ -787,15 +793,15 @@ external FLSliceResult CBLKeyPair_PrivateKeyData(
   ffi.Pointer<CBLKeyPair> keyPair,
 );
 
-@ffi.Native<NativeCBLTLSIdentity_Certificates>()
+@ffi.Native<NativeCBLTLSIdentity_Certificates>(isLeaf: true)
 external ffi.Pointer<CBLCert> CBLTLSIdentity_Certificates(
   ffi.Pointer<CBLTLSIdentity> identity,
 );
 
-@ffi.Native<NativeCBLTLSIdentity_Expiration>()
+@ffi.Native<NativeCBLTLSIdentity_Expiration>(isLeaf: true)
 external int CBLTLSIdentity_Expiration(ffi.Pointer<CBLTLSIdentity> identity);
 
-@ffi.Native<NativeCBLTLSIdentity_CreateIdentity>()
+@ffi.Native<NativeCBLTLSIdentity_CreateIdentity>(isLeaf: true)
 external ffi.Pointer<CBLTLSIdentity> CBLTLSIdentity_CreateIdentity(
   int keyUsages,
   FLDict attributes,
@@ -813,13 +819,13 @@ external ffi.Pointer<CBLTLSIdentity> CBLTLSIdentity_CreateIdentityWithKeyPair(
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLTLSIdentity_DeleteIdentityWithLabel>()
+@ffi.Native<NativeCBLTLSIdentity_DeleteIdentityWithLabel>(isLeaf: true)
 external bool CBLTLSIdentity_DeleteIdentityWithLabel(
   FLString label,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLTLSIdentity_IdentityWithLabel>()
+@ffi.Native<NativeCBLTLSIdentity_IdentityWithLabel>(isLeaf: true)
 external ffi.Pointer<CBLTLSIdentity> CBLTLSIdentity_IdentityWithLabel(
   FLString label,
   ffi.Pointer<CBLError> outError,
@@ -832,7 +838,7 @@ external ffi.Pointer<CBLTLSIdentity> CBLTLSIdentity_IdentityWithKeyPairAndCerts(
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLTLSIdentity_IdentityWithCerts>()
+@ffi.Native<NativeCBLTLSIdentity_IdentityWithCerts>(isLeaf: true)
 external ffi.Pointer<CBLTLSIdentity> CBLTLSIdentity_IdentityWithCerts(
   ffi.Pointer<CBLCert> cert,
   ffi.Pointer<CBLError> outError,
@@ -841,101 +847,101 @@ external ffi.Pointer<CBLTLSIdentity> CBLTLSIdentity_IdentityWithCerts(
 @ffi.Native<FLString>()
 external final FLString kCBLAuthDefaultCookieName;
 
-@ffi.Native<NativeCBLEndpoint_CreateWithURL>()
+@ffi.Native<NativeCBLEndpoint_CreateWithURL>(isLeaf: true)
 external ffi.Pointer<CBLEndpoint> CBLEndpoint_CreateWithURL(
   FLString url,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLEndpoint_CreateWithLocalDB>()
+@ffi.Native<NativeCBLEndpoint_CreateWithLocalDB>(isLeaf: true)
 external ffi.Pointer<CBLEndpoint> CBLEndpoint_CreateWithLocalDB(
   ffi.Pointer<CBLDatabase> arg0,
 );
 
-@ffi.Native<NativeCBLEndpoint_Free>()
+@ffi.Native<NativeCBLEndpoint_Free>(isLeaf: true)
 external void CBLEndpoint_Free(ffi.Pointer<CBLEndpoint> arg0);
 
-@ffi.Native<NativeCBLAuth_CreatePassword>()
+@ffi.Native<NativeCBLAuth_CreatePassword>(isLeaf: true)
 external ffi.Pointer<CBLAuthenticator> CBLAuth_CreatePassword(
   FLString username,
   FLString password,
 );
 
-@ffi.Native<NativeCBLAuth_CreateSession>()
+@ffi.Native<NativeCBLAuth_CreateSession>(isLeaf: true)
 external ffi.Pointer<CBLAuthenticator> CBLAuth_CreateSession(
   FLString sessionID,
   FLString cookieName,
 );
 
-@ffi.Native<NativeCBLAuth_CreateCertificate>()
+@ffi.Native<NativeCBLAuth_CreateCertificate>(isLeaf: true)
 external ffi.Pointer<CBLAuthenticator> CBLAuth_CreateCertificate(
   ffi.Pointer<CBLTLSIdentity> identity,
 );
 
-@ffi.Native<NativeCBLAuth_Free>()
+@ffi.Native<NativeCBLAuth_Free>(isLeaf: true)
 external void CBLAuth_Free(ffi.Pointer<CBLAuthenticator> arg0);
 
 @ffi.Native<CBLConflictResolver>()
 external CBLConflictResolver CBLDefaultConflictResolver;
 
-@ffi.Native<NativeCBLReplicator_Create>()
+@ffi.Native<NativeCBLReplicator_Create>(isLeaf: true)
 external ffi.Pointer<CBLReplicator> CBLReplicator_Create(
   ffi.Pointer<CBLReplicatorConfiguration> arg0,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLReplicator_Config>()
+@ffi.Native<NativeCBLReplicator_Config>(isLeaf: true)
 external ffi.Pointer<CBLReplicatorConfiguration> CBLReplicator_Config(
   ffi.Pointer<CBLReplicator> arg0,
 );
 
-@ffi.Native<NativeCBLReplicator_Start>()
+@ffi.Native<NativeCBLReplicator_Start>(isLeaf: true)
 external void CBLReplicator_Start(
   ffi.Pointer<CBLReplicator> replicator,
   bool resetCheckpoint,
 );
 
-@ffi.Native<NativeCBLReplicator_Stop>()
+@ffi.Native<NativeCBLReplicator_Stop>(isLeaf: true)
 external void CBLReplicator_Stop(ffi.Pointer<CBLReplicator> arg0);
 
-@ffi.Native<NativeCBLReplicator_SetHostReachable>()
+@ffi.Native<NativeCBLReplicator_SetHostReachable>(isLeaf: true)
 external void CBLReplicator_SetHostReachable(
   ffi.Pointer<CBLReplicator> arg0,
   bool reachable,
 );
 
-@ffi.Native<NativeCBLReplicator_SetSuspended>()
+@ffi.Native<NativeCBLReplicator_SetSuspended>(isLeaf: true)
 external void CBLReplicator_SetSuspended(
   ffi.Pointer<CBLReplicator> repl,
   bool suspended,
 );
 
-@ffi.Native<NativeCBLReplicator_Status>()
+@ffi.Native<NativeCBLReplicator_Status>(isLeaf: true)
 external CBLReplicatorStatus CBLReplicator_Status(
   ffi.Pointer<CBLReplicator> arg0,
 );
 
-@ffi.Native<NativeCBLReplicator_PendingDocumentIDs>()
+@ffi.Native<NativeCBLReplicator_PendingDocumentIDs>(isLeaf: true)
 external FLDict CBLReplicator_PendingDocumentIDs(
   ffi.Pointer<CBLReplicator> arg0,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLReplicator_IsDocumentPending>()
+@ffi.Native<NativeCBLReplicator_IsDocumentPending>(isLeaf: true)
 external bool CBLReplicator_IsDocumentPending(
   ffi.Pointer<CBLReplicator> repl,
   FLString docID,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLReplicator_PendingDocumentIDs2>()
+@ffi.Native<NativeCBLReplicator_PendingDocumentIDs2>(isLeaf: true)
 external FLDict CBLReplicator_PendingDocumentIDs2(
   ffi.Pointer<CBLReplicator> arg0,
   ffi.Pointer<CBLCollection> collection,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLReplicator_IsDocumentPending2>()
+@ffi.Native<NativeCBLReplicator_IsDocumentPending2>(isLeaf: true)
 external bool CBLReplicator_IsDocumentPending2(
   ffi.Pointer<CBLReplicator> repl,
   FLString docID,
@@ -943,14 +949,14 @@ external bool CBLReplicator_IsDocumentPending2(
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLReplicator_AddChangeListener>()
+@ffi.Native<NativeCBLReplicator_AddChangeListener>(isLeaf: true)
 external ffi.Pointer<CBLListenerToken> CBLReplicator_AddChangeListener(
   ffi.Pointer<CBLReplicator> arg0,
   CBLReplicatorChangeListener arg1,
   ffi.Pointer<ffi.Void> context,
 );
 
-@ffi.Native<NativeCBLReplicator_AddDocumentReplicationListener>()
+@ffi.Native<NativeCBLReplicator_AddDocumentReplicationListener>(isLeaf: true)
 external ffi.Pointer<CBLListenerToken>
 CBLReplicator_AddDocumentReplicationListener(
   ffi.Pointer<CBLReplicator> arg0,
@@ -958,7 +964,7 @@ CBLReplicator_AddDocumentReplicationListener(
   ffi.Pointer<ffi.Void> context,
 );
 
-@ffi.Native<NativeCBLReplicator_ServerCertificate>()
+@ffi.Native<NativeCBLReplicator_ServerCertificate>(isLeaf: true)
 external ffi.Pointer<CBLCert> CBLReplicator_ServerCertificate(
   ffi.Pointer<CBLReplicator> arg0,
 );
@@ -1041,86 +1047,86 @@ external final FLSlice kCBLEncryptableType;
 @ffi.Native<FLSlice>()
 external final FLSlice kCBLEncryptableValueProperty;
 
-@ffi.Native<NativeCBLEncryptable_CreateWithNull>()
+@ffi.Native<NativeCBLEncryptable_CreateWithNull>(isLeaf: true)
 external ffi.Pointer<CBLEncryptable> CBLEncryptable_CreateWithNull();
 
-@ffi.Native<NativeCBLEncryptable_CreateWithBool>()
+@ffi.Native<NativeCBLEncryptable_CreateWithBool>(isLeaf: true)
 external ffi.Pointer<CBLEncryptable> CBLEncryptable_CreateWithBool(bool value);
 
-@ffi.Native<NativeCBLEncryptable_CreateWithInt>()
+@ffi.Native<NativeCBLEncryptable_CreateWithInt>(isLeaf: true)
 external ffi.Pointer<CBLEncryptable> CBLEncryptable_CreateWithInt(int value);
 
-@ffi.Native<NativeCBLEncryptable_CreateWithUInt>()
+@ffi.Native<NativeCBLEncryptable_CreateWithUInt>(isLeaf: true)
 external ffi.Pointer<CBLEncryptable> CBLEncryptable_CreateWithUInt(int value);
 
-@ffi.Native<NativeCBLEncryptable_CreateWithFloat>()
+@ffi.Native<NativeCBLEncryptable_CreateWithFloat>(isLeaf: true)
 external ffi.Pointer<CBLEncryptable> CBLEncryptable_CreateWithFloat(
   double value,
 );
 
-@ffi.Native<NativeCBLEncryptable_CreateWithDouble>()
+@ffi.Native<NativeCBLEncryptable_CreateWithDouble>(isLeaf: true)
 external ffi.Pointer<CBLEncryptable> CBLEncryptable_CreateWithDouble(
   double value,
 );
 
-@ffi.Native<NativeCBLEncryptable_CreateWithString>()
+@ffi.Native<NativeCBLEncryptable_CreateWithString>(isLeaf: true)
 external ffi.Pointer<CBLEncryptable> CBLEncryptable_CreateWithString(
   FLString value,
 );
 
-@ffi.Native<NativeCBLEncryptable_CreateWithValue>()
+@ffi.Native<NativeCBLEncryptable_CreateWithValue>(isLeaf: true)
 external ffi.Pointer<CBLEncryptable> CBLEncryptable_CreateWithValue(
   FLValue value,
 );
 
-@ffi.Native<NativeCBLEncryptable_CreateWithArray>()
+@ffi.Native<NativeCBLEncryptable_CreateWithArray>(isLeaf: true)
 external ffi.Pointer<CBLEncryptable> CBLEncryptable_CreateWithArray(
   FLArray value,
 );
 
-@ffi.Native<NativeCBLEncryptable_CreateWithDict>()
+@ffi.Native<NativeCBLEncryptable_CreateWithDict>(isLeaf: true)
 external ffi.Pointer<CBLEncryptable> CBLEncryptable_CreateWithDict(
   FLDict value,
 );
 
-@ffi.Native<NativeCBLEncryptable_Value>()
+@ffi.Native<NativeCBLEncryptable_Value>(isLeaf: true)
 external FLValue CBLEncryptable_Value(ffi.Pointer<CBLEncryptable> encryptable);
 
-@ffi.Native<NativeCBLEncryptable_Properties>()
+@ffi.Native<NativeCBLEncryptable_Properties>(isLeaf: true)
 external FLDict CBLEncryptable_Properties(
   ffi.Pointer<CBLEncryptable> encryptable,
 );
 
-@ffi.Native<NativeFLDict_IsEncryptableValue>()
+@ffi.Native<NativeFLDict_IsEncryptableValue>(isLeaf: true)
 external bool FLDict_IsEncryptableValue(FLDict arg0);
 
-@ffi.Native<NativeFLDict_GetEncryptableValue>()
+@ffi.Native<NativeFLDict_GetEncryptableValue>(isLeaf: true)
 external ffi.Pointer<CBLEncryptable> FLDict_GetEncryptableValue(
   FLDict encryptableDict,
 );
 
-@ffi.Native<NativeFLSlot_SetEncryptableValue>()
+@ffi.Native<NativeFLSlot_SetEncryptableValue>(isLeaf: true)
 external void FLSlot_SetEncryptableValue(
   FLSlot slot,
   ffi.Pointer<CBLEncryptable> encryptable,
 );
 
-@ffi.Native<NativeCBLLogSinks_SetConsole>()
+@ffi.Native<NativeCBLLogSinks_SetConsole>(isLeaf: true)
 external void CBLLogSinks_SetConsole(CBLConsoleLogSink sink);
 
-@ffi.Native<NativeCBLLogSinks_Console>()
+@ffi.Native<NativeCBLLogSinks_Console>(isLeaf: true)
 external CBLConsoleLogSink CBLLogSinks_Console();
 
-@ffi.Native<NativeCBLLogSinks_SetCustom>()
+@ffi.Native<NativeCBLLogSinks_SetCustom>(isLeaf: true)
 external void CBLLogSinks_SetCustom(CBLCustomLogSink sink);
 
-@ffi.Native<NativeCBLLogSinks_CustomSink>()
+@ffi.Native<NativeCBLLogSinks_CustomSink>(isLeaf: true)
 external CBLCustomLogSink CBLLogSinks_CustomSink();
 
-@ffi.Native<NativeCBLLogSinks_SetFile>()
+@ffi.Native<NativeCBLLogSinks_SetFile>(isLeaf: true)
 external void CBLLogSinks_SetFile(CBLFileLogSink sink);
 
-@ffi.Native<NativeCBLLogSinks_File>()
+@ffi.Native<NativeCBLLogSinks_File>(isLeaf: true)
 external CBLFileLogSink CBLLogSinks_File();
 
 @ffi.Native<NativeCBL_Log>()
@@ -1129,34 +1135,34 @@ external void CBL_Log(int domain, int level, ffi.Pointer<ffi.Char> format);
 @ffi.Native<NativeCBL_LogMessage>()
 external void CBL_LogMessage(int domain, int level, FLSlice message);
 
-@ffi.Native<NativeCBLLog_ConsoleLevel>()
+@ffi.Native<NativeCBLLog_ConsoleLevel>(isLeaf: true)
 external int CBLLog_ConsoleLevel();
 
-@ffi.Native<NativeCBLLog_SetConsoleLevel>()
+@ffi.Native<NativeCBLLog_SetConsoleLevel>(isLeaf: true)
 external void CBLLog_SetConsoleLevel(int arg0);
 
-@ffi.Native<NativeCBLLog_CallbackLevel>()
+@ffi.Native<NativeCBLLog_CallbackLevel>(isLeaf: true)
 external int CBLLog_CallbackLevel();
 
-@ffi.Native<NativeCBLLog_SetCallbackLevel>()
+@ffi.Native<NativeCBLLog_SetCallbackLevel>(isLeaf: true)
 external void CBLLog_SetCallbackLevel(int arg0);
 
-@ffi.Native<NativeCBLLog_Callback>()
+@ffi.Native<NativeCBLLog_Callback>(isLeaf: true)
 external CBLLogCallback CBLLog_Callback();
 
-@ffi.Native<NativeCBLLog_SetCallback>()
+@ffi.Native<NativeCBLLog_SetCallback>(isLeaf: true)
 external void CBLLog_SetCallback(CBLLogCallback callback);
 
-@ffi.Native<NativeCBLLog_FileConfig>()
+@ffi.Native<NativeCBLLog_FileConfig>(isLeaf: true)
 external ffi.Pointer<CBLLogFileConfiguration> CBLLog_FileConfig();
 
-@ffi.Native<NativeCBLLog_SetFileConfig>()
+@ffi.Native<NativeCBLLog_SetFileConfig>(isLeaf: true)
 external bool CBLLog_SetFileConfig(
   CBLLogFileConfiguration arg0,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBL_RegisterPredictiveModel>()
+@ffi.Native<NativeCBL_RegisterPredictiveModel>(isLeaf: true)
 external void CBL_RegisterPredictiveModel(
   FLString name,
   CBLPredictiveModel model,
@@ -1165,7 +1171,7 @@ external void CBL_RegisterPredictiveModel(
 @ffi.Native<NativeCBL_UnregisterPredictiveModel>()
 external void CBL_UnregisterPredictiveModel(FLString name);
 
-@ffi.Native<NativeCBLDatabase_CreateQuery>()
+@ffi.Native<NativeCBLDatabase_CreateQuery>(isLeaf: true)
 external ffi.Pointer<CBLQuery> CBLDatabase_CreateQuery(
   ffi.Pointer<CBLDatabase> db,
   int language,
@@ -1174,13 +1180,13 @@ external ffi.Pointer<CBLQuery> CBLDatabase_CreateQuery(
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLQuery_SetParameters>()
+@ffi.Native<NativeCBLQuery_SetParameters>(isLeaf: true)
 external void CBLQuery_SetParameters(
   ffi.Pointer<CBLQuery> query,
   FLDict parameters,
 );
 
-@ffi.Native<NativeCBLQuery_Parameters>()
+@ffi.Native<NativeCBLQuery_Parameters>(isLeaf: true)
 external FLDict CBLQuery_Parameters(ffi.Pointer<CBLQuery> query);
 
 @ffi.Native<NativeCBLQuery_Execute>()
@@ -1189,13 +1195,13 @@ external ffi.Pointer<CBLResultSet> CBLQuery_Execute(
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLQuery_Explain>()
+@ffi.Native<NativeCBLQuery_Explain>(isLeaf: true)
 external FLSliceResult CBLQuery_Explain(ffi.Pointer<CBLQuery> arg0);
 
-@ffi.Native<NativeCBLQuery_ColumnCount>()
+@ffi.Native<NativeCBLQuery_ColumnCount>(isLeaf: true)
 external int CBLQuery_ColumnCount(ffi.Pointer<CBLQuery> arg0);
 
-@ffi.Native<NativeCBLQuery_ColumnName>()
+@ffi.Native<NativeCBLQuery_ColumnName>(isLeaf: true)
 external FLSlice CBLQuery_ColumnName(
   ffi.Pointer<CBLQuery> arg0,
   int columnIndex,
@@ -1204,68 +1210,68 @@ external FLSlice CBLQuery_ColumnName(
 @ffi.Native<NativeCBLResultSet_Next>()
 external bool CBLResultSet_Next(ffi.Pointer<CBLResultSet> arg0);
 
-@ffi.Native<NativeCBLResultSet_ValueAtIndex>()
+@ffi.Native<NativeCBLResultSet_ValueAtIndex>(isLeaf: true)
 external FLValue CBLResultSet_ValueAtIndex(
   ffi.Pointer<CBLResultSet> arg0,
   int index,
 );
 
-@ffi.Native<NativeCBLResultSet_ValueForKey>()
+@ffi.Native<NativeCBLResultSet_ValueForKey>(isLeaf: true)
 external FLValue CBLResultSet_ValueForKey(
   ffi.Pointer<CBLResultSet> arg0,
   FLString key,
 );
 
-@ffi.Native<NativeCBLResultSet_ResultArray>()
+@ffi.Native<NativeCBLResultSet_ResultArray>(isLeaf: true)
 external FLArray CBLResultSet_ResultArray(ffi.Pointer<CBLResultSet> arg0);
 
-@ffi.Native<NativeCBLResultSet_ResultDict>()
+@ffi.Native<NativeCBLResultSet_ResultDict>(isLeaf: true)
 external FLDict CBLResultSet_ResultDict(ffi.Pointer<CBLResultSet> arg0);
 
-@ffi.Native<NativeCBLResultSet_GetQuery>()
+@ffi.Native<NativeCBLResultSet_GetQuery>(isLeaf: true)
 external ffi.Pointer<CBLQuery> CBLResultSet_GetQuery(
   ffi.Pointer<CBLResultSet> rs,
 );
 
-@ffi.Native<NativeCBLQuery_AddChangeListener>()
+@ffi.Native<NativeCBLQuery_AddChangeListener>(isLeaf: true)
 external ffi.Pointer<CBLListenerToken> CBLQuery_AddChangeListener(
   ffi.Pointer<CBLQuery> query,
   CBLQueryChangeListener listener,
   ffi.Pointer<ffi.Void> context,
 );
 
-@ffi.Native<NativeCBLQuery_CopyCurrentResults>()
+@ffi.Native<NativeCBLQuery_CopyCurrentResults>(isLeaf: true)
 external ffi.Pointer<CBLResultSet> CBLQuery_CopyCurrentResults(
   ffi.Pointer<CBLQuery> query,
   ffi.Pointer<CBLListenerToken> listener,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLQueryIndex_Name>()
+@ffi.Native<NativeCBLQueryIndex_Name>(isLeaf: true)
 external FLString CBLQueryIndex_Name(ffi.Pointer<CBLQueryIndex> index);
 
-@ffi.Native<NativeCBLQueryIndex_Collection>()
+@ffi.Native<NativeCBLQueryIndex_Collection>(isLeaf: true)
 external ffi.Pointer<CBLCollection> CBLQueryIndex_Collection(
   ffi.Pointer<CBLQueryIndex> index,
 );
 
-@ffi.Native<NativeCBLQueryIndex_BeginUpdate>()
+@ffi.Native<NativeCBLQueryIndex_BeginUpdate>(isLeaf: true)
 external ffi.Pointer<CBLIndexUpdater> CBLQueryIndex_BeginUpdate(
   ffi.Pointer<CBLQueryIndex> index,
   int limit,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLIndexUpdater_Count>()
+@ffi.Native<NativeCBLIndexUpdater_Count>(isLeaf: true)
 external int CBLIndexUpdater_Count(ffi.Pointer<CBLIndexUpdater> updater);
 
-@ffi.Native<NativeCBLIndexUpdater_Value>()
+@ffi.Native<NativeCBLIndexUpdater_Value>(isLeaf: true)
 external FLValue CBLIndexUpdater_Value(
   ffi.Pointer<CBLIndexUpdater> updater,
   int index,
 );
 
-@ffi.Native<NativeCBLIndexUpdater_SetVector>()
+@ffi.Native<NativeCBLIndexUpdater_SetVector>(isLeaf: true)
 external bool CBLIndexUpdater_SetVector(
   ffi.Pointer<CBLIndexUpdater> updater,
   int index,
@@ -1274,13 +1280,13 @@ external bool CBLIndexUpdater_SetVector(
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLIndexUpdater_SkipVector>()
+@ffi.Native<NativeCBLIndexUpdater_SkipVector>(isLeaf: true)
 external void CBLIndexUpdater_SkipVector(
   ffi.Pointer<CBLIndexUpdater> updater,
   int index,
 );
 
-@ffi.Native<NativeCBLIndexUpdater_Finish>()
+@ffi.Native<NativeCBLIndexUpdater_Finish>(isLeaf: true)
 external bool CBLIndexUpdater_Finish(
   ffi.Pointer<CBLIndexUpdater> updater,
   ffi.Pointer<CBLError> outError,
@@ -1289,45 +1295,45 @@ external bool CBLIndexUpdater_Finish(
 @ffi.Native<FLString>()
 external final FLString kCBLDefaultScopeName;
 
-@ffi.Native<NativeCBLScope_Name>()
+@ffi.Native<NativeCBLScope_Name>(isLeaf: true)
 external FLString CBLScope_Name(ffi.Pointer<CBLScope> scope);
 
-@ffi.Native<NativeCBLScope_Database>()
+@ffi.Native<NativeCBLScope_Database>(isLeaf: true)
 external ffi.Pointer<CBLDatabase> CBLScope_Database(
   ffi.Pointer<CBLScope> scope,
 );
 
-@ffi.Native<NativeCBLScope_CollectionNames>()
+@ffi.Native<NativeCBLScope_CollectionNames>(isLeaf: true)
 external FLMutableArray CBLScope_CollectionNames(
   ffi.Pointer<CBLScope> scope,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLScope_Collection>()
+@ffi.Native<NativeCBLScope_Collection>(isLeaf: true)
 external ffi.Pointer<CBLCollection> CBLScope_Collection(
   ffi.Pointer<CBLScope> scope,
   FLString collectionName,
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLListenerAuth_CreatePassword>()
+@ffi.Native<NativeCBLListenerAuth_CreatePassword>(isLeaf: true)
 external ffi.Pointer<CBLListenerAuthenticator> CBLListenerAuth_CreatePassword(
   CBLListenerPasswordAuthCallback auth,
   ffi.Pointer<ffi.Void> context,
 );
 
-@ffi.Native<NativeCBLListenerAuth_CreateCertificate>()
+@ffi.Native<NativeCBLListenerAuth_CreateCertificate>(isLeaf: true)
 external ffi.Pointer<CBLListenerAuthenticator>
 CBLListenerAuth_CreateCertificate(
   CBLListenerCertAuthCallback auth,
   ffi.Pointer<ffi.Void> context,
 );
 
-@ffi.Native<NativeCBLListenerAuth_CreateCertificateWithRootCerts>()
+@ffi.Native<NativeCBLListenerAuth_CreateCertificateWithRootCerts>(isLeaf: true)
 external ffi.Pointer<CBLListenerAuthenticator>
 CBLListenerAuth_CreateCertificateWithRootCerts(ffi.Pointer<CBLCert> rootCerts);
 
-@ffi.Native<NativeCBLListenerAuth_Free>()
+@ffi.Native<NativeCBLListenerAuth_Free>(isLeaf: true)
 external void CBLListenerAuth_Free(ffi.Pointer<CBLListenerAuthenticator> arg0);
 
 @ffi.Native<NativeCBLURLEndpointListener_Create>()
@@ -1336,26 +1342,26 @@ external ffi.Pointer<CBLURLEndpointListener> CBLURLEndpointListener_Create(
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLURLEndpointListener_Config>()
+@ffi.Native<NativeCBLURLEndpointListener_Config>(isLeaf: true)
 external ffi.Pointer<CBLURLEndpointListenerConfiguration>
 CBLURLEndpointListener_Config(ffi.Pointer<CBLURLEndpointListener> arg0);
 
-@ffi.Native<NativeCBLURLEndpointListener_Port>()
+@ffi.Native<NativeCBLURLEndpointListener_Port>(isLeaf: true)
 external int CBLURLEndpointListener_Port(
   ffi.Pointer<CBLURLEndpointListener> arg0,
 );
 
-@ffi.Native<NativeCBLURLEndpointListener_TLSIdentity>()
+@ffi.Native<NativeCBLURLEndpointListener_TLSIdentity>(isLeaf: true)
 external ffi.Pointer<CBLTLSIdentity> CBLURLEndpointListener_TLSIdentity(
   ffi.Pointer<CBLURLEndpointListener> arg0,
 );
 
-@ffi.Native<NativeCBLURLEndpointListener_Urls>()
+@ffi.Native<NativeCBLURLEndpointListener_Urls>(isLeaf: true)
 external FLMutableArray CBLURLEndpointListener_Urls(
   ffi.Pointer<CBLURLEndpointListener> arg0,
 );
 
-@ffi.Native<NativeCBLURLEndpointListener_Status>()
+@ffi.Native<NativeCBLURLEndpointListener_Status>(isLeaf: true)
 external CBLConnectionStatus CBLURLEndpointListener_Status(
   ffi.Pointer<CBLURLEndpointListener> arg0,
 );
@@ -1366,176 +1372,176 @@ external bool CBLURLEndpointListener_Start(
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLURLEndpointListener_Stop>()
+@ffi.Native<NativeCBLURLEndpointListener_Stop>(isLeaf: true)
 external void CBLURLEndpointListener_Stop(
   ffi.Pointer<CBLURLEndpointListener> arg0,
 );
 
-@ffi.Native<NativeFLSlice_Equal>()
+@ffi.Native<NativeFLSlice_Equal>(isLeaf: true)
 external bool FLSlice_Equal(FLSlice a, FLSlice b);
 
-@ffi.Native<NativeFLSlice_Compare>()
+@ffi.Native<NativeFLSlice_Compare>(isLeaf: true)
 external int FLSlice_Compare(FLSlice arg0, FLSlice arg1);
 
-@ffi.Native<NativeFLSlice_Hash>()
+@ffi.Native<NativeFLSlice_Hash>(isLeaf: true)
 external int FLSlice_Hash(FLSlice s);
 
-@ffi.Native<NativeFLSlice_ToCString>()
+@ffi.Native<NativeFLSlice_ToCString>(isLeaf: true)
 external bool FLSlice_ToCString(
   FLSlice s,
   ffi.Pointer<ffi.Char> buffer,
   int capacity,
 );
 
-@ffi.Native<NativeFLSliceResult_New>()
+@ffi.Native<NativeFLSliceResult_New>(isLeaf: true)
 external FLSliceResult FLSliceResult_New(int arg0);
 
-@ffi.Native<NativeFLSlice_Copy>()
+@ffi.Native<NativeFLSlice_Copy>(isLeaf: true)
 external FLSliceResult FLSlice_Copy(FLSlice arg0);
 
-@ffi.Native<NativeFLBuf_Retain>(symbol: '_FLBuf_Retain')
+@ffi.Native<NativeFLBuf_Retain>(symbol: '_FLBuf_Retain', isLeaf: true)
 external void FLBuf_Retain(ffi.Pointer<ffi.Void> arg0);
 
-@ffi.Native<NativeFLBuf_Release>(symbol: '_FLBuf_Release')
+@ffi.Native<NativeFLBuf_Release>(symbol: '_FLBuf_Release', isLeaf: true)
 external void FLBuf_Release(ffi.Pointer<ffi.Void> arg0);
 
-@ffi.Native<NativeFL_WipeMemory>()
+@ffi.Native<NativeFL_WipeMemory>(isLeaf: true)
 external void FL_WipeMemory(ffi.Pointer<ffi.Void> dst, int size);
 
-@ffi.Native<NativeFLTimestamp_Now>()
+@ffi.Native<NativeFLTimestamp_Now>(isLeaf: true)
 external int FLTimestamp_Now();
 
-@ffi.Native<NativeFLTimestamp_ToString>()
+@ffi.Native<NativeFLTimestamp_ToString>(isLeaf: true)
 external FLStringResult FLTimestamp_ToString(int timestamp, bool asUTC);
 
-@ffi.Native<NativeFLTimestamp_FromString>()
+@ffi.Native<NativeFLTimestamp_FromString>(isLeaf: true)
 external int FLTimestamp_FromString(FLString str);
 
 @ffi.Native<FLArray>()
 external FLArray kFLEmptyArray;
 
-@ffi.Native<NativeFLArray_Count>()
+@ffi.Native<NativeFLArray_Count>(isLeaf: true)
 external int FLArray_Count(FLArray arg0);
 
-@ffi.Native<NativeFLArray_IsEmpty>()
+@ffi.Native<NativeFLArray_IsEmpty>(isLeaf: true)
 external bool FLArray_IsEmpty(FLArray arg0);
 
-@ffi.Native<NativeFLArray_AsMutable>()
+@ffi.Native<NativeFLArray_AsMutable>(isLeaf: true)
 external FLMutableArray FLArray_AsMutable(FLArray arg0);
 
-@ffi.Native<NativeFLArray_Get>()
+@ffi.Native<NativeFLArray_Get>(isLeaf: true)
 external FLValue FLArray_Get(FLArray arg0, int index);
 
-@ffi.Native<NativeFLArrayIterator_Begin>()
+@ffi.Native<NativeFLArrayIterator_Begin>(isLeaf: true)
 external void FLArrayIterator_Begin(
   FLArray arg0,
   ffi.Pointer<FLArrayIterator> arg1,
 );
 
-@ffi.Native<NativeFLArrayIterator_GetValue>()
+@ffi.Native<NativeFLArrayIterator_GetValue>(isLeaf: true)
 external FLValue FLArrayIterator_GetValue(ffi.Pointer<FLArrayIterator> arg0);
 
-@ffi.Native<NativeFLArrayIterator_GetValueAt>()
+@ffi.Native<NativeFLArrayIterator_GetValueAt>(isLeaf: true)
 external FLValue FLArrayIterator_GetValueAt(
   ffi.Pointer<FLArrayIterator> arg0,
   int offset,
 );
 
-@ffi.Native<NativeFLArrayIterator_GetCount>()
+@ffi.Native<NativeFLArrayIterator_GetCount>(isLeaf: true)
 external int FLArrayIterator_GetCount(ffi.Pointer<FLArrayIterator> arg0);
 
-@ffi.Native<NativeFLArrayIterator_Next>()
+@ffi.Native<NativeFLArrayIterator_Next>(isLeaf: true)
 external bool FLArrayIterator_Next(ffi.Pointer<FLArrayIterator> arg0);
 
 @ffi.Native<FLDict>()
 external FLDict kFLEmptyDict;
 
-@ffi.Native<NativeFLDict_Count>()
+@ffi.Native<NativeFLDict_Count>(isLeaf: true)
 external int FLDict_Count(FLDict arg0);
 
-@ffi.Native<NativeFLDict_IsEmpty>()
+@ffi.Native<NativeFLDict_IsEmpty>(isLeaf: true)
 external bool FLDict_IsEmpty(FLDict arg0);
 
-@ffi.Native<NativeFLDict_AsMutable>()
+@ffi.Native<NativeFLDict_AsMutable>(isLeaf: true)
 external FLMutableDict FLDict_AsMutable(FLDict arg0);
 
-@ffi.Native<NativeFLDict_Get>()
+@ffi.Native<NativeFLDict_Get>(isLeaf: true)
 external FLValue FLDict_Get(FLDict arg0, FLSlice keyString);
 
-@ffi.Native<NativeFLDictIterator_Begin>()
+@ffi.Native<NativeFLDictIterator_Begin>(isLeaf: true)
 external void FLDictIterator_Begin(
   FLDict arg0,
   ffi.Pointer<FLDictIterator> arg1,
 );
 
-@ffi.Native<NativeFLDictIterator_GetKey>()
+@ffi.Native<NativeFLDictIterator_GetKey>(isLeaf: true)
 external FLValue FLDictIterator_GetKey(ffi.Pointer<FLDictIterator> arg0);
 
-@ffi.Native<NativeFLDictIterator_GetKeyString>()
+@ffi.Native<NativeFLDictIterator_GetKeyString>(isLeaf: true)
 external FLString FLDictIterator_GetKeyString(ffi.Pointer<FLDictIterator> arg0);
 
-@ffi.Native<NativeFLDictIterator_GetValue>()
+@ffi.Native<NativeFLDictIterator_GetValue>(isLeaf: true)
 external FLValue FLDictIterator_GetValue(ffi.Pointer<FLDictIterator> arg0);
 
-@ffi.Native<NativeFLDictIterator_GetCount>()
+@ffi.Native<NativeFLDictIterator_GetCount>(isLeaf: true)
 external int FLDictIterator_GetCount(ffi.Pointer<FLDictIterator> arg0);
 
-@ffi.Native<NativeFLDictIterator_Next>()
+@ffi.Native<NativeFLDictIterator_Next>(isLeaf: true)
 external bool FLDictIterator_Next(ffi.Pointer<FLDictIterator> arg0);
 
-@ffi.Native<NativeFLDictIterator_End>()
+@ffi.Native<NativeFLDictIterator_End>(isLeaf: true)
 external void FLDictIterator_End(ffi.Pointer<FLDictIterator> arg0);
 
-@ffi.Native<NativeFLDictKey_Init>()
+@ffi.Native<NativeFLDictKey_Init>(isLeaf: true)
 external FLDictKey FLDictKey_Init(FLSlice string);
 
-@ffi.Native<NativeFLDictKey_GetString>()
+@ffi.Native<NativeFLDictKey_GetString>(isLeaf: true)
 external FLString FLDictKey_GetString(ffi.Pointer<FLDictKey> arg0);
 
-@ffi.Native<NativeFLDict_GetWithKey>()
+@ffi.Native<NativeFLDict_GetWithKey>(isLeaf: true)
 external FLValue FLDict_GetWithKey(FLDict arg0, ffi.Pointer<FLDictKey> arg1);
 
-@ffi.Native<NativeFLDeepIterator_New>()
+@ffi.Native<NativeFLDeepIterator_New>(isLeaf: true)
 external FLDeepIterator FLDeepIterator_New(FLValue arg0);
 
-@ffi.Native<NativeFLDeepIterator_Free>()
+@ffi.Native<NativeFLDeepIterator_Free>(isLeaf: true)
 external void FLDeepIterator_Free(FLDeepIterator arg0);
 
-@ffi.Native<NativeFLDeepIterator_GetValue>()
+@ffi.Native<NativeFLDeepIterator_GetValue>(isLeaf: true)
 external FLValue FLDeepIterator_GetValue(FLDeepIterator arg0);
 
-@ffi.Native<NativeFLDeepIterator_GetParent>()
+@ffi.Native<NativeFLDeepIterator_GetParent>(isLeaf: true)
 external FLValue FLDeepIterator_GetParent(FLDeepIterator arg0);
 
-@ffi.Native<NativeFLDeepIterator_GetKey>()
+@ffi.Native<NativeFLDeepIterator_GetKey>(isLeaf: true)
 external FLSlice FLDeepIterator_GetKey(FLDeepIterator arg0);
 
-@ffi.Native<NativeFLDeepIterator_GetIndex>()
+@ffi.Native<NativeFLDeepIterator_GetIndex>(isLeaf: true)
 external int FLDeepIterator_GetIndex(FLDeepIterator arg0);
 
-@ffi.Native<NativeFLDeepIterator_GetDepth>()
+@ffi.Native<NativeFLDeepIterator_GetDepth>(isLeaf: true)
 external int FLDeepIterator_GetDepth(FLDeepIterator arg0);
 
-@ffi.Native<NativeFLDeepIterator_SkipChildren>()
+@ffi.Native<NativeFLDeepIterator_SkipChildren>(isLeaf: true)
 external void FLDeepIterator_SkipChildren(FLDeepIterator arg0);
 
-@ffi.Native<NativeFLDeepIterator_Next>()
+@ffi.Native<NativeFLDeepIterator_Next>(isLeaf: true)
 external bool FLDeepIterator_Next(FLDeepIterator arg0);
 
-@ffi.Native<NativeFLDeepIterator_GetPath>()
+@ffi.Native<NativeFLDeepIterator_GetPath>(isLeaf: true)
 external void FLDeepIterator_GetPath(
   FLDeepIterator arg0,
   ffi.Pointer<ffi.Pointer<FLPathComponent>> outPath,
   ffi.Pointer<ffi.Size> outDepth,
 );
 
-@ffi.Native<NativeFLDeepIterator_GetPathString>()
+@ffi.Native<NativeFLDeepIterator_GetPathString>(isLeaf: true)
 external FLSliceResult FLDeepIterator_GetPathString(FLDeepIterator arg0);
 
-@ffi.Native<NativeFLDeepIterator_GetJSONPointer>()
+@ffi.Native<NativeFLDeepIterator_GetJSONPointer>(isLeaf: true)
 external FLSliceResult FLDeepIterator_GetJSONPointer(FLDeepIterator arg0);
 
-@ffi.Native<NativeFLDoc_FromResultData>()
+@ffi.Native<NativeFLDoc_FromResultData>(isLeaf: true)
 external FLDoc FLDoc_FromResultData(
   FLSliceResult data,
   int arg1,
@@ -1543,209 +1549,209 @@ external FLDoc FLDoc_FromResultData(
   FLSlice externData,
 );
 
-@ffi.Native<NativeFLDoc_Release>()
+@ffi.Native<NativeFLDoc_Release>(isLeaf: true)
 external void FLDoc_Release(FLDoc arg0);
 
-@ffi.Native<NativeFLDoc_Retain>()
+@ffi.Native<NativeFLDoc_Retain>(isLeaf: true)
 external FLDoc FLDoc_Retain(FLDoc arg0);
 
-@ffi.Native<NativeFLDoc_GetData>()
+@ffi.Native<NativeFLDoc_GetData>(isLeaf: true)
 external FLSlice FLDoc_GetData(FLDoc arg0);
 
-@ffi.Native<NativeFLDoc_GetAllocedData>()
+@ffi.Native<NativeFLDoc_GetAllocedData>(isLeaf: true)
 external FLSliceResult FLDoc_GetAllocedData(FLDoc arg0);
 
-@ffi.Native<NativeFLDoc_GetRoot>()
+@ffi.Native<NativeFLDoc_GetRoot>(isLeaf: true)
 external FLValue FLDoc_GetRoot(FLDoc arg0);
 
-@ffi.Native<NativeFLDoc_GetSharedKeys>()
+@ffi.Native<NativeFLDoc_GetSharedKeys>(isLeaf: true)
 external FLSharedKeys FLDoc_GetSharedKeys(FLDoc arg0);
 
-@ffi.Native<NativeFLValue_FindDoc>()
+@ffi.Native<NativeFLValue_FindDoc>(isLeaf: true)
 external FLDoc FLValue_FindDoc(FLValue arg0);
 
-@ffi.Native<NativeFLDoc_SetAssociated>()
+@ffi.Native<NativeFLDoc_SetAssociated>(isLeaf: true)
 external bool FLDoc_SetAssociated(
   FLDoc doc,
   ffi.Pointer<ffi.Void> pointer,
   ffi.Pointer<ffi.Char> type,
 );
 
-@ffi.Native<NativeFLDoc_GetAssociated>()
+@ffi.Native<NativeFLDoc_GetAssociated>(isLeaf: true)
 external ffi.Pointer<ffi.Void> FLDoc_GetAssociated(
   FLDoc doc,
   ffi.Pointer<ffi.Char> type,
 );
 
-@ffi.Native<NativeFLEncoder_New>()
+@ffi.Native<NativeFLEncoder_New>(isLeaf: true)
 external FLEncoder FLEncoder_New();
 
-@ffi.Native<NativeFLEncoder_NewWithOptions>()
+@ffi.Native<NativeFLEncoder_NewWithOptions>(isLeaf: true)
 external FLEncoder FLEncoder_NewWithOptions(
   int format,
   int reserveSize,
   bool uniqueStrings,
 );
 
-@ffi.Native<NativeFLEncoder_NewWritingToFile>()
+@ffi.Native<NativeFLEncoder_NewWritingToFile>(isLeaf: true)
 external FLEncoder FLEncoder_NewWritingToFile(
   ffi.Pointer<FILE> arg0,
   bool uniqueStrings,
 );
 
-@ffi.Native<NativeFLEncoder_Free>()
+@ffi.Native<NativeFLEncoder_Free>(isLeaf: true)
 external void FLEncoder_Free(FLEncoder arg0);
 
-@ffi.Native<NativeFLEncoder_SetSharedKeys>()
+@ffi.Native<NativeFLEncoder_SetSharedKeys>(isLeaf: true)
 external void FLEncoder_SetSharedKeys(FLEncoder arg0, FLSharedKeys arg1);
 
-@ffi.Native<NativeFLEncoder_SetExtraInfo>()
+@ffi.Native<NativeFLEncoder_SetExtraInfo>(isLeaf: true)
 external void FLEncoder_SetExtraInfo(
   FLEncoder arg0,
   ffi.Pointer<ffi.Void> info,
 );
 
-@ffi.Native<NativeFLEncoder_GetExtraInfo>()
+@ffi.Native<NativeFLEncoder_GetExtraInfo>(isLeaf: true)
 external ffi.Pointer<ffi.Void> FLEncoder_GetExtraInfo(FLEncoder arg0);
 
-@ffi.Native<NativeFLEncoder_Reset>()
+@ffi.Native<NativeFLEncoder_Reset>(isLeaf: true)
 external void FLEncoder_Reset(FLEncoder arg0);
 
-@ffi.Native<NativeFLEncoder_BytesWritten>()
+@ffi.Native<NativeFLEncoder_BytesWritten>(isLeaf: true)
 external int FLEncoder_BytesWritten(FLEncoder arg0);
 
-@ffi.Native<NativeFLEncoder_WriteNull>()
+@ffi.Native<NativeFLEncoder_WriteNull>(isLeaf: true)
 external bool FLEncoder_WriteNull(FLEncoder arg0);
 
-@ffi.Native<NativeFLEncoder_WriteUndefined>()
+@ffi.Native<NativeFLEncoder_WriteUndefined>(isLeaf: true)
 external bool FLEncoder_WriteUndefined(FLEncoder arg0);
 
-@ffi.Native<NativeFLEncoder_WriteBool>()
+@ffi.Native<NativeFLEncoder_WriteBool>(isLeaf: true)
 external bool FLEncoder_WriteBool(FLEncoder arg0, bool arg1);
 
-@ffi.Native<NativeFLEncoder_WriteInt>()
+@ffi.Native<NativeFLEncoder_WriteInt>(isLeaf: true)
 external bool FLEncoder_WriteInt(FLEncoder arg0, int arg1);
 
-@ffi.Native<NativeFLEncoder_WriteUInt>()
+@ffi.Native<NativeFLEncoder_WriteUInt>(isLeaf: true)
 external bool FLEncoder_WriteUInt(FLEncoder arg0, int arg1);
 
-@ffi.Native<NativeFLEncoder_WriteFloat>()
+@ffi.Native<NativeFLEncoder_WriteFloat>(isLeaf: true)
 external bool FLEncoder_WriteFloat(FLEncoder arg0, double arg1);
 
-@ffi.Native<NativeFLEncoder_WriteDouble>()
+@ffi.Native<NativeFLEncoder_WriteDouble>(isLeaf: true)
 external bool FLEncoder_WriteDouble(FLEncoder arg0, double arg1);
 
-@ffi.Native<NativeFLEncoder_WriteString>()
+@ffi.Native<NativeFLEncoder_WriteString>(isLeaf: true)
 external bool FLEncoder_WriteString(FLEncoder arg0, FLString arg1);
 
-@ffi.Native<NativeFLEncoder_WriteDateString>()
+@ffi.Native<NativeFLEncoder_WriteDateString>(isLeaf: true)
 external bool FLEncoder_WriteDateString(FLEncoder encoder, int ts, bool asUTC);
 
-@ffi.Native<NativeFLEncoder_WriteData>()
+@ffi.Native<NativeFLEncoder_WriteData>(isLeaf: true)
 external bool FLEncoder_WriteData(FLEncoder arg0, FLSlice arg1);
 
-@ffi.Native<NativeFLEncoder_WriteValue>()
+@ffi.Native<NativeFLEncoder_WriteValue>(isLeaf: true)
 external bool FLEncoder_WriteValue(FLEncoder arg0, FLValue arg1);
 
-@ffi.Native<NativeFLEncoder_BeginArray>()
+@ffi.Native<NativeFLEncoder_BeginArray>(isLeaf: true)
 external bool FLEncoder_BeginArray(FLEncoder arg0, int reserveCount);
 
-@ffi.Native<NativeFLEncoder_EndArray>()
+@ffi.Native<NativeFLEncoder_EndArray>(isLeaf: true)
 external bool FLEncoder_EndArray(FLEncoder arg0);
 
-@ffi.Native<NativeFLEncoder_BeginDict>()
+@ffi.Native<NativeFLEncoder_BeginDict>(isLeaf: true)
 external bool FLEncoder_BeginDict(FLEncoder arg0, int reserveCount);
 
-@ffi.Native<NativeFLEncoder_WriteKey>()
+@ffi.Native<NativeFLEncoder_WriteKey>(isLeaf: true)
 external bool FLEncoder_WriteKey(FLEncoder arg0, FLString arg1);
 
-@ffi.Native<NativeFLEncoder_WriteKeyValue>()
+@ffi.Native<NativeFLEncoder_WriteKeyValue>(isLeaf: true)
 external bool FLEncoder_WriteKeyValue(FLEncoder arg0, FLValue arg1);
 
-@ffi.Native<NativeFLEncoder_EndDict>()
+@ffi.Native<NativeFLEncoder_EndDict>(isLeaf: true)
 external bool FLEncoder_EndDict(FLEncoder arg0);
 
-@ffi.Native<NativeFLEncoder_WriteRaw>()
+@ffi.Native<NativeFLEncoder_WriteRaw>(isLeaf: true)
 external bool FLEncoder_WriteRaw(FLEncoder arg0, FLSlice arg1);
 
-@ffi.Native<NativeFLEncoder_FinishDoc>()
+@ffi.Native<NativeFLEncoder_FinishDoc>(isLeaf: true)
 external FLDoc FLEncoder_FinishDoc(
   FLEncoder arg0,
   ffi.Pointer<ffi.UnsignedInt> outError,
 );
 
-@ffi.Native<NativeFLEncoder_Finish>()
+@ffi.Native<NativeFLEncoder_Finish>(isLeaf: true)
 external FLSliceResult FLEncoder_Finish(
   FLEncoder arg0,
   ffi.Pointer<ffi.UnsignedInt> outError,
 );
 
-@ffi.Native<NativeFLEncoder_GetError>()
+@ffi.Native<NativeFLEncoder_GetError>(isLeaf: true)
 external int FLEncoder_GetError(FLEncoder arg0);
 
-@ffi.Native<NativeFLEncoder_GetErrorMessage>()
+@ffi.Native<NativeFLEncoder_GetErrorMessage>(isLeaf: true)
 external ffi.Pointer<ffi.Char> FLEncoder_GetErrorMessage(FLEncoder arg0);
 
-@ffi.Native<NativeFLValue_ToJSON>()
+@ffi.Native<NativeFLValue_ToJSON>(isLeaf: true)
 external FLStringResult FLValue_ToJSON(FLValue arg0);
 
-@ffi.Native<NativeFLValue_ToJSON5>()
+@ffi.Native<NativeFLValue_ToJSON5>(isLeaf: true)
 external FLStringResult FLValue_ToJSON5(FLValue arg0);
 
-@ffi.Native<NativeFLValue_ToJSONX>()
+@ffi.Native<NativeFLValue_ToJSONX>(isLeaf: true)
 external FLStringResult FLValue_ToJSONX(
   FLValue v,
   bool json5,
   bool canonicalForm,
 );
 
-@ffi.Native<NativeFLDoc_FromJSON>()
+@ffi.Native<NativeFLDoc_FromJSON>(isLeaf: true)
 external FLDoc FLDoc_FromJSON(
   FLSlice json,
   ffi.Pointer<ffi.UnsignedInt> outError,
 );
 
-@ffi.Native<NativeFLMutableArray_NewFromJSON>()
+@ffi.Native<NativeFLMutableArray_NewFromJSON>(isLeaf: true)
 external FLMutableArray FLMutableArray_NewFromJSON(
   FLString json,
   ffi.Pointer<ffi.UnsignedInt> outError,
 );
 
-@ffi.Native<NativeFLMutableDict_NewFromJSON>()
+@ffi.Native<NativeFLMutableDict_NewFromJSON>(isLeaf: true)
 external FLMutableDict FLMutableDict_NewFromJSON(
   FLString json,
   ffi.Pointer<ffi.UnsignedInt> outError,
 );
 
-@ffi.Native<NativeFLEncoder_ConvertJSON>()
+@ffi.Native<NativeFLEncoder_ConvertJSON>(isLeaf: true)
 external bool FLEncoder_ConvertJSON(FLEncoder arg0, FLSlice json);
 
-@ffi.Native<NativeFLKeyPath_New>()
+@ffi.Native<NativeFLKeyPath_New>(isLeaf: true)
 external FLKeyPath FLKeyPath_New(
   FLSlice specifier,
   ffi.Pointer<ffi.UnsignedInt> outError,
 );
 
-@ffi.Native<NativeFLKeyPath_Free>()
+@ffi.Native<NativeFLKeyPath_Free>(isLeaf: true)
 external void FLKeyPath_Free(FLKeyPath arg0);
 
-@ffi.Native<NativeFLKeyPath_Eval>()
+@ffi.Native<NativeFLKeyPath_Eval>(isLeaf: true)
 external FLValue FLKeyPath_Eval(FLKeyPath arg0, FLValue root);
 
-@ffi.Native<NativeFLKeyPath_EvalOnce>()
+@ffi.Native<NativeFLKeyPath_EvalOnce>(isLeaf: true)
 external FLValue FLKeyPath_EvalOnce(
   FLSlice specifier,
   FLValue root,
   ffi.Pointer<ffi.UnsignedInt> outError,
 );
 
-@ffi.Native<NativeFLKeyPath_ToString>()
+@ffi.Native<NativeFLKeyPath_ToString>(isLeaf: true)
 external FLStringResult FLKeyPath_ToString(FLKeyPath path);
 
-@ffi.Native<NativeFLKeyPath_Equals>()
+@ffi.Native<NativeFLKeyPath_Equals>(isLeaf: true)
 external bool FLKeyPath_Equals(FLKeyPath path1, FLKeyPath path2);
 
-@ffi.Native<NativeFLKeyPath_GetElement>()
+@ffi.Native<NativeFLKeyPath_GetElement>(isLeaf: true)
 external bool FLKeyPath_GetElement(
   FLKeyPath arg0,
   int i,
@@ -1759,261 +1765,261 @@ external FLValue kFLNullValue;
 @ffi.Native<FLValue>()
 external FLValue kFLUndefinedValue;
 
-@ffi.Native<NativeFLValue_GetType>()
+@ffi.Native<NativeFLValue_GetType>(isLeaf: true)
 external int FLValue_GetType(FLValue arg0);
 
-@ffi.Native<NativeFLValue_IsInteger>()
+@ffi.Native<NativeFLValue_IsInteger>(isLeaf: true)
 external bool FLValue_IsInteger(FLValue arg0);
 
-@ffi.Native<NativeFLValue_IsUnsigned>()
+@ffi.Native<NativeFLValue_IsUnsigned>(isLeaf: true)
 external bool FLValue_IsUnsigned(FLValue arg0);
 
-@ffi.Native<NativeFLValue_IsDouble>()
+@ffi.Native<NativeFLValue_IsDouble>(isLeaf: true)
 external bool FLValue_IsDouble(FLValue arg0);
 
-@ffi.Native<NativeFLValue_AsBool>()
+@ffi.Native<NativeFLValue_AsBool>(isLeaf: true)
 external bool FLValue_AsBool(FLValue arg0);
 
-@ffi.Native<NativeFLValue_AsInt>()
+@ffi.Native<NativeFLValue_AsInt>(isLeaf: true)
 external int FLValue_AsInt(FLValue arg0);
 
-@ffi.Native<NativeFLValue_AsUnsigned>()
+@ffi.Native<NativeFLValue_AsUnsigned>(isLeaf: true)
 external int FLValue_AsUnsigned(FLValue arg0);
 
-@ffi.Native<NativeFLValue_AsFloat>()
+@ffi.Native<NativeFLValue_AsFloat>(isLeaf: true)
 external double FLValue_AsFloat(FLValue arg0);
 
-@ffi.Native<NativeFLValue_AsDouble>()
+@ffi.Native<NativeFLValue_AsDouble>(isLeaf: true)
 external double FLValue_AsDouble(FLValue arg0);
 
-@ffi.Native<NativeFLValue_AsString>()
+@ffi.Native<NativeFLValue_AsString>(isLeaf: true)
 external FLString FLValue_AsString(FLValue arg0);
 
-@ffi.Native<NativeFLValue_AsTimestamp>()
+@ffi.Native<NativeFLValue_AsTimestamp>(isLeaf: true)
 external int FLValue_AsTimestamp(FLValue arg0);
 
-@ffi.Native<NativeFLValue_AsData>()
+@ffi.Native<NativeFLValue_AsData>(isLeaf: true)
 external FLSlice FLValue_AsData(FLValue arg0);
 
-@ffi.Native<NativeFLValue_AsArray>()
+@ffi.Native<NativeFLValue_AsArray>(isLeaf: true)
 external FLArray FLValue_AsArray(FLValue arg0);
 
-@ffi.Native<NativeFLValue_AsDict>()
+@ffi.Native<NativeFLValue_AsDict>(isLeaf: true)
 external FLDict FLValue_AsDict(FLValue arg0);
 
-@ffi.Native<NativeFLValue_ToString>()
+@ffi.Native<NativeFLValue_ToString>(isLeaf: true)
 external FLStringResult FLValue_ToString(FLValue arg0);
 
-@ffi.Native<NativeFLValue_IsEqual>()
+@ffi.Native<NativeFLValue_IsEqual>(isLeaf: true)
 external bool FLValue_IsEqual(FLValue v1, FLValue v2);
 
-@ffi.Native<NativeFLValue_IsMutable>()
+@ffi.Native<NativeFLValue_IsMutable>(isLeaf: true)
 external bool FLValue_IsMutable(FLValue arg0);
 
-@ffi.Native<NativeFLValue_Retain>()
+@ffi.Native<NativeFLValue_Retain>(isLeaf: true)
 external FLValue FLValue_Retain(FLValue arg0);
 
-@ffi.Native<NativeFLValue_Release>()
+@ffi.Native<NativeFLValue_Release>(isLeaf: true)
 external void FLValue_Release(FLValue arg0);
 
-@ffi.Native<NativeFLArray_MutableCopy>()
+@ffi.Native<NativeFLArray_MutableCopy>(isLeaf: true)
 external FLMutableArray FLArray_MutableCopy(FLArray arg0, int arg1);
 
-@ffi.Native<NativeFLMutableArray_New>()
+@ffi.Native<NativeFLMutableArray_New>(isLeaf: true)
 external FLMutableArray FLMutableArray_New();
 
-@ffi.Native<NativeFLMutableArray_GetSource>()
+@ffi.Native<NativeFLMutableArray_GetSource>(isLeaf: true)
 external FLArray FLMutableArray_GetSource(FLMutableArray arg0);
 
-@ffi.Native<NativeFLMutableArray_IsChanged>()
+@ffi.Native<NativeFLMutableArray_IsChanged>(isLeaf: true)
 external bool FLMutableArray_IsChanged(FLMutableArray arg0);
 
-@ffi.Native<NativeFLMutableArray_SetChanged>()
+@ffi.Native<NativeFLMutableArray_SetChanged>(isLeaf: true)
 external void FLMutableArray_SetChanged(FLMutableArray arg0, bool changed);
 
-@ffi.Native<NativeFLMutableArray_Insert>()
+@ffi.Native<NativeFLMutableArray_Insert>(isLeaf: true)
 external void FLMutableArray_Insert(
   FLMutableArray array,
   int firstIndex,
   int count,
 );
 
-@ffi.Native<NativeFLMutableArray_Remove>()
+@ffi.Native<NativeFLMutableArray_Remove>(isLeaf: true)
 external void FLMutableArray_Remove(
   FLMutableArray array,
   int firstIndex,
   int count,
 );
 
-@ffi.Native<NativeFLMutableArray_Resize>()
+@ffi.Native<NativeFLMutableArray_Resize>(isLeaf: true)
 external void FLMutableArray_Resize(FLMutableArray array, int size);
 
-@ffi.Native<NativeFLMutableArray_GetMutableArray>()
+@ffi.Native<NativeFLMutableArray_GetMutableArray>(isLeaf: true)
 external FLMutableArray FLMutableArray_GetMutableArray(
   FLMutableArray arg0,
   int index,
 );
 
-@ffi.Native<NativeFLMutableArray_GetMutableDict>()
+@ffi.Native<NativeFLMutableArray_GetMutableDict>(isLeaf: true)
 external FLMutableDict FLMutableArray_GetMutableDict(
   FLMutableArray arg0,
   int index,
 );
 
-@ffi.Native<NativeFLDict_MutableCopy>()
+@ffi.Native<NativeFLDict_MutableCopy>(isLeaf: true)
 external FLMutableDict FLDict_MutableCopy(FLDict source, int arg1);
 
-@ffi.Native<NativeFLMutableDict_New>()
+@ffi.Native<NativeFLMutableDict_New>(isLeaf: true)
 external FLMutableDict FLMutableDict_New();
 
-@ffi.Native<NativeFLMutableDict_GetSource>()
+@ffi.Native<NativeFLMutableDict_GetSource>(isLeaf: true)
 external FLDict FLMutableDict_GetSource(FLMutableDict arg0);
 
-@ffi.Native<NativeFLMutableDict_IsChanged>()
+@ffi.Native<NativeFLMutableDict_IsChanged>(isLeaf: true)
 external bool FLMutableDict_IsChanged(FLMutableDict arg0);
 
-@ffi.Native<NativeFLMutableDict_SetChanged>()
+@ffi.Native<NativeFLMutableDict_SetChanged>(isLeaf: true)
 external void FLMutableDict_SetChanged(FLMutableDict arg0, bool arg1);
 
-@ffi.Native<NativeFLMutableDict_Remove>()
+@ffi.Native<NativeFLMutableDict_Remove>(isLeaf: true)
 external void FLMutableDict_Remove(FLMutableDict arg0, FLString key);
 
-@ffi.Native<NativeFLMutableDict_RemoveAll>()
+@ffi.Native<NativeFLMutableDict_RemoveAll>(isLeaf: true)
 external void FLMutableDict_RemoveAll(FLMutableDict arg0);
 
-@ffi.Native<NativeFLMutableDict_GetMutableArray>()
+@ffi.Native<NativeFLMutableDict_GetMutableArray>(isLeaf: true)
 external FLMutableArray FLMutableDict_GetMutableArray(
   FLMutableDict arg0,
   FLString key,
 );
 
-@ffi.Native<NativeFLMutableDict_GetMutableDict>()
+@ffi.Native<NativeFLMutableDict_GetMutableDict>(isLeaf: true)
 external FLMutableDict FLMutableDict_GetMutableDict(
   FLMutableDict arg0,
   FLString key,
 );
 
-@ffi.Native<NativeFLValue_NewString>()
+@ffi.Native<NativeFLValue_NewString>(isLeaf: true)
 external FLValue FLValue_NewString(FLString arg0);
 
-@ffi.Native<NativeFLValue_NewData>()
+@ffi.Native<NativeFLValue_NewData>(isLeaf: true)
 external FLValue FLValue_NewData(FLSlice arg0);
 
-@ffi.Native<NativeFLMutableArray_Set>()
+@ffi.Native<NativeFLMutableArray_Set>(isLeaf: true)
 external FLSlot FLMutableArray_Set(FLMutableArray arg0, int index);
 
-@ffi.Native<NativeFLMutableArray_Append>()
+@ffi.Native<NativeFLMutableArray_Append>(isLeaf: true)
 external FLSlot FLMutableArray_Append(FLMutableArray arg0);
 
-@ffi.Native<NativeFLMutableDict_Set>()
+@ffi.Native<NativeFLMutableDict_Set>(isLeaf: true)
 external FLSlot FLMutableDict_Set(FLMutableDict arg0, FLString key);
 
-@ffi.Native<NativeFLSlot_SetNull>()
+@ffi.Native<NativeFLSlot_SetNull>(isLeaf: true)
 external void FLSlot_SetNull(FLSlot arg0);
 
-@ffi.Native<NativeFLSlot_SetBool>()
+@ffi.Native<NativeFLSlot_SetBool>(isLeaf: true)
 external void FLSlot_SetBool(FLSlot arg0, bool arg1);
 
-@ffi.Native<NativeFLSlot_SetInt>()
+@ffi.Native<NativeFLSlot_SetInt>(isLeaf: true)
 external void FLSlot_SetInt(FLSlot arg0, int arg1);
 
-@ffi.Native<NativeFLSlot_SetUInt>()
+@ffi.Native<NativeFLSlot_SetUInt>(isLeaf: true)
 external void FLSlot_SetUInt(FLSlot arg0, int arg1);
 
-@ffi.Native<NativeFLSlot_SetFloat>()
+@ffi.Native<NativeFLSlot_SetFloat>(isLeaf: true)
 external void FLSlot_SetFloat(FLSlot arg0, double arg1);
 
-@ffi.Native<NativeFLSlot_SetDouble>()
+@ffi.Native<NativeFLSlot_SetDouble>(isLeaf: true)
 external void FLSlot_SetDouble(FLSlot arg0, double arg1);
 
-@ffi.Native<NativeFLSlot_SetString>()
+@ffi.Native<NativeFLSlot_SetString>(isLeaf: true)
 external void FLSlot_SetString(FLSlot arg0, FLString arg1);
 
-@ffi.Native<NativeFLSlot_SetData>()
+@ffi.Native<NativeFLSlot_SetData>(isLeaf: true)
 external void FLSlot_SetData(FLSlot arg0, FLSlice arg1);
 
-@ffi.Native<NativeFLSlot_SetValue>()
+@ffi.Native<NativeFLSlot_SetValue>(isLeaf: true)
 external void FLSlot_SetValue(FLSlot arg0, FLValue arg1);
 
-@ffi.Native<NativeFLCreateJSONDelta>()
+@ffi.Native<NativeFLCreateJSONDelta>(isLeaf: true)
 external FLSliceResult FLCreateJSONDelta(FLValue old, FLValue nuu);
 
-@ffi.Native<NativeFLEncodeJSONDelta>()
+@ffi.Native<NativeFLEncodeJSONDelta>(isLeaf: true)
 external bool FLEncodeJSONDelta(
   FLValue old,
   FLValue nuu,
   FLEncoder jsonEncoder,
 );
 
-@ffi.Native<NativeFLApplyJSONDelta>()
+@ffi.Native<NativeFLApplyJSONDelta>(isLeaf: true)
 external FLSliceResult FLApplyJSONDelta(
   FLValue old,
   FLSlice jsonDelta,
   ffi.Pointer<ffi.UnsignedInt> outError,
 );
 
-@ffi.Native<NativeFLEncodeApplyingJSONDelta>()
+@ffi.Native<NativeFLEncodeApplyingJSONDelta>(isLeaf: true)
 external bool FLEncodeApplyingJSONDelta(
   FLValue old,
   FLSlice jsonDelta,
   FLEncoder encoder,
 );
 
-@ffi.Native<NativeFLSharedKeys_New>()
+@ffi.Native<NativeFLSharedKeys_New>(isLeaf: true)
 external FLSharedKeys FLSharedKeys_New();
 
-@ffi.Native<NativeFLSharedKeys_NewWithRead>()
+@ffi.Native<NativeFLSharedKeys_NewWithRead>(isLeaf: true)
 external FLSharedKeys FLSharedKeys_NewWithRead(
   FLSharedKeysReadCallback arg0,
   ffi.Pointer<ffi.Void> context,
 );
 
-@ffi.Native<NativeFLSharedKeys_GetStateData>()
+@ffi.Native<NativeFLSharedKeys_GetStateData>(isLeaf: true)
 external FLSliceResult FLSharedKeys_GetStateData(FLSharedKeys arg0);
 
-@ffi.Native<NativeFLSharedKeys_LoadStateData>()
+@ffi.Native<NativeFLSharedKeys_LoadStateData>(isLeaf: true)
 external bool FLSharedKeys_LoadStateData(FLSharedKeys arg0, FLSlice arg1);
 
-@ffi.Native<NativeFLSharedKeys_WriteState>()
+@ffi.Native<NativeFLSharedKeys_WriteState>(isLeaf: true)
 external void FLSharedKeys_WriteState(FLSharedKeys arg0, FLEncoder arg1);
 
-@ffi.Native<NativeFLSharedKeys_LoadState>()
+@ffi.Native<NativeFLSharedKeys_LoadState>(isLeaf: true)
 external bool FLSharedKeys_LoadState(FLSharedKeys arg0, FLValue arg1);
 
-@ffi.Native<NativeFLSharedKeys_Encode>()
+@ffi.Native<NativeFLSharedKeys_Encode>(isLeaf: true)
 external int FLSharedKeys_Encode(FLSharedKeys arg0, FLString arg1, bool add);
 
-@ffi.Native<NativeFLSharedKeys_Decode>()
+@ffi.Native<NativeFLSharedKeys_Decode>(isLeaf: true)
 external FLString FLSharedKeys_Decode(FLSharedKeys arg0, int key);
 
-@ffi.Native<NativeFLSharedKeys_Count>()
+@ffi.Native<NativeFLSharedKeys_Count>(isLeaf: true)
 external int FLSharedKeys_Count(FLSharedKeys arg0);
 
-@ffi.Native<NativeFLSharedKeys_RevertToCount>()
+@ffi.Native<NativeFLSharedKeys_RevertToCount>(isLeaf: true)
 external void FLSharedKeys_RevertToCount(FLSharedKeys arg0, int oldCount);
 
-@ffi.Native<NativeFLSharedKeys_DisableCaching>()
+@ffi.Native<NativeFLSharedKeys_DisableCaching>(isLeaf: true)
 external void FLSharedKeys_DisableCaching(FLSharedKeys arg0);
 
-@ffi.Native<NativeFLSharedKeys_Retain>()
+@ffi.Native<NativeFLSharedKeys_Retain>(isLeaf: true)
 external FLSharedKeys FLSharedKeys_Retain(FLSharedKeys arg0);
 
-@ffi.Native<NativeFLSharedKeys_Release>()
+@ffi.Native<NativeFLSharedKeys_Release>(isLeaf: true)
 external void FLSharedKeys_Release(FLSharedKeys arg0);
 
-@ffi.Native<NativeFLSharedKeyScope_WithRange>()
+@ffi.Native<NativeFLSharedKeyScope_WithRange>(isLeaf: true)
 external FLSharedKeyScope FLSharedKeyScope_WithRange(
   FLSlice range,
   FLSharedKeys arg1,
 );
 
-@ffi.Native<NativeFLSharedKeyScope_Free>()
+@ffi.Native<NativeFLSharedKeyScope_Free>(isLeaf: true)
 external void FLSharedKeyScope_Free(FLSharedKeyScope arg0);
 
-@ffi.Native<NativeFLValue_FromData>()
+@ffi.Native<NativeFLValue_FromData>(isLeaf: true)
 external FLValue FLValue_FromData(FLSlice data, int trust);
 
-@ffi.Native<NativeFLJSON5_ToJSON>()
+@ffi.Native<NativeFLJSON5_ToJSON>(isLeaf: true)
 external FLStringResult FLJSON5_ToJSON(
   FLString json5,
   ffi.Pointer<FLStringResult> outErrorMessage,
@@ -2021,13 +2027,13 @@ external FLStringResult FLJSON5_ToJSON(
   ffi.Pointer<ffi.UnsignedInt> outError,
 );
 
-@ffi.Native<NativeFLData_ConvertJSON>()
+@ffi.Native<NativeFLData_ConvertJSON>(isLeaf: true)
 external FLSliceResult FLData_ConvertJSON(
   FLSlice json,
   ffi.Pointer<ffi.UnsignedInt> outError,
 );
 
-@ffi.Native<NativeFLEncoder_Amend>()
+@ffi.Native<NativeFLEncoder_Amend>(isLeaf: true)
 external void FLEncoder_Amend(
   FLEncoder e,
   FLSlice base,
@@ -2035,37 +2041,37 @@ external void FLEncoder_Amend(
   bool externPointers,
 );
 
-@ffi.Native<NativeFLEncoder_GetBase>()
+@ffi.Native<NativeFLEncoder_GetBase>(isLeaf: true)
 external FLSlice FLEncoder_GetBase(FLEncoder arg0);
 
-@ffi.Native<NativeFLEncoder_SuppressTrailer>()
+@ffi.Native<NativeFLEncoder_SuppressTrailer>(isLeaf: true)
 external void FLEncoder_SuppressTrailer(FLEncoder arg0);
 
-@ffi.Native<NativeFLEncoder_GetNextWritePos>()
+@ffi.Native<NativeFLEncoder_GetNextWritePos>(isLeaf: true)
 external int FLEncoder_GetNextWritePos(FLEncoder arg0);
 
-@ffi.Native<NativeFLEncoder_LastValueWritten>()
+@ffi.Native<NativeFLEncoder_LastValueWritten>(isLeaf: true)
 external int FLEncoder_LastValueWritten(FLEncoder arg0);
 
-@ffi.Native<NativeFLEncoder_WriteValueAgain>()
+@ffi.Native<NativeFLEncoder_WriteValueAgain>(isLeaf: true)
 external bool FLEncoder_WriteValueAgain(FLEncoder arg0, int preWrittenValue);
 
-@ffi.Native<NativeFLEncoder_Snip>()
+@ffi.Native<NativeFLEncoder_Snip>(isLeaf: true)
 external FLSliceResult FLEncoder_Snip(FLEncoder arg0);
 
-@ffi.Native<NativeFLEncoder_FinishItem>()
+@ffi.Native<NativeFLEncoder_FinishItem>(isLeaf: true)
 external int FLEncoder_FinishItem(FLEncoder arg0);
 
-@ffi.Native<NativeFLJSONEncoder_NextDocument>()
+@ffi.Native<NativeFLJSONEncoder_NextDocument>(isLeaf: true)
 external void FLJSONEncoder_NextDocument(FLEncoder arg0);
 
-@ffi.Native<NativeFLDump>()
+@ffi.Native<NativeFLDump>(isLeaf: true)
 external ffi.Pointer<ffi.Char> FLDump(FLValue arg0);
 
-@ffi.Native<NativeFLDumpData>()
+@ffi.Native<NativeFLDumpData>(isLeaf: true)
 external ffi.Pointer<ffi.Char> FLDumpData(FLSlice data);
 
-@ffi.Native<NativeFLData_Dump>()
+@ffi.Native<NativeFLData_Dump>(isLeaf: true)
 external FLStringResult FLData_Dump(FLSlice data);
 
 const addresses = _SymbolAddresses();
