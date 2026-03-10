@@ -17,6 +17,7 @@ final class ProxyDocumentDelegate
        id = state.docId,
        _revisionId = state.revisionId,
        _sequence = state.sequence,
+       _timestamp = state.timestamp,
        encodedProperties = state.properties?.encodedValue,
        _propertiesDict = state.properties?.value.asDict {
     if (bindToProxiedDocument) {
@@ -28,6 +29,7 @@ final class ProxyDocumentDelegate
     : id = delegate.id,
       _revisionId = delegate.revisionId,
       _sequence = delegate.sequence,
+      _timestamp = delegate.timestamp,
       encodedProperties = delegate.encodedProperties,
       _propertiesDict = delegate is ProxyDocumentDelegate
           ? delegate._propertiesDict
@@ -45,6 +47,10 @@ final class ProxyDocumentDelegate
   @override
   int get sequence => _sequence;
   int _sequence;
+
+  @override
+  int get timestamp => _timestamp;
+  int _timestamp;
 
   @override
   Data? encodedProperties;
@@ -90,6 +96,7 @@ final class ProxyDocumentDelegate
 
     _revisionId = state.revisionId;
     _sequence = state.sequence;
+    _timestamp = state.timestamp;
   }
 
   DocumentState getState({bool withProperties = true}) => DocumentState(
@@ -98,6 +105,7 @@ final class ProxyDocumentDelegate
     docId: id,
     revisionId: revisionId,
     sequence: sequence,
+    timestamp: timestamp,
     properties: withProperties
         ? SendableValue.fromEncodedValue(encodedProperties!)
         : null,

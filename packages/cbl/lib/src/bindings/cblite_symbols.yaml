@@ -15,12 +15,6 @@ files:
         dart-name: DartCBLConflictHandlerFunction
       CBLConflictResolverFunction:
         name: CBLConflictResolverFunction
-      CBLDatabaseChangeListenerFunction:
-        name: CBLDatabaseChangeListenerFunction
-        dart-name: DartCBLDatabaseChangeListenerFunction
-      CBLDocumentChangeListenerFunction:
-        name: CBLDocumentChangeListenerFunction
-        dart-name: DartCBLDocumentChangeListenerFunction
       CBLDocumentPropertyDecryptorFunction:
         name: CBLDocumentPropertyDecryptorFunction
       CBLDocumentPropertyEncryptorFunction:
@@ -40,10 +34,6 @@ files:
       CBLNotificationsReadyCallbackFunction:
         name: CBLNotificationsReadyCallbackFunction
         dart-name: DartCBLNotificationsReadyCallbackFunction
-      CBLPropertyDecryptorFunction:
-        name: CBLPropertyDecryptorFunction
-      CBLPropertyEncryptorFunction:
-        name: CBLPropertyEncryptorFunction
       CBLQueryChangeListenerFunction:
         name: CBLQueryChangeListenerFunction
         dart-name: DartCBLQueryChangeListenerFunction
@@ -400,10 +390,6 @@ files:
         name: CBLCollection_SetDocumentExpiration
       c:@F@CBLDatabaseConfiguration_Default:
         name: CBLDatabaseConfiguration_Default
-      c:@F@CBLDatabase_AddChangeListener:
-        name: CBLDatabase_AddChangeListener
-      c:@F@CBLDatabase_AddDocumentChangeListener:
-        name: CBLDatabase_AddDocumentChangeListener
       c:@F@CBLDatabase_BeginTransaction:
         name: CBLDatabase_BeginTransaction
       c:@F@CBLDatabase_BufferNotifications:
@@ -418,16 +404,10 @@ files:
         name: CBLDatabase_CollectionNames
       c:@F@CBLDatabase_Config:
         name: CBLDatabase_Config
-      c:@F@CBLDatabase_Count:
-        name: CBLDatabase_Count
       c:@F@CBLDatabase_CreateCollection:
         name: CBLDatabase_CreateCollection
-      c:@F@CBLDatabase_CreateFullTextIndex:
-        name: CBLDatabase_CreateFullTextIndex
       c:@F@CBLDatabase_CreateQuery:
         name: CBLDatabase_CreateQuery
-      c:@F@CBLDatabase_CreateValueIndex:
-        name: CBLDatabase_CreateValueIndex
       c:@F@CBLDatabase_DefaultCollection:
         name: CBLDatabase_DefaultCollection
       c:@F@CBLDatabase_DefaultScope:
@@ -436,24 +416,10 @@ files:
         name: CBLDatabase_Delete
       c:@F@CBLDatabase_DeleteCollection:
         name: CBLDatabase_DeleteCollection
-      c:@F@CBLDatabase_DeleteDocument:
-        name: CBLDatabase_DeleteDocument
-      c:@F@CBLDatabase_DeleteDocumentWithConcurrencyControl:
-        name: CBLDatabase_DeleteDocumentWithConcurrencyControl
-      c:@F@CBLDatabase_DeleteIndex:
-        name: CBLDatabase_DeleteIndex
       c:@F@CBLDatabase_EndTransaction:
         name: CBLDatabase_EndTransaction
       c:@F@CBLDatabase_GetBlob:
         name: CBLDatabase_GetBlob
-      c:@F@CBLDatabase_GetDocument:
-        name: CBLDatabase_GetDocument
-      c:@F@CBLDatabase_GetDocumentExpiration:
-        name: CBLDatabase_GetDocumentExpiration
-      c:@F@CBLDatabase_GetIndexNames:
-        name: CBLDatabase_GetIndexNames
-      c:@F@CBLDatabase_GetMutableDocument:
-        name: CBLDatabase_GetMutableDocument
       c:@F@CBLDatabase_Name:
         name: CBLDatabase_Name
       c:@F@CBLDatabase_Open:
@@ -462,26 +428,14 @@ files:
         name: CBLDatabase_Path
       c:@F@CBLDatabase_PerformMaintenance:
         name: CBLDatabase_PerformMaintenance
-      c:@F@CBLDatabase_PurgeDocument:
-        name: CBLDatabase_PurgeDocument
-      c:@F@CBLDatabase_PurgeDocumentByID:
-        name: CBLDatabase_PurgeDocumentByID
       c:@F@CBLDatabase_SaveBlob:
         name: CBLDatabase_SaveBlob
-      c:@F@CBLDatabase_SaveDocument:
-        name: CBLDatabase_SaveDocument
-      c:@F@CBLDatabase_SaveDocumentWithConcurrencyControl:
-        name: CBLDatabase_SaveDocumentWithConcurrencyControl
-      c:@F@CBLDatabase_SaveDocumentWithConflictHandler:
-        name: CBLDatabase_SaveDocumentWithConflictHandler
       c:@F@CBLDatabase_Scope:
         name: CBLDatabase_Scope
       c:@F@CBLDatabase_ScopeNames:
         name: CBLDatabase_ScopeNames
       c:@F@CBLDatabase_SendNotifications:
         name: CBLDatabase_SendNotifications
-      c:@F@CBLDatabase_SetDocumentExpiration:
-        name: CBLDatabase_SetDocumentExpiration
       c:@F@CBLDocument_Collection:
         name: CBLDocument_Collection
       c:@F@CBLDocument_Create:
@@ -506,6 +460,8 @@ files:
         name: CBLDocument_SetJSON
       c:@F@CBLDocument_SetProperties:
         name: CBLDocument_SetProperties
+      c:@F@CBLDocument_Timestamp:
+        name: CBLDocument_Timestamp
       c:@F@CBLEncryptable_CreateWithArray:
         name: CBLEncryptable_CreateWithArray
       c:@F@CBLEncryptable_CreateWithBool:
@@ -584,22 +540,6 @@ files:
         name: CBLLogSinks_SetCustom
       c:@F@CBLLogSinks_SetFile:
         name: CBLLogSinks_SetFile
-      c:@F@CBLLog_Callback:
-        name: CBLLog_Callback
-      c:@F@CBLLog_CallbackLevel:
-        name: CBLLog_CallbackLevel
-      c:@F@CBLLog_ConsoleLevel:
-        name: CBLLog_ConsoleLevel
-      c:@F@CBLLog_FileConfig:
-        name: CBLLog_FileConfig
-      c:@F@CBLLog_SetCallback:
-        name: CBLLog_SetCallback
-      c:@F@CBLLog_SetCallbackLevel:
-        name: CBLLog_SetCallbackLevel
-      c:@F@CBLLog_SetConsoleLevel:
-        name: CBLLog_SetConsoleLevel
-      c:@F@CBLLog_SetFileConfig:
-        name: CBLLog_SetFileConfig
       c:@F@CBLQueryIndex_BeginUpdate:
         name: CBLQueryIndex_BeginUpdate
       c:@F@CBLQueryIndex_Collection:
@@ -914,6 +854,10 @@ files:
         name: FLEncoder_WriteDouble
       c:@F@FLEncoder_WriteFloat:
         name: FLEncoder_WriteFloat
+      c:@F@FLEncoder_WriteFormatted:
+        name: FLEncoder_WriteFormatted
+      c:@F@FLEncoder_WriteFormattedArgs:
+        name: FLEncoder_WriteFormattedArgs
       c:@F@FLEncoder_WriteInt:
         name: FLEncoder_WriteInt
       c:@F@FLEncoder_WriteKey:
@@ -938,6 +882,14 @@ files:
         name: FLJSON5_ToJSON
       c:@F@FLJSONEncoder_NextDocument:
         name: FLJSONEncoder_NextDocument
+      c:@F@FLKeyPath_AddComponents:
+        name: FLKeyPath_AddComponents
+      c:@F@FLKeyPath_AddIndex:
+        name: FLKeyPath_AddIndex
+      c:@F@FLKeyPath_AddProperty:
+        name: FLKeyPath_AddProperty
+      c:@F@FLKeyPath_DropComponents:
+        name: FLKeyPath_DropComponents
       c:@F@FLKeyPath_Equals:
         name: FLKeyPath_Equals
       c:@F@FLKeyPath_Eval:
@@ -946,10 +898,14 @@ files:
         name: FLKeyPath_EvalOnce
       c:@F@FLKeyPath_Free:
         name: FLKeyPath_Free
+      c:@F@FLKeyPath_GetCount:
+        name: FLKeyPath_GetCount
       c:@F@FLKeyPath_GetElement:
         name: FLKeyPath_GetElement
       c:@F@FLKeyPath_New:
         name: FLKeyPath_New
+      c:@F@FLKeyPath_NewEmpty:
+        name: FLKeyPath_NewEmpty
       c:@F@FLKeyPath_ToString:
         name: FLKeyPath_ToString
       c:@F@FLMutableArray_Append:
@@ -976,6 +932,8 @@ files:
         name: FLMutableArray_Set
       c:@F@FLMutableArray_SetChanged:
         name: FLMutableArray_SetChanged
+      c:@F@FLMutableArray_UpdateWithFormat:
+        name: FLMutableArray_UpdateWithFormat
       c:@F@FLMutableDict_GetMutableArray:
         name: FLMutableDict_GetMutableArray
       c:@F@FLMutableDict_GetMutableDict:
@@ -996,6 +954,8 @@ files:
         name: FLMutableDict_Set
       c:@F@FLMutableDict_SetChanged:
         name: FLMutableDict_SetChanged
+      c:@F@FLMutableDict_UpdateWithFormat:
+        name: FLMutableDict_UpdateWithFormat
       c:@F@FLSharedKeyScope_Free:
         name: FLSharedKeyScope_Free
       c:@F@FLSharedKeyScope_WithRange:
@@ -1106,6 +1066,10 @@ files:
         name: FLValue_NewData
       c:@F@FLValue_NewString:
         name: FLValue_NewString
+      c:@F@FLValue_NewWithFormat:
+        name: FLValue_NewWithFormat
+      c:@F@FLValue_NewWithFormatV:
+        name: FLValue_NewWithFormatV
       c:@F@FLValue_Release:
         name: FLValue_Release
       c:@F@FLValue_Retain:
@@ -1118,6 +1082,8 @@ files:
         name: FLValue_ToJSONX
       c:@F@FLValue_ToString:
         name: FLValue_ToString
+      c:@F@FLValue_UpdateWithFormatV:
+        name: FLValue_UpdateWithFormatV
       c:@F@FL_WipeMemory:
         name: FL_WipeMemory
       c:@F@_FLBuf_Release:
@@ -1206,6 +1172,8 @@ files:
         name: CBLArrayIndexConfiguration
       c:@SA@CBLCollectionChange:
         name: CBLCollectionChange
+      c:@SA@CBLCollectionConfiguration:
+        name: CBLCollectionConfiguration
       c:@SA@CBLConnectionStatus:
         name: CBLConnectionStatus
       c:@SA@CBLConsoleLogSink:
@@ -1224,16 +1192,12 @@ files:
         name: CBLFileLogSink
       c:@SA@CBLFullTextIndexConfiguration:
         name: CBLFullTextIndexConfiguration
-      c:@SA@CBLLogFileConfiguration:
-        name: CBLLogFileConfiguration
       c:@SA@CBLPredictiveModel:
         name: CBLPredictiveModel
       c:@SA@CBLProxySettings:
         name: CBLProxySettings
       c:@SA@CBLReplicatedDocument:
         name: CBLReplicatedDocument
-      c:@SA@CBLReplicationCollection:
-        name: CBLReplicationCollection
       c:@SA@CBLReplicatorConfiguration:
         name: CBLReplicatorConfiguration
       c:@SA@CBLReplicatorProgress:
@@ -1254,6 +1218,10 @@ files:
         name: FLDictKey
       c:@SA@FLPathComponent:
         name: FLPathComponent
+      c:@T@__builtin_va_list:
+        name: __builtin_va_list
+      c:@T@va_list:
+        name: va_list$1
       c:@kCBLAuthDefaultCookieName:
         name: kCBLAuthDefaultCookieName
       c:@kCBLBlobContentTypeProperty:
@@ -1314,8 +1282,6 @@ files:
         name: kCBLDefaultLogFileMaxRotateCount
       c:@kCBLDefaultLogFileMaxSize:
         name: kCBLDefaultLogFileMaxSize
-      c:@kCBLDefaultLogFileUsePlainText:
-        name: kCBLDefaultLogFileUsePlainText
       c:@kCBLDefaultLogFileUsePlaintext:
         name: kCBLDefaultLogFileUsePlaintext
       c:@kCBLDefaultReplicatorAcceptParentCookies:
@@ -1326,8 +1292,6 @@ files:
         name: kCBLDefaultReplicatorDisableAutoPurge
       c:@kCBLDefaultReplicatorHeartbeat:
         name: kCBLDefaultReplicatorHeartbeat
-      c:@kCBLDefaultReplicatorMaxAttemptWaitTime:
-        name: kCBLDefaultReplicatorMaxAttemptWaitTime
       c:@kCBLDefaultReplicatorMaxAttemptsContinuous:
         name: kCBLDefaultReplicatorMaxAttemptsContinuous
       c:@kCBLDefaultReplicatorMaxAttemptsSingleShot:
@@ -1381,8 +1345,6 @@ files:
         name: CBLCollectionChangeListener
       c:CBLCollection.h@T@CBLCollectionDocumentChangeListener:
         name: CBLCollectionDocumentChangeListener
-      c:CBLDatabase.h@T@CBLDatabaseChangeListener:
-        name: CBLDatabaseChangeListener
       c:CBLDatabase.h@T@CBLEncryptionAlgorithm:
         name: CBLEncryptionAlgorithm
         dart-name: DartCBLEncryptionAlgorithm
@@ -1399,10 +1361,6 @@ files:
         dart-name: DartCBLConcurrencyControl
       c:CBLDocument.h@T@CBLConflictHandler:
         name: CBLConflictHandler
-      c:CBLDocument.h@T@CBLDocumentChangeListener:
-        name: CBLDocumentChangeListener
-      c:CBLLog.h@T@CBLLogCallback:
-        name: CBLLogCallback
       c:CBLLogSinks.h@T@CBLLogDomain:
         name: CBLLogDomain
         dart-name: DartCBLLogDomain
@@ -1436,13 +1394,11 @@ files:
         name: CBLDocumentPropertyEncryptor
       c:CBLReplicator.h@T@CBLDocumentReplicationListener:
         name: CBLDocumentReplicationListener
-      c:CBLReplicator.h@T@CBLPropertyDecryptor:
-        name: CBLPropertyDecryptor
-      c:CBLReplicator.h@T@CBLPropertyEncryptor:
-        name: CBLPropertyEncryptor
       c:CBLReplicator.h@T@CBLProxyType:
         name: CBLProxyType
         dart-name: DartCBLProxyType
+      c:CBLReplicator.h@T@CBLReplicationCollection:
+        name: CBLReplicationCollection
       c:CBLReplicator.h@T@CBLReplicationFilter:
         name: CBLReplicationFilter
       c:CBLReplicator.h@T@CBLReplicatorActivityLevel:
@@ -1506,6 +1462,10 @@ files:
       c:_types.h@T@__darwin_off_t:
         name: __darwin_off_t
         dart-name: Dart__int64_t
+      c:_types.h@T@__darwin_va_list:
+        name: __darwin_va_list
       c:_types.h@T@__int64_t:
         name: __int64_t
         dart-name: Dart__int64_t
+      c:_va_list.h@T@va_list:
+        name: va_list

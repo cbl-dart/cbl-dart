@@ -88,10 +88,30 @@ Future<T> _withClient<T>(Future<T> Function(Client) fn) async {
 }
 
 Future<void> flushDatabaseByAdmin() async {
+  // Prefer purging via Sync Gateway because it is faster and preserves auth
+  // metadata such as test users.
+  await _purgeSyncGatewayDatabase();
+}
+
+Future<void> _purgeSyncGatewayDatabase() async {
+  final response = await syncGatewayRequest(
+    Uri.parse('$syncGatewayDatabase/_all_docs'),
+    admin: true,
+  );
+  final allDocs = jsonDecode(response) as Map<String, Object?>;
+  final rows = allDocs['rows']! as List<Object?>;
+  if (rows.isEmpty) {
+    return;
+  }
+  final purgeBody = {
+    for (final row in rows.cast<Map<String, Object?>>())
+      row['id']! as String: ['*'],
+  };
   await syncGatewayRequest(
-    Uri.parse('$syncGatewayDatabase/_flush'),
+    Uri.parse('$syncGatewayDatabase/_purge'),
     method: 'POST',
     admin: true,
+    body: jsonEncode(purgeBody),
   );
 }
 

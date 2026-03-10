@@ -47,10 +47,11 @@ CBL_CAPI_BEGIN
     with only some values different, create one query with placeholder parameter(s), and substitute
     the desired value(s) with \ref CBLQuery_SetParameters each time you run the query.
     @note  You must release the \ref CBLQuery when you're finished with it.
+    @note  The JSON query language is a volatile API. Volatile APIs are experimental and may likely be changed.
+         They may also be used to indicate inherently private APIs that may be exposed, but "YMMV"
+         (your mileage may vary) principles apply.
     @param db  The database to query.
-    @param language  The query language,
-            [JSON](https://github.com/couchbase/couchbase-lite-core/wiki/JSON-Query-Schema) or
-            [N1QL](https://docs.couchbase.com/server/4.0/n1ql/n1ql-language-reference/index.html).
+    @param language  The query language
     @param queryString  The query string.
     @param outErrorPos  If non-NULL, then on a parse error the approximate byte offset in the
                     input expression will be stored here (or -1 if not known/applicable.)

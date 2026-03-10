@@ -7,8 +7,8 @@ import 'package:path/path.dart' as p;
 
 import 'src/download.dart' as dl;
 
-const _cbliteRelease = '3.2.4';
-const _vectorSearchRelease = '1.0.0';
+const _cbliteRelease = '4.0.3';
+const _vectorSearchRelease = '2.0.0';
 
 void main(List<String> args) async {
   await build(args, buildHook);

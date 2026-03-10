@@ -34,7 +34,7 @@
 
 CBL_ASSUME_NONNULL_BEGIN
 
-static inline bool operator== (const CBLError &e1, const CBLError &e2) {
+inline bool operator== (const CBLError &e1, const CBLError &e2) {
     if (e1.code != 0)
         return e1.domain == e2.domain && e1.code == e2.code;
     else

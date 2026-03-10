@@ -754,6 +754,12 @@ void main() {
         expect(doc.revisionId, isNull);
       });
 
+      test('timestamp returns `0` when the document is new', () {
+        final doc = MutableDocument();
+
+        expect(doc.timestamp, 0);
+      });
+
       apiTest(
         'revisionId returns string when document has been saved',
         () async {
@@ -762,7 +768,38 @@ void main() {
           final doc = MutableDocument();
           await db.saveDocument(doc);
 
-          expect(doc.revisionId, '1-581ad726ee407c8376fc94aad966051d013893c4');
+          expect(doc.revisionId, isNotNull);
+          expect(doc.revisionId, isNotEmpty);
+        },
+      );
+
+      apiTest('timestamp returns the documents timestamp', () async {
+        final db = await openTestDatabase();
+
+        final doc = MutableDocument();
+        await db.saveDocument(doc);
+
+        expect(doc.timestamp, isPositive);
+
+        final loadedDoc = (await db.document(doc.id))!;
+        expect(loadedDoc.timestamp, doc.timestamp);
+      });
+
+      apiTest(
+        'revisionId and timestamp change when the document is updated',
+        () async {
+          final db = await openTestDatabase();
+
+          final doc = MutableDocument({'value': 'initial'});
+          await db.saveDocument(doc);
+          final initialRevisionId = doc.revisionId;
+          final initialTimestamp = doc.timestamp;
+
+          doc.setValue('updated', key: 'value');
+          await db.saveDocument(doc);
+
+          expect(doc.revisionId, isNot(initialRevisionId));
+          expect(doc.timestamp, greaterThan(initialTimestamp));
         },
       );
 
@@ -837,7 +874,7 @@ void main() {
 
           final explain = await q.explain();
 
-          expect(explain, contains('fts1 VIRTUAL TABLE INDEX'));
+          expect(explain, contains('VIRTUAL TABLE INDEX'));
         },
       );
 
@@ -868,7 +905,7 @@ void main() {
 
         final explain = await q.explain();
 
-        expect(explain, contains('fts1 VIRTUAL TABLE INDEX'));
+        expect(explain, contains('VIRTUAL TABLE INDEX'));
       });
 
       apiTest('deleteIndex should delete the given index', () async {

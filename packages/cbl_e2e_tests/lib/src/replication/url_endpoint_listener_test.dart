@@ -19,6 +19,8 @@ final String? skipPeerSyncTest = _skipPeerSyncTestEnv
     ? 'Skipping test on macOS + Flutter + CI'
     : Platform.isIOS
     ? 'Listener URLs use machine hostname, unresolvable on iOS simulator'
+    : Platform.isLinux
+    ? 'TLS/crypto issues on Linux (see #882)'
     : null;
 
 void main() {
@@ -231,6 +233,7 @@ void main() {
         acceptOnlySelfSignedServerCertificate: true,
       )..addCollection(await clientDb.defaultCollection);
       final replicator = await Replicator.create(replicatorConfig);
+      addTearDown(replicator.close);
 
       // Pull document from listener to client.
       await replicator.replicateOneShot();
@@ -291,6 +294,7 @@ void main() {
       acceptOnlySelfSignedServerCertificate: true,
     )..addCollection(await clientDb.defaultCollection);
     var replicator = await Replicator.create(replicatorConfig);
+    addTearDown(replicator.close);
     await replicator.replicateOneShot();
     var replicatorStatus = await replicator.status;
     expect(
@@ -305,6 +309,7 @@ void main() {
       acceptOnlySelfSignedServerCertificate: true,
     )..addCollection(await clientDb.defaultCollection);
     replicator = await Replicator.create(replicatorConfig);
+    addTearDown(replicator.close);
     await replicator.replicateOneShot();
     replicatorStatus = await replicator.status;
     expect(
@@ -319,6 +324,7 @@ void main() {
       acceptOnlySelfSignedServerCertificate: true,
     )..addCollection(await clientDb.defaultCollection);
     replicator = await Replicator.create(replicatorConfig);
+    addTearDown(replicator.close);
     await replicator.replicateOneShot();
     replicatorStatus = await replicator.status;
     expect(replicatorStatus.error, isNull);
@@ -374,6 +380,7 @@ void main() {
         acceptOnlySelfSignedServerCertificate: true,
       )..addCollection(await clientDb.defaultCollection);
       var replicator = await Replicator.create(replicatorConfig);
+      addTearDown(replicator.close);
       await replicator.replicateOneShot();
       var replicatorStatus = await replicator.status;
       expect(
@@ -388,6 +395,7 @@ void main() {
         acceptOnlySelfSignedServerCertificate: true,
       )..addCollection(await clientDb.defaultCollection);
       replicator = await Replicator.create(replicatorConfig);
+      addTearDown(replicator.close);
       await replicator.replicateOneShot();
       replicatorStatus = await replicator.status;
       expect(
@@ -402,6 +410,7 @@ void main() {
         acceptOnlySelfSignedServerCertificate: true,
       )..addCollection(await clientDb.defaultCollection);
       replicator = await Replicator.create(replicatorConfig);
+      addTearDown(replicator.close);
       await replicator.replicateOneShot();
       replicatorStatus = await replicator.status;
       expect(replicatorStatus.error, isNull);
@@ -443,6 +452,7 @@ void main() {
         acceptOnlySelfSignedServerCertificate: true,
       )..addCollection(await clientDb.defaultCollection);
       var replicator = await Replicator.create(replicatorConfig);
+      addTearDown(replicator.close);
       await replicator.replicateOneShot();
       var replicatorStatus = await replicator.status;
       expect(
@@ -457,6 +467,7 @@ void main() {
         acceptOnlySelfSignedServerCertificate: true,
       )..addCollection(await clientDb.defaultCollection);
       replicator = await Replicator.create(replicatorConfig);
+      addTearDown(replicator.close);
       await replicator.replicateOneShot();
       replicatorStatus = await replicator.status;
       expect(
@@ -471,6 +482,7 @@ void main() {
         acceptOnlySelfSignedServerCertificate: true,
       )..addCollection(await clientDb.defaultCollection);
       replicator = await Replicator.create(replicatorConfig);
+      addTearDown(replicator.close);
       await replicator.replicateOneShot();
       replicatorStatus = await replicator.status;
       expect(replicatorStatus.error, isNull);

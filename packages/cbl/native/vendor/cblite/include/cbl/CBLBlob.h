@@ -208,7 +208,7 @@ CBL_CAPI_BEGIN
 
     /** Returns true if a value in a document is a blob reference.
         If so, you can call \ref FLValue_GetBlob to access it. */
-    static inline bool FLValue_IsBlob(FLValue _cbl_nullable v) {
+    CBLINLINE bool FLValue_IsBlob(FLValue _cbl_nullable v) {
         return FLDict_IsBlob(FLValue_AsDict(v));
     }
 
@@ -216,7 +216,7 @@ CBL_CAPI_BEGIN
         @param value  The value (dictionary) in the document.
         @return  A \ref CBLBlob instance for this blob, or `NULL` if the value is not a blob.
         \note  The returned CBLBlob object will be released when its document is released. */
-    static inline const CBLBlob* _cbl_nullable FLValue_GetBlob(FLValue _cbl_nullable value) {
+    CBLINLINE const CBLBlob* _cbl_nullable FLValue_GetBlob(FLValue _cbl_nullable value) {
         return FLDict_GetBlob(FLValue_AsDict(value));
     }
 
@@ -226,14 +226,14 @@ CBL_CAPI_BEGIN
         @param array  The array to store into.
         @param index  The position in the array at which to store the blob reference.
         @param blob  The blob reference to be stored. */
-    static inline void FLMutableArray_SetBlob(FLMutableArray array, uint32_t index, CBLBlob *blob) {
+    CBLINLINE void FLMutableArray_SetBlob(FLMutableArray array, uint32_t index, CBLBlob *blob) {
         FLSlot_SetBlob(FLMutableArray_Set(array, index), blob);
     }
 
     /** Appends a blob reference to an array.
         @param array  The array to store into.
         @param blob  The blob reference to be stored. */
-    static inline void FLMutableArray_AppendBlob(FLMutableArray array, CBLBlob *blob) {
+    CBLINLINE void FLMutableArray_AppendBlob(FLMutableArray array, CBLBlob *blob) {
         FLSlot_SetBlob(FLMutableArray_Append(array), blob);
     }
 
@@ -241,7 +241,7 @@ CBL_CAPI_BEGIN
         @param dict  The Dict to store into.
         @param key  The key to associate the blob reference with.
         @param blob  The blob reference to be stored. */
-    static inline void FLMutableDict_SetBlob(FLMutableDict dict, FLString key, CBLBlob *blob) {
+    CBLINLINE void FLMutableDict_SetBlob(FLMutableDict dict, FLString key, CBLBlob *blob) {
         FLSlot_SetBlob(FLMutableDict_Set(dict, key), blob);
     }
 

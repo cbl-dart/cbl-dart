@@ -109,6 +109,7 @@ final class ProxyReplicator extends ProxyObject
           trustedRootCertificates: config.trustedRootCertificates?.toData(),
           headers: config.headers,
           enableAutoPurge: config.enableAutoPurge,
+          acceptParentDomainCookies: config.acceptParentDomainCookies,
           heartbeat: config.heartbeat,
           maxAttempts: config.maxAttempts,
           maxAttemptWaitTime: config.maxAttemptWaitTime,

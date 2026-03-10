@@ -138,14 +138,11 @@ external bool CBLDart_CBLLog_SetCallback(CBLDart_AsyncCallback callback);
 @ffi.Native<NativeCBLDart_CBLLog_SetCallbackLevel>()
 external void CBLDart_CBLLog_SetCallbackLevel(imp$1.DartCBLLogLevel level);
 
-@ffi.Native<NativeCBLDart_CBLLog_SetFileConfig>()
-external bool CBLDart_CBLLog_SetFileConfig(
-  ffi.Pointer<CBLLogFileConfiguration> config,
-  ffi.Pointer<CBLError> errorOut,
-);
+@ffi.Native<NativeCBLDart_CBLLog_SetFileSink>()
+external void CBLDart_CBLLog_SetFileSink(ffi.Pointer<CBLFileLogSink> sink);
 
-@ffi.Native<NativeCBLDart_CBLLog_GetFileConfig>()
-external ffi.Pointer<CBLLogFileConfiguration> CBLDart_CBLLog_GetFileConfig();
+@ffi.Native<NativeCBLDart_CBLLog_GetFileSink>()
+external ffi.Pointer<CBLFileLogSink> CBLDart_CBLLog_GetFileSink();
 
 @ffi.Native<NativeCBLDart_CBLLog_SetSentryBreadcrumbs>()
 external bool CBLDart_CBLLog_SetSentryBreadcrumbs(bool enabled);
@@ -551,21 +548,14 @@ typedef NativeCBLDart_CBLLog_SetCallbackLevel =
     ffi.Void Function(imp$1.CBLLogLevel level);
 typedef DartCBLDart_CBLLog_SetCallbackLevel =
     void Function(imp$1.DartCBLLogLevel level);
-typedef CBLLogFileConfiguration = imp$1.CBLLogFileConfiguration;
-typedef NativeCBLDart_CBLLog_SetFileConfig =
-    ffi.Bool Function(
-      ffi.Pointer<CBLLogFileConfiguration> config,
-      ffi.Pointer<CBLError> errorOut,
-    );
-typedef DartCBLDart_CBLLog_SetFileConfig =
-    bool Function(
-      ffi.Pointer<CBLLogFileConfiguration> config,
-      ffi.Pointer<CBLError> errorOut,
-    );
-typedef NativeCBLDart_CBLLog_GetFileConfig =
-    ffi.Pointer<CBLLogFileConfiguration> Function();
-typedef DartCBLDart_CBLLog_GetFileConfig =
-    ffi.Pointer<CBLLogFileConfiguration> Function();
+typedef CBLFileLogSink = imp$1.CBLFileLogSink;
+typedef NativeCBLDart_CBLLog_SetFileSink =
+    ffi.Void Function(ffi.Pointer<CBLFileLogSink> sink);
+typedef DartCBLDart_CBLLog_SetFileSink =
+    void Function(ffi.Pointer<CBLFileLogSink> sink);
+typedef NativeCBLDart_CBLLog_GetFileSink =
+    ffi.Pointer<CBLFileLogSink> Function();
+typedef DartCBLDart_CBLLog_GetFileSink = ffi.Pointer<CBLFileLogSink> Function();
 typedef NativeCBLDart_CBLLog_SetSentryBreadcrumbs =
     ffi.Bool Function(ffi.Bool enabled);
 typedef DartCBLDart_CBLLog_SetSentryBreadcrumbs = bool Function(bool enabled);
@@ -851,6 +841,9 @@ final class CBLDart_ReplicatorConfiguration extends ffi.Struct {
 
   @ffi.Size()
   external int collectionsCount;
+
+  @ffi.Bool()
+  external bool acceptParentDomainCookies;
 }
 
 typedef CBLReplicator = imp$1.CBLReplicator;

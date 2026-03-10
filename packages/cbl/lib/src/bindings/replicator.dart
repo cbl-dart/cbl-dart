@@ -84,6 +84,7 @@ final class CBLReplicatorConfiguration {
     this.pinnedServerCertificate,
     this.trustedRootCertificates,
     required this.collections,
+    this.acceptParentDomainCookies = false,
   });
 
   final Pointer<cblite.CBLDatabase> database;
@@ -101,6 +102,7 @@ final class CBLReplicatorConfiguration {
   final Data? pinnedServerCertificate;
   final Data? trustedRootCertificates;
   final List<CBLReplicationCollection> collections;
+  final bool acceptParentDomainCookies;
 }
 
 final class ReplicationFilterCallbackMessage {
@@ -468,7 +470,8 @@ final class ReplicatorBindings {
           config.trustedRootCertificates?.toSliceResult().flSlice(
             globalArena,
           ) ??
-          nullptr;
+          nullptr
+      ..acceptParentDomainCookies = config.acceptParentDomainCookies;
 
     final collectionStructs =
         globalArena<cblitedart.CBLDart_ReplicationCollection>(

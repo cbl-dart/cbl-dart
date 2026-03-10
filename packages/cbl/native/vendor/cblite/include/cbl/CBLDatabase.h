@@ -92,13 +92,6 @@ typedef struct {
         power failure will not cause the loss of any data.  FULL synchronous
         is very safe but it is also dramatically slower. */
     bool fullSync;
-    
-    /**
-     Disable memory-mapped I/O. By default, memory-mapped I/O is enabled.
-     Disabling it may affect database performance. Typically, there is no need to modify this setting.
-     @note Memory-mapped I/O is always disabled on macOS to prevent database corruption,
-           so setting mmapDisabled value has no effect on the macOS platform. */
-    bool mmapDisabled;
 } CBLDatabaseConfiguration;
 
 /** Returns the default database configuration. */
@@ -265,93 +258,11 @@ FLString CBLDatabase_Name(const CBLDatabase*) CBLAPI;
 _cbl_warn_unused
 FLStringResult CBLDatabase_Path(const CBLDatabase*) CBLAPI;
 
-/** Returns the number of documents in the database, or zero if the database is closed or deleted.
-    @warning  <b>Deprecated :</b> Use CBLCollection_Count on the default collection instead. */
-uint64_t CBLDatabase_Count(const CBLDatabase*) CBLAPI;
-
 /** Returns the database's configuration, as given when it was opened. */
 const CBLDatabaseConfiguration CBLDatabase_Config(const CBLDatabase*) CBLAPI;
 
 /** @} */
 
-/** \name  Query Indexes
-    @{
-    Query Index Management
- */
-
-/** Creates a value index.
-    Indexes are persistent.
-    If an identical index with that name already exists, nothing happens (and no error is returned.)
-    If a non-identical index with that name already exists, it is deleted and re-created.
-    @warning  <b>Deprecated :</b> Use CBLCollection_CreateValueIndex on the default collection instead. */
-bool CBLDatabase_CreateValueIndex(CBLDatabase *db,
-                                  FLString name,
-                                  CBLValueIndexConfiguration config,
-                                  CBLError* _cbl_nullable outError) CBLAPI;
-
-/** Creates a full-text index.
-    Indexes are persistent.
-    If an identical index with that name already exists, nothing happens (and no error is returned.)
-    If a non-identical index with that name already exists, it is deleted and re-created.
-    @warning  <b>Deprecated :</b> Use CBLCollection_CreateFullTextIndex on the default collection instead. */
-bool CBLDatabase_CreateFullTextIndex(CBLDatabase *db,
-                                     FLString name,
-                                     CBLFullTextIndexConfiguration config,
-                                     CBLError* _cbl_nullable outError) CBLAPI;
-
-/** Deletes an index given its name.
-    @warning  <b>Deprecated :</b> Use CBLCollection_DeleteIndex on the default collection instead. */
-bool CBLDatabase_DeleteIndex(CBLDatabase *db,
-                             FLString name,
-                             CBLError* _cbl_nullable outError) CBLAPI;
-
-/** Returns the names of the indexes on this database, as a Fleece array of strings.
-    @note  You are responsible for releasing the returned Fleece array.
-    @warning  <b>Deprecated :</b> Use CBLCollection_GetIndexNames on the default collection instead. */
-_cbl_warn_unused
-FLArray CBLDatabase_GetIndexNames(CBLDatabase *db) CBLAPI;
-
-
-/** @} */
-
-#ifdef __APPLE__
-#pragma mark - LISTENERS
-#endif
-/** \name  Database listeners
-    @{
-    A database change listener lets you detect changes made to all documents in the default collection.
-    (If you only want to observe specific documents, use a \ref CBLDocumentChangeListener instead.)
-    @note If there are multiple \ref CBLDatabase instances on the same database file, each one's
-    listeners will be notified of changes made by other database instances.
-    @warning  Changes made to the database file by other processes will _not_ be notified. */
-
-/** A default collection change listener callback, invoked after one or more documents in the default collection are changed on disk.
-    @warning  By default, this listener may be called on arbitrary threads. If your code isn't
-              prepared for that, you may want to use \ref CBLDatabase_BufferNotifications
-              so that listeners will be called in a safe context.
-    @warning  <b>Deprecated :</b> CBLCollectionChangeListener instead.
-    @param context  An arbitrary value given when the callback was registered.
-    @param db  The database that changed.
-    @param numDocs  The number of documents that changed (size of the `docIDs` array)
-    @param docIDs  The IDs of the documents that changed, as a C array of `numDocs` C strings. */
-typedef void (*CBLDatabaseChangeListener)(void* _cbl_nullable context,
-                                          const CBLDatabase* db,
-                                          unsigned numDocs,
-                                          FLString docIDs[_cbl_nonnull]);
-
-/** Registers a default collection change listener callback. It will be called after one or more
-    documents are changed on disk.
-    @warning  <b>Deprecated :</b> Use CBLCollection_AddChangeListener on the default collection instead.
-    @param db  The database to observe.
-    @param listener  The callback to be invoked.
-    @param context  An opaque value that will be passed to the callback.
-    @return  A token to be passed to \ref CBLListener_Remove when it's time to remove the listener.*/
-_cbl_warn_unused
-CBLListenerToken* CBLDatabase_AddChangeListener(const CBLDatabase* db,
-                                                CBLDatabaseChangeListener listener,
-                                                void* _cbl_nullable context) CBLAPI;
-
-/** @} */
 /** @} */    // end of outer \defgroup
 
 
