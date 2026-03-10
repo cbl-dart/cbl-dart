@@ -63,6 +63,7 @@ functions:
       - CBLKeyPair_PublicKeyDigest
       - CBLKeyPair_PublicKeyData
       - CBLKeyPair_PrivateKeyData
+      - CBLTLSIdentity_CreateIdentityWithKeyPair
       # Synchronously invoke the custom log callback.
       - CBL_Log
       - CBL_LogMessage

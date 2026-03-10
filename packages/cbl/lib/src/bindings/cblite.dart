@@ -810,7 +810,7 @@ external ffi.Pointer<CBLTLSIdentity> CBLTLSIdentity_CreateIdentity(
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLTLSIdentity_CreateIdentityWithKeyPair>(isLeaf: true)
+@ffi.Native<NativeCBLTLSIdentity_CreateIdentityWithKeyPair>()
 external ffi.Pointer<CBLTLSIdentity> CBLTLSIdentity_CreateIdentityWithKeyPair(
   int keyUsages,
   ffi.Pointer<CBLKeyPair> keypair,
