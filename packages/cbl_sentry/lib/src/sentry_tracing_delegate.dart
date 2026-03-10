@@ -239,13 +239,12 @@ final class SentryTracingDelegate extends TracingDelegate {
     ISentrySpan? startChildTransaction() {
       final parentTraceHeader = _currentSentryTraceHeader;
       if (parentTraceHeader != null) {
-        return _hub.startTransactionWithContext(
-          SentryTransactionContext.fromSentryTrace(
-            'CBLWorker',
-            operation.debugName(isInWorker: _isWorkerDelegate),
-            parentTraceHeader,
-          ).copyWith(description: operation.debugDescription),
-        );
+        final transactionContext = SentryTransactionContext.fromSentryTrace(
+          'CBLWorker',
+          operation.debugName(isInWorker: _isWorkerDelegate),
+          parentTraceHeader,
+        )..description = operation.debugDescription;
+        return _hub.startTransactionWithContext(transactionContext);
       }
 
       return null;
