@@ -89,7 +89,7 @@ abstract base class CblE2eTestBinding {
     // Propagate group-level skips to individual tests, working around
     // Flutter's integration_test framework ignoring group-level skip.
     final effectiveSkip =
-        skip ?? _groupSkips.firstWhere((s) => s != null, orElse: () => null);
+        skip ?? _groupSkips.lastWhere((s) => s != null, orElse: () => null);
     final testDescriptions = [..._groupDescriptions, description];
     testFn(
       description,
