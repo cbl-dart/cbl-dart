@@ -19,6 +19,8 @@ services:
         condition: service_healthy
     entrypoint: []
     command: /opt/couchbase/init/init-couchbase.sh
+    environment:
+      CBS_CLUSTER_HOSTNAME: '127.0.0.1'
     volumes:
       - ./init-couchbase.sh:/opt/couchbase/init/init-couchbase.sh:ro
     restart: 'no'

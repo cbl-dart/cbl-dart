@@ -376,7 +376,15 @@ function _collectCrashReportsLinuxFlutter() {
     done
 }
 
+function _isAndroidEmulatorReachable() {
+    "$ANDROID_HOME/platform-tools/adb" -s "emulator-5554" get-state 2>/dev/null | grep -q "device"
+}
+
 function _collectCrashReportsAndroid() {
+    if ! _isAndroidEmulatorReachable; then
+        echo "Android emulator is not reachable, skipping bugreport collection"
+        return 0
+    fi
     ./tools/android-emulator.sh bugreport -o "$testResultsDir"
 }
 
@@ -395,8 +403,17 @@ function _collectCblLogsStandalone() {
     echo "Copied files"
 }
 
+function _isIosSimulatorBooted() {
+    xcrun simctl list devices booted -j 2>/dev/null | grep -q '"state" : "Booted"'
+}
+
 function _collectCblLogsIosSimulator() {
     echo "Collecting Couchbase Lite logs from iOS Simulator app"
+
+    if ! _isIosSimulatorBooted; then
+        echo "No booted iOS simulator found, skipping log collection"
+        return 0
+    fi
 
     ./tools/apple-simulator.sh copyData \
         -o "iOS-$iosVersion" \
@@ -423,6 +440,10 @@ function _collectCblLogsMacOS() {
 }
 
 function _collectCblLogsAndroid() {
+    if ! _isAndroidEmulatorReachable; then
+        echo "Android emulator is not reachable, skipping app data collection"
+        return 0
+    fi
     ./tools/android-emulator.sh copyAppData
     zip -r appData.zip appData
     mv appData.zip "$testResultsDir"

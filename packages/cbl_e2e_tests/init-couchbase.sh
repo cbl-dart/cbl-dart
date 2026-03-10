@@ -4,6 +4,10 @@ set -e
 
 CBS_HOST="${CBS_HOST:-couchbase-server}"
 CBS_PORT="${CBS_PORT:-8091}"
+# The hostname the node should use to identify itself. In Docker this should be
+# 127.0.0.1 (the node's own loopback) even though we connect via the service
+# name.
+CBS_CLUSTER_HOSTNAME="${CBS_CLUSTER_HOSTNAME:-${CBS_HOST}}"
 CBS_ADMIN_USER="${CBS_ADMIN_USER:-Administrator}"
 CBS_ADMIN_PASS="${CBS_ADMIN_PASS:-password}"
 BUCKET_NAME="${BUCKET_NAME:-db}"
@@ -18,7 +22,7 @@ echo "Couchbase Server REST API is ready"
 
 echo "Initializing cluster..."
 curl -sf -X POST "http://${CBS_HOST}:${CBS_PORT}/clusterInit" \
-    -d "hostname=${CBS_HOST}" \
+    -d "hostname=${CBS_CLUSTER_HOSTNAME}" \
     -d "services=kv,index,n1ql" \
     -d "memoryQuota=256" \
     -d "indexMemoryQuota=256" \
