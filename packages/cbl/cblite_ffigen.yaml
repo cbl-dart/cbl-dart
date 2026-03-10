@@ -64,6 +64,10 @@ functions:
       - CBLKeyPair_PublicKeyData
       - CBLKeyPair_PrivateKeyData
       - CBLTLSIdentity_CreateIdentityWithKeyPair
+      - CBLTLSIdentity_IdentityWithKeyPairAndCerts
+      # May synchronously invoke external key callbacks via TLS identity.
+      - CBLURLEndpointListener_Create
+      - CBLURLEndpointListener_Start
       # Synchronously invoke the custom log callback.
       - CBL_Log
       - CBL_LogMessage

@@ -831,7 +831,7 @@ external ffi.Pointer<CBLTLSIdentity> CBLTLSIdentity_IdentityWithLabel(
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLTLSIdentity_IdentityWithKeyPairAndCerts>(isLeaf: true)
+@ffi.Native<NativeCBLTLSIdentity_IdentityWithKeyPairAndCerts>()
 external ffi.Pointer<CBLTLSIdentity> CBLTLSIdentity_IdentityWithKeyPairAndCerts(
   ffi.Pointer<CBLKeyPair> keypair,
   ffi.Pointer<CBLCert> cert,
@@ -1336,7 +1336,7 @@ CBLListenerAuth_CreateCertificateWithRootCerts(ffi.Pointer<CBLCert> rootCerts);
 @ffi.Native<NativeCBLListenerAuth_Free>(isLeaf: true)
 external void CBLListenerAuth_Free(ffi.Pointer<CBLListenerAuthenticator> arg0);
 
-@ffi.Native<NativeCBLURLEndpointListener_Create>(isLeaf: true)
+@ffi.Native<NativeCBLURLEndpointListener_Create>()
 external ffi.Pointer<CBLURLEndpointListener> CBLURLEndpointListener_Create(
   ffi.Pointer<CBLURLEndpointListenerConfiguration> arg0,
   ffi.Pointer<CBLError> outError,
@@ -1366,7 +1366,7 @@ external CBLConnectionStatus CBLURLEndpointListener_Status(
   ffi.Pointer<CBLURLEndpointListener> arg0,
 );
 
-@ffi.Native<NativeCBLURLEndpointListener_Start>(isLeaf: true)
+@ffi.Native<NativeCBLURLEndpointListener_Start>()
 external bool CBLURLEndpointListener_Start(
   ffi.Pointer<CBLURLEndpointListener> arg0,
   ffi.Pointer<CBLError> outError,
