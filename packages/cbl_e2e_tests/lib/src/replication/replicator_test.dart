@@ -15,12 +15,12 @@ import '../utils/database_utils.dart';
 import '../utils/matchers.dart';
 import '../utils/replicator_utils.dart';
 import '../utils/test_document.dart';
-import 'url_endpoint_listener_test.dart';
+import '../utils/utils.dart';
 
 void main() {
   setupTestBinding();
 
-  group('Replicator', () {
+  group('Replicator', skip: skipReplicationTests, () {
     setupTestDocument();
 
     setUp(flushDatabaseByAdmin);
@@ -137,37 +137,33 @@ void main() {
       expect(configA, isNot(same(configB)));
     });
 
-    apiTest(
-      'continuous replication',
-      skip: Platform.isLinux ? 'Flaky on Linux (see #882)' : null,
-      () async {
-        final pushDb = await openTestDatabase(name: 'Push');
-        final pullDb = await openTestDatabase(name: 'Pull');
+    apiTest('continuous replication', () async {
+      final pushDb = await openTestDatabase(name: 'Push');
+      final pullDb = await openTestDatabase(name: 'Pull');
 
-        final pushRepl = await pushDb.createTestReplicator(
-          replicatorType: ReplicatorType.push,
-          continuous: true,
-        );
-        addTearDown(pushRepl.close);
+      final pushRepl = await pushDb.createTestReplicator(
+        replicatorType: ReplicatorType.push,
+        continuous: true,
+      );
+      addTearDown(pushRepl.close);
 
-        final pullRepl = await pullDb.createTestReplicator(
-          replicatorType: ReplicatorType.pull,
-          continuous: true,
-        );
-        addTearDown(pullRepl.close);
+      final pullRepl = await pullDb.createTestReplicator(
+        replicatorType: ReplicatorType.pull,
+        continuous: true,
+      );
+      addTearDown(pullRepl.close);
 
-        final timestamp = DateTime.now().microsecondsSinceEpoch;
-        final doc = MutableDocument.withId(
-          'continuouslyReplicatedDoc-$timestamp',
-        );
+      final timestamp = DateTime.now().microsecondsSinceEpoch;
+      final doc = MutableDocument.withId(
+        'continuouslyReplicatedDoc-$timestamp',
+      );
 
-        expect(pullDb.watchAllIds(), emitsThrough(contains(doc.id)));
+      expect(pullDb.watchAllIds(), emitsThrough(contains(doc.id)));
 
-        await pushRepl.start();
-        await pullRepl.start();
-        await pushDb.saveDocument(doc);
-      },
-    );
+      await pushRepl.start();
+      await pullRepl.start();
+      await pushDb.saveDocument(doc);
+    });
 
     apiTest('listen to query while replicator is pulling', () async {
       final pullDb = await openTestDatabase();
@@ -182,42 +178,36 @@ void main() {
       await pullDb.watchAllIds().first;
     });
 
-    apiTest(
-      'use documentIds to filter replicated documents',
-      skip: Platform.isLinux
-          ? 'HybridClock not seeded on Linux (see #881)'
-          : null,
-      () async {
-        // Insert doc A and B into push db
-        // Sync push db  with server with documentIds == [docA.id]
-        // Sync pull db  with server
-        // => pull db contains doc A
+    apiTest('use documentIds to filter replicated documents', () async {
+      // Insert doc A and B into push db
+      // Sync push db  with server with documentIds == [docA.id]
+      // Sync pull db  with server
+      // => pull db contains doc A
 
-        final pushDb = await openTestDatabase(name: 'Push');
-        final pullDb = await openTestDatabase(name: 'Pull');
+      final pushDb = await openTestDatabase(name: 'Push');
+      final pullDb = await openTestDatabase(name: 'Pull');
 
-        final docA = MutableDocument();
-        await pushDb.saveDocument(docA);
-        final docB = MutableDocument();
-        await pushDb.saveDocument(docB);
+      final docA = MutableDocument();
+      await pushDb.saveDocument(docA);
+      final docB = MutableDocument();
+      await pushDb.saveDocument(docB);
 
-        final pusher = await pushDb.createTestReplicator(
-          replicatorType: ReplicatorType.push,
-          documentIds: [docA.id],
-        );
-        addTearDown(pusher.close);
-        await pusher.replicateOneShot();
+      final pusher = await pushDb.createTestReplicator(
+        replicatorType: ReplicatorType.push,
+        documentIds: [docA.id],
+      );
+      addTearDown(pusher.close);
+      await pusher.replicateOneShot();
 
-        final puller = await pullDb.createTestReplicator(
-          replicatorType: ReplicatorType.pull,
-        );
-        addTearDown(puller.close);
-        await puller.replicateOneShot();
+      final puller = await pullDb.createTestReplicator(
+        replicatorType: ReplicatorType.pull,
+      );
+      addTearDown(puller.close);
+      await puller.replicateOneShot();
 
-        final idsInPullDb = await pullDb.getAllIds();
-        expect(idsInPullDb, contains(docA.id));
-      },
-    );
+      final idsInPullDb = await pullDb.getAllIds();
+      expect(idsInPullDb, contains(docA.id));
+    });
 
     apiTest('use channels to filter pulled documents', () async {
       // Insert doc A and B into push db, where doc A is in channel A
@@ -250,87 +240,75 @@ void main() {
       expect(idsInPullDb, contains(docA.id));
     });
 
-    apiTest(
-      'use pushFilter to filter pushed documents',
-      skip: Platform.isLinux
-          ? 'HybridClock not seeded on Linux (see #881)'
-          : null,
-      () async {
-        final pushDb = await openTestDatabase(name: 'Push');
-        final pullDb = await openTestDatabase(name: 'Pull');
+    apiTest('use pushFilter to filter pushed documents', () async {
+      final pushDb = await openTestDatabase(name: 'Push');
+      final pullDb = await openTestDatabase(name: 'Pull');
 
-        final docA = MutableDocument();
-        await pushDb.saveDocument(docA);
-        final docB = MutableDocument();
-        await pushDb.saveDocument(docB);
+      final docA = MutableDocument();
+      await pushDb.saveDocument(docA);
+      final docB = MutableDocument();
+      await pushDb.saveDocument(docB);
 
-        final pusher = await pushDb.createTestReplicator(
-          replicatorType: ReplicatorType.push,
-          pushFilter: expectAsync2((document, flags) {
-            expect(flags, isEmpty);
-            expect(document.id, anyOf(docA.id, docB.id));
-            return docA.id == document.id;
-          }, count: 2),
-        );
-        addTearDown(pusher.close);
-        await pusher.replicateOneShot();
+      final pusher = await pushDb.createTestReplicator(
+        replicatorType: ReplicatorType.push,
+        pushFilter: expectAsync2((document, flags) {
+          expect(flags, isEmpty);
+          expect(document.id, anyOf(docA.id, docB.id));
+          return docA.id == document.id;
+        }, count: 2),
+      );
+      addTearDown(pusher.close);
+      await pusher.replicateOneShot();
 
-        final puller = await pullDb.createTestReplicator(
-          replicatorType: ReplicatorType.pull,
-        );
-        addTearDown(puller.close);
-        await puller.replicateOneShot();
+      final puller = await pullDb.createTestReplicator(
+        replicatorType: ReplicatorType.pull,
+      );
+      addTearDown(puller.close);
+      await puller.replicateOneShot();
 
-        final idsInPullDb = await pullDb.getAllIds();
-        expect(idsInPullDb, contains(docA.id));
-        expect(idsInPullDb, isNot(contains(docB.id)));
-      },
-    );
+      final idsInPullDb = await pullDb.getAllIds();
+      expect(idsInPullDb, contains(docA.id));
+      expect(idsInPullDb, isNot(contains(docB.id)));
+    });
 
-    apiTest(
-      'use typedPushFilter to filter pushed documents',
-      skip: Platform.isLinux
-          ? 'HybridClock not seeded on Linux (see #881)'
-          : null,
-      () async {
-        final pushDb = await openTestDatabase(
-          name: 'Push',
-          typedDataAdapter: testAdapter,
-        );
-        final pullDb = await openTestDatabase(
-          name: 'Pull',
-          typedDataAdapter: testAdapter,
-        );
+    apiTest('use typedPushFilter to filter pushed documents', () async {
+      final pushDb = await openTestDatabase(
+        name: 'Push',
+        typedDataAdapter: testAdapter,
+      );
+      final pullDb = await openTestDatabase(
+        name: 'Pull',
+        typedDataAdapter: testAdapter,
+      );
 
-        final docA = MutableTestTypedDoc();
-        await pushDb.saveTypedDocument(docA).withConcurrencyControl();
-        final docB = MutableTestTypedDoc();
-        await pushDb.saveTypedDocument(docB).withConcurrencyControl();
+      final docA = MutableTestTypedDoc();
+      await pushDb.saveTypedDocument(docA).withConcurrencyControl();
+      final docB = MutableTestTypedDoc();
+      await pushDb.saveTypedDocument(docB).withConcurrencyControl();
 
-        final pusher = await pushDb.createTestReplicator(
-          replicatorType: ReplicatorType.push,
-          typedPushFilter: expectAsync2((document, flags) {
-            expect(flags, isEmpty);
-            expect(document, isA<TestTypedDoc>());
-            final doc = document as TestTypedDoc;
-            expect(doc.internal.id, anyOf(docA.internal.id, docB.internal.id));
-            return docA.internal.id == doc.internal.id;
-          }, count: 2),
-        );
-        addTearDown(pusher.close);
-        await pusher.replicateOneShot();
+      final pusher = await pushDb.createTestReplicator(
+        replicatorType: ReplicatorType.push,
+        typedPushFilter: expectAsync2((document, flags) {
+          expect(flags, isEmpty);
+          expect(document, isA<TestTypedDoc>());
+          final doc = document as TestTypedDoc;
+          expect(doc.internal.id, anyOf(docA.internal.id, docB.internal.id));
+          return docA.internal.id == doc.internal.id;
+        }, count: 2),
+      );
+      addTearDown(pusher.close);
+      await pusher.replicateOneShot();
 
-        final puller = await pullDb.createTestReplicator(
-          replicatorType: ReplicatorType.pull,
-        );
-        addTearDown(puller.close);
-        await puller.replicateOneShot();
+      final puller = await pullDb.createTestReplicator(
+        replicatorType: ReplicatorType.pull,
+      );
+      addTearDown(puller.close);
+      await puller.replicateOneShot();
 
-        final idsInPullDb = await pullDb.getAllIds();
-        expect(idsInPullDb, contains(docA.internal.id));
-        expect(idsInPullDb, isNot(contains(docB.internal.id)));
-      },
-    );
+      final idsInPullDb = await pullDb.getAllIds();
+      expect(idsInPullDb, contains(docA.internal.id));
+      expect(idsInPullDb, isNot(contains(docB.internal.id)));
+    });
 
     apiTest('pushFilter exception handling', () async {
       Object? uncaughtError;
@@ -403,53 +381,47 @@ void main() {
       expect(idsInPullDb, isNot(contains(docB.id)));
     });
 
-    apiTest(
-      'use typedPullFilter to filter pulled documents',
-      skip: Platform.isLinux
-          ? 'HybridClock not seeded on Linux (see #881)'
-          : null,
-      () async {
-        final pushDb = await openTestDatabase(
-          name: 'Push',
-          typedDataAdapter: testAdapter,
-        );
-        final pullDb = await openTestDatabase(
-          name: 'Pull',
-          typedDataAdapter: testAdapter,
-        );
+    apiTest('use typedPullFilter to filter pulled documents', () async {
+      final pushDb = await openTestDatabase(
+        name: 'Push',
+        typedDataAdapter: testAdapter,
+      );
+      final pullDb = await openTestDatabase(
+        name: 'Pull',
+        typedDataAdapter: testAdapter,
+      );
 
-        final docA = MutableTestTypedDoc();
-        await pushDb.saveTypedDocument(docA).withConcurrencyControl();
-        final docB = MutableTestTypedDoc();
-        await pushDb.saveTypedDocument(docB).withConcurrencyControl();
+      final docA = MutableTestTypedDoc();
+      await pushDb.saveTypedDocument(docA).withConcurrencyControl();
+      final docB = MutableTestTypedDoc();
+      await pushDb.saveTypedDocument(docB).withConcurrencyControl();
 
-        final pusher = await pushDb.createTestReplicator(
-          replicatorType: ReplicatorType.push,
-        );
-        addTearDown(pusher.close);
-        await pusher.replicateOneShot();
+      final pusher = await pushDb.createTestReplicator(
+        replicatorType: ReplicatorType.push,
+      );
+      addTearDown(pusher.close);
+      await pusher.replicateOneShot();
 
-        final puller = await pullDb.createTestReplicator(
-          replicatorType: ReplicatorType.pull,
-          typedPullFilter: expectAsync2(
-            (document, flags) {
-              expect(flags, isEmpty);
-              expect(document, isA<TestTypedDoc>());
-              final doc = document as TestTypedDoc;
-              return docA.internal.id == doc.internal.id;
-            },
-            count: 2,
-            max: -1,
-          ),
-        );
-        addTearDown(puller.close);
-        await puller.replicateOneShot();
+      final puller = await pullDb.createTestReplicator(
+        replicatorType: ReplicatorType.pull,
+        typedPullFilter: expectAsync2(
+          (document, flags) {
+            expect(flags, isEmpty);
+            expect(document, isA<TestTypedDoc>());
+            final doc = document as TestTypedDoc;
+            return docA.internal.id == doc.internal.id;
+          },
+          count: 2,
+          max: -1,
+        ),
+      );
+      addTearDown(puller.close);
+      await puller.replicateOneShot();
 
-        final idsInPullDb = await pullDb.getAllIds();
-        expect(idsInPullDb, contains(docA.internal.id));
-        expect(idsInPullDb, isNot(contains(docB.internal.id)));
-      },
-    );
+      final idsInPullDb = await pullDb.getAllIds();
+      expect(idsInPullDb, contains(docA.internal.id));
+      expect(idsInPullDb, isNot(contains(docB.internal.id)));
+    });
 
     apiTest('pullFilter exception handling', () async {
       Object? uncaughtError;
@@ -488,47 +460,41 @@ void main() {
       expect(uncaughtError, isException);
     });
 
-    apiTest(
-      'custom conflict resolver',
-      skip: Platform.isLinux
-          ? 'Conflict resolver ignored on Linux (see #882)'
-          : null,
-      () async {
-        // Create document in db A
-        // Sync db A with server
-        // Sync db B with server
-        // Change doc in db A
-        // Change doc in db B
-        // Sync db B with server
-        // Sync db A with server
-        // => Conflict in db A
+    apiTest('custom conflict resolver', () async {
+      // Create document in db A
+      // Sync db A with server
+      // Sync db B with server
+      // Change doc in db A
+      // Change doc in db B
+      // Sync db B with server
+      // Sync db A with server
+      // => Conflict in db A
 
-        final dbA = await openTestDatabase(name: 'A');
-        final replicatorA = await dbA.createTestReplicator(
-          conflictResolver: expectAsync1((conflict) {
-            expect(conflict.documentId, testDocumentId);
-            expect(conflict.localDocument, isTestDocument('DB-A-2'));
-            expect(conflict.remoteDocument, isTestDocument('DB-B-1'));
-            return conflict.remoteDocument;
-          }),
-        );
-        addTearDown(replicatorA.close);
+      final dbA = await openTestDatabase(name: 'A');
+      final replicatorA = await dbA.createTestReplicator(
+        conflictResolver: expectAsync1((conflict) {
+          expect(conflict.documentId, testDocumentId);
+          expect(conflict.localDocument, isTestDocument('DB-A-2'));
+          expect(conflict.remoteDocument, isTestDocument('DB-B-1'));
+          return conflict.remoteDocument;
+        }),
+      );
+      addTearDown(replicatorA.close);
 
-        final dbB = await openTestDatabase(name: 'B');
-        final replicatorB = await dbB.createTestReplicator();
-        addTearDown(replicatorB.close);
+      final dbB = await openTestDatabase(name: 'B');
+      final replicatorB = await dbB.createTestReplicator();
+      addTearDown(replicatorB.close);
 
-        await dbA.writeTestDocument('DB-A-1');
-        await replicatorA.replicateOneShot();
-        await replicatorB.replicateOneShot();
-        await dbA.writeTestDocument('DB-A-2');
-        await dbB.writeTestDocument('DB-B-1');
-        await replicatorB.replicateOneShot();
-        await replicatorA.replicateOneShot();
+      await dbA.writeTestDocument('DB-A-1');
+      await replicatorA.replicateOneShot();
+      await replicatorB.replicateOneShot();
+      await dbA.writeTestDocument('DB-A-2');
+      await dbB.writeTestDocument('DB-B-1');
+      await replicatorB.replicateOneShot();
+      await replicatorA.replicateOneShot();
 
-        expect(await dbA.getTestDocumentOrNull(), isTestDocument('DB-B-1'));
-      },
-    );
+      expect(await dbA.getTestDocumentOrNull(), isTestDocument('DB-B-1'));
+    });
 
     // apiTest('custom conflict resolver returns merged document', () async {
     //   // Create document in db A
@@ -566,54 +532,48 @@ void main() {
     //   expect(testDocument!.value('merged'), isTrue);
     // });
 
-    apiTest(
-      'custom typed conflict resolver',
-      skip: Platform.isLinux
-          ? 'Conflict resolver ignored on Linux (see #882)'
-          : null,
-      () async {
-        // Create document in db A
-        // Sync db A with server
-        // Sync db B with server
-        // Change doc in db A
-        // Change doc in db B
-        // Sync db B with server
-        // Sync db A with server
-        // => Conflict in db A
+    apiTest('custom typed conflict resolver', () async {
+      // Create document in db A
+      // Sync db A with server
+      // Sync db B with server
+      // Change doc in db A
+      // Change doc in db B
+      // Sync db B with server
+      // Sync db A with server
+      // => Conflict in db A
 
-        final dbA = await openTestDatabase(
-          name: 'A',
-          typedDataAdapter: testAdapter,
-        );
-        final replicatorA = await dbA.createTestReplicator(
-          typedConflictResolver: expectAsync1((conflict) {
-            expect(conflict.documentId, testDocumentId);
-            expect(conflict.localDocument, isA<TestTypedDoc>());
-            expect(conflict.remoteDocument, isA<TestTypedDoc>());
-            final localDoc = conflict.localDocument! as TestTypedDoc;
-            final remoteDoc = conflict.remoteDocument! as TestTypedDoc;
-            expect(localDoc.internal, isTestDocument('DB-A-2'));
-            expect(remoteDoc.internal, isTestDocument('DB-B-1'));
-            return conflict.remoteDocument;
-          }),
-        );
-        addTearDown(replicatorA.close);
+      final dbA = await openTestDatabase(
+        name: 'A',
+        typedDataAdapter: testAdapter,
+      );
+      final replicatorA = await dbA.createTestReplicator(
+        typedConflictResolver: expectAsync1((conflict) {
+          expect(conflict.documentId, testDocumentId);
+          expect(conflict.localDocument, isA<TestTypedDoc>());
+          expect(conflict.remoteDocument, isA<TestTypedDoc>());
+          final localDoc = conflict.localDocument! as TestTypedDoc;
+          final remoteDoc = conflict.remoteDocument! as TestTypedDoc;
+          expect(localDoc.internal, isTestDocument('DB-A-2'));
+          expect(remoteDoc.internal, isTestDocument('DB-B-1'));
+          return conflict.remoteDocument;
+        }),
+      );
+      addTearDown(replicatorA.close);
 
-        final dbB = await openTestDatabase(name: 'B');
-        final replicatorB = await dbB.createTestReplicator();
-        addTearDown(replicatorB.close);
+      final dbB = await openTestDatabase(name: 'B');
+      final replicatorB = await dbB.createTestReplicator();
+      addTearDown(replicatorB.close);
 
-        await dbA.writeTestDocument('DB-A-1', type: 'TestTypedDoc');
-        await replicatorA.replicateOneShot();
-        await replicatorB.replicateOneShot();
-        await dbA.writeTestDocument('DB-A-2', type: 'TestTypedDoc');
-        await dbB.writeTestDocument('DB-B-1', type: 'TestTypedDoc');
-        await replicatorB.replicateOneShot();
-        await replicatorA.replicateOneShot();
+      await dbA.writeTestDocument('DB-A-1', type: 'TestTypedDoc');
+      await replicatorA.replicateOneShot();
+      await replicatorB.replicateOneShot();
+      await dbA.writeTestDocument('DB-A-2', type: 'TestTypedDoc');
+      await dbB.writeTestDocument('DB-B-1', type: 'TestTypedDoc');
+      await replicatorB.replicateOneShot();
+      await replicatorA.replicateOneShot();
 
-        expect(await dbA.getTestDocumentOrNull(), isTestDocument('DB-B-1'));
-      },
-    );
+      expect(await dbA.getTestDocumentOrNull(), isTestDocument('DB-B-1'));
+    });
 
     apiTest('conflict resolver exception handling', () async {
       Object? uncaughtError;
@@ -856,27 +816,21 @@ void main() {
       () => autoPurgeTest(enableAutoPurge: false),
     );
 
-    apiTest(
-      'use database endpoint',
-      skip: Platform.isLinux
-          ? 'HybridClock not seeded on Linux (see #881)'
-          : null,
-      () async {
-        final dbA = await openTestDatabase(name: 'a');
-        final dbB = await openTestDatabase(name: 'b');
-        final repl = await Replicator.create(
-          ReplicatorConfiguration(database: dbA, target: DatabaseEndpoint(dbB)),
-        );
-        addTearDown(repl.close);
+    apiTest('use database endpoint', () async {
+      final dbA = await openTestDatabase(name: 'a');
+      final dbB = await openTestDatabase(name: 'b');
+      final repl = await Replicator.create(
+        ReplicatorConfiguration(database: dbA, target: DatabaseEndpoint(dbB)),
+      );
+      addTearDown(repl.close);
 
-        final doc = MutableDocument();
-        await dbA.saveDocument(doc);
+      final doc = MutableDocument();
+      await dbA.saveDocument(doc);
 
-        await repl.replicateOneShot();
+      await repl.replicateOneShot();
 
-        expect(await dbB.document(doc.id), isNotNull);
-      },
-    );
+      expect(await dbB.document(doc.id), isNotNull);
+    });
 
     apiTest(
       'throws when wrong type of database is used with database endpoint',

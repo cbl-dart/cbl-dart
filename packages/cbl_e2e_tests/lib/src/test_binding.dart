@@ -29,7 +29,8 @@ typedef TestFn =
       Object? skip,
     });
 
-typedef GroupFn = void Function(String description, void Function() body);
+typedef GroupFn =
+    void Function(String description, void Function() body, {Object? skip});
 
 typedef TestHook = void Function(dynamic Function() body);
 
@@ -98,9 +99,9 @@ abstract base class CblE2eTestBinding {
     );
   }
 
-  void _group(String description, void Function() body) {
+  void _group(String description, void Function() body, {Object? skip}) {
     _groupDescriptions.add(description);
-    groupFn(description, body);
+    groupFn(description, body, skip: skip);
     _groupDescriptions.removeLast();
   }
 
@@ -169,8 +170,8 @@ void test(String description, FutureOr<void> Function() body, {Object? skip}) =>
     CblE2eTestBinding.instance._test(description, body, skip: skip);
 
 @isTestGroup
-void group(String description, void Function() body) =>
-    CblE2eTestBinding.instance._group(description, body);
+void group(String description, void Function() body, {Object? skip}) =>
+    CblE2eTestBinding.instance._group(description, body, skip: skip);
 
 void setUpAll(dynamic Function() body) =>
     CblE2eTestBinding.instance.setUpAllFn(body);

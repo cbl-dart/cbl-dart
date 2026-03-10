@@ -16,8 +16,8 @@ import '../test_binding.dart';
 import '../utils/database_utils.dart';
 import '../utils/matchers.dart';
 import '../utils/replicator_utils.dart';
+import '../utils/utils.dart';
 import 'private_keys.dart';
-import 'url_endpoint_listener_test.dart';
 
 final futureExpiration = DateTime.utc(2100);
 
