@@ -56,6 +56,13 @@ functions:
       - CBLResultSet_Next
       # Synchronously fires all buffered listener callbacks.
       - CBLDatabase_SendNotifications
+      # Synchronously invokes the unregistered callback of the predictive model.
+      - CBL_UnregisterPredictiveModel
+      # May synchronously invoke external key callbacks (publicKeyData,
+      # decrypt, sign, free) registered via CBLKeyPair_CreateWithExternalKey.
+      - CBLKeyPair_PublicKeyDigest
+      - CBLKeyPair_PublicKeyData
+      - CBLKeyPair_PrivateKeyData
       # Synchronously invoke the custom log callback.
       - CBL_Log
       - CBL_LogMessage

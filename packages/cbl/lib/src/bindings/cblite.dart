@@ -778,17 +778,17 @@ external ffi.Pointer<CBLKeyPair> CBLKeyPair_CreateWithPrivateKeyData(
   ffi.Pointer<CBLError> outError,
 );
 
-@ffi.Native<NativeCBLKeyPair_PublicKeyDigest>(isLeaf: true)
+@ffi.Native<NativeCBLKeyPair_PublicKeyDigest>()
 external FLSliceResult CBLKeyPair_PublicKeyDigest(
   ffi.Pointer<CBLKeyPair> keyPair,
 );
 
-@ffi.Native<NativeCBLKeyPair_PublicKeyData>(isLeaf: true)
+@ffi.Native<NativeCBLKeyPair_PublicKeyData>()
 external FLSliceResult CBLKeyPair_PublicKeyData(
   ffi.Pointer<CBLKeyPair> keyPair,
 );
 
-@ffi.Native<NativeCBLKeyPair_PrivateKeyData>(isLeaf: true)
+@ffi.Native<NativeCBLKeyPair_PrivateKeyData>()
 external FLSliceResult CBLKeyPair_PrivateKeyData(
   ffi.Pointer<CBLKeyPair> keyPair,
 );
@@ -1168,7 +1168,7 @@ external void CBL_RegisterPredictiveModel(
   CBLPredictiveModel model,
 );
 
-@ffi.Native<NativeCBL_UnregisterPredictiveModel>(isLeaf: true)
+@ffi.Native<NativeCBL_UnregisterPredictiveModel>()
 external void CBL_UnregisterPredictiveModel(FLString name);
 
 @ffi.Native<NativeCBLDatabase_CreateQuery>(isLeaf: true)
