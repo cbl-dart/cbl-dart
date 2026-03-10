@@ -146,6 +146,41 @@ hooks:
 Vector search requires the Enterprise edition and is supported on ARM64 and
 x86-64.
 
+## `LogFileConfiguration.maxRotateCount` renamed to `maxKeptFiles`
+
+The `maxRotateCount` property on `api|LogFileConfiguration` has been renamed to
+`maxKeptFiles`. Update any references accordingly:
+
+```dart
+// Before (v3)
+final config = LogFileConfiguration(
+  directory: logDir,
+  maxRotateCount: 5,
+);
+
+// After (v4)
+final config = LogFileConfiguration(
+  directory: logDir,
+  maxKeptFiles: 5,
+);
+```
+
+## Query boolean expressions return booleans instead of integers
+
+In v3, boolean-producing query expressions (comparisons, logical operators, null
+checks, `like()`, `between()`, `in_()`, `is_()`, `api|Meta.isDeleted`,
+quantifiers) returned `1` and `0` as integers.
+
+In v4, these expressions return native `true` and `false` boolean values. If
+your code checks query results for `== 1` or `== 0` instead of using them as
+booleans, you will need to update those checks.
+
+## Revision IDs are no longer deterministic
+
+CBL 4 changed its revision ID generation algorithm. Revision IDs are no longer
+derived deterministically from document content. Code that hardcodes or predicts
+revision IDs based on document content will break.
+
 ## Conflict resolver exception handling
 
 In v3, when a custom `api|ConflictResolver` threw an exception, the native layer
@@ -206,5 +241,11 @@ No manual steps are required.
    - Replace `CouchbaseLiteDart.init(...)` with `api|CouchbaseLite.init`.
 7. **Enable vector search** (if needed) via `pubspec.yaml` config and an
    explicit call to `api|Extension.enableVectorSearch`.
-8. **Run your app** -- native libraries will be built automatically on first
-   run.
+8. **Rename `maxRotateCount`** to `maxKeptFiles` in any `LogFileConfiguration`
+   usage.
+9. **Update query result checks** that compare boolean expressions against `1`
+   or `0` -- they now return `true`/`false`.
+10. **Remove hardcoded revision IDs** -- revision IDs are no longer
+    deterministic.
+11. **Run your app** -- native libraries will be built automatically on first
+    run.

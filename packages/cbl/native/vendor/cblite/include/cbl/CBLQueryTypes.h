@@ -24,10 +24,22 @@ CBL_CAPI_BEGIN
 /** \defgroup queries   Queries
     @{ */
 
-/** Supported Query languages */
+/** Query languages */
 typedef CBL_ENUM(uint32_t, CBLQueryLanguage) {
-    kCBLJSONLanguage,       ///< [JSON query schema](https://github.com/couchbase/couchbase-lite-core/wiki/JSON-Query-Schema)
-    kCBLN1QLLanguage        ///< [N1QL syntax](https://docs.couchbase.com/server/6.0/n1ql/n1ql-language-reference/index.html)
+    /**
+     * VOLATILE API : The JSON query language is a volatile API.  Volatile APIs are experimental and may likely be changed.
+     * They may also be used to indicate inherently private APIs that may be exposed, but "YMMV" (your mileage may vary)
+     * principles apply.
+     *
+     * See the [JSON query schema](https://github.com/couchbase/couchbase-lite-core/wiki/JSON-Query-Schema).
+     */
+    kCBLJSONLanguage,
+    /**
+     * SQL++ (formerly N1QL) query language.
+     *
+     * See the [N1QL language reference](https://docs.couchbase.com/couchbase-lite/current/c/query-n1ql-mobile.html).
+     */
+    kCBLN1QLLanguage
 };
 
 /** @} */

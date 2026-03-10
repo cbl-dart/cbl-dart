@@ -13,7 +13,7 @@ void main() {
   group('FileLogConfiguration', () {
     test('validate properties', () {
       expect(
-        () => LogFileConfiguration(directory: 'A', maxRotateCount: -1),
+        () => LogFileConfiguration(directory: 'A', maxKeptFiles: -1),
         throwsRangeError,
       );
       expect(
@@ -21,9 +21,9 @@ void main() {
         throwsRangeError,
       );
 
-      final config = LogFileConfiguration(directory: 'A')..maxRotateCount = 0;
+      final config = LogFileConfiguration(directory: 'A')..maxKeptFiles = 0;
 
-      expect(() => config.maxRotateCount = -1, throwsRangeError);
+      expect(() => config.maxKeptFiles = -1, throwsRangeError);
 
       config.maxSize = 1;
       expect(() => config.maxSize = 0, throwsRangeError);
@@ -34,13 +34,13 @@ void main() {
         directory: 'A',
         usePlainText: true,
         maxSize: 99,
-        maxRotateCount: 999,
+        maxKeptFiles: 999,
       );
       final copy = LogFileConfiguration.from(source);
       expect(copy.directory, source.directory);
       expect(copy.usePlainText, source.usePlainText);
       expect(copy.maxSize, source.maxSize);
-      expect(copy.maxRotateCount, source.maxRotateCount);
+      expect(copy.maxKeptFiles, source.maxKeptFiles);
     });
 
     test('==', () {
@@ -65,7 +65,7 @@ void main() {
         'USE-PLAIN-TEXT, '
         'maxSize: 500.0 KB, '
         // ignore: missing_whitespace_between_adjacent_strings
-        'maxRotateCount: 1'
+        'maxKeptFiles: 1'
         ')',
       );
     });
@@ -94,7 +94,7 @@ void main() {
       final config = LogFileConfiguration(
         directory: '$tmpDir/GetAndSetLogFileConfig',
         maxSize: 2,
-        maxRotateCount: 3,
+        maxKeptFiles: 3,
         usePlainText: true,
       );
 

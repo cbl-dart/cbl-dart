@@ -100,11 +100,10 @@ CBLDART_EXPORT
 void CBLDart_CBLLog_SetCallbackLevel(CBLLogLevel level);
 
 CBLDART_EXPORT
-bool CBLDart_CBLLog_SetFileConfig(CBLLogFileConfiguration* config,
-                                  CBLError* errorOut);
+void CBLDart_CBLLog_SetFileSink(CBLFileLogSink* sink);
 
 CBLDART_EXPORT
-CBLLogFileConfiguration* CBLDart_CBLLog_GetFileConfig();
+CBLFileLogSink* CBLDart_CBLLog_GetFileSink();
 
 CBLDART_EXPORT
 bool CBLDart_CBLLog_SetSentryBreadcrumbs(bool enabled);
@@ -245,6 +244,7 @@ struct CBLDart_ReplicatorConfiguration {
   FLSlice* trustedRootCertificates;
   CBLDart_ReplicationCollection* collections;
   size_t collectionsCount;
+  bool acceptParentDomainCookies;
 };
 
 CBLDART_EXPORT

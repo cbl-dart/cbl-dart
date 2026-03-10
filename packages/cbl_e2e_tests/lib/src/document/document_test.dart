@@ -27,23 +27,26 @@ void main() {
   group('Document', () {
     apiTest('properties', () async {
       final db = await openTestDatabase();
-      const revisionId = '1-581ad726ee407c8376fc94aad966051d013893c4';
       final doc = MutableDocument.withId('id');
 
       expect(doc.id, 'id');
       expect(doc.revisionId, isNull);
       expect(doc.sequence, 0);
+      expect(doc.timestamp, 0);
 
       await db.saveDocument(doc);
 
-      expect(doc.revisionId, revisionId);
+      expect(doc.revisionId, isNotNull);
+      expect(doc.revisionId, isNotEmpty);
       expect(doc.sequence, 1);
+      expect(doc.timestamp, isPositive);
 
       final loadedDoc = (await db.document(doc.id))!;
 
       expect(loadedDoc.id, 'id');
-      expect(loadedDoc.revisionId, revisionId);
+      expect(loadedDoc.revisionId, doc.revisionId);
       expect(loadedDoc.sequence, 1);
+      expect(loadedDoc.timestamp, doc.timestamp);
     });
 
     apiTest('==', () async {
@@ -250,8 +253,9 @@ void main() {
           'Document('
           'id: ${doc.id}, '
           'revisionId: ${doc.revisionId}, '
+          'sequence: ${doc.sequence}, '
           // ignore: missing_whitespace_between_adjacent_strings
-          'sequence: ${doc.sequence}'
+          'timestamp: ${loadedDoc!.timestamp}'
           ')',
         );
       });
@@ -272,6 +276,8 @@ void main() {
       final mutableDoc = doc.toMutable();
       expect(mutableDoc, doc);
       expect(mutableDoc, isNot(same(doc)));
+      expect(mutableDoc.revisionId, doc.revisionId);
+      expect(mutableDoc.timestamp, doc.timestamp);
     });
 
     apiTest('toMutable: saved mutable doc', () async {
@@ -281,6 +287,8 @@ void main() {
       final mutableDoc = doc.toMutable();
       expect(mutableDoc, doc);
       expect(mutableDoc, isNot(same(doc)));
+      expect(mutableDoc.revisionId, doc.revisionId);
+      expect(mutableDoc.timestamp, doc.timestamp);
     });
 
     group('mutable', () {
@@ -404,8 +412,9 @@ void main() {
         'MutableDocument('
         'id: ${mutableDoc.id}, '
         'revisionId: ${mutableDoc.revisionId}, '
+        'sequence: ${mutableDoc.sequence}, '
         // ignore: missing_whitespace_between_adjacent_strings
-        'sequence: ${mutableDoc.sequence}'
+        'timestamp: ${mutableDoc.timestamp}'
         ')',
       );
     });

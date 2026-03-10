@@ -399,11 +399,16 @@ void _checkAssets({
       expect(File(p.join(libDir, 'CouchbaseLite')).existsSync(), isTrue);
     case OS.linux:
       // Major-version soname for DT_NEEDED resolution.
-      expect(File(p.join(libDir, 'libcblite.so.3')).existsSync(), isTrue);
+      final sonameFiles = Directory(libDir)
+          .listSync()
+          .map((entity) => p.basename(entity.path))
+          .where((name) => RegExp(r'^libcblite\.so\.\d+$').hasMatch(name))
+          .toList();
+      expect(sonameFiles, hasLength(1));
       // Unversioned symlink for the linker (-lcblite).
       expect(File(p.join(libDir, 'libcblite.so')).existsSync(), isTrue);
       // Code asset should be the soname version.
-      expect(cbliteAsset.file!.toFilePath(), endsWith('libcblite.so.3'));
+      expect(cbliteAsset.file!.toFilePath(), endsWith(sonameFiles.single));
     case OS.android:
       expect(File(p.join(libDir, 'libcblite.so')).existsSync(), isTrue);
     case OS.windows:

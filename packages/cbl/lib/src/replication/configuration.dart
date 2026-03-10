@@ -173,6 +173,7 @@ final class ReplicatorConfiguration {
     this.conflictResolver,
     this.typedConflictResolver,
     this.enableAutoPurge = true,
+    this.acceptParentDomainCookies = false,
     Duration? heartbeat,
     int? maxAttempts,
     Duration? maxAttemptWaitTime,
@@ -214,6 +215,7 @@ final class ReplicatorConfiguration {
       conflictResolver = config.conflictResolver,
       typedConflictResolver = config.typedConflictResolver,
       enableAutoPurge = config.enableAutoPurge,
+      acceptParentDomainCookies = config.acceptParentDomainCookies,
       _heartbeat = config.heartbeat,
       _maxAttempts = config.maxAttempts,
       _maxAttemptWaitTime = config.maxAttemptWaitTime;
@@ -347,6 +349,17 @@ final class ReplicatorConfiguration {
   /// - [Replicator.addDocumentReplicationListener] for listening to
   ///   [DocumentReplication]s performed by a [Replicator].
   bool enableAutoPurge;
+
+  /// Whether to remove the restriction that does not allow the replicator to
+  /// save the parent-domain cookies from the HTTP response.
+  ///
+  /// For example, when this option is set to `true`, the cookies whose domain
+  /// is ".foo.com" returned by "bar.foo.com" host will be permitted to save.
+  /// This is only recommended if the host issuing the cookie is well trusted.
+  ///
+  /// The default value is `false` which means that the parent-domain cookies
+  /// are not permitted to save by default.
+  bool acceptParentDomainCookies;
 
   /// The heartbeat interval.
   ///
@@ -500,6 +513,7 @@ final class ReplicatorConfiguration {
         if (conflictResolver != null) 'CUSTOM-CONFLICT-RESOLVER',
         if (typedConflictResolver != null) 'TYPED-CUSTOM-CONFLICT-RESOLVER',
         if (!enableAutoPurge) 'DISABLE-AUTO-PURGE',
+        if (acceptParentDomainCookies) 'ACCEPT-PARENT-DOMAIN-COOKIES',
         if (heartbeat != null) 'heartbeat: ${_heartbeat!.inSeconds}s',
         if (maxAttempts != null) 'maxAttempts: $maxAttempts',
         if (maxAttemptWaitTime != null)

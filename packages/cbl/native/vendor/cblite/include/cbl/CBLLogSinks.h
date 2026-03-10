@@ -21,7 +21,7 @@
 
 CBL_CAPI_BEGIN
 
-/** \defgroup logging   Logging (Deprecated)
+/** \defgroup LogSinks   LogSinks
      @{
      Manages Couchbase Lite logging configuration, with three log sinks:
      - **Console Log Sink**: Enabled by default at the **warning** level for all domains.

@@ -18,6 +18,9 @@ final class DocumentBindings {
   static int sequence(Pointer<cblite.CBLDocument> doc) =>
       cblite.CBLDocument_Sequence(doc);
 
+  static int timestamp(Pointer<cblite.CBLDocument> doc) =>
+      cblite.CBLDocument_Timestamp(doc);
+
   static cblite.FLDict properties(Pointer<cblite.CBLDocument> doc) =>
       cblite.CBLDocument_Properties(doc);
 

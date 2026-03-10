@@ -54,12 +54,18 @@ function startCouchbaseServices() {
 
     case "$(uname)" in
     Darwin)
+        ./packages/cbl_e2e_tests/couchbase-services.sh startCouchbaseServerMacOS
+        ./packages/cbl_e2e_tests/couchbase-services.sh waitForCouchbaseServer
+        ./packages/cbl_e2e_tests/couchbase-services.sh initCouchbaseServer
         : >"$syncGatewayLogFile"
         ./packages/cbl_e2e_tests/couchbase-services.sh startSyncGatewayMacOS \
             >>"$syncGatewayLogFile" 2>&1 &
         ./packages/cbl_e2e_tests/couchbase-services.sh waitForSyncGateway
         ;;
     MINGW64* | MSYS* | CYGWIN*)
+        ./packages/cbl_e2e_tests/couchbase-services.sh startCouchbaseServerWindows
+        ./packages/cbl_e2e_tests/couchbase-services.sh waitForCouchbaseServer
+        ./packages/cbl_e2e_tests/couchbase-services.sh initCouchbaseServer
         : >"$syncGatewayLogFile"
         ./packages/cbl_e2e_tests/couchbase-services.sh startSyncGatewayWindows \
             >>"$syncGatewayLogFile" 2>&1 &
@@ -370,7 +376,15 @@ function _collectCrashReportsLinuxFlutter() {
     done
 }
 
+function _isAndroidEmulatorReachable() {
+    "$ANDROID_HOME/platform-tools/adb" -s "emulator-5554" get-state 2>/dev/null | grep -q "device"
+}
+
 function _collectCrashReportsAndroid() {
+    if ! _isAndroidEmulatorReachable; then
+        echo "Android emulator is not reachable, skipping bugreport collection"
+        return 0
+    fi
     ./tools/android-emulator.sh bugreport -o "$testResultsDir"
 }
 
@@ -389,8 +403,17 @@ function _collectCblLogsStandalone() {
     echo "Copied files"
 }
 
+function _isIosSimulatorBooted() {
+    xcrun simctl list devices booted -j 2>/dev/null | grep -q '"state" : "Booted"'
+}
+
 function _collectCblLogsIosSimulator() {
     echo "Collecting Couchbase Lite logs from iOS Simulator app"
+
+    if ! _isIosSimulatorBooted; then
+        echo "No booted iOS simulator found, skipping log collection"
+        return 0
+    fi
 
     ./tools/apple-simulator.sh copyData \
         -o "iOS-$iosVersion" \
@@ -417,6 +440,10 @@ function _collectCblLogsMacOS() {
 }
 
 function _collectCblLogsAndroid() {
+    if ! _isAndroidEmulatorReachable; then
+        echo "Android emulator is not reachable, skipping app data collection"
+        return 0
+    fi
     ./tools/android-emulator.sh copyAppData
     zip -r appData.zip appData
     mv appData.zip "$testResultsDir"
@@ -435,6 +462,41 @@ function _collectCblLogsLinux() {
     echo "Copying files..."
     cp -a "$cblLogsDir" "$testResultsDir"
     echo "Copied files"
+}
+
+function _collectCouchbaseServerLogs() {
+    echo "Collecting Couchbase Server logs"
+
+    local outputDir="$testResultsDir/couchbase-server-logs"
+    mkdir -p "$outputDir"
+
+    case "$(uname)" in
+    Darwin)
+        local processLog="${RUNNER_TEMP:-/tmp}/couchbase-server-macos.log"
+        local appLog="$HOME/Library/Logs/CouchbaseServer.log"
+        local httpLog="$HOME/Library/Logs/couchbase-server.log"
+
+        for logFile in "$processLog" "$appLog" "$httpLog"; do
+            if [ -f "$logFile" ]; then
+                echo "Copying $logFile"
+                cp -a "$logFile" "$outputDir/"
+            fi
+        done
+        ;;
+    MINGW64*|MSYS*|CYGWIN*)
+        local cbsLogDir="/c/Program Files/Couchbase/Server/var/lib/couchbase/logs"
+        if [ -d "$cbsLogDir" ]; then
+            echo "Copying Couchbase Server logs from $cbsLogDir"
+            cp -a "$cbsLogDir"/* "$outputDir/" 2>/dev/null || true
+        else
+            echo "Couchbase Server log directory not found"
+        fi
+        ;;
+    *)
+        ./packages/cbl_e2e_tests/couchbase-services.sh logsCouchbaseServer \
+            >"$outputDir/couchbase-server.log" 2>&1 || true
+        ;;
+    esac
 }
 
 function _collectSyncGatewayLogs() {
@@ -468,6 +530,7 @@ function collectTestResults() {
     # Wait for crash reports/core dumps.
     sleep 60
 
+    _collectCouchbaseServerLogs
     _collectSyncGatewayLogs
 
     case "$embedder" in

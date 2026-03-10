@@ -15,12 +15,12 @@ import '../utils/database_utils.dart';
 import '../utils/matchers.dart';
 import '../utils/replicator_utils.dart';
 import '../utils/test_document.dart';
-import 'url_endpoint_listener_test.dart';
+import '../utils/utils.dart';
 
 void main() {
   setupTestBinding();
 
-  group('Replicator', () {
+  group('Replicator', skip: skipReplicationTests, () {
     setupTestDocument();
 
     setUp(flushDatabaseByAdmin);
@@ -196,11 +196,13 @@ void main() {
         replicatorType: ReplicatorType.push,
         documentIds: [docA.id],
       );
+      addTearDown(pusher.close);
       await pusher.replicateOneShot();
 
       final puller = await pullDb.createTestReplicator(
         replicatorType: ReplicatorType.pull,
       );
+      addTearDown(puller.close);
       await puller.replicateOneShot();
 
       final idsInPullDb = await pullDb.getAllIds();
@@ -224,12 +226,14 @@ void main() {
       final pusher = await pushDb.createTestReplicator(
         replicatorType: ReplicatorType.push,
       );
+      addTearDown(pusher.close);
       await pusher.replicateOneShot();
 
       final puller = await pullDb.createTestReplicator(
         replicatorType: ReplicatorType.pull,
         channels: ['A'],
       );
+      addTearDown(puller.close);
       await puller.replicateOneShot();
 
       final idsInPullDb = await pullDb.getAllIds();
@@ -253,11 +257,13 @@ void main() {
           return docA.id == document.id;
         }, count: 2),
       );
+      addTearDown(pusher.close);
       await pusher.replicateOneShot();
 
       final puller = await pullDb.createTestReplicator(
         replicatorType: ReplicatorType.pull,
       );
+      addTearDown(puller.close);
       await puller.replicateOneShot();
 
       final idsInPullDb = await pullDb.getAllIds();
@@ -290,11 +296,13 @@ void main() {
           return docA.internal.id == doc.internal.id;
         }, count: 2),
       );
+      addTearDown(pusher.close);
       await pusher.replicateOneShot();
 
       final puller = await pullDb.createTestReplicator(
         replicatorType: ReplicatorType.pull,
       );
+      addTearDown(puller.close);
       await puller.replicateOneShot();
 
       final idsInPullDb = await pullDb.getAllIds();
@@ -318,12 +326,14 @@ void main() {
               throw Exception();
             },
           );
+          addTearDown(pusher.close);
 
           await pusher.replicateOneShot();
 
           final puller = await pullDb.createTestReplicator(
             replicatorType: ReplicatorType.pull,
           );
+          addTearDown(puller.close);
 
           await puller.replicateOneShot();
 
@@ -349,6 +359,7 @@ void main() {
       final pusher = await pushDb.createTestReplicator(
         replicatorType: ReplicatorType.push,
       );
+      addTearDown(pusher.close);
       await pusher.replicateOneShot();
 
       final puller = await pullDb.createTestReplicator(
@@ -362,6 +373,7 @@ void main() {
           max: -1,
         ),
       );
+      addTearDown(puller.close);
       await puller.replicateOneShot();
 
       final idsInPullDb = await pullDb.getAllIds();
@@ -387,6 +399,7 @@ void main() {
       final pusher = await pushDb.createTestReplicator(
         replicatorType: ReplicatorType.push,
       );
+      addTearDown(pusher.close);
       await pusher.replicateOneShot();
 
       final puller = await pullDb.createTestReplicator(
@@ -402,6 +415,7 @@ void main() {
           max: -1,
         ),
       );
+      addTearDown(puller.close);
       await puller.replicateOneShot();
 
       final idsInPullDb = await pullDb.getAllIds();
@@ -422,6 +436,7 @@ void main() {
           final pusher = await pushDb.createTestReplicator(
             replicatorType: ReplicatorType.push,
           );
+          addTearDown(pusher.close);
 
           await pusher.replicateOneShot();
 
@@ -431,6 +446,7 @@ void main() {
               throw Exception();
             },
           );
+          addTearDown(puller.close);
 
           await puller.replicateOneShot();
 
@@ -463,9 +479,11 @@ void main() {
           return conflict.remoteDocument;
         }),
       );
+      addTearDown(replicatorA.close);
 
       final dbB = await openTestDatabase(name: 'B');
       final replicatorB = await dbB.createTestReplicator();
+      addTearDown(replicatorB.close);
 
       await dbA.writeTestDocument('DB-A-1');
       await replicatorA.replicateOneShot();
@@ -540,9 +558,11 @@ void main() {
           return conflict.remoteDocument;
         }),
       );
+      addTearDown(replicatorA.close);
 
       final dbB = await openTestDatabase(name: 'B');
       final replicatorB = await dbB.createTestReplicator();
+      addTearDown(replicatorB.close);
 
       await dbA.writeTestDocument('DB-A-1', type: 'TestTypedDoc');
       await replicatorA.replicateOneShot();
@@ -565,9 +585,11 @@ void main() {
               throw Exception();
             }),
           );
+          addTearDown(replicatorA.close);
 
           final dbB = await openTestDatabase(name: 'B');
           final replicatorB = await dbB.createTestReplicator();
+          addTearDown(replicatorB.close);
 
           await dbA.writeTestDocument('DB-A-1');
           await replicatorA.replicateOneShot();
@@ -587,6 +609,7 @@ void main() {
     apiTest('status returns the current status of the replicator', () async {
       final db = await openTestDatabase();
       final replicator = await db.createTestReplicator();
+      addTearDown(replicator.close);
       final status = await replicator.status;
       expect(status.activity, ReplicatorActivityLevel.stopped);
       expect(status.error, isNull);
@@ -597,6 +620,7 @@ void main() {
     apiTest('change listener is notified while listening', () async {
       final db = await openTestDatabase();
       final replicator = await db.createTestReplicator();
+      addTearDown(replicator.close);
 
       late final ListenerToken token;
       token = await replicator.addChangeListener(
@@ -646,6 +670,7 @@ void main() {
           acceptOnlySelfSignedServerCertificate: true,
         )..addCollection(clientCollection);
         final clientRepl = await Replicator.create(clientConfig);
+        addTearDown(clientRepl.close);
         await clientRepl.replicateOneShot();
         final receivedCertificate = await clientRepl.serverCertificate;
         expect(receivedCertificate!.attributes, serverCertificate.attributes);
@@ -661,6 +686,7 @@ void main() {
       () async {
         final db = await openTestDatabase();
         final replicator = await db.createTestReplicator();
+        addTearDown(replicator.close);
         final doc = MutableDocument();
         await db.saveDocument(doc);
 
@@ -689,6 +715,7 @@ void main() {
     apiTest('changes stream emits replicator changes', () async {
       final db = await openTestDatabase();
       final replicator = await db.createTestReplicator();
+      addTearDown(replicator.close);
 
       expect(
         replicator.changes().map((it) => it.status.activity),
@@ -704,6 +731,7 @@ void main() {
     apiTest('documentReplications emits document replications', () async {
       final db = await openTestDatabase();
       final replicator = await db.createTestReplicator();
+      addTearDown(replicator.close);
       final doc = MutableDocument();
       await db.saveDocument(doc);
 
@@ -736,6 +764,7 @@ void main() {
         final db = await openTestDatabase();
         final collection = await db.defaultCollection;
         final replicator = await db.createTestReplicator();
+        addTearDown(replicator.close);
         final doc = MutableDocument();
         await db.saveDocument(doc);
         expect(await replicator.pendingDocumentIds, [doc.id]);
@@ -751,6 +780,7 @@ void main() {
         final db = await openTestDatabase();
         final collection = await db.defaultCollection;
         final replicator = await db.createTestReplicator();
+        addTearDown(replicator.close);
         final doc = MutableDocument();
         await db.saveDocument(doc);
         expect(await replicator.isDocumentPending(doc.id), isTrue);
@@ -764,6 +794,7 @@ void main() {
     apiTest('start and stop', () async {
       final db = await openTestDatabase();
       final repl = await db.createTestReplicator(continuous: true);
+      addTearDown(repl.close);
 
       await repl.driveToStatus(
         hasActivityLevel(ReplicatorActivityLevel.idle),
@@ -791,6 +822,7 @@ void main() {
       final repl = await Replicator.create(
         ReplicatorConfiguration(database: dbA, target: DatabaseEndpoint(dbB)),
       );
+      addTearDown(repl.close);
 
       final doc = MutableDocument();
       await dbA.saveDocument(doc);
@@ -826,6 +858,7 @@ void main() {
     test('supports starting replicator while async document save', () async {
       final db = await openAsyncTestDatabase();
       final repl = await db.createTestReplicator();
+      addTearDown(repl.close);
 
       final documentSave = db.saveDocument(MutableDocument());
       final replStart = repl.start();
@@ -839,6 +872,7 @@ void main() {
       () async {
         final db = await openAsyncTestDatabase();
         final repl = await db.createTestReplicator();
+        addTearDown(repl.close);
 
         final transactionWork = Completer<void>();
         final transaction = db.inBatch(() => transactionWork.future);
@@ -855,6 +889,7 @@ void main() {
       () async {
         final db = await openTestDatabase();
         final repl = await db.createTestReplicator();
+        addTearDown(repl.close);
 
         final exceptionMatcher = throwsA(
           isDatabaseException

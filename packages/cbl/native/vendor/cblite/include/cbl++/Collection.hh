@@ -290,19 +290,9 @@ namespace cbl {
     
     private:
         
-        static void _callListener(void* _cbl_nullable context, const CBLCollectionChange* change) {
-            Collection col = Collection((CBLCollection*)change->collection);
-            std::vector<slice> docIDs((slice*)&change->docIDs[0], (slice*)&change->docIDs[change->numDocs]);
-            auto ch = std::make_unique<CollectionChange>(col, docIDs);
-            CollectionChangeListener::call(context, ch.get());
-        }
+        static void _callListener(void* _cbl_nullable context, const CBLCollectionChange* change);
 
-        static void _callDocListener(void* _cbl_nullable context, const CBLDocumentChange* change) {
-            Collection col = Collection((CBLCollection*)change->collection);
-            slice docID = change->docID;
-            auto ch = std::make_unique<DocumentChange>(col, docID);
-            CollectionDocumentChangeListener::call(context, ch.get());
-        }
+        static void _callDocListener(void* _cbl_nullable context, const CBLDocumentChange* change);
     };
 
     /** Collection change info notified to the collection change listener's callback. */
@@ -362,6 +352,22 @@ namespace cbl {
     inline Collection Database::getDefaultCollection() const {
         CBLError error {};
         return Collection::adopt(CBLDatabase_DefaultCollection(ref(), &error), &error) ;
+    }
+
+    // Collection method bodies:
+
+    inline void Collection::_callListener(void* _cbl_nullable context, const CBLCollectionChange* change) {
+        Collection col = Collection((CBLCollection*)change->collection);
+        std::vector<slice> docIDs((slice*)&change->docIDs[0], (slice*)&change->docIDs[change->numDocs]);
+        auto ch = std::make_unique<CollectionChange>(col, docIDs);
+        CollectionChangeListener::call(context, ch.get());
+    }
+
+    inline void Collection::_callDocListener(void* _cbl_nullable context, const CBLDocumentChange* change) {
+        Collection col = Collection((CBLCollection*)change->collection);
+        slice docID = change->docID;
+        auto ch = std::make_unique<DocumentChange>(col, docID);
+        CollectionDocumentChangeListener::call(context, ch.get());
     }
 }
 

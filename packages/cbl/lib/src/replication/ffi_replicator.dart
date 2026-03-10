@@ -150,6 +150,7 @@ final class FfiReplicator
       trustedRootCertificates: config.trustedRootCertificates?.toData(),
       collections: replicationCollections,
       disableAutoPurge: !config.enableAutoPurge,
+      acceptParentDomainCookies: config.acceptParentDomainCookies,
     );
 
     try {

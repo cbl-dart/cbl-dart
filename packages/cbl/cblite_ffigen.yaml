@@ -49,7 +49,6 @@ functions:
       - '.*'
     exclude:
       # Functions that synchronously invoke callback parameters.
-      - CBLDatabase_SaveDocumentWithConflictHandler
       - CBLCollection_SaveDocumentWithConflictHandler
       # Query execution can synchronously invoke predictive model callbacks.
       - CBLQuery_Execute
@@ -60,11 +59,16 @@ functions:
       - CBL_UnregisterPredictiveModel
       # May synchronously invoke external key callbacks (publicKeyData,
       # decrypt, sign, free) registered via CBLKeyPair_CreateWithExternalKey.
+      - CBLKeyPair_CreateWithExternalKey
       - CBLKeyPair_PublicKeyDigest
       - CBLKeyPair_PublicKeyData
       - CBLKeyPair_PrivateKeyData
       - CBLTLSIdentity_CreateIdentityWithKeyPair
       - CBLTLSIdentity_IdentityWithKeyPairAndCerts
+      # May synchronously invoke listener authentication callbacks.
+      - CBLListenerAuth_CreatePassword
+      - CBLListenerAuth_CreateCertificate
+      - CBLListenerAuth_CreateCertificateWithRootCerts
       # May synchronously invoke external key callbacks via TLS identity.
       - CBLURLEndpointListener_Create
       - CBLURLEndpointListener_Start

@@ -40,6 +40,11 @@ abstract final class Document implements DictionaryInterface, Iterable<String> {
   /// another’s, that means it was changed more recently.
   int get sequence;
 
+  /// The document’s HLC-encoded timestamp.
+  ///
+  /// This is `0` if the document has not been saved yet.
+  int get timestamp;
+
   /// The [Collection] this document belongs to.
   ///
   /// Returns `null` if the document has not been saved yet.
@@ -84,6 +89,9 @@ abstract interface class DocumentDelegate {
   /// The document's sequence number.
   int get sequence;
 
+  /// The document's timestamp.
+  int get timestamp;
+
   /// The document's encoded properties.
   Data? get encodedProperties;
 
@@ -122,6 +130,9 @@ final class NewDocumentDelegate extends DocumentDelegate {
 
   @override
   int get sequence => 0;
+
+  @override
+  int get timestamp => 0;
 
   @override
   Data? encodedProperties;
@@ -264,6 +275,9 @@ final class DelegateDocument with IterableMixin<String> implements Document {
   int get sequence => _delegate.sequence;
 
   @override
+  int get timestamp => _delegate.timestamp;
+
+  @override
   int get length => _properties.length;
 
   @override
@@ -333,8 +347,9 @@ final class DelegateDocument with IterableMixin<String> implements Document {
       '$_typeName('
       'id: $id, '
       'revisionId: $revisionId, '
+      'sequence: $sequence, '
       // ignore: missing_whitespace_between_adjacent_strings
-      'sequence: $sequence'
+      'timestamp: $timestamp'
       ')';
 }
 

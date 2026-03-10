@@ -14,10 +14,10 @@ final class LogFileConfiguration {
     required this.directory,
     this.usePlainText = false,
     int? maxSize,
-    int? maxRotateCount,
+    int? maxKeptFiles,
   }) {
     this.maxSize = maxSize ?? this.maxSize;
-    this.maxRotateCount = maxRotateCount ?? this.maxRotateCount;
+    this.maxKeptFiles = maxKeptFiles ?? this.maxKeptFiles;
   }
 
   /// Creates a [LogFileConfiguration] from [config] by copying all properties.
@@ -25,10 +25,10 @@ final class LogFileConfiguration {
     : directory = config.directory,
       usePlainText = config.usePlainText,
       _maxSize = config.maxSize,
-      _maxRotateCount = config.maxRotateCount;
+      _maxKeptFiles = config.maxKeptFiles;
 
   static const _defaultMaxSize = 500 * 1024;
-  static const _defaultMaxRotateCount = 1;
+  static const _defaultMaxKeptFiles = 1;
 
   /// The directory to store the log files in.
   final String directory;
@@ -50,17 +50,17 @@ final class LogFileConfiguration {
     _maxSize = maxSize;
   }
 
-  /// The maximum number of rotated log files to keep.
+  /// The maximum number of log files to keep per log level.
   ///
   /// The default is 1 which means one backup for a total of 2 log files.
-  int get maxRotateCount => _maxRotateCount;
-  int _maxRotateCount = _defaultMaxRotateCount;
+  int get maxKeptFiles => _maxKeptFiles;
+  int _maxKeptFiles = _defaultMaxKeptFiles;
 
-  set maxRotateCount(int maxRotateCount) {
-    if (maxRotateCount < 0) {
-      throw RangeError.range(maxRotateCount, 0, null, 'maxRotateCount');
+  set maxKeptFiles(int maxKeptFiles) {
+    if (maxKeptFiles < 0) {
+      throw RangeError.range(maxKeptFiles, 0, null, 'maxKeptFiles');
     }
-    _maxRotateCount = maxRotateCount;
+    _maxKeptFiles = maxKeptFiles;
   }
 
   @override
@@ -71,14 +71,14 @@ final class LogFileConfiguration {
           directory == other.directory &&
           usePlainText == other.usePlainText &&
           maxSize == other.maxSize &&
-          maxRotateCount == other.maxRotateCount;
+          maxKeptFiles == other.maxKeptFiles;
 
   @override
   int get hashCode =>
       directory.hashCode ^
       usePlainText.hashCode ^
       maxSize.hashCode ^
-      maxRotateCount.hashCode;
+      maxKeptFiles.hashCode;
 
   @override
   String toString() => [
@@ -87,7 +87,7 @@ final class LogFileConfiguration {
       'directory: $directory',
       if (usePlainText) 'USE-PLAIN-TEXT',
       'maxSize: ${(maxSize / 1024).toStringAsFixed(1)} KB',
-      'maxRotateCount: $maxRotateCount',
+      'maxKeptFiles: $maxKeptFiles',
     ].join(', '),
     ')',
   ].join();
@@ -155,7 +155,7 @@ final class FileLoggerImpl extends FileLogger {
       newConfig = CBLLogFileConfiguration(
         level: _level.toCBLLogLevel(),
         directory: config.directory,
-        maxRotateCount: config.maxRotateCount,
+        maxKeptFiles: config.maxKeptFiles,
         maxSize: config.maxSize,
         usePlainText: config.usePlainText,
       );
@@ -171,7 +171,7 @@ extension on CBLLogFileConfiguration {
   LogFileConfiguration? toLogFileConfiguration() => LogFileConfiguration(
     directory: directory,
     usePlainText: usePlainText,
-    maxRotateCount: maxRotateCount,
+    maxKeptFiles: maxKeptFiles,
     maxSize: maxSize,
   );
 }

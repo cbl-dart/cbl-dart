@@ -25,6 +25,7 @@
 #include "cbl/CBLLog.h"
 #include "cbl/CBLScope.h"
 #include "fleece/Mutable.hh"
+#include <exception>
 #include <functional>
 #include <mutex>
 #include <string>
@@ -166,10 +167,6 @@ namespace cbl {
         /** Returns the database's full filesystem path, or an empty string if the database is closed or deleted. */
         std::string path() const                        {return asString(CBLDatabase_Path(ref()));}
         
-        /** Returns the number of documents in the database, or zero if the database is closed or deleted.
-            @warning  <b>Deprecated :</b> Use Collection's count() on the default collection instead. */
-        uint64_t count() const                          {return CBLDatabase_Count(ref());}
-        
         /** Returns the database's configuration, as given when it was opened. */
         CBLDatabaseConfiguration config() const         {return CBLDatabase_Config(ref());}
 
@@ -230,113 +227,6 @@ namespace cbl {
         /** Returns the default collection. */
         inline Collection getDefaultCollection() const;
         
-        // Documents:
-
-        /** Reads a document from the default collection in an immutable form.
-            @note If you are reading the document in order to make changes to it, call \ref Database::getMutableDocument() instead.
-            @warning <b>Deprecated :</b> Use Collection::getDocument(slice docID) on the default collection instead.
-            @param docID  The ID of the document.
-            @return A new \ref Document instance, or NULL if the doc doesn't exist, or throws if an error occurred. */
-        inline Document getDocument(slice docID) const;
-        
-        /** Reads a document from the default collection in mutable form that can be updated and saved.
-            (This function is otherwise identical to \ref Database::getDocument(slice docID).)
-            @warning <b>Deprecated :</b> Use Collection::getMutableDocument(slice docID) on the default collection instead.
-            @param docID  The ID of the document.
-            @return A new \ref Document instance, or NULL if the doc doesn't exist, or throws if an error occurred. */
-        inline MutableDocument getMutableDocument(slice docID) const;
-        
-        /** Saves a (mutable) document to the default collection.
-            @warning If a newer revision has been saved since \p doc was loaded, it will be overwritten by
-                    this one. This can lead to data loss! To avoid this, call
-                    \ref Database::saveDocument(MutableDocument &doc, CBLConcurrencyControl concurrency)
-                    \ref Database::saveDocument(MutableDocument &doc, ConflictHandler handler) instead.
-            @warning <b>Deprecated :</b> Use Collection::saveDocument(MutableDocument &doc) on the default collection instead.
-            @param doc  The mutable document to save. */
-        inline void saveDocument(MutableDocument &doc);
-
-        /** Saves a (mutable) document to the default collection.
-            If a conflicting revision has been saved since \p doc was loaded, the \p concurrency
-            parameter specifies whether the save should fail, or the conflicting revision should
-            be overwritten with the revision being saved.
-            If you need finer-grained control, call \ref Database::saveDocument(MutableDocument &doc, ConflictHandler handler) instead.
-            @warning <b>Deprecated :</b> Use Collection::saveDocument(MutableDocument &doc, CBLConcurrencyControl concurrency)
-                     on the default collection instead.
-            @param doc  The mutable document to save.
-            @param concurrency  Conflict-handling strategy (fail or overwrite).
-            @return True on success, false on failure. */
-        _cbl_warn_unused
-        inline bool saveDocument(MutableDocument &doc, CBLConcurrencyControl concurrency);
-
-        /** Saves a (mutable) document to the default collection, allowing for custom conflict handling in the event
-            that the document has been updated since \p doc was loaded.
-            @warning <b>Deprecated :</b> Use Collection::saveDocument(MutableDocument &doc, ConflictHandler handler)
-                     on the default collection instead.
-            @param doc  The mutable document to save.
-            @param handler  The callback to be invoked if there is a conflict.
-            @return True on success, false on failure. */
-        _cbl_warn_unused
-        inline bool saveDocument(MutableDocument &doc, ConflictHandler handler);
-
-        /** Deletes a document from the default collection. Deletions are replicated.
-            @warning <b>Deprecated :</b> Use Collection's deleteDocument(Document& doc) on the default collection instead.
-            @param doc  The document to delete. */
-        inline void deleteDocument(Document &doc);
-
-        /** Deletes a document from the default collection. Deletions are replicated.
-            @warning <b>Deprecated :</b> Use Use Collection::deleteDocument(Document& doc, CBLConcurrencyControl concurrency)
-                     on the default collection instead.
-            @param doc  The document to delete.
-            @param concurrency  Conflict-handling strategy.
-            @return True on success, false on failure. */
-        _cbl_warn_unused
-        inline bool deleteDocument(Document &doc, CBLConcurrencyControl concurrency);
-
-        /** Purges a document from the default collection. This removes all traces of the document.
-            Purges are _not_ replicated. If the document is changed on a server, it will be re-created
-            when pulled.
-            @warning <b>Deprecated :</b> Use Collection::purgeDocument(Document& doc) on the default collection instead.
-            @note If you don't have the document in memory already, \ref purgeDocument(slice docID) is a simpler shortcut.
-            @param doc  The document to purge. */
-        inline void purgeDocument(Document &doc);
-
-        /** Purges a document by its ID from the default collection.
-            @warning <b>Deprecated :</b> Use Collection::purgeDocument(slice docID) on the default collection instead.
-            @param docID  The document ID to purge.
-            @return True if the document was purged, false if it doesn't exist. */
-        bool purgeDocument(slice docID) {
-            CBLError error;
-            bool purged = CBLDatabase_PurgeDocumentByID(ref(), docID, &error);
-            if (!purged && error.code != 0)
-                throw error;
-            return purged;
-        }
-        
-        /** Returns the time, if any, at which a given document in the default collection will expire and be purged.
-            Documents don't normally expire; you have to call \ref Database::setDocumentExpiration(slice docID, time_t expiration)
-            to set a document's expiration time.
-            @warning  <b>Deprecated :</b> Use Collection::getDocumentExpiration(slice docID) on the default collection instead.
-            @param docID  The ID of the document.
-            @return The expiration time as a CBLTimestamp (milliseconds since Unix epoch),
-                  or 0 if the document does not have an expiration */
-        time_t getDocumentExpiration(slice docID) const {
-            CBLError error;
-            time_t exp = CBLDatabase_GetDocumentExpiration(ref(), docID, &error);
-            check(exp >= 0, error);
-            return exp;
-        }
-        
-        /** Sets or clears the expiration time of a document in the default collection.
-            @warning <b>Deprecated :</b> Use Collection::setDocumentExpiration(slice docID, time_t expiration)
-                     on the default collection instead.
-            @param docID  The ID of the document.
-            @param expiration  The expiration time as a CBLTimestamp (milliseconds since Unix epoch),
-                          or 0 if the document should never expire. */
-        void setDocumentExpiration(slice docID, time_t expiration) {
-            CBLError error;
-            check(CBLDatabase_SetDocumentExpiration(ref(), docID, expiration, &error), error);
-        }
-        
         // Query:
         
         /** Creates a new query by compiling the input string.
@@ -350,85 +240,6 @@ namespace cbl {
             @param queryString  The query string.
             @return  The new query object. */
         inline Query createQuery(CBLQueryLanguage language, slice queryString);
-
-        // Indexes:
-
-        /** Creates a value index in the default collection.
-            Indexes are persistent.
-            If an identical index with that name already exists, nothing happens (and no error is returned.)
-            If a non-identical index with that name already exists, it is deleted and re-created.
-            @warning <b>Deprecated :</b> Use Collection::createValueIndex(slice name, CBLValueIndexConfiguration config)
-                     on the default collection instead.
-            @param name  The index name.
-            @param config  The value index config. */
-        void createValueIndex(slice name, CBLValueIndexConfiguration config) {
-            CBLError error;
-            check(CBLDatabase_CreateValueIndex(ref(), name, config, &error), error);
-        }
-        
-        /** Creates a full-text index in the default collection.
-            Indexes are persistent.
-            If an identical index with that name already exists, nothing happens (and no error is returned.)
-            If a non-identical index with that name already exists, it is deleted and re-created.
-            @warning <b>Deprecated :</b> Use Collection::createFullTextIndex(slice name, CBLFullTextIndexConfiguration config)
-                     on the default collection instead.
-            @param name  The index name.
-            @param config  The full-text index config. */
-        void createFullTextIndex(slice name, CBLFullTextIndexConfiguration config) {
-            CBLError error;
-            check(CBLDatabase_CreateFullTextIndex(ref(), name, config, &error), error);
-        }
-
-        /** Deletes an index given its name from the default collection.
-            @warning <b>Deprecated :</b> Use Collection::deleteIndex(slice name) on the default collection instead. */
-        void deleteIndex(slice name) {
-            CBLError error;
-            check(CBLDatabase_DeleteIndex(ref(), name, &error), error);
-        }
-
-        /** Returns the names of the indexes in the default collection, as a Fleece array of strings.
-            @warning <b>Deprecated :</b> Use Collection::getIndexNames() on the default collection instead. */
-        fleece::RetainedArray getIndexNames() {
-            FLArray flNames = CBLDatabase_GetIndexNames(ref());
-            fleece::RetainedArray names(flNames);
-            FLArray_Release(flNames);
-            return names;
-        }
-
-        // Listeners:
-
-        /** Database (Default Collection) Change Listener Token */
-        using ChangeListener = cbl::ListenerToken<Database, const std::vector<slice>&>;
-        
-        /** Registers a database change listener callback. It will be called after one or more
-            documents in the default collection are changed on disk.
-            @warning <b>Deprecated :</b> Use Collection::addChangeListener(ChangeListener::Callback f)
-                     on the default collection instead.
-            @param callback  The callback to be invoked.
-            @return A Change Listener Token. Call \ref ListenerToken::remove() method to remove the listener. */
-        [[nodiscard]] ChangeListener addChangeListener(ChangeListener::Callback callback) {
-            auto l = ChangeListener(callback);
-            l.setToken( CBLDatabase_AddChangeListener(ref(), &_callListener, l.context()) );
-            return l;
-        }
-
-        /** Document (in the Default Collection) Change Listener Token */
-        using DocumentChangeListener = cbl::ListenerToken<Database,slice>;
-
-        /** Registers a document change listener callback. It will be called after a specific document in the default collection
-            is changed on disk.
-            @warning <b>Deprecated :</b> Use Collection::addDocumentChangeListener(slice docID,
-                     DocumentChangeListener::Callback listener) on the default collection instead.
-            @param docID  The ID of the document to observe.
-            @param callback  The callback to be invoked.
-            @return A Change Listener Token. Call \ref ListenerToken::remove() method to remove the listener. */
-        [[nodiscard]] DocumentChangeListener addDocumentChangeListener(slice docID,
-                                                                       DocumentChangeListener::Callback callback)
-        {
-            auto l = DocumentChangeListener(callback);
-            l.setToken( CBLDatabase_AddDocumentChangeListener(ref(), docID, &_callDocListener, l.context()) );
-            return l;
-        }
 
         // Notifications:
         
@@ -491,19 +302,6 @@ namespace cbl {
             std::mutex _mutex;
             NotificationsReadyCallback _callback {nullptr};
         };
-        
-        static void _callListener(void* _cbl_nullable context,
-                                  const CBLDatabase *db,
-                                  unsigned nDocs, FLString *docIDs)
-        {
-            std::vector<slice> vec((slice*)&docIDs[0], (slice*)&docIDs[nDocs]);
-            ChangeListener::call(context, Database((CBLDatabase*)db), vec);
-        }
-
-        static void _callDocListener(void* _cbl_nullable context,
-                                     const CBLDatabase *db, FLString docID) {
-            DocumentChangeListener::call(context, Database((CBLDatabase*)db), docID);
-        }
         
         std::shared_ptr<NotificationsReadyCallbackAccess> _notificationReadyCallbackAccess;
         

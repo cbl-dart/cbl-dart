@@ -37,6 +37,9 @@ final class FfiDocumentDelegate implements DocumentDelegate, Finalizable {
   int get sequence => DocumentBindings.sequence(pointer);
 
   @override
+  int get timestamp => DocumentBindings.timestamp(pointer);
+
+  @override
   Data? get encodedProperties =>
       _encodedProperties ??= _readEncodedProperties();
   Data? _encodedProperties;

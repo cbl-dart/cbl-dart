@@ -29,7 +29,8 @@ typedef TestFn =
       Object? skip,
     });
 
-typedef GroupFn = void Function(String description, void Function() body);
+typedef GroupFn =
+    void Function(String description, void Function() body, {Object? skip});
 
 typedef TestHook = void Function(dynamic Function() body);
 
@@ -78,12 +79,17 @@ abstract base class CblE2eTestBinding {
   TestHook get addTearDownFn => t.addTearDown;
 
   final _groupDescriptions = <String>[];
+  final _groupSkips = <Object?>[];
 
   void _test(
     String description,
     FutureOr<void> Function() body, {
     Object? skip,
   }) {
+    // Propagate group-level skips to individual tests, working around
+    // Flutter's integration_test framework ignoring group-level skip.
+    final effectiveSkip =
+        skip ?? _groupSkips.lastWhere((s) => s != null, orElse: () => null);
     final testDescriptions = [..._groupDescriptions, description];
     testFn(
       description,
@@ -94,13 +100,15 @@ abstract base class CblE2eTestBinding {
           #testDescriptions: testDescriptions,
         },
       ),
-      skip: skip,
+      skip: effectiveSkip,
     );
   }
 
-  void _group(String description, void Function() body) {
+  void _group(String description, void Function() body, {Object? skip}) {
     _groupDescriptions.add(description);
-    groupFn(description, body);
+    _groupSkips.add(skip);
+    groupFn(description, body, skip: skip);
+    _groupSkips.removeLast();
     _groupDescriptions.removeLast();
   }
 
@@ -120,7 +128,7 @@ abstract base class CblE2eTestBinding {
         ..config = LogFileConfiguration(
           directory: '$tmpDir/logs',
           usePlainText: true,
-          maxRotateCount: 100,
+          maxKeptFiles: 100,
           // Should be large enough to captures all logs of a test run without
           // file splitting.
           maxSize: 100 * 1024 * 1024, // 100 MB
@@ -169,8 +177,8 @@ void test(String description, FutureOr<void> Function() body, {Object? skip}) =>
     CblE2eTestBinding.instance._test(description, body, skip: skip);
 
 @isTestGroup
-void group(String description, void Function() body) =>
-    CblE2eTestBinding.instance._group(description, body);
+void group(String description, void Function() body, {Object? skip}) =>
+    CblE2eTestBinding.instance._group(description, body, skip: skip);
 
 void setUpAll(dynamic Function() body) =>
     CblE2eTestBinding.instance.setUpAllFn(body);

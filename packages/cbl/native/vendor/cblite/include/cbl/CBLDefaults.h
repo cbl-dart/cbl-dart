@@ -53,10 +53,6 @@ CBL_PUBLIC extern const bool kCBLDefaultDatabaseMmapDisabled;
 /** [false] Plaintext is not used, and instead binary encoding is used in log files */
 CBL_PUBLIC extern const bool kCBLDefaultLogFileUsePlaintext;
 
-/** [false] Plaintext is not used, and instead binary encoding is used in log files
-    @warning <b>Deprecated :</b> Use kCBLDefaultLogFileUsePlaintext instead. */
-CBL_PUBLIC extern const bool kCBLDefaultLogFileUsePlainText;
-
 /** [524288] 512 KiB for the size of a log file */
 CBL_PUBLIC extern const size_t kCBLDefaultLogFileMaxSize;
 
@@ -110,10 +106,6 @@ CBL_PUBLIC extern const unsigned kCBLDefaultReplicatorMaxAttemptsContinuous;
 
 /** [300] Max wait time between retry attempts in seconds */
 CBL_PUBLIC extern const unsigned kCBLDefaultReplicatorMaxAttemptsWaitTime;
-
-/** [300] Max wait time between retry attempts in seconds 
-    @warning <b>Deprecated :</b> Use kCBLDefaultReplicatorMaxAttemptsWaitTime instead. */
-CBL_PUBLIC extern const unsigned kCBLDefaultReplicatorMaxAttemptWaitTime;
 
 /** [false] Purge documents when a user loses access */
 CBL_PUBLIC extern const bool kCBLDefaultReplicatorDisableAutoPurge;

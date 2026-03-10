@@ -546,7 +546,7 @@ void main() {
 
           final explain = await q.explain();
 
-          expect(explain, contains('fts1 VIRTUAL TABLE INDEX'));
+          expect(explain, contains('VIRTUAL TABLE INDEX'));
         },
       );
 
@@ -576,7 +576,7 @@ void main() {
               dimensions: 2,
               centroids: 1,
               encoding: VectorEncoding.none(),
-              metric: DistanceMetric.euclidean,
+              metric: DistanceMetric.euclideanSquared,
               minTrainingSize: 1,
               maxTrainingSize: 1,
               numProbes: 1,
@@ -638,7 +638,7 @@ void main() {
 
         final explain = await q.explain();
 
-        expect(explain, contains('fts1 VIRTUAL TABLE INDEX'));
+        expect(explain, contains('VIRTUAL TABLE INDEX'));
       });
 
       apiTest('deleteIndex should delete the given index', () async {

@@ -457,6 +457,7 @@ final class CreateReplicator extends Request<int> implements SendAware {
     Data? trustedRootCertificates,
     this.headers,
     this.enableAutoPurge = true,
+    this.acceptParentDomainCookies = false,
     this.heartbeat,
     this.maxAttempts,
     this.maxAttemptWaitTime,
@@ -486,6 +487,7 @@ final class CreateReplicator extends Request<int> implements SendAware {
   final SendableData? _trustedRootCertificates;
   final Map<String, String>? headers;
   final bool enableAutoPurge;
+  final bool acceptParentDomainCookies;
   final Duration? heartbeat;
   final int? maxAttempts;
   final Duration? maxAttemptWaitTime;
@@ -769,6 +771,7 @@ final class DocumentState implements SendAware {
     required this.docId,
     required this.revisionId,
     required this.sequence,
+    required this.timestamp,
     this.properties,
   });
 
@@ -777,6 +780,7 @@ final class DocumentState implements SendAware {
   final String docId;
   final String? revisionId;
   final int sequence;
+  final int timestamp;
   final SendableValue? properties;
 
   @override
@@ -787,7 +791,8 @@ final class DocumentState implements SendAware {
           sourceId == other.sourceId &&
           docId == other.docId &&
           revisionId == other.revisionId &&
-          sequence == other.sequence;
+          sequence == other.sequence &&
+          timestamp == other.timestamp;
 
   @override
   int get hashCode =>
@@ -795,7 +800,8 @@ final class DocumentState implements SendAware {
       sourceId.hashCode ^
       docId.hashCode ^
       revisionId.hashCode ^
-      sequence.hashCode;
+      sequence.hashCode ^
+      timestamp.hashCode;
 
   @override
   void willSend() => properties?.willSend();
