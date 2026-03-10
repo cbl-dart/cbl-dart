@@ -79,12 +79,17 @@ abstract base class CblE2eTestBinding {
   TestHook get addTearDownFn => t.addTearDown;
 
   final _groupDescriptions = <String>[];
+  final _groupSkips = <Object?>[];
 
   void _test(
     String description,
     FutureOr<void> Function() body, {
     Object? skip,
   }) {
+    // Propagate group-level skips to individual tests, working around
+    // Flutter's integration_test framework ignoring group-level skip.
+    final effectiveSkip =
+        skip ?? _groupSkips.firstWhere((s) => s != null, orElse: () => null);
     final testDescriptions = [..._groupDescriptions, description];
     testFn(
       description,
@@ -95,13 +100,15 @@ abstract base class CblE2eTestBinding {
           #testDescriptions: testDescriptions,
         },
       ),
-      skip: skip,
+      skip: effectiveSkip,
     );
   }
 
   void _group(String description, void Function() body, {Object? skip}) {
     _groupDescriptions.add(description);
+    _groupSkips.add(skip);
     groupFn(description, body, skip: skip);
+    _groupSkips.removeLast();
     _groupDescriptions.removeLast();
   }
 
