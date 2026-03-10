@@ -14,7 +14,7 @@ resolution: workspace
 
 dependencies:
   cbl: ^3.6.0+2
-  sentry: ^8.0.0
+  sentry: ^9.14.0
 
 dev_dependencies:
   test: ^1.21.1
