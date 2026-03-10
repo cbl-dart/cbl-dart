@@ -33,14 +33,26 @@ functions:
       - CBLDart_ListenerCertAuthCallbackTrampoline
       - CBLDart_ListenerPasswordAuthCallbackTrampoline
       - CBLDart_PredictiveModel_Delete
+  # Leaf functions bypass some of the Dart-to-native calling overhead, but have
+  # constraints:
+  #
+  # Hard: Must not call back into Dart or use any Dart VM APIs.
+  # Soft: Should be short-running and non-blocking. A blocking leaf call delays
+  #       GC and isolate group synchronization until it returns.
+  #
+  # Functions that only *store* AsyncCallbacks/Dart ports for later use are safe
+  # to mark as leaf. Functions that call Dart_* APIs or synchronously invoke
+  # Dart callbacks are not.
   leaf:
     include:
       - '.*'
     exclude:
-      # Functions that call Dart VM APIs.
+      # Functions that call Dart VM APIs (Dart_InitializeApiDL,
+      # Dart_NewPersistentHandle_DL, etc.).
       - CBLDart_Initialize
       - CBLDartKeyPair_CreateWithExternalKey
-      # Functions that interact with Dart ports.
+      # Functions that interact with Dart ports (create/close ports, post
+      # messages, or invoke Dart callbacks synchronously).
       - CBLDart_AsyncCallback_New
       - CBLDart_AsyncCallback_Delete
       - CBLDart_AsyncCallback_Close

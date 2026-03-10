@@ -35,6 +35,15 @@ functions:
       - FLEncoder_Free
       - FLSharedKeys_Release
       - FLValue_Release
+  # Leaf functions bypass some of the Dart-to-native calling overhead, but have
+  # constraints:
+  #
+  # Hard: Must not call back into Dart or use any Dart VM APIs.
+  # Soft: Should be short-running and non-blocking. A blocking leaf call delays
+  #       GC and isolate group synchronization until it returns.
+  #
+  # Functions that only *store* callbacks for later async invocation are safe to
+  # mark as leaf. Functions that *synchronously invoke* callbacks are not.
   leaf:
     include:
       - '.*'
@@ -42,6 +51,9 @@ functions:
       # Functions that synchronously invoke callback parameters.
       - CBLDatabase_SaveDocumentWithConflictHandler
       - CBLCollection_SaveDocumentWithConflictHandler
+      # Query execution can synchronously invoke predictive model callbacks.
+      - CBLQuery_Execute
+      - CBLResultSet_Next
 structs:
   member-rename:
     FLDictKey:

@@ -1189,7 +1189,7 @@ external void CBLQuery_SetParameters(
 @ffi.Native<NativeCBLQuery_Parameters>(isLeaf: true)
 external FLDict CBLQuery_Parameters(ffi.Pointer<CBLQuery> query);
 
-@ffi.Native<NativeCBLQuery_Execute>(isLeaf: true)
+@ffi.Native<NativeCBLQuery_Execute>()
 external ffi.Pointer<CBLResultSet> CBLQuery_Execute(
   ffi.Pointer<CBLQuery> arg0,
   ffi.Pointer<CBLError> outError,
@@ -1207,7 +1207,7 @@ external FLSlice CBLQuery_ColumnName(
   int columnIndex,
 );
 
-@ffi.Native<NativeCBLResultSet_Next>(isLeaf: true)
+@ffi.Native<NativeCBLResultSet_Next>()
 external bool CBLResultSet_Next(ffi.Pointer<CBLResultSet> arg0);
 
 @ffi.Native<NativeCBLResultSet_ValueAtIndex>(isLeaf: true)
