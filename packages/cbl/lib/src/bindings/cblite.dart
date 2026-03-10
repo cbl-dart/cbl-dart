@@ -679,7 +679,7 @@ external void CBLDatabase_BufferNotifications(
   ffi.Pointer<ffi.Void> context,
 );
 
-@ffi.Native<NativeCBLDatabase_SendNotifications>(isLeaf: true)
+@ffi.Native<NativeCBLDatabase_SendNotifications>()
 external void CBLDatabase_SendNotifications(ffi.Pointer<CBLDatabase> db);
 
 @ffi.Native<FLString>()
@@ -1129,10 +1129,10 @@ external void CBLLogSinks_SetFile(CBLFileLogSink sink);
 @ffi.Native<NativeCBLLogSinks_File>(isLeaf: true)
 external CBLFileLogSink CBLLogSinks_File();
 
-@ffi.Native<NativeCBL_Log>(isLeaf: true)
+@ffi.Native<NativeCBL_Log>()
 external void CBL_Log(int domain, int level, ffi.Pointer<ffi.Char> format);
 
-@ffi.Native<NativeCBL_LogMessage>(isLeaf: true)
+@ffi.Native<NativeCBL_LogMessage>()
 external void CBL_LogMessage(int domain, int level, FLSlice message);
 
 @ffi.Native<NativeCBLLog_ConsoleLevel>(isLeaf: true)

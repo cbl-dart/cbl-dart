@@ -54,6 +54,11 @@ functions:
       # Query execution can synchronously invoke predictive model callbacks.
       - CBLQuery_Execute
       - CBLResultSet_Next
+      # Synchronously fires all buffered listener callbacks.
+      - CBLDatabase_SendNotifications
+      # Synchronously invoke the custom log callback.
+      - CBL_Log
+      - CBL_LogMessage
 structs:
   member-rename:
     FLDictKey:
