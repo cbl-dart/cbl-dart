@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.13)
 project(runner LANGUAGES CXX)
 
 set(BINARY_NAME "cbl_e2e_tests_flutter")

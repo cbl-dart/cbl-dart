@@ -142,7 +142,11 @@ final class TestDelegate extends TracingDelegate {
     TracedOperation operation,
     Future<T> Function() execute,
   ) async {
-    asyncOperations.add(operation);
+    // Filter out ReleaseObject calls which are triggered by GC finalizers
+    // and can non-deterministically appear from previous tests.
+    if (operation is! ChannelCallOp || operation.name != 'ReleaseObject') {
+      asyncOperations.add(operation);
+    }
     return super.traceAsyncOperation(operation, execute);
   }
 }

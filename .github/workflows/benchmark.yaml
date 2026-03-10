@@ -12,7 +12,6 @@ on:
     types:
       - opened
       - reopened
-      - edited
       - synchronize
       - closed
     paths-ignore:
@@ -108,7 +107,7 @@ jobs:
     if:
       github.event_name == 'pull_request' && github.event.action == 'closed' &&
       github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: blacksmith-2vcpu-ubuntu-2404
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

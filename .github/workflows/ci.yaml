@@ -23,7 +23,7 @@ jobs:
   formatting-dart:
     name: Formatting - Dart
     timeout-minutes: 10
-    runs-on: blacksmith-4vcpu-ubuntu-2204
+    runs-on: blacksmith-2vcpu-ubuntu-2204
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -54,7 +54,7 @@ jobs:
   formatting-clang:
     name: Formatting - Clang
     timeout-minutes: 10
-    runs-on: blacksmith-4vcpu-ubuntu-2204
+    runs-on: blacksmith-2vcpu-ubuntu-2204
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -68,7 +68,7 @@ jobs:
   analyze-dart:
     name: Analyze Dart code
     timeout-minutes: 10
-    runs-on: blacksmith-4vcpu-ubuntu-2204
+    runs-on: blacksmith-2vcpu-ubuntu-2204
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -114,7 +114,7 @@ jobs:
       TEST_PACKAGE: ${{ matrix.package }}
     runs-on: >-
       ${{ fromJSON('{
-        "Ubuntu":"blacksmith-4vcpu-ubuntu-2204",
+        "Ubuntu":"blacksmith-2vcpu-ubuntu-2204",
         "macOS":"macos-15",
         "Windows":"windows-2025"
       }')[matrix.os] }}
@@ -187,7 +187,7 @@ jobs:
         "iOS":"warp-macos-15-arm64-6x",
         "macOS":"warp-macos-15-arm64-6x",
         "Android":"blacksmith-4vcpu-ubuntu-2204",
-        "Ubuntu":"blacksmith-4vcpu-ubuntu-2204",
+        "Ubuntu":"blacksmith-2vcpu-ubuntu-2204",
         "Windows":"windows-2025"
       }')[matrix.os] }}
     env:
