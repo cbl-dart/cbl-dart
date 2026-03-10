@@ -12,7 +12,6 @@ on:
     types:
       - opened
       - reopened
-      - edited
       - synchronize
       - closed
     paths-ignore:
