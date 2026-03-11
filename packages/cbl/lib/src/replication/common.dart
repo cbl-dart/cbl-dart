@@ -55,5 +55,9 @@ Future<(ID, Map<IC, CollectionConfiguration>)> resolveReplicatorCollections<
     collections = config.collections.cast<IC, CollectionConfiguration>();
   }
 
-  return (database, collections);
+  final adapter = (database as DatabaseBase).typedDataAdapter;
+  final resolvedCollections = collections.map(
+    (collection, config) => MapEntry(collection, config.resolve(adapter)),
+  );
+  return (database, resolvedCollections);
 }
