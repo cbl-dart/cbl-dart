@@ -310,6 +310,57 @@ void main() {
       expect(idsInPullDb, isNot(contains(docB.internal.id)));
     });
 
+    apiTest('use typedPushFilter in CollectionConfiguration to filter pushed '
+        'documents', () async {
+      final pushDb = await openTestDatabase(
+        name: 'Push',
+        typedDataAdapter: testAdapter,
+      );
+      final pullDb = await openTestDatabase(
+        name: 'Pull',
+        typedDataAdapter: testAdapter,
+      );
+
+      final docA = MutableTestTypedDoc();
+      await pushDb.saveTypedDocument(docA).withConcurrencyControl();
+      final docB = MutableTestTypedDoc();
+      await pushDb.saveTypedDocument(docB).withConcurrencyControl();
+
+      final pushConfig =
+          ReplicatorConfiguration(
+            target: UrlEndpoint(syncGatewayReplicationUrl),
+            replicatorType: ReplicatorType.push,
+            authenticator: janeAuthenticator,
+          )..addCollection(
+            await pushDb.defaultCollection,
+            CollectionConfiguration(
+              typedPushFilter: expectAsync2((document, flags) {
+                expect(flags, isEmpty);
+                expect(document, isA<TestTypedDoc>());
+                final doc = document as TestTypedDoc;
+                expect(
+                  doc.internal.id,
+                  anyOf(docA.internal.id, docB.internal.id),
+                );
+                return docA.internal.id == doc.internal.id;
+              }, count: 2),
+            ),
+          );
+      final pusher = await Replicator.create(pushConfig);
+      addTearDown(pusher.close);
+      await pusher.replicateOneShot();
+
+      final puller = await pullDb.createTestReplicator(
+        replicatorType: ReplicatorType.pull,
+      );
+      addTearDown(puller.close);
+      await puller.replicateOneShot();
+
+      final idsInPullDb = await pullDb.getAllIds();
+      expect(idsInPullDb, contains(docA.internal.id));
+      expect(idsInPullDb, isNot(contains(docB.internal.id)));
+    });
+
     apiTest('pushFilter exception handling', () async {
       Object? uncaughtError;
       await runZonedGuarded(
@@ -415,6 +466,57 @@ void main() {
           max: -1,
         ),
       );
+      addTearDown(puller.close);
+      await puller.replicateOneShot();
+
+      final idsInPullDb = await pullDb.getAllIds();
+      expect(idsInPullDb, contains(docA.internal.id));
+      expect(idsInPullDb, isNot(contains(docB.internal.id)));
+    });
+
+    apiTest('use typedPullFilter in CollectionConfiguration to filter pulled '
+        'documents', () async {
+      final pushDb = await openTestDatabase(
+        name: 'Push',
+        typedDataAdapter: testAdapter,
+      );
+      final pullDb = await openTestDatabase(
+        name: 'Pull',
+        typedDataAdapter: testAdapter,
+      );
+
+      final docA = MutableTestTypedDoc();
+      await pushDb.saveTypedDocument(docA).withConcurrencyControl();
+      final docB = MutableTestTypedDoc();
+      await pushDb.saveTypedDocument(docB).withConcurrencyControl();
+
+      final pusher = await pushDb.createTestReplicator(
+        replicatorType: ReplicatorType.push,
+      );
+      addTearDown(pusher.close);
+      await pusher.replicateOneShot();
+
+      final pullConfig =
+          ReplicatorConfiguration(
+            target: UrlEndpoint(syncGatewayReplicationUrl),
+            replicatorType: ReplicatorType.pull,
+            authenticator: janeAuthenticator,
+          )..addCollection(
+            await pullDb.defaultCollection,
+            CollectionConfiguration(
+              typedPullFilter: expectAsync2(
+                (document, flags) {
+                  expect(flags, isEmpty);
+                  expect(document, isA<TestTypedDoc>());
+                  final doc = document as TestTypedDoc;
+                  return docA.internal.id == doc.internal.id;
+                },
+                count: 2,
+                max: -1,
+              ),
+            ),
+          );
+      final puller = await Replicator.create(pullConfig);
       addTearDown(puller.close);
       await puller.replicateOneShot();
 
@@ -574,6 +676,64 @@ void main() {
 
       expect(await dbA.getTestDocumentOrNull(), isTestDocument('DB-B-1'));
     });
+
+    apiTest(
+      'custom typed conflict resolver in CollectionConfiguration',
+      () async {
+        // Create document in db A
+        // Sync db A with server
+        // Sync db B with server
+        // Change doc in db A
+        // Change doc in db B
+        // Sync db B with server
+        // Sync db A with server
+        // => Conflict in db A
+
+        final dbA = await openTestDatabase(
+          name: 'A',
+          typedDataAdapter: testAdapter,
+        );
+        final collectionA = await dbA.defaultCollection;
+
+        final configA =
+            ReplicatorConfiguration(
+              target: UrlEndpoint(syncGatewayReplicationUrl),
+              authenticator: janeAuthenticator,
+            )..addCollection(
+              collectionA,
+              CollectionConfiguration(
+                typedConflictResolver: TypedConflictResolver.from(
+                  expectAsync1((conflict) {
+                    expect(conflict.documentId, testDocumentId);
+                    expect(conflict.localDocument, isA<TestTypedDoc>());
+                    expect(conflict.remoteDocument, isA<TestTypedDoc>());
+                    final localDoc = conflict.localDocument! as TestTypedDoc;
+                    final remoteDoc = conflict.remoteDocument! as TestTypedDoc;
+                    expect(localDoc.internal, isTestDocument('DB-A-2'));
+                    expect(remoteDoc.internal, isTestDocument('DB-B-1'));
+                    return conflict.remoteDocument;
+                  }),
+                ),
+              ),
+            );
+        final replicatorA = await Replicator.create(configA);
+        addTearDown(replicatorA.close);
+
+        final dbB = await openTestDatabase(name: 'B');
+        final replicatorB = await dbB.createTestReplicator();
+        addTearDown(replicatorB.close);
+
+        await dbA.writeTestDocument('DB-A-1', type: 'TestTypedDoc');
+        await replicatorA.replicateOneShot();
+        await replicatorB.replicateOneShot();
+        await dbA.writeTestDocument('DB-A-2', type: 'TestTypedDoc');
+        await dbB.writeTestDocument('DB-B-1', type: 'TestTypedDoc');
+        await replicatorB.replicateOneShot();
+        await replicatorA.replicateOneShot();
+
+        expect(await dbA.getTestDocumentOrNull(), isTestDocument('DB-B-1'));
+      },
+    );
 
     apiTest('conflict resolver exception handling', () async {
       Object? uncaughtError;

@@ -16,6 +16,126 @@ import '../utils/matchers.dart';
 void main() {
   setupTestBinding();
 
+  group('CollectionConfiguration', () {
+    test('defaults', () {
+      final config = CollectionConfiguration();
+
+      expect(config.channels, isNull);
+      expect(config.documentIds, isNull);
+      expect(config.pushFilter, isNull);
+      expect(config.typedPushFilter, isNull);
+      expect(config.pullFilter, isNull);
+      expect(config.typedPullFilter, isNull);
+      expect(config.conflictResolver, isNull);
+      expect(config.typedConflictResolver, isNull);
+    });
+
+    test('from', () {
+      final source = CollectionConfiguration(
+        channels: ['A'],
+        documentIds: ['ID'],
+        pushFilter: (document, flags) => true,
+        typedPushFilter: (document, flags) => true,
+        pullFilter: (document, flags) => true,
+        typedPullFilter: (document, flags) => true,
+        conflictResolver: ConflictResolver.from((_) => null),
+        typedConflictResolver: TypedConflictResolver.from((_) => null),
+      );
+
+      final copy = CollectionConfiguration.from(source);
+
+      expect(copy.channels, source.channels);
+      expect(copy.documentIds, source.documentIds);
+      expect(copy.pushFilter, source.pushFilter);
+      expect(copy.typedPushFilter, source.typedPushFilter);
+      expect(copy.pullFilter, source.pullFilter);
+      expect(copy.typedPullFilter, source.typedPullFilter);
+      expect(copy.conflictResolver, source.conflictResolver);
+      expect(copy.typedConflictResolver, source.typedConflictResolver);
+    });
+
+    test('toString', () {
+      expect(CollectionConfiguration().toString(), 'CollectionConfiguration()');
+
+      expect(
+        CollectionConfiguration(
+          channels: ['A'],
+          documentIds: ['ID'],
+          pushFilter: (document, flags) => true,
+          typedPushFilter: (document, flags) => true,
+          pullFilter: (document, flags) => true,
+          typedPullFilter: (document, flags) => true,
+          conflictResolver: ConflictResolver.from((_) => null),
+          typedConflictResolver: TypedConflictResolver.from((_) => null),
+        ).toString(),
+        'CollectionConfiguration('
+        'channels: [A], '
+        'documentIds: [ID], '
+        'PUSH-FILTER, '
+        'TYPED-PUSH-FILTER, '
+        'PULL-FILTER, '
+        'TYPED-PULL-FILTER, '
+        'CUSTOM-CONFLICT-RESOLVER, '
+        // ignore: missing_whitespace_between_adjacent_strings
+        'TYPED-CUSTOM-CONFLICT-RESOLVER'
+        ')',
+      );
+    });
+
+    group('resolve', () {
+      test('returns same instance when no typed fields are set', () {
+        final config = CollectionConfiguration(
+          channels: ['A'],
+          pushFilter: (document, flags) => true,
+        );
+        final resolved = config.resolve(null);
+        expect(identical(resolved, config), isTrue);
+      });
+
+      test('combines typed push filter', () {
+        final adapter = TypedDataRegistry();
+        final config = CollectionConfiguration(
+          typedPushFilter: (document, flags) => true,
+        );
+        final resolved = config.resolve(adapter);
+        expect(resolved.pushFilter, isNotNull);
+        expect(resolved.typedPushFilter, isNull);
+      });
+
+      test('combines typed pull filter', () {
+        final adapter = TypedDataRegistry();
+        final config = CollectionConfiguration(
+          typedPullFilter: (document, flags) => true,
+        );
+        final resolved = config.resolve(adapter);
+        expect(resolved.pullFilter, isNotNull);
+        expect(resolved.typedPullFilter, isNull);
+      });
+
+      test('combines typed conflict resolver', () {
+        final adapter = TypedDataRegistry();
+        final config = CollectionConfiguration(
+          typedConflictResolver: TypedConflictResolver.from((_) => null),
+        );
+        final resolved = config.resolve(adapter);
+        expect(resolved.conflictResolver, isNotNull);
+        expect(resolved.typedConflictResolver, isNull);
+      });
+
+      test('preserves channels and documentIds', () {
+        final adapter = TypedDataRegistry();
+        final config = CollectionConfiguration(
+          channels: ['A', 'B'],
+          documentIds: ['ID1'],
+          typedPushFilter: (document, flags) => true,
+        );
+        final resolved = config.resolve(adapter);
+        expect(resolved.channels, ['A', 'B']);
+        expect(resolved.documentIds, ['ID1']);
+      });
+    });
+  });
+
   group('Configuration', () {
     test('defaults', () {
       final config = ReplicatorConfiguration(

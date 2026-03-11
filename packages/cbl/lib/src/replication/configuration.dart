@@ -83,8 +83,11 @@ final class CollectionConfiguration {
     this.channels,
     this.documentIds,
     this.pushFilter,
+    this.typedPushFilter,
     this.pullFilter,
+    this.typedPullFilter,
     this.conflictResolver,
+    this.typedConflictResolver,
   });
 
   /// Creates a replication configuration for a [Collection] from another
@@ -93,8 +96,11 @@ final class CollectionConfiguration {
     : channels = config.channels,
       documentIds = config.documentIds,
       pushFilter = config.pushFilter,
+      typedPushFilter = config.typedPushFilter,
       pullFilter = config.pullFilter,
-      conflictResolver = config.conflictResolver;
+      typedPullFilter = config.typedPullFilter,
+      conflictResolver = config.conflictResolver,
+      typedConflictResolver = config.typedConflictResolver;
 
   /// A set of Sync Gateway channel names to pull from.
   ///
@@ -116,17 +122,38 @@ final class CollectionConfiguration {
   /// Only documents for which the function returns `true` are replicated.
   ReplicationFilter? pushFilter;
 
+  /// Filter for validating whether the documents can be pushed to the remote
+  /// endpoint, which receives typed document instances.
+  ///
+  /// Only documents for which the function returns `true` are replicated.
+  @experimental
+  TypedReplicationFilter? typedPushFilter;
+
   /// Filter for validating whether the [Document]s can be pulled from the
   /// remote endpoint.
   ///
   /// Only documents for which the function returns `true` are replicated.
   ReplicationFilter? pullFilter;
 
+  /// Filter for validating whether the documents can be pulled from the remote
+  /// endpoint, which receives typed document instances.
+  ///
+  /// Only documents for which the function returns `true` are replicated.
+  @experimental
+  TypedReplicationFilter? typedPullFilter;
+
   /// A custom conflict resolver.
   ///
   /// If this value is not set, or set to `null`, the default conflict resolver
   /// will be applied.
   ConflictResolver? conflictResolver;
+
+  /// A custom conflict resolver, which receives typed document instances.
+  ///
+  /// If this value is not set, or set to `null`, the default conflict resolver
+  /// will be applied.
+  @experimental
+  TypedConflictResolver? typedConflictResolver;
 
   @override
   String toString() => [
@@ -135,8 +162,11 @@ final class CollectionConfiguration {
       if (channels != null) 'channels: $channels',
       if (documentIds != null) 'documentIds: $documentIds',
       if (pushFilter != null) 'PUSH-FILTER',
+      if (typedPushFilter != null) 'TYPED-PUSH-FILTER',
       if (pullFilter != null) 'PULL-FILTER',
+      if (typedPullFilter != null) 'TYPED-PULL-FILTER',
       if (conflictResolver != null) 'CUSTOM-CONFLICT-RESOLVER',
+      if (typedConflictResolver != null) 'TYPED-CUSTOM-CONFLICT-RESOLVER',
     ].join(', '),
     ')',
   ].join();
@@ -165,12 +195,15 @@ final class ReplicatorConfiguration {
     this.documentIds,
     @Deprecated('Use CollectionConfiguration.pushFilter instead.')
     this.pushFilter,
+    @Deprecated('Use CollectionConfiguration.typedPushFilter instead.')
     this.typedPushFilter,
     @Deprecated('Use CollectionConfiguration.pullFilter instead.')
     this.pullFilter,
+    @Deprecated('Use CollectionConfiguration.typedPullFilter instead.')
     this.typedPullFilter,
     @Deprecated('Use CollectionConfiguration.conflictResolver instead.')
     this.conflictResolver,
+    @Deprecated('Use CollectionConfiguration.typedConflictResolver instead.')
     this.typedConflictResolver,
     this.enableAutoPurge = true,
     this.acceptParentDomainCookies = false,
@@ -297,7 +330,7 @@ final class ReplicatorConfiguration {
   /// endpoint, which receives typed document instances.
   ///
   /// Only documents for which the function returns `true` are replicated.
-  @experimental
+  @Deprecated('Use CollectionConfiguration.typedPushFilter instead.')
   TypedReplicationFilter? typedPushFilter;
 
   /// Filter for validating whether the [Document]s can be pulled from the
@@ -311,7 +344,7 @@ final class ReplicatorConfiguration {
   /// endpoint, which receives typed document instances.
   ///
   /// Only documents for which the function returns `true` are replicated.
-  @experimental
+  @Deprecated('Use CollectionConfiguration.typedPullFilter instead.')
   TypedReplicationFilter? typedPullFilter;
 
   /// A custom conflict resolver.
@@ -325,7 +358,7 @@ final class ReplicatorConfiguration {
   ///
   /// If this value is not set, or set to `null`, the default conflict resolver
   /// will be applied.
-  @experimental
+  @Deprecated('Use CollectionConfiguration.typedConflictResolver instead.')
   TypedConflictResolver? typedConflictResolver;
 
   /// Whether to automatically purge a document when the user looses access to
@@ -574,6 +607,36 @@ extension InternalReplicatorConfiguration on ReplicatorConfiguration {
             'CollectionConfiguration.',
       );
     }
+  }
+}
+
+extension InternalCollectionConfiguration on CollectionConfiguration {
+  /// Returns a copy with typed fields combined into untyped fields.
+  CollectionConfiguration resolve(TypedDataAdapter? adapter) {
+    if (typedPushFilter == null &&
+        typedPullFilter == null &&
+        typedConflictResolver == null) {
+      return this;
+    }
+    return CollectionConfiguration(
+      channels: channels,
+      documentIds: documentIds,
+      pushFilter: combineReplicationFilters(
+        pushFilter,
+        typedPushFilter,
+        adapter,
+      ),
+      pullFilter: combineReplicationFilters(
+        pullFilter,
+        typedPullFilter,
+        adapter,
+      ),
+      conflictResolver: combineConflictResolvers(
+        conflictResolver,
+        typedConflictResolver,
+        adapter,
+      ),
+    );
   }
 }
 
