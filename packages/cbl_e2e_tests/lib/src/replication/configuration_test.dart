@@ -1,10 +1,6 @@
-// TODO(blaugold): Migrate to collection API.
-// ignore_for_file: deprecated_member_use
-
 import 'dart:typed_data';
 
 import 'package:cbl/cbl.dart';
-import 'package:cbl/src/database/database_base.dart';
 import 'package:cbl/src/replication/configuration.dart';
 import 'package:cbl/src/replication/conflict.dart';
 import 'package:cbl/src/typed_data_internal.dart';
@@ -139,7 +135,6 @@ void main() {
   group('Configuration', () {
     test('defaults', () {
       final config = ReplicatorConfiguration(
-        database: _Database(),
         target: UrlEndpoint(Uri.parse('ws://host/db')),
       );
 
@@ -150,14 +145,6 @@ void main() {
       expect(config.pinnedServerCertificate, isNull);
       expect(config.trustedRootCertificates, isNull);
       expect(config.headers, isNull);
-      expect(config.channels, isNull);
-      expect(config.documentIds, isNull);
-      expect(config.pushFilter, isNull);
-      expect(config.typedPushFilter, isNull);
-      expect(config.pullFilter, isNull);
-      expect(config.typedPullFilter, isNull);
-      expect(config.conflictResolver, isNull);
-      expect(config.typedConflictResolver, isNull);
       expect(config.enableAutoPurge, isTrue);
       expect(config.heartbeat, isNull);
       expect(config.maxAttempts, isNull);
@@ -166,7 +153,6 @@ void main() {
 
     test('set validated properties', () {
       final config = ReplicatorConfiguration(
-        database: _Database(),
         target: UrlEndpoint(Uri.parse('ws://host/db')),
       )..heartbeat = const Duration(seconds: 1);
 
@@ -189,7 +175,6 @@ void main() {
 
     test('from', () {
       final source = ReplicatorConfiguration(
-        database: _Database(),
         target: UrlEndpoint(Uri.parse('ws://host/db')),
         replicatorType: ReplicatorType.pull,
         continuous: true,
@@ -197,14 +182,6 @@ void main() {
         pinnedServerCertificate: Uint8List(0),
         trustedRootCertificates: Uint8List(0),
         headers: {'Client': 'cbl-dart', 'Authentication': 'AUTH'},
-        channels: ['A'],
-        documentIds: ['ID'],
-        pushFilter: (document, flags) => true,
-        typedPushFilter: (document, flags) => true,
-        pullFilter: (document, flags) => true,
-        typedPullFilter: (document, flags) => true,
-        conflictResolver: ConflictResolver.from((_) => null),
-        typedConflictResolver: TypedConflictResolver.from((_) => null),
         enableAutoPurge: false,
         heartbeat: const Duration(seconds: 1),
         maxAttempts: 1,
@@ -214,7 +191,6 @@ void main() {
 
       final copy = ReplicatorConfiguration.from(source);
 
-      expect(copy.database, source.database);
       expect(copy.target, source.target);
       expect(copy.replicatorType, source.replicatorType);
       expect(copy.continuous, source.continuous);
@@ -226,14 +202,6 @@ void main() {
       expect(copy.pinnedServerCertificate, source.pinnedServerCertificate);
       expect(copy.trustedRootCertificates, source.trustedRootCertificates);
       expect(copy.headers, source.headers);
-      expect(copy.channels, source.channels);
-      expect(copy.documentIds, source.documentIds);
-      expect(copy.pushFilter, source.pushFilter);
-      expect(copy.typedPushFilter, source.typedPushFilter);
-      expect(copy.pullFilter, source.pullFilter);
-      expect(copy.typedPullFilter, source.typedPullFilter);
-      expect(copy.conflictResolver, source.conflictResolver);
-      expect(copy.typedConflictResolver, source.typedConflictResolver);
       expect(copy.enableAutoPurge, source.enableAutoPurge);
       expect(copy.heartbeat, source.heartbeat);
       expect(copy.maxAttempts, source.maxAttempts);
@@ -244,13 +212,11 @@ void main() {
       ReplicatorConfiguration config;
 
       config = ReplicatorConfiguration(
-        database: _Database(),
         target: UrlEndpoint(Uri.parse('ws://host/db')),
       );
       expect(
         config.toString(),
         'ReplicatorConfiguration('
-        'database: _Database, '
         'target: UrlEndpoint(ws://host/db), '
         // ignore: missing_whitespace_between_adjacent_strings
         'replicatorType: pushAndPull'
@@ -258,7 +224,6 @@ void main() {
       );
 
       config = ReplicatorConfiguration(
-        database: _Database(),
         target: UrlEndpoint(Uri.parse('ws://host/db')),
         replicatorType: ReplicatorType.pull,
         continuous: true,
@@ -267,14 +232,6 @@ void main() {
         pinnedServerCertificate: Uint8List(0),
         trustedRootCertificates: Uint8List(0),
         headers: {'Client': 'cbl-dart', 'Authentication': 'AUTH'},
-        channels: ['A'],
-        documentIds: ['ID'],
-        pushFilter: (document, flags) => true,
-        typedPushFilter: (document, flags) => true,
-        pullFilter: (document, flags) => true,
-        typedPullFilter: (document, flags) => true,
-        conflictResolver: ConflictResolver.from((_) => null),
-        typedConflictResolver: TypedConflictResolver.from((_) => null),
         enableAutoPurge: false,
         heartbeat: const Duration(seconds: 1),
         maxAttempts: 1,
@@ -284,7 +241,6 @@ void main() {
       expect(
         config.toString(),
         'ReplicatorConfiguration('
-        'database: _Database, '
         'target: UrlEndpoint(ws://host/db), '
         'replicatorType: pull, '
         'CONTINUOUS, '
@@ -294,14 +250,6 @@ void main() {
         'PINNED-SERVER-CERTIFICATE, '
         'TRUSTED-ROOT-CERTIFICATES, '
         'headers: {Client: cbl-dart, Authentication: REDACTED}, '
-        'channels: [A], '
-        'documentIds: [ID], '
-        'PUSH-FILTER, '
-        'TYPED-PUSH-FILTER, '
-        'PULL-FILTER, '
-        'TYPED-PULL-FILTER, '
-        'CUSTOM-CONFLICT-RESOLVER, '
-        'TYPED-CUSTOM-CONFLICT-RESOLVER, '
         'DISABLE-AUTO-PURGE, '
         'heartbeat: 1s, '
         'maxAttempts: 1, '
@@ -423,15 +371,4 @@ void main() {
       });
     });
   });
-}
-
-class _Database with DatabaseBase implements Database {
-  @override
-  void noSuchMethod(Invocation invocation) {}
-
-  @override
-  TypedDataAdapter? get typedDataAdapter => TypedDataRegistry();
-
-  @override
-  String toString() => '_Database';
 }

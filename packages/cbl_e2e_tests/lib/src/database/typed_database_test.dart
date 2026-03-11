@@ -1,6 +1,3 @@
-// TODO(blaugold): Migrate to collection API.
-// ignore_for_file: deprecated_member_use
-
 import 'package:cbl/cbl.dart';
 import 'package:cbl/src/typed_data_internal.dart';
 
@@ -13,14 +10,15 @@ import '../utils/matchers.dart';
 void main() {
   setupTestBinding();
 
-  group('Typed Database', () {
+  group('Typed Collection', () {
     group('saveTypedDocument', () {
       apiTest('throws if database does not support typed data', () async {
         final db = await openTestDatabase();
+        final collection = await db.defaultCollection;
         final doc = MutableTestDocA();
 
         expect(
-          () => db.saveTypedDocument(doc).withConcurrencyControl(),
+          () => collection.saveTypedDocument(doc).withConcurrencyControl(),
           throwsA(
             isTypedDataException.havingCode(
               TypedDataErrorCode.typedDataNotSupported,
@@ -31,10 +29,11 @@ void main() {
 
       apiTest('with concurrency control', () async {
         final db = await openTestDatabase(typedDataAdapter: testAdapter);
+        final collection = await db.defaultCollection;
         final doc = MutableTestDocA();
 
         expect(
-          await db.saveTypedDocument(doc).withConcurrencyControl(),
+          await collection.saveTypedDocument(doc).withConcurrencyControl(),
           isTrue,
         );
         expect(doc.internal.revisionId, isNotNull);
@@ -43,29 +42,33 @@ void main() {
       group('with conflict handler', () {
         apiTest('no conflict', () async {
           final db = await openTestDatabase(typedDataAdapter: testAdapter);
+          final collection = await db.defaultCollection;
           final doc = MutableTestDocA();
 
           expect(
-            await db
+            await collection
                 .saveTypedDocument(doc)
                 .withConflictHandler((oldDoc, newDoc) => true),
             isTrue,
           );
           expect(
-            (await db.document(doc.internal.id))!.revisionId,
+            (await collection.document(doc.internal.id))!.revisionId,
             doc.internal.revisionId,
           );
         });
 
         apiTest('resolving to abort save', () async {
           final db = await openTestDatabase(typedDataAdapter: testAdapter);
+          final collection = await db.defaultCollection;
           final doc = MutableTestDocA();
-          await db.saveTypedDocument(doc).withConcurrencyControl();
+          await collection.saveTypedDocument(doc).withConcurrencyControl();
           final conflictingDoc = doc.toMutable();
-          await db.saveTypedDocument(conflictingDoc).withConcurrencyControl();
+          await collection
+              .saveTypedDocument(conflictingDoc)
+              .withConcurrencyControl();
 
           expect(
-            await db
+            await collection
                 .saveTypedDocument(doc)
                 .withConflictHandler(
                   expectAsync2((documentBeingSaved, conflictingDocument) {
@@ -80,20 +83,23 @@ void main() {
             isFalse,
           );
           expect(
-            (await db.document(doc.internal.id))!.revisionId,
+            (await collection.document(doc.internal.id))!.revisionId,
             conflictingDoc.internal.revisionId,
           );
         });
 
         apiTest('resolving to retry save', () async {
           final db = await openTestDatabase(typedDataAdapter: testAdapter);
+          final collection = await db.defaultCollection;
           final doc = MutableTestDocA();
-          await db.saveTypedDocument(doc).withConcurrencyControl();
+          await collection.saveTypedDocument(doc).withConcurrencyControl();
           final conflictingDoc = doc.toMutable();
-          await db.saveTypedDocument(conflictingDoc).withConcurrencyControl();
+          await collection
+              .saveTypedDocument(conflictingDoc)
+              .withConcurrencyControl();
 
           expect(
-            await db
+            await collection
                 .saveTypedDocument(doc)
                 .withConflictHandler(
                   expectAsync2((documentBeingSaved, conflictingDocument) {
@@ -108,7 +114,7 @@ void main() {
             isTrue,
           );
           expect(
-            (await db.document(doc.internal.id))!.revisionId,
+            (await collection.document(doc.internal.id))!.revisionId,
             doc.internal.revisionId,
           );
         });
@@ -117,29 +123,31 @@ void main() {
       group('with sync conflict handler', () {
         test('no conflict', () {
           final db = openSyncTestDatabase(typedDataAdapter: testAdapter);
+          final collection = db.defaultCollection;
           final doc = MutableTestDocA();
 
           expect(
-            db
+            collection
                 .saveTypedDocument(doc)
                 .withConflictHandlerSync((oldDoc, newDoc) => true),
             isTrue,
           );
           expect(
-            db.document(doc.internal.id)!.revisionId,
+            collection.document(doc.internal.id)!.revisionId,
             doc.internal.revisionId,
           );
         });
 
         apiTest('resolving to abort save', () {
           final db = openSyncTestDatabase(typedDataAdapter: testAdapter);
+          final collection = db.defaultCollection;
           final doc = MutableTestDocA();
-          db.saveTypedDocument(doc).withConcurrencyControl();
+          collection.saveTypedDocument(doc).withConcurrencyControl();
           final conflictingDoc = doc.toMutable();
-          db.saveTypedDocument(conflictingDoc).withConcurrencyControl();
+          collection.saveTypedDocument(conflictingDoc).withConcurrencyControl();
 
           expect(
-            db
+            collection
                 .saveTypedDocument(doc)
                 .withConflictHandlerSync(
                   expectAsync2((documentBeingSaved, conflictingDocument) {
@@ -154,20 +162,21 @@ void main() {
             isFalse,
           );
           expect(
-            db.document(doc.internal.id)!.revisionId,
+            collection.document(doc.internal.id)!.revisionId,
             conflictingDoc.internal.revisionId,
           );
         });
 
         apiTest('resolving to retry save', () {
           final db = openSyncTestDatabase(typedDataAdapter: testAdapter);
+          final collection = db.defaultCollection;
           final doc = MutableTestDocA();
-          db.saveTypedDocument(doc).withConcurrencyControl();
+          collection.saveTypedDocument(doc).withConcurrencyControl();
           final conflictingDoc = doc.toMutable();
-          db.saveTypedDocument(conflictingDoc).withConcurrencyControl();
+          collection.saveTypedDocument(conflictingDoc).withConcurrencyControl();
 
           expect(
-            db
+            collection
                 .saveTypedDocument(doc)
                 .withConflictHandlerSync(
                   expectAsync2((documentBeingSaved, conflictingDocument) {
@@ -182,7 +191,7 @@ void main() {
             isTrue,
           );
           expect(
-            db.document(doc.internal.id)!.revisionId,
+            collection.document(doc.internal.id)!.revisionId,
             doc.internal.revisionId,
           );
         });
@@ -192,9 +201,10 @@ void main() {
     group('typedDocument', () {
       apiTest('throws if database does not support typed data', () async {
         final db = await openTestDatabase();
+        final collection = await db.defaultCollection;
 
         expect(
-          () => db.typedDocument<TestDocA>('a'),
+          () => collection.typedDocument<TestDocA>('a'),
           throwsA(
             isTypedDataException.havingCode(
               TypedDataErrorCode.typedDataNotSupported,
@@ -205,17 +215,21 @@ void main() {
 
       apiTest('document does not exist', () async {
         final db = await openTestDatabase(typedDataAdapter: testAdapter);
+        final collection = await db.defaultCollection;
 
-        final loadedDoc = await db.typedDocument<TestDocA>('a');
+        final loadedDoc = await collection.typedDocument<TestDocA>('a');
         expect(loadedDoc, isNull);
       });
 
       apiTest('load immutable doc with static type', () async {
         final db = await openTestDatabase(typedDataAdapter: testAdapter);
+        final collection = await db.defaultCollection;
         final doc = MutableTestDocA();
-        await db.saveTypedDocument(doc).withConcurrencyControl();
+        await collection.saveTypedDocument(doc).withConcurrencyControl();
 
-        final loadedDoc = await db.typedDocument<TestDocA>(doc.internal.id);
+        final loadedDoc = await collection.typedDocument<TestDocA>(
+          doc.internal.id,
+        );
         expect(loadedDoc, isNotNull);
         expect(loadedDoc!.internal.id, doc.internal.id);
         expect(loadedDoc.internal.sequence, doc.internal.sequence);
@@ -224,10 +238,11 @@ void main() {
 
       apiTest('load mutable doc with static type', () async {
         final db = await openTestDatabase(typedDataAdapter: testAdapter);
+        final collection = await db.defaultCollection;
         final doc = MutableTestDocA();
-        await db.saveTypedDocument(doc).withConcurrencyControl();
+        await collection.saveTypedDocument(doc).withConcurrencyControl();
 
-        final loadedDoc = await db.typedDocument<MutableTestDocA>(
+        final loadedDoc = await collection.typedDocument<MutableTestDocA>(
           doc.internal.id,
         );
         expect(loadedDoc, isNotNull);
@@ -238,30 +253,38 @@ void main() {
 
       apiTest('load immutable doc with dynamic type', () async {
         final db = await openTestDatabase(typedDataAdapter: testAdapter);
+        final collection = await db.defaultCollection;
         final doc = MutableTestDocA();
-        await db.saveTypedDocument(doc).withConcurrencyControl();
+        await collection.saveTypedDocument(doc).withConcurrencyControl();
 
-        expect(await db.typedDocument(doc.internal.id), isA<TestDocA>());
+        expect(
+          await collection.typedDocument(doc.internal.id),
+          isA<TestDocA>(),
+        );
       });
 
       apiTest('load mutable doc with dynamic type', () async {
         final db = await openTestDatabase(typedDataAdapter: testAdapter);
+        final collection = await db.defaultCollection;
         final doc = MutableTestDocA();
-        await db.saveTypedDocument(doc).withConcurrencyControl();
+        await collection.saveTypedDocument(doc).withConcurrencyControl();
 
         expect(
-          await db.typedDocument<TypedMutableDocumentObject>(doc.internal.id),
+          await collection.typedDocument<TypedMutableDocumentObject>(
+            doc.internal.id,
+          ),
           isA<MutableTestDocA>(),
         );
       });
 
       apiTest('loaded document fails type check', () async {
         final db = await openTestDatabase(typedDataAdapter: testAdapter);
+        final collection = await db.defaultCollection;
         final doc = MutableDocument({'type': 'WrongType'});
-        await db.saveDocument(doc);
+        await collection.saveDocument(doc);
 
         expect(
-          () => db.typedDocument<TestDocA>(doc.id),
+          () => collection.typedDocument<TestDocA>(doc.id),
           throwsA(
             isTypedDataException
                 .havingCode(TypedDataErrorCode.typeMatchingConflict)
@@ -276,11 +299,12 @@ void main() {
 
       apiTest('loaded document matches incorrect type check', () async {
         final db = await openTestDatabase(typedDataAdapter: testAdapter);
+        final collection = await db.defaultCollection;
         final doc = MutableDocument({'type': 'TestDocB'});
-        await db.saveDocument(doc);
+        await collection.saveDocument(doc);
 
         expect(
-          () => db.typedDocument<TestDocA>(doc.id),
+          () => collection.typedDocument<TestDocA>(doc.id),
           throwsA(
             isTypedDataException
                 .havingCode(TypedDataErrorCode.typeMatchingConflict)
@@ -297,11 +321,12 @@ void main() {
         'loaded document matches type check(s) for type without type matcher',
         () async {
           final db = await openTestDatabase(typedDataAdapter: testAdapter);
+          final collection = await db.defaultCollection;
           final doc = MutableDocument({'type': 'TestDocA'});
-          await db.saveDocument(doc);
+          await collection.saveDocument(doc);
 
           expect(
-            () => db.typedDocument<TestDocWithoutTypeMatcher>(doc.id),
+            () => collection.typedDocument<TestDocWithoutTypeMatcher>(doc.id),
             throwsA(
               isTypedDataException
                   .havingCode(TypedDataErrorCode.typeMatchingConflict)
@@ -319,10 +344,11 @@ void main() {
     group('deleteTypedDocument', () {
       apiTest('throws if database does not support typed data', () async {
         final db = await openTestDatabase();
+        final collection = await db.defaultCollection;
         final doc = MutableTestDocA();
 
         expect(
-          () => db.deleteTypedDocument(doc),
+          () => collection.deleteTypedDocument(doc),
           throwsA(
             isTypedDataException.havingCode(
               TypedDataErrorCode.typedDataNotSupported,
@@ -333,21 +359,26 @@ void main() {
 
       apiTest('deletes document', () async {
         final db = await openTestDatabase(typedDataAdapter: testAdapter);
+        final collection = await db.defaultCollection;
         final doc = MutableTestDocA();
-        await db.saveTypedDocument(doc).withConcurrencyControl();
+        await collection.saveTypedDocument(doc).withConcurrencyControl();
 
-        expect(await db.deleteTypedDocument(doc), isTrue);
-        expect(await db.typedDocument<TestDocA>(doc.internal.id), isNull);
+        expect(await collection.deleteTypedDocument(doc), isTrue);
+        expect(
+          await collection.typedDocument<TestDocA>(doc.internal.id),
+          isNull,
+        );
       });
     });
 
     group('purgeTypedDocument', () {
       apiTest('throws if database does not support typed data', () async {
         final db = await openTestDatabase();
+        final collection = await db.defaultCollection;
         final doc = MutableTestDocA();
 
         expect(
-          () => db.purgeTypedDocument(doc),
+          () => collection.purgeTypedDocument(doc),
           throwsA(
             isTypedDataException.havingCode(
               TypedDataErrorCode.typedDataNotSupported,
@@ -358,11 +389,15 @@ void main() {
 
       apiTest('purges document', () async {
         final db = await openTestDatabase(typedDataAdapter: testAdapter);
+        final collection = await db.defaultCollection;
         final doc = MutableTestDocA();
-        await db.saveTypedDocument(doc).withConcurrencyControl();
+        await collection.saveTypedDocument(doc).withConcurrencyControl();
 
-        await db.purgeTypedDocument(doc);
-        expect(await db.typedDocument<TestDocA>(doc.internal.id), isNull);
+        await collection.purgeTypedDocument(doc);
+        expect(
+          await collection.typedDocument<TestDocA>(doc.internal.id),
+          isNull,
+        );
       });
     });
   });

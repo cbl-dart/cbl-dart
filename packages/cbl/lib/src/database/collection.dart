@@ -1,5 +1,3 @@
-// ignore_for_file: deprecated_member_use_from_same_package
-
 import 'dart:async';
 
 import 'package:meta/meta.dart';
@@ -12,7 +10,6 @@ import '../support/streams.dart';
 import '../typed_data/typed_object.dart';
 import 'collection_change.dart';
 import 'database.dart';
-import 'database_change.dart';
 import 'document_change.dart';
 import 'scope.dart';
 
@@ -71,12 +68,6 @@ typedef SyncSaveConflictHandler =
 /// {@category Database}
 typedef CollectionChangeListener = void Function(CollectionChange change);
 
-/// Listener which is called when one or more [Document]s in a [Database] have
-/// changed.
-///
-/// {@category Database}
-typedef DatabaseChangeListener = void Function(DatabaseChange change);
-
 /// Listener which is called when a single [Document] has changed.
 ///
 /// {@category Database}
@@ -117,12 +108,11 @@ typedef DocumentChangeListener = void Function(DocumentChange change);
 /// When opening a pre-collection database, the existing documents and indexes
 /// in the database will be automatically migrated to the default collection.
 ///
-/// Any pre-collection database APIs that refer to documents, listeners, and
-/// indexes without specifying a collection such as [Database.document] will
-/// implicitly operate on the default collection. In other words, they behave
-/// exactly the way they used to, but collection-aware code should avoid them
-/// and use the new collection APIs instead. These legacy APIs are deprecated
-/// and will be removed eventually.
+/// Any pre-collection database APIs that referred to documents, listeners, and
+/// indexes without specifying a collection implicitly operated on the default
+/// collection. Collection-aware code should avoid them and use the new
+/// collection APIs instead. These legacy APIs are deprecated and will be
+/// removed eventually.
 abstract interface class Collection {
   /// The name of the default collection.
   static const defaultName = '_default';

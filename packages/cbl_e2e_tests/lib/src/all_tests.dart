@@ -1,6 +1,5 @@
 import 'bindings/bindings_test.dart' as bindings_bindings;
 import 'database/collection_test.dart' as database_collection;
-import 'database/database_change_test.dart' as database_database_change;
 import 'database/database_configuration_test.dart'
     as database_database_configuration;
 import 'database/database_test.dart' as database_database;
@@ -49,7 +48,6 @@ import 'typed_data/registry_test.dart' as typed_data_runtime_support;
 final tests = [
   bindings_bindings.main,
   database_collection.main,
-  database_database_change.main,
   database_database_configuration.main,
   database_database.main,
   database_document_change.main,

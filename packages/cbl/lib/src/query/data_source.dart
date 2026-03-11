@@ -19,11 +19,6 @@ abstract final class DataSourceAs extends DataSourceInterface {
 ///
 /// {@category Query Builder}
 abstract final class DataSource {
-  /// Creates a data source from a [Database].
-  @Deprecated('Use DataSource.collection(database.defaultCollection) instead.')
-  static DataSourceAs database(Database database) =>
-      DataSourceAsImpl(source: database);
-
   /// Creates a data source from a [Collection].
   static DataSourceAs collection(Collection collection) =>
       DataSourceAsImpl(source: collection);
@@ -34,23 +29,15 @@ abstract final class DataSource {
 final class DataSourceImpl implements DataSourceInterface {
   DataSourceImpl({required this.source, this.alias});
 
-  final Object source;
+  final Collection source;
   final String? alias;
 
-  Database get database => switch (source) {
-    final Database database => database,
-    CollectionBase(:final database) => database,
-    _ => throw UnimplementedError(),
-  };
+  Database get database => (source as CollectionBase).database;
 
-  Map<String, Object?> toJson() => switch (source) {
-    Database(:final name) => {'AS': alias ?? name},
-    CollectionBase(:final fullName) => {
-      if (alias != null) 'AS': alias,
-      'COLLECTION': fullName,
-    },
-    _ => throw UnimplementedError(),
-  };
+  Map<String, Object?> toJson() {
+    final fullName = (source as CollectionBase).fullName;
+    return {if (alias != null) 'AS': alias, 'COLLECTION': fullName};
+  }
 }
 
 final class DataSourceAsImpl extends DataSourceImpl implements DataSourceAs {

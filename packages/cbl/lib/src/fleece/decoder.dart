@@ -289,9 +289,7 @@ final class FleeceDecoder extends Converter<Data, Object?> {
 /// Fleece decoder which uses a recursive algorithm to decode Fleece data.
 ///
 /// This decoder exists only to benchmark the listener based [FleeceDecoder].
-@Deprecated('Use FleeceDecoder instead.')
 class RecursiveFleeceDecoder extends Converter<Data, Object?> {
-  @Deprecated('Use FleeceDecoder instead.')
   RecursiveFleeceDecoder({
     this.trust = FLTrust.untrusted,
     this.sharedKeys,

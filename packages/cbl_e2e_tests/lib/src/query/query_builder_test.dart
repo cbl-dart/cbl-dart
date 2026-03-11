@@ -1,6 +1,3 @@
-// TODO(blaugold): Migrate to collection API.
-// ignore_for_file: deprecated_member_use
-
 import 'dart:async';
 import 'dart:math';
 
@@ -36,10 +33,6 @@ void main() {
       );
 
       expect(
-        () => query.select(SelectResult.all()).from(DataSource.database(db)),
-        throwsA(isA<ArgumentError>()),
-      );
-      expect(
         () => query
             .select(SelectResult.all())
             .from(DataSource.collection(collection)),
@@ -62,12 +55,6 @@ void main() {
       void exploreBuilderQuery(Query query, Map<String, Object?> selectQuery) {
         if (query is FromRouter) {
           final fromRouter = query as FromRouter;
-          exploreBuilderQuery(fromRouter.from(DataSource.database(db)), {
-            ...selectQuery,
-            'FROM': [
-              {'AS': 'db'},
-            ],
-          });
           exploreBuilderQuery(
             fromRouter.from(DataSource.collection(collection)),
             {
@@ -86,14 +73,16 @@ void main() {
           final joinRouter = query as JoinRouter;
           exploreBuilderQuery(
             joinRouter.join(
-              Join.join(DataSource.database(db)).on(Expression.property('a')),
+              Join.join(
+                DataSource.collection(collection),
+              ).on(Expression.property('a')),
             ),
             {
               ...selectQuery,
               'FROM': <Object>[
                 ...selectQuery['FROM']! as List<Object>,
                 {
-                  'AS': 'db',
+                  'COLLECTION': '_default._default',
                   'JOIN': 'INNER',
                   'ON': ['.a'],
                 },
@@ -102,14 +91,16 @@ void main() {
           );
           exploreBuilderQuery(
             joinRouter.joinAll([
-              Join.join(DataSource.database(db)).on(Expression.property('a')),
+              Join.join(
+                DataSource.collection(collection),
+              ).on(Expression.property('a')),
             ]),
             {
               ...selectQuery,
               'FROM': <Object>[
                 ...selectQuery['FROM']! as List<Object>,
                 {
-                  'AS': 'db',
+                  'COLLECTION': '_default._default',
                   'JOIN': 'INNER',
                   'ON': ['.a'],
                 },
@@ -211,16 +202,18 @@ void main() {
       setUpAll(
         runWithApiValues(() async {
           final db = await getSharedTestDatabase();
+          final collection = await db.defaultCollection;
           final doc = MutableDocument.withId('SelectOneResult', {'a': true});
-          await db.saveDocument(doc);
+          await collection.saveDocument(doc);
         }),
       );
 
       Future<Object?> selectOneResult(SelectResultInterface selectResult) =>
           Future.value(getSharedTestDatabase()).then((db) async {
+            final collection = await db.defaultCollection;
             final resultSet = await const QueryBuilder()
                 .select(selectResult)
-                .from(DataSource.database(db))
+                .from(DataSource.collection(collection))
                 .where(Meta.id.equalTo(Expression.string('SelectOneResult')))
                 .execute();
 
@@ -270,12 +263,13 @@ void main() {
     group('Query', () {
       apiTest('distinct', () async {
         final db = await openTestDatabase();
-        await db.saveDocument(MutableDocument({'a': true}));
-        await db.saveDocument(MutableDocument({'a': true}));
+        final collection = await db.defaultCollection;
+        await collection.saveDocument(MutableDocument({'a': true}));
+        await collection.saveDocument(MutableDocument({'a': true}));
 
         final resultSet = await const QueryBuilder()
             .selectDistinct(SelectResult.all())
-            .from(DataSource.database(db))
+            .from(DataSource.collection(collection))
             .execute();
 
         final result = await resultSet
@@ -405,13 +399,14 @@ void main() {
 
       apiTest('orderBy', () async {
         final db = await openTestDatabase();
+        final collection = await db.defaultCollection;
         final docs = List.generate(5, (_) => MutableDocument());
 
         await db.saveAllDocuments(docs);
 
         final resultSet = await const QueryBuilder()
             .select(SelectResult.expression(Meta.id))
-            .from(DataSource.database(db))
+            .from(DataSource.collection(collection))
             .orderBy(Ordering.expression(Meta.id))
             .execute();
 
@@ -425,13 +420,14 @@ void main() {
 
       apiTest('limit', () async {
         final db = await openTestDatabase();
+        final collection = await db.defaultCollection;
         final docs = List.generate(5, (_) => MutableDocument());
 
         await db.saveAllDocuments(docs);
 
         final resultSet = await const QueryBuilder()
             .select(SelectResult.expression(Meta.id))
-            .from(DataSource.database(db))
+            .from(DataSource.collection(collection))
             .orderBy(Ordering.expression(Meta.id))
             .limit(Expression.value(3), offset: Expression.value(2))
             .execute();
@@ -764,10 +760,11 @@ void main() {
       setUpAll(
         runWithApiValues(() async {
           final db = await getSharedTestDatabase();
-          await db.saveDocument(doc());
-          await db.setDocumentExpiration(doc().id, expirationDate);
-          await db.saveDocument(deletedDoc());
-          await db.deleteDocument(deletedDoc());
+          final collection = await db.defaultCollection;
+          await collection.saveDocument(doc());
+          await collection.setDocumentExpiration(doc().id, expirationDate);
+          await collection.saveDocument(deletedDoc());
+          await collection.deleteDocument(deletedDoc());
         }),
       );
 
@@ -776,6 +773,7 @@ void main() {
         bool deleted = false,
       }) async {
         final db = await getSharedTestDatabase();
+        final collection = await db.defaultCollection;
 
         final id = deleted ? deletedDoc().id : doc().id;
         var where = Meta.id.equalTo(valExpr(id));
@@ -786,7 +784,7 @@ void main() {
 
         final resultSet = await const QueryBuilder()
             .select(SelectResult.expression(expression))
-            .from(DataSource.database(db))
+            .from(DataSource.collection(collection))
             .where(where)
             .execute();
 
@@ -1152,23 +1150,24 @@ void main() {
     group('FullTextFunction', () {
       apiTest('match and rank', () async {
         final db = await openTestDatabase();
-        await db.createIndex(
+        final collection = await db.defaultCollection;
+        await collection.createIndex(
           'a',
           IndexBuilder.fullTextIndex([FullTextIndexItem.property('a')]),
         );
 
         final docA = MutableDocument({'a': 'The quick brown fox'});
-        await db.saveDocument(docA);
+        await collection.saveDocument(docA);
 
         final docB = MutableDocument({'a': 'The slow brown fox'});
-        await db.saveDocument(docB);
+        await collection.saveDocument(docB);
 
         final resultSet = await const QueryBuilder()
             .selectAll([
               SelectResult.expression(Meta.id),
               SelectResult.expression(FullTextFunction.rank('a')),
             ])
-            .from(DataSource.database(db))
+            .from(DataSource.collection(collection))
             .where(
               FullTextFunction.match(
                 indexName: 'a',
@@ -1195,7 +1194,8 @@ void setupEvalExprUtils() {
   setUpAll(
     runWithApiValues(() async {
       final db = await getSharedTestDatabase();
-      await db.saveDocument(MutableDocument.withId('EvalExpr'));
+      final collection = await db.defaultCollection;
+      await collection.saveDocument(MutableDocument.withId('EvalExpr'));
     }),
   );
 }
@@ -1209,11 +1209,12 @@ Future<T> evalExpr<T extends Object?>(
   Parameters? parameters,
 }) async {
   final db = await getSharedTestDatabase();
+  final collection = await db.defaultCollection;
   if (doc != null) {
-    await db.saveDocument(doc);
+    await collection.saveDocument(doc);
   }
 
-  DataSourceInterface dataSource = DataSource.database(db);
+  DataSourceInterface dataSource = DataSource.collection(collection);
   if (dataSourceAlias != null) {
     dataSource = (dataSource as DataSourceAs).as(dataSourceAlias);
   }
@@ -1282,9 +1283,10 @@ extension on Database {
   Future<List<Object?>> aggQuery(
     Iterable<SelectResultInterface> selectResults,
   ) async {
+    final collection = await defaultCollection;
     final resultSet = await const QueryBuilder()
         .selectAll(selectResults.toList())
-        .from(DataSource.database(this))
+        .from(DataSource.collection(collection))
         .groupBy(Expression.property(aggGroupProperty))
         .execute();
 
@@ -1309,13 +1311,14 @@ extension on Database {
   }) async {
     await deleteAllDocuments();
     await saveAllDocuments(docs);
+    final collection = await defaultCollection;
     const leftSide = 'left';
     const rightSide = 'right';
 
     final sideProp = Expression.property('side');
     final joinProp = Expression.property('on');
 
-    final joinFrom = DataSource.database(this).as(rightSide);
+    final joinFrom = DataSource.collection(collection).as(rightSide);
 
     final joinOn = joinProp
         .from(rightSide)
@@ -1346,7 +1349,7 @@ extension on Database {
           SelectResult.expression(Meta.id.from(leftSide)),
           SelectResult.expression(Meta.id.from(rightSide)),
         ])
-        .from(DataSource.database(this).as(leftSide))
+        .from(DataSource.collection(collection).as(leftSide))
         .join(join)
         .where(sideProp.from(leftSide).equalTo(valExpr(leftSide)))
         .execute();

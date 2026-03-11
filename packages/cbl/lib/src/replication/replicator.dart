@@ -114,19 +114,15 @@ abstract interface class Replicator implements ClosableResource {
   static Future<Replicator> create(ReplicatorConfiguration config) {
     config.validate();
 
-    // ignore: deprecated_member_use_from_same_package
-    if (config.database is AsyncDatabase ||
-        config.collections.keys.any(
-          (collection) => collection is AsyncCollection,
-        )) {
+    if (config.collections.keys.any(
+      (collection) => collection is AsyncCollection,
+    )) {
       return Replicator.createAsync(config);
     }
 
-    // ignore: deprecated_member_use_from_same_package
-    if (config.database is SyncDatabase ||
-        config.collections.keys.any(
-          (collection) => collection is SyncCollection,
-        )) {
+    if (config.collections.keys.any(
+      (collection) => collection is SyncCollection,
+    )) {
       return Replicator.createSync(config);
     }
 
@@ -242,22 +238,6 @@ abstract interface class Replicator implements ClosableResource {
   /// {@macro cbl.Collection.AsyncListenStream}
   Stream<DocumentReplication> documentReplications();
 
-  /// Returns a [Set] of ids for [Document]s in the default collection, who have
-  /// revisions pending to be pushed.
-  ///
-  /// This API is a snapshot and results may change between the time the call
-  /// was mad and the time the call returns.
-  @Deprecated('Use pendingDocumentIdsInCollection instead.')
-  FutureOr<Set<String>> get pendingDocumentIds;
-
-  /// Returns whether the [Document] with the given [documentId], in the default
-  /// collection, has revisions pending to be pushed.
-  ///
-  /// This API is a snapshot and the result may change between the time the call
-  /// was made and the time the call returns.
-  @Deprecated('Use isDocumentPendingInCollection instead.')
-  FutureOr<bool> isDocumentPending(String documentId);
-
   /// Returns a [Set] of ids for [Document]s in the given [collection], who have
   /// revisions pending to be pushed.
   ///
@@ -307,14 +287,6 @@ abstract interface class SyncReplicator implements Replicator {
   @override
   void removeChangeListener(ListenerToken token);
 
-  @Deprecated('Use pendingDocumentIdsInCollection instead.')
-  @override
-  Set<String> get pendingDocumentIds;
-
-  @Deprecated('Use isDocumentPendingInCollection instead.')
-  @override
-  bool isDocumentPending(String documentId);
-
   @override
   Set<String> pendingDocumentIdsInCollection(Collection collection);
 
@@ -358,14 +330,6 @@ abstract interface class AsyncReplicator implements Replicator {
 
   @override
   AsyncListenStream<DocumentReplication> documentReplications();
-
-  @Deprecated('Use pendingDocumentIdsInCollection instead.')
-  @override
-  Future<Set<String>> get pendingDocumentIds;
-
-  @Deprecated('Use isDocumentPendingInCollection instead.')
-  @override
-  Future<bool> isDocumentPending(String documentId);
 
   @override
   Future<Set<String>> pendingDocumentIdsInCollection(Collection collection);

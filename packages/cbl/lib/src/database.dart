@@ -5,7 +5,6 @@ export 'database/collection.dart'
         SyncCollection,
         SaveConflictHandler,
         SyncSaveConflictHandler,
-        DatabaseChangeListener,
         DocumentChangeListener,
         CollectionChangeListener;
 export 'database/collection_change.dart' show CollectionChange;
@@ -21,7 +20,6 @@ export 'database/database.dart'
         SyncSaveTypedDocument,
         TypedSaveConflictHandler,
         TypedSyncSaveConflictHandler;
-export 'database/database_change.dart' show DatabaseChange;
 export 'database/database_configuration.dart'
     show DatabaseConfiguration, EncryptionKey;
 export 'database/document_change.dart' show DocumentChange;

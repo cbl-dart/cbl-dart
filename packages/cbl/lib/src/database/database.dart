@@ -6,24 +6,17 @@ import 'package:meta/meta.dart';
 
 import '../document/blob.dart';
 import '../document/document.dart';
-import '../document/fragment.dart';
 import '../log.dart';
 import '../log/log.dart';
-import '../query/index/index.dart';
 import '../query/prediction.dart';
 import '../query/query.dart';
-import '../replication.dart';
-import '../support/listener_token.dart';
 import '../support/resource.dart';
-import '../support/streams.dart';
 import '../support/tracing.dart';
 import '../tracing.dart';
 import '../typed_data.dart';
 import '../typed_data/adapter.dart';
 import 'collection.dart';
-import 'database_change.dart';
 import 'database_configuration.dart';
-import 'document_change.dart';
 import 'ffi_database.dart';
 import 'proxy_database.dart';
 import 'scope.dart';
@@ -226,10 +219,6 @@ abstract interface class Database implements ClosableResource {
   /// Is `null` if the database is closed or deleted.
   String? get path;
 
-  /// The total number of documents in the database.
-  @Deprecated('Use defaultCollection.count instead.')
-  FutureOr<int> get count;
-
   /// The configuration which was used to open this database.
   DatabaseConfiguration get config;
 
@@ -275,123 +264,6 @@ abstract interface class Database implements ClosableResource {
     String scope = Scope.defaultName,
   ]);
 
-  /// Returns the [Document] with the given [id], if it exists.
-  @Deprecated('Use defaultCollection.document instead.')
-  FutureOr<Document?> document(String id);
-
-  /// Returns the [DocumentFragment] for the [Document] with the given [id].
-  @Deprecated('Use defaultCollection[] instead.')
-  FutureOr<DocumentFragment> operator [](String id);
-
-  /// Returns the typed document, with type [D] and the given [id], if it
-  /// exists.
-  @Deprecated('Use defaultCollection.typedDocument instead.')
-  @experimental
-  FutureOr<D?> typedDocument<D extends TypedDocumentObject>(String id);
-
-  /// Saves a [document] to this database, resolving conflicts through
-  /// [ConcurrencyControl].
-  ///
-  /// When write operations are executed concurrently, the last writer will win
-  /// by default. In this case the result is always `true`.
-  ///
-  /// To fail on conflict instead, pass [ConcurrencyControl.failOnConflict] to
-  /// [concurrencyControl]. In this case, if the document could not be saved the
-  /// result is `false`. On success it is `true`.
-  @Deprecated('Use defaultCollection.saveDocument instead.')
-  FutureOr<bool> saveDocument(
-    MutableDocument document, [
-    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
-  ]);
-
-  /// Saves a [document] to this database, resolving conflicts with a
-  /// [conflictHandler].
-  ///
-  /// {@template cbl.Database.saveDocumentWithConflictHandler}
-  /// When write operations are executed concurrently and if conflicts occur,
-  /// the [conflictHandler] will be called. Use the conflict handler to directly
-  /// edit the [Document] to resolve the conflict. When the conflict handler
-  /// returns `true`, the save method will save the edited document as the
-  /// resolved document. If the conflict handler returns `false`, the save
-  /// operation will be canceled with `false` as the result. If the conflict
-  /// handler returns `true` or there is no conflict the result is `true`.
-  /// {@endtemplate}
-  @Deprecated('Use defaultCollection.saveDocumentWithConflictHandler instead.')
-  FutureOr<bool> saveDocumentWithConflictHandler(
-    MutableDocument document,
-    SaveConflictHandler conflictHandler,
-  );
-
-  /// Creates and returns an object, which can be used to save a typed
-  /// [document] to this database.
-  ///
-  /// A call to this method will not save the document to the database. Call one
-  /// of the methods of the returned object to finally save the [document].
-  ///
-  /// See also:
-  ///
-  /// - [SaveTypedDocument] for the object used to save typed documents.
-  @Deprecated('Use defaultCollection.saveTypedDocument instead.')
-  @experimental
-  @useResult
-  SaveTypedDocument<D, MD> saveTypedDocument<
-    D extends TypedDocumentObject,
-    MD extends TypedMutableDocumentObject
-  >(TypedMutableDocumentObject<D, MD> document);
-
-  /// Deletes a [document] from this database, resolving conflicts through
-  /// [ConcurrencyControl].
-  ///
-  /// When write operations are executed concurrently, the last writer will win
-  /// by default. In this case the result is always `true`.
-  ///
-  /// To fail on conflict instead, pass [ConcurrencyControl.failOnConflict] to
-  /// [concurrencyControl]. In this case, if the document could not be deleted
-  /// the result is `false`. On success it is `true`.
-  @Deprecated('Use defaultCollection.deleteDocument instead.')
-  FutureOr<bool> deleteDocument(
-    Document document, [
-    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
-  ]);
-
-  /// Deletes a typed [document] from this database, resolving conflicts through
-  /// [ConcurrencyControl].
-  ///
-  /// When write operations are executed concurrently, the last writer will win
-  /// by default. In this case the result is always `true`.
-  ///
-  /// To fail on conflict instead, pass [ConcurrencyControl.failOnConflict] to
-  /// [concurrencyControl]. In this case, if the document could not be deleted
-  /// the result is `false`. On success it is `true`.
-  @Deprecated('Use defaultCollection.deleteTypedDocument instead.')
-  @experimental
-  FutureOr<bool> deleteTypedDocument(
-    TypedDocumentObject document, [
-    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
-  ]);
-
-  /// Purges a [document] from this database.
-  ///
-  /// This is more drastic than deletion: It removes all traces of the document.
-  /// The purge will **not** be replicated to other databases.
-  @Deprecated('Use defaultCollection.purgeDocument instead.')
-  FutureOr<void> purgeDocument(Document document);
-
-  /// Purges a typed [document] from this database.
-  ///
-  /// This is more drastic than deletion: It removes all traces of the document.
-  /// The purge will **not** be replicated to other databases.
-  @Deprecated('Use defaultCollection.purgeTypedDocument instead.')
-  @experimental
-  FutureOr<void> purgeTypedDocument(TypedDocumentObject document);
-
-  /// Purges a [Document] from this database by its [id].
-  ///
-  /// This is more drastic than deletion: It removes all traces of the document.
-  /// The purge will **not** be replicated to other databases.
-  @Deprecated('Use defaultCollection.purgeDocumentById instead.')
-  FutureOr<void> purgeDocumentById(String id);
-
   /// Saves a [Blob] directly into this database without associating it with any
   /// [Document]s.
   ///
@@ -427,90 +299,15 @@ abstract interface class Database implements ClosableResource {
   /// {@endtemplate}
   Future<void> inBatch(FutureOr<void> Function() fn);
 
-  /// Sets an [expiration] date for a [Document] by its [id].
-  ///
-  /// After the given date the document will be purged from the database
-  ///
-  /// This is more drastic than deletion: It removes all traces of the document.
-  /// The purge will **not** be replicated to other databases.
-  @Deprecated('Use defaultCollection.setDocumentExpiration instead.')
-  FutureOr<void> setDocumentExpiration(String id, DateTime? expiration);
-
-  /// Gets the expiration date of a [Document] by its [id], if it exists.
-  @Deprecated('Use defaultCollection.getDocumentExpiration instead.')
-  FutureOr<DateTime?> getDocumentExpiration(String id);
-
-  /// Adds a [listener] to be notified of all changes to [Document]s in this
-  /// database.
-  ///
-  /// {@macro cbl.Collection.addChangeListener}
-  ///
-  /// See also:
-  ///
-  /// - [DatabaseChange] for the change event given to [listener].
-  /// - [changes] for alternatively listening to changes through a [Stream].
-  /// - [addDocumentChangeListener] for listening for changes to a single
-  ///   [Document].
-  /// - [removeChangeListener] for removing a previously added listener.
-  @Deprecated('Use defaultCollection.addChangeListener instead.')
-  FutureOr<ListenerToken> addChangeListener(DatabaseChangeListener listener);
-
-  /// Adds a [listener] to be notified of changes to the [Document] with the
-  /// given [id].
-  ///
-  /// {@macro cbl.Collection.addChangeListener}
-  ///
-  /// See also:
-  ///
-  /// - [DocumentChange] for the change event given to [listener].
-  /// - [documentChanges] for alternatively listening to changes through a
-  ///   [Stream].
-  /// - [addChangeListener] for listening for changes to this database.
-  /// - [removeChangeListener] for removing a previously added listener.
-  @Deprecated('Use defaultCollection.addDocumentChangeListener instead.')
-  FutureOr<ListenerToken> addDocumentChangeListener(
-    String id,
-    DocumentChangeListener listener,
-  );
-
-  /// {@macro cbl.Collection.removeChangeListener}
-  ///
-  /// See also:
-  ///
-  /// - [addChangeListener] for listening for changes to this database.
-  /// - [addDocumentChangeListener] for listening for changes to a single
-  ///   [Document].
-  @Deprecated('Use defaultCollection.removeChangeListener instead.')
-  FutureOr<void> removeChangeListener(ListenerToken token);
-
-  /// Returns a [Stream] to be notified of all changes to [Document]s in this
-  /// database.
-  ///
-  /// This is an alternative stream based API for the [addChangeListener] API.
-  ///
-  /// {@macro cbl.Collection.AsyncListenStream}
-  @Deprecated('Use defaultCollection.changes instead.')
-  Stream<DatabaseChange> changes();
-
-  /// Returns a [Stream] to be notified of changes to the [Document] with the
-  /// given [id].
-  ///
-  /// This is an alternative stream based API for the
-  /// [addDocumentChangeListener] API.
-  ///
-  /// {@macro cbl.Collection.AsyncListenStream}
-  @Deprecated('Use defaultCollection.documentChanges instead.')
-  Stream<DocumentChange> documentChanges(String id);
-
   /// Closes this database.
   ///
-  /// Before closing this database, [Replicator]s and change streams are closed.
+  /// Before closing this database, replicators and change streams are closed.
   @override
   Future<void> close();
 
   /// Closes and deletes this database.
   ///
-  /// Before closing this database, [Replicator]s and change streams are closed.
+  /// Before closing this database, replicators and change streams are closed.
   Future<void> delete();
 
   /// Performs database maintenance.
@@ -524,22 +321,6 @@ abstract interface class Database implements ClosableResource {
   /// database will be encrypted with that key; if it was already encrypted, it
   /// will be re-encrypted with the new key.
   FutureOr<void> changeEncryptionKey(EncryptionKey? newKey);
-
-  /// The names of all existing indexes.
-  @Deprecated('Use defaultCollection.indexes instead.')
-  FutureOr<List<String>> get indexes;
-
-  /// Creates a value or full-text search [index] with the given [name].
-  ///
-  /// The name can be used for deleting the index. Creating a new different
-  /// index with an existing index name will replace the old index; creating the
-  /// same index with the same name is a no-op.
-  @Deprecated('Use defaultCollection.createIndex instead.')
-  FutureOr<void> createIndex(String name, Index index);
-
-  /// Deletes the [Index] of the given [name].
-  @Deprecated('Use defaultCollection.deleteIndex instead.')
-  FutureOr<void> deleteIndex(String name);
 
   /// Creates a [Query] from a query string.
   ///
@@ -633,10 +414,6 @@ abstract interface class SyncDatabase implements Database {
     DatabaseConfiguration? config,
   }) => FfiDatabase.copy(from: from, name: name, config: config);
 
-  @Deprecated('Use defaultCollection.count instead.')
-  @override
-  int get count;
-
   @override
   SyncScope get defaultScope;
 
@@ -664,75 +441,6 @@ abstract interface class SyncDatabase implements Database {
   @override
   void deleteCollection(String name, [String scope = Scope.defaultName]);
 
-  @Deprecated('Use defaultCollection.document instead.')
-  @override
-  Document? document(String id);
-
-  @Deprecated('Use defaultCollection[] instead.')
-  @override
-  DocumentFragment operator [](String id);
-
-  @Deprecated('Use defaultCollection.typedDocument instead.')
-  @override
-  @experimental
-  D? typedDocument<D extends TypedDocumentObject>(String id);
-
-  @Deprecated('Use defaultCollection.saveDocument instead.')
-  @override
-  bool saveDocument(
-    MutableDocument document, [
-    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
-  ]);
-
-  /// Saves a [document] to this database, resolving conflicts with an sync
-  /// [conflictHandler].
-  ///
-  /// {@macro cbl.Database.saveDocumentWithConflictHandler}
-  @Deprecated(
-    'Use defaultCollection.saveDocumentWithConflictHandlerSync instead.',
-  )
-  bool saveDocumentWithConflictHandlerSync(
-    MutableDocument document,
-    SyncSaveConflictHandler conflictHandler,
-  );
-
-  @Deprecated('Use defaultCollection.saveTypedDocument instead.')
-  @override
-  @experimental
-  @useResult
-  SyncSaveTypedDocument<D, MD> saveTypedDocument<
-    D extends TypedDocumentObject,
-    MD extends TypedMutableDocumentObject
-  >(TypedMutableDocumentObject<D, MD> document);
-
-  @Deprecated('Use defaultCollection.deleteDocument instead.')
-  @override
-  bool deleteDocument(
-    Document document, [
-    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
-  ]);
-
-  @Deprecated('Use defaultCollection.deleteTypedDocument instead.')
-  @override
-  @experimental
-  bool deleteTypedDocument(
-    TypedDocumentObject document, [
-    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
-  ]);
-
-  @Deprecated('Use defaultCollection.purgeDocument instead.')
-  @override
-  void purgeDocument(Document document);
-
-  @Deprecated('Use defaultCollection.purgeTypedDocument instead.')
-  @override
-  @experimental
-  void purgeTypedDocument(TypedDocumentObject document);
-
-  @Deprecated('Use defaultCollection.purgeDocumentById instead.')
-  @override
-  void purgeDocumentById(String id);
-
   @override
   Future<void> saveBlob(Blob blob);
 
@@ -744,46 +452,11 @@ abstract interface class SyncDatabase implements Database {
   /// {@macro cbl.Database.inBatch}
   void inBatchSync(void Function() fn);
 
-  @Deprecated('Use defaultCollection.setDocumentExpiration instead.')
-  @override
-  void setDocumentExpiration(String id, DateTime? expiration);
-
-  @Deprecated('Use defaultCollection.getDocumentExpiration instead.')
-  @override
-  DateTime? getDocumentExpiration(String id);
-
-  @Deprecated('Use defaultCollection.addChangeListener instead.')
-  @override
-  ListenerToken addChangeListener(DatabaseChangeListener listener);
-
-  @Deprecated('Use defaultCollection.addDocumentChangeListener instead.')
-  @override
-  ListenerToken addDocumentChangeListener(
-    String id,
-    DocumentChangeListener listener,
-  );
-
-  @Deprecated('Use defaultCollection.removeChangeListener instead.')
-  @override
-  void removeChangeListener(ListenerToken token);
-
   @override
   void performMaintenance(MaintenanceType type);
 
   @override
   void changeEncryptionKey(EncryptionKey? newKey);
-
-  @Deprecated('Use defaultCollection.indexes instead.')
-  @override
-  List<String> get indexes;
-
-  @Deprecated('Use defaultCollection.createIndex instead.')
-  @override
-  void createIndex(String name, Index index);
-
-  @Deprecated('Use defaultCollection.deleteIndex instead.')
-  @override
-  void deleteIndex(String name);
 
   @override
   SyncQuery createQuery(String query, {bool json = false});
@@ -847,10 +520,6 @@ abstract interface class AsyncDatabase implements Database {
     DatabaseConfiguration? config,
   }) => WorkerDatabase.copy(from: from, name: name, config: config);
 
-  @Deprecated('Use defaultCollection.count instead.')
-  @override
-  Future<int> get count;
-
   @override
   Future<AsyncScope> get defaultScope;
 
@@ -884,70 +553,6 @@ abstract interface class AsyncDatabase implements Database {
     String scope = Scope.defaultName,
   ]);
 
-  @Deprecated('Use defaultCollection.document instead.')
-  @override
-  Future<Document?> document(String id);
-
-  @Deprecated('Use defaultCollection[] instead.')
-  @override
-  Future<DocumentFragment> operator [](String id);
-
-  @Deprecated('Use defaultCollection.typedDocument instead.')
-  @override
-  @experimental
-  Future<D?> typedDocument<D extends TypedDocumentObject>(String id);
-
-  @Deprecated('Use defaultCollection.saveDocument instead.')
-  @override
-  Future<bool> saveDocument(
-    MutableDocument document, [
-    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
-  ]);
-
-  @Deprecated('Use defaultCollection.saveDocumentWithConflictHandler instead.')
-  @override
-  Future<bool> saveDocumentWithConflictHandler(
-    MutableDocument document,
-    SaveConflictHandler conflictHandler,
-  );
-
-  @Deprecated('Use defaultCollection.saveTypedDocument instead.')
-  @override
-  @experimental
-  @useResult
-  AsyncSaveTypedDocument<D, MD> saveTypedDocument<
-    D extends TypedDocumentObject,
-    MD extends TypedMutableDocumentObject
-  >(TypedMutableDocumentObject<D, MD> document);
-
-  @Deprecated('Use defaultCollection.deleteDocument instead.')
-  @override
-  Future<bool> deleteDocument(
-    Document document, [
-    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
-  ]);
-
-  @Deprecated('Use defaultCollection.deleteTypedDocument instead.')
-  @override
-  @experimental
-  Future<bool> deleteTypedDocument(
-    TypedDocumentObject document, [
-    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
-  ]);
-
-  @Deprecated('Use defaultCollection.purgeDocument instead.')
-  @override
-  Future<void> purgeDocument(Document document);
-
-  @Deprecated('Use defaultCollection.purgeTypedDocument instead.')
-  @override
-  @experimental
-  Future<void> purgeTypedDocument(TypedDocumentObject document);
-
-  @Deprecated('Use defaultCollection.purgeDocumentById instead.')
-  @override
-  Future<void> purgeDocumentById(String id);
-
   @override
   Future<void> saveBlob(Blob blob);
 
@@ -957,54 +562,11 @@ abstract interface class AsyncDatabase implements Database {
   @override
   Future<void> inBatch(FutureOr<void> Function() fn);
 
-  @Deprecated('Use defaultCollection.setDocumentExpiration instead.')
-  @override
-  Future<void> setDocumentExpiration(String id, DateTime? expiration);
-
-  @Deprecated('Use defaultCollection.getDocumentExpiration instead.')
-  @override
-  Future<DateTime?> getDocumentExpiration(String id);
-
-  @Deprecated('Use defaultCollection.addChangeListener instead.')
-  @override
-  Future<ListenerToken> addChangeListener(DatabaseChangeListener listener);
-
-  @Deprecated('Use defaultCollection.addDocumentChangeListener instead.')
-  @override
-  Future<ListenerToken> addDocumentChangeListener(
-    String id,
-    DocumentChangeListener listener,
-  );
-
-  @Deprecated('Use defaultCollection.removeChangeListener instead.')
-  @override
-  Future<void> removeChangeListener(ListenerToken token);
-
-  @Deprecated('Use defaultCollection.changes instead.')
-  @override
-  AsyncListenStream<DatabaseChange> changes();
-
-  @Deprecated('Use defaultCollection.documentChanges instead.')
-  @override
-  AsyncListenStream<DocumentChange> documentChanges(String id);
-
   @override
   Future<void> performMaintenance(MaintenanceType type);
 
   @override
   Future<void> changeEncryptionKey(EncryptionKey? newKey);
-
-  @Deprecated('Use defaultCollection.indexes instead.')
-  @override
-  Future<List<String>> get indexes;
-
-  @Deprecated('Use defaultCollection.createIndex instead.')
-  @override
-  Future<void> createIndex(String name, Index index);
-
-  @Deprecated('Use defaultCollection.deleteIndex instead.')
-  @override
-  Future<void> deleteIndex(String name);
 
   @override
   Future<AsyncQuery> createQuery(String query, {bool json = false});

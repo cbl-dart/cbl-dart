@@ -41,7 +41,7 @@ final class ProxyReplicator extends ProxyObject
 
   static Future<ProxyReplicator> create(ReplicatorConfiguration config) async {
     final (database, collections) =
-        await resolveReplicatorCollections<
+        resolveReplicatorCollections<
           AsyncDatabase,
           AsyncCollection,
           ProxyDatabase,
@@ -257,19 +257,6 @@ final class ProxyReplicator extends ProxyObject
       addListener: _addDocumentReplicationListener,
     ),
   );
-
-  @override
-  Future<Set<String>> get pendingDocumentIds async =>
-      pendingDocumentIdsInCollection(
-        (await _database.defaultCollection) as ProxyCollection,
-      );
-
-  @override
-  Future<bool> isDocumentPending(String documentId) async =>
-      isDocumentPendingInCollection(
-        documentId,
-        (await _database.defaultCollection) as ProxyCollection,
-      );
 
   @override
   Future<Set<String>> pendingDocumentIdsInCollection(

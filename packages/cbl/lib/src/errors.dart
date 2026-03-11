@@ -293,32 +293,15 @@ final class MbedTlsException extends CouchbaseLiteException {
   String get _typeName => 'MbedTlsException';
 }
 
-/// Exception thrown when JSON data is invalid.
-@Deprecated(
-  'Use FleeceException instead. This class will be removed in the future.',
-)
-final class InvalidJsonException extends CouchbaseLiteException {
-  // ignore: deprecated_consistency
-  /// Creates an exception which is thrown when JSON data is invalid.
-  @Deprecated(
-    'Use FleeceException instead. This class will be removed in the future.',
-  )
-  InvalidJsonException(this.message);
-
-  @override
-  final String message;
-
-  @override
-  String get _typeName => 'InvalidJsonException';
-}
-
 /// An exception that is thrown when a Fleece error is detected.
 ///
 /// Fleece is the library used to serialize and deserialize data. This type of
 /// exception should be reported.
-// ignore: deprecated_member_use_from_same_package
-final class FleeceException extends InvalidJsonException {
-  FleeceException(super.message);
+final class FleeceException extends CouchbaseLiteException {
+  FleeceException(this.message);
+
+  @override
+  final String message;
 
   @override
   String get _typeName => 'FleeceException';

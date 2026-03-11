@@ -1,6 +1,3 @@
-// TODO(blaugold): Migrate to collection API.
-// ignore_for_file: deprecated_member_use
-
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
@@ -28,26 +25,29 @@ void main() {
     apiTest('create Replicator smoke test', () async {
       final db = await openTestDatabase();
 
-      final repl = await Replicator.create(
-        ReplicatorConfiguration(
-          database: db,
-          target: UrlEndpoint(syncGatewayReplicationUrl),
-          authenticator: BasicAuthenticator(
-            username: 'user',
-            password: 'password',
-          ),
-          headers: {'Client': 'test'},
-          pinnedServerCertificate: Uint8List(0),
-          trustedRootCertificates: Uint8List(0),
-          channels: ['channel'],
-          documentIds: ['id'],
-          pushFilter: (document, isDeleted) => true,
-          pullFilter: (document, isDeleted) => true,
-          conflictResolver: ConflictResolver.from(
-            (conflict) => conflict.localDocument,
-          ),
-        ),
-      );
+      final config =
+          ReplicatorConfiguration(
+            target: UrlEndpoint(syncGatewayReplicationUrl),
+            authenticator: BasicAuthenticator(
+              username: 'user',
+              password: 'password',
+            ),
+            headers: {'Client': 'test'},
+            pinnedServerCertificate: Uint8List(0),
+            trustedRootCertificates: Uint8List(0),
+          )..addCollection(
+            await db.defaultCollection,
+            CollectionConfiguration(
+              channels: ['channel'],
+              documentIds: ['id'],
+              pushFilter: (document, isDeleted) => true,
+              pullFilter: (document, isDeleted) => true,
+              conflictResolver: ConflictResolver.from(
+                (conflict) => conflict.localDocument,
+              ),
+            ),
+          );
+      final repl = await Replicator.create(config);
 
       // Check that is possible to start the replicator with this configuration.
       await repl.start();
@@ -89,13 +89,11 @@ void main() {
     apiTest('create Replicator with SessionAuthenticator', () async {
       final db = await openTestDatabase();
 
-      final repl = await Replicator.create(
-        ReplicatorConfiguration(
-          database: db,
-          target: UrlEndpoint(syncGatewayReplicationUrl),
-          authenticator: SessionAuthenticator(sessionId: 'a', cookieName: 'b'),
-        ),
-      );
+      final config = ReplicatorConfiguration(
+        target: UrlEndpoint(syncGatewayReplicationUrl),
+        authenticator: SessionAuthenticator(sessionId: 'a', cookieName: 'b'),
+      )..addCollection(await db.defaultCollection);
+      final repl = await Replicator.create(config);
 
       // Check that is possible to start the replicator with this configuration.
       await repl.start();
@@ -106,13 +104,11 @@ void main() {
       // https://github.com/cbl-dart/cbl-dart/issues/349
       final db = await openTestDatabase();
 
+      final config = ReplicatorConfiguration(
+        target: UrlEndpoint(Uri.parse('http://foo')),
+      )..addCollection(await db.defaultCollection);
       expect(
-        () => Replicator.create(
-          ReplicatorConfiguration(
-            database: db,
-            target: UrlEndpoint(Uri.parse('http://foo')),
-          ),
-        ),
+        () => Replicator.create(config),
         throwsA(
           isA<DatabaseException>().having(
             (exception) => exception.code,
@@ -126,9 +122,8 @@ void main() {
     apiTest('config returns copy', () async {
       final db = await openTestDatabase();
       final config = ReplicatorConfiguration(
-        database: db,
         target: UrlEndpoint(syncGatewayReplicationUrl),
-      );
+      )..addCollection(await db.defaultCollection);
       final repl = await Replicator.create(config);
       addTearDown(repl.close);
       final configA = repl.config;
@@ -153,6 +148,8 @@ void main() {
       );
       addTearDown(pullRepl.close);
 
+      final pushCollection = await pushDb.defaultCollection;
+
       final timestamp = DateTime.now().microsecondsSinceEpoch;
       final doc = MutableDocument.withId(
         'continuouslyReplicatedDoc-$timestamp',
@@ -162,7 +159,7 @@ void main() {
 
       await pushRepl.start();
       await pullRepl.start();
-      await pushDb.saveDocument(doc);
+      await pushCollection.saveDocument(doc);
     });
 
     apiTest('listen to query while replicator is pulling', () async {
@@ -186,11 +183,12 @@ void main() {
 
       final pushDb = await openTestDatabase(name: 'Push');
       final pullDb = await openTestDatabase(name: 'Pull');
+      final pushCollection = await pushDb.defaultCollection;
 
       final docA = MutableDocument();
-      await pushDb.saveDocument(docA);
+      await pushCollection.saveDocument(docA);
       final docB = MutableDocument();
-      await pushDb.saveDocument(docB);
+      await pushCollection.saveDocument(docB);
 
       final pusher = await pushDb.createTestReplicator(
         replicatorType: ReplicatorType.push,
@@ -217,11 +215,12 @@ void main() {
 
       final pushDb = await openTestDatabase(name: 'Push');
       final pullDb = await openTestDatabase(name: 'Push');
+      final pushCollection = await pushDb.defaultCollection;
 
       final docA = MutableDocument({'channels': 'A'});
-      await pushDb.saveDocument(docA);
+      await pushCollection.saveDocument(docA);
       final docB = MutableDocument();
-      await pushDb.saveDocument(docB);
+      await pushCollection.saveDocument(docB);
 
       final pusher = await pushDb.createTestReplicator(
         replicatorType: ReplicatorType.push,
@@ -243,11 +242,12 @@ void main() {
     apiTest('use pushFilter to filter pushed documents', () async {
       final pushDb = await openTestDatabase(name: 'Push');
       final pullDb = await openTestDatabase(name: 'Pull');
+      final pushCollection = await pushDb.defaultCollection;
 
       final docA = MutableDocument();
-      await pushDb.saveDocument(docA);
+      await pushCollection.saveDocument(docA);
       final docB = MutableDocument();
-      await pushDb.saveDocument(docB);
+      await pushCollection.saveDocument(docB);
 
       final pusher = await pushDb.createTestReplicator(
         replicatorType: ReplicatorType.push,
@@ -280,11 +280,12 @@ void main() {
         name: 'Pull',
         typedDataAdapter: testAdapter,
       );
+      final pushCollection = await pushDb.defaultCollection;
 
       final docA = MutableTestTypedDoc();
-      await pushDb.saveTypedDocument(docA).withConcurrencyControl();
+      await pushCollection.saveTypedDocument(docA).withConcurrencyControl();
       final docB = MutableTestTypedDoc();
-      await pushDb.saveTypedDocument(docB).withConcurrencyControl();
+      await pushCollection.saveTypedDocument(docB).withConcurrencyControl();
 
       final pusher = await pushDb.createTestReplicator(
         replicatorType: ReplicatorType.push,
@@ -320,11 +321,12 @@ void main() {
         name: 'Pull',
         typedDataAdapter: testAdapter,
       );
+      final pushCollection = await pushDb.defaultCollection;
 
       final docA = MutableTestTypedDoc();
-      await pushDb.saveTypedDocument(docA).withConcurrencyControl();
+      await pushCollection.saveTypedDocument(docA).withConcurrencyControl();
       final docB = MutableTestTypedDoc();
-      await pushDb.saveTypedDocument(docB).withConcurrencyControl();
+      await pushCollection.saveTypedDocument(docB).withConcurrencyControl();
 
       final pushConfig =
           ReplicatorConfiguration(
@@ -367,9 +369,11 @@ void main() {
         () async {
           final pushDb = await openTestDatabase(name: 'Push');
           final pullDb = await openTestDatabase(name: 'Pull');
+          final pushCollection = await pushDb.defaultCollection;
+          final pullCollection = await pullDb.defaultCollection;
 
           final doc = MutableDocument();
-          await pushDb.saveDocument(doc);
+          await pushCollection.saveDocument(doc);
 
           final pusher = await pushDb.createTestReplicator(
             replicatorType: ReplicatorType.push,
@@ -389,7 +393,7 @@ void main() {
           await puller.replicateOneShot();
 
           // Documents where filter throws are not pushed.
-          expect(await pullDb.document(doc.id), isNull);
+          expect(await pullCollection.document(doc.id), isNull);
         },
         (error, _) {
           uncaughtError = error;
@@ -401,11 +405,12 @@ void main() {
     apiTest('use pullFilter to filter pulled documents', () async {
       final pushDb = await openTestDatabase(name: 'Push');
       final pullDb = await openTestDatabase(name: 'Pull');
+      final pushCollection = await pushDb.defaultCollection;
 
       final docA = MutableDocument();
-      await pushDb.saveDocument(docA);
+      await pushCollection.saveDocument(docA);
       final docB = MutableDocument();
-      await pushDb.saveDocument(docB);
+      await pushCollection.saveDocument(docB);
 
       final pusher = await pushDb.createTestReplicator(
         replicatorType: ReplicatorType.push,
@@ -441,11 +446,12 @@ void main() {
         name: 'Pull',
         typedDataAdapter: testAdapter,
       );
+      final pushCollection = await pushDb.defaultCollection;
 
       final docA = MutableTestTypedDoc();
-      await pushDb.saveTypedDocument(docA).withConcurrencyControl();
+      await pushCollection.saveTypedDocument(docA).withConcurrencyControl();
       final docB = MutableTestTypedDoc();
-      await pushDb.saveTypedDocument(docB).withConcurrencyControl();
+      await pushCollection.saveTypedDocument(docB).withConcurrencyControl();
 
       final pusher = await pushDb.createTestReplicator(
         replicatorType: ReplicatorType.push,
@@ -484,11 +490,12 @@ void main() {
         name: 'Pull',
         typedDataAdapter: testAdapter,
       );
+      final pushCollection = await pushDb.defaultCollection;
 
       final docA = MutableTestTypedDoc();
-      await pushDb.saveTypedDocument(docA).withConcurrencyControl();
+      await pushCollection.saveTypedDocument(docA).withConcurrencyControl();
       final docB = MutableTestTypedDoc();
-      await pushDb.saveTypedDocument(docB).withConcurrencyControl();
+      await pushCollection.saveTypedDocument(docB).withConcurrencyControl();
 
       final pusher = await pushDb.createTestReplicator(
         replicatorType: ReplicatorType.push,
@@ -531,9 +538,11 @@ void main() {
         () async {
           final pushDb = await openTestDatabase(name: 'Push');
           final pullDb = await openTestDatabase(name: 'Pull');
+          final pushCollection = await pushDb.defaultCollection;
+          final pullCollection = await pullDb.defaultCollection;
 
           final doc = MutableDocument();
-          await pushDb.saveDocument(doc);
+          await pushCollection.saveDocument(doc);
 
           final pusher = await pushDb.createTestReplicator(
             replicatorType: ReplicatorType.push,
@@ -553,7 +562,7 @@ void main() {
           await puller.replicateOneShot();
 
           // Documents where filter throws are not pulled.
-          expect(await pullDb.document(doc.id), isNull);
+          expect(await pullCollection.document(doc.id), isNull);
         },
         (error, _) {
           uncaughtError = error;
@@ -845,10 +854,11 @@ void main() {
       'document replication listener is notified while listening',
       () async {
         final db = await openTestDatabase();
+        final collection = await db.defaultCollection;
         final replicator = await db.createTestReplicator();
         addTearDown(replicator.close);
         final doc = MutableDocument();
-        await db.saveDocument(doc);
+        await collection.saveDocument(doc);
 
         late final ListenerToken token;
         token = await replicator.addDocumentReplicationListener(
@@ -867,7 +877,7 @@ void main() {
         // Trigger two replication runs, to verify that after the listener is
         // removed it won't be called any more.
         await replicator.replicateOneShot();
-        await db.saveDocument(doc);
+        await collection.saveDocument(doc);
         await replicator.replicateOneShot();
       },
     );
@@ -890,10 +900,11 @@ void main() {
 
     apiTest('documentReplications emits document replications', () async {
       final db = await openTestDatabase();
+      final collection = await db.defaultCollection;
       final replicator = await db.createTestReplicator();
       addTearDown(replicator.close);
       final doc = MutableDocument();
-      await db.saveDocument(doc);
+      await collection.saveDocument(doc);
 
       expect(
         replicator.documentReplications(),
@@ -926,8 +937,10 @@ void main() {
         final replicator = await db.createTestReplicator();
         addTearDown(replicator.close);
         final doc = MutableDocument();
-        await db.saveDocument(doc);
-        expect(await replicator.pendingDocumentIds, [doc.id]);
+        await collection.saveDocument(doc);
+        expect(await replicator.pendingDocumentIdsInCollection(collection), [
+          doc.id,
+        ]);
         expect(await replicator.pendingDocumentIdsInCollection(collection), [
           doc.id,
         ]);
@@ -942,8 +955,11 @@ void main() {
         final replicator = await db.createTestReplicator();
         addTearDown(replicator.close);
         final doc = MutableDocument();
-        await db.saveDocument(doc);
-        expect(await replicator.isDocumentPending(doc.id), isTrue);
+        await collection.saveDocument(doc);
+        expect(
+          await replicator.isDocumentPendingInCollection(doc.id, collection),
+          isTrue,
+        );
         expect(
           await replicator.isDocumentPendingInCollection(doc.id, collection),
           isTrue,
@@ -979,17 +995,19 @@ void main() {
     apiTest('use database endpoint', () async {
       final dbA = await openTestDatabase(name: 'a');
       final dbB = await openTestDatabase(name: 'b');
-      final repl = await Replicator.create(
-        ReplicatorConfiguration(database: dbA, target: DatabaseEndpoint(dbB)),
-      );
+      final collectionA = await dbA.defaultCollection;
+      final collectionB = await dbB.defaultCollection;
+      final config = ReplicatorConfiguration(target: DatabaseEndpoint(dbB))
+        ..addCollection(collectionA);
+      final repl = await Replicator.create(config);
       addTearDown(repl.close);
 
       final doc = MutableDocument();
-      await dbA.saveDocument(doc);
+      await collectionA.saveDocument(doc);
 
       await repl.replicateOneShot();
 
-      expect(await dbB.document(doc.id), isNotNull);
+      expect(await collectionB.document(doc.id), isNotNull);
     });
 
     apiTest(
@@ -1001,15 +1019,10 @@ void main() {
           async: getSharedSyncTestDatabase,
         );
 
+        final config = ReplicatorConfiguration(target: DatabaseEndpoint(dbB))
+          ..addCollection(await dbA.defaultCollection);
         expect(
-          Future.sync(
-            () => Replicator.create(
-              ReplicatorConfiguration(
-                database: dbA,
-                target: DatabaseEndpoint(dbB),
-              ),
-            ),
-          ),
+          Future.sync(() => Replicator.create(config)),
           throwsArgumentError,
         );
       },
@@ -1017,10 +1030,11 @@ void main() {
 
     test('supports starting replicator while async document save', () async {
       final db = await openAsyncTestDatabase();
+      final collection = await db.defaultCollection;
       final repl = await db.createTestReplicator();
       addTearDown(repl.close);
 
-      final documentSave = db.saveDocument(MutableDocument());
+      final documentSave = collection.saveDocument(MutableDocument());
       final replStart = repl.start();
 
       await documentSave;
@@ -1080,12 +1094,13 @@ Future<void> autoPurgeTest({required bool enableAutoPurge}) async {
   final documentAccessRemoved = Completer<void>();
 
   final db = await openTestDatabase();
+  final collection = await db.defaultCollection;
 
   final doc = MutableDocument({
     'channels': ['Alice'],
   });
 
-  await db.saveDocument(doc);
+  await collection.saveDocument(doc);
 
   final replicator = await db.createTestReplicator(
     authenticator: aliceAuthenticator,
@@ -1116,13 +1131,16 @@ Future<void> autoPurgeTest({required bool enableAutoPurge}) async {
 
   // Remove document from the user's channel.
   doc['channels'].value = null;
-  db.saveDocument(doc);
+  collection.saveDocument(doc);
 
   await documentAccessRemoved.future;
 
   // Verify whether or not the document has been auto purged depending on
   // whether auto purge is enabled.
-  expect(await db.document(doc.id), enableAutoPurge ? isNull : isNotNull);
+  expect(
+    await collection.document(doc.id),
+    enableAutoPurge ? isNull : isNotNull,
+  );
 }
 
 class TestTypedDoc<I extends Document>
