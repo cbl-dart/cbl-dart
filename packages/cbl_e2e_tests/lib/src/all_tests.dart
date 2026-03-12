@@ -1,11 +1,10 @@
 import 'bindings/bindings_test.dart' as bindings_bindings;
 import 'database/collection_test.dart' as database_collection;
-import 'database/database_change_test.dart' as database_database_change;
 import 'database/database_configuration_test.dart'
     as database_database_configuration;
 import 'database/database_test.dart' as database_database;
 import 'database/document_change_test.dart' as database_document_change;
-import 'database/typed_database_test.dart' as typed_database;
+import 'database/typed_collection_test.dart' as typed_collection;
 import 'document/array_test.dart' as document_array_test;
 import 'document/blob_test.dart' as document_blob_test;
 import 'document/dictionary_test.dart' as document_dictionary_test;
@@ -49,7 +48,6 @@ import 'typed_data/registry_test.dart' as typed_data_runtime_support;
 final tests = [
   bindings_bindings.main,
   database_collection.main,
-  database_database_change.main,
   database_database_configuration.main,
   database_database.main,
   database_document_change.main,
@@ -88,7 +86,7 @@ final tests = [
   typed_data_conversion.main,
   typed_data_helpers.main,
   typed_data_runtime_support.main,
-  typed_database.main,
+  typed_collection.main,
   url_endpoint_listener.main,
 ];
 

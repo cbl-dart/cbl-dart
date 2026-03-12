@@ -34,7 +34,6 @@ import 'collection.dart';
 import 'collection_change.dart';
 import 'database.dart';
 import 'database_base.dart';
-import 'database_change.dart';
 import 'database_configuration.dart';
 import 'document_change.dart';
 import 'proxy_blob_store.dart';
@@ -108,10 +107,6 @@ final class ProxyDatabase extends ProxyObject
 
   @override
   String? path;
-
-  @override
-  Future<int> get count =>
-      defaultCollection.then((collection) => collection.count);
 
   @override
   DatabaseConfiguration get config => DatabaseConfiguration.from(_config);
@@ -189,79 +184,6 @@ final class ProxyDatabase extends ProxyObject
   );
 
   @override
-  Future<Document?> document(String id) =>
-      defaultCollection.then((collection) => collection.document(id));
-
-  @override
-  Future<DocumentFragment> operator [](String id) =>
-      defaultCollection.then((collection) => collection[id]);
-
-  @override
-  Future<D?> typedDocument<D extends TypedDocumentObject>(String id) =>
-      // ignore: cast_nullable_to_non_nullable
-      super.typedDocument<D>(id) as Future<D?>;
-
-  @override
-  Future<bool> saveDocument(
-    covariant MutableDelegateDocument document, [
-    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
-  ]) => defaultCollection.then(
-    (collection) => collection.saveDocument(document, concurrencyControl),
-  );
-
-  @override
-  Future<bool> saveDocumentWithConflictHandler(
-    covariant MutableDelegateDocument document,
-    SaveConflictHandler conflictHandler,
-  ) => defaultCollection.then(
-    (collection) =>
-        collection.saveDocumentWithConflictHandler(document, conflictHandler),
-  );
-
-  @override
-  AsyncSaveTypedDocument<D, MD> saveTypedDocument<
-    D extends TypedDocumentObject,
-    MD extends TypedMutableDocumentObject
-  >(TypedMutableDocumentObject<D, MD> document) =>
-      _ProxySaveTypedDocument(this, () => defaultCollection, document);
-
-  @override
-  Future<bool> deleteDocument(
-    covariant DelegateDocument document, [
-    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
-  ]) => defaultCollection.then(
-    (collection) => collection.deleteDocument(document, concurrencyControl),
-  );
-
-  @override
-  Future<bool> deleteTypedDocument(
-    TypedDocumentObject document, [
-    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
-  ]) async {
-    useWithTypedData();
-    return deleteDocument(
-      document.internal as DelegateDocument,
-      concurrencyControl,
-    );
-  }
-
-  @override
-  Future<void> purgeDocument(covariant DelegateDocument document) =>
-      defaultCollection.then(
-        (collection) => collection.purgeDocument(document),
-      );
-
-  @override
-  Future<void> purgeTypedDocument(TypedDocumentObject document) async {
-    useWithTypedData();
-    await purgeDocument(document.internal as DelegateDocument);
-  }
-
-  @override
-  Future<void> purgeDocumentById(String id) =>
-      defaultCollection.then((collection) => collection.purgeDocumentById(id));
-
-  @override
   Future<void> saveBlob(covariant BlobImpl blob) =>
       use(() => blob.ensureIsInstalled(this));
 
@@ -277,63 +199,6 @@ final class ProxyDatabase extends ProxyObject
   @override
   Future<void> inBatch(FutureOr<void> Function() fn) =>
       use(() => runInTransactionAsync(fn, requiresNewTransaction: true));
-
-  @override
-  Future<void> setDocumentExpiration(String id, DateTime? expiration) =>
-      defaultCollection.then(
-        (collection) => collection.setDocumentExpiration(id, expiration),
-      );
-
-  @override
-  Future<DateTime?> getDocumentExpiration(String id) => defaultCollection.then(
-    (collection) => collection.getDocumentExpiration(id),
-  );
-
-  @override
-  Future<ListenerToken> addChangeListener(DatabaseChangeListener listener) =>
-      defaultCollection.then(
-        (collection) => collection.addChangeListener(
-          (change) => listener(change.toDatabaseChange()),
-        ),
-      );
-
-  @override
-  Future<ListenerToken> addDocumentChangeListener(
-    String id,
-    DocumentChangeListener listener,
-  ) => defaultCollection.then(
-    (collection) => collection.addDocumentChangeListener(id, listener),
-  );
-
-  @override
-  Future<void> removeChangeListener(ListenerToken token) async =>
-      defaultCollection.then(
-        (collection) => collection.removeChangeListener(token),
-      );
-
-  @override
-  AsyncListenStream<DatabaseChange> changes() => useSync(
-    () => ListenerStream(
-      parent: this,
-      addListener: (listener) async {
-        final collection = (await defaultCollection) as ProxyCollection;
-        return collection._addChangeListener(
-          (change) => listener(change.toDatabaseChange()),
-        );
-      },
-    ),
-  );
-
-  @override
-  AsyncListenStream<DocumentChange> documentChanges(String id) => useSync(
-    () => ListenerStream(
-      parent: this,
-      addListener: (listener) async {
-        final collection = (await defaultCollection) as ProxyCollection;
-        return collection._addDocumentChangeListener(id, listener);
-      },
-    ),
-  );
 
   @override
   Future<void> performClose() async {
@@ -364,20 +229,6 @@ final class ProxyDatabase extends ProxyObject
       ChangeDatabaseEncryptionKey(databaseId: objectId, encryptionKey: newKey),
     ),
   );
-
-  @override
-  Future<List<String>> get indexes =>
-      defaultCollection.then((collections) => collections.indexes);
-
-  @override
-  Future<void> createIndex(String name, covariant IndexImplInterface index) =>
-      defaultCollection.then(
-        (collections) => collections.createIndex(name, index),
-      );
-
-  @override
-  Future<void> deleteIndex(String name) =>
-      defaultCollection.then((collections) => collections.deleteIndex(name));
 
   @override
   Future<AsyncQuery> createQuery(String query, {bool json = false}) async {

@@ -3,8 +3,6 @@ import 'package:meta/meta.dart';
 
 import '../document.dart';
 import 'collection.dart';
-import 'database_base.dart';
-import 'database_change.dart';
 
 /// A [Collection] change event.
 ///
@@ -34,10 +32,5 @@ final class CollectionChange {
 
   @override
   String toString() =>
-      'CollectionChange(database: $collection, documentIds: $documentIds)';
-}
-
-extension InternalCollectionChange on CollectionChange {
-  DatabaseChange toDatabaseChange() =>
-      DatabaseChange((collection as CollectionBase).database, documentIds);
+      'CollectionChange(collection: $collection, documentIds: $documentIds)';
 }

@@ -32,7 +32,6 @@ import 'collection.dart';
 import 'collection_change.dart';
 import 'database.dart';
 import 'database_base.dart';
-import 'database_change.dart';
 import 'database_configuration.dart';
 import 'document_change.dart';
 import 'ffi_blob_store.dart';
@@ -121,9 +120,6 @@ final class FfiDatabase
   String? _path;
 
   @override
-  int get count => defaultCollection.count;
-
-  @override
   DatabaseConfiguration get config => DatabaseConfiguration.from(_config);
 
   @override
@@ -193,78 +189,6 @@ final class FfiDatabase
       DatabaseBindings.endTransaction(pointer, commit: commit);
 
   @override
-  Document? document(String id) => defaultCollection.document(id);
-
-  @override
-  DocumentFragment operator [](String id) => defaultCollection[id];
-
-  @override
-  D? typedDocument<D extends TypedDocumentObject>(String id) =>
-      super.typedDocument<D>(id) as D?;
-
-  @override
-  bool saveDocument(
-    covariant MutableDelegateDocument document, [
-    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
-  ]) => defaultCollection.saveDocument(document, concurrencyControl);
-
-  @override
-  FutureOr<bool> saveDocumentWithConflictHandler(
-    covariant MutableDelegateDocument document,
-    SaveConflictHandler conflictHandler,
-  ) => defaultCollection.saveDocumentWithConflictHandler(
-    document,
-    conflictHandler,
-  );
-
-  @override
-  bool saveDocumentWithConflictHandlerSync(
-    covariant MutableDelegateDocument document,
-    SyncSaveConflictHandler conflictHandler,
-  ) => defaultCollection.saveDocumentWithConflictHandlerSync(
-    document,
-    conflictHandler,
-  );
-
-  @override
-  SyncSaveTypedDocument<D, MD> saveTypedDocument<
-    D extends TypedDocumentObject,
-    MD extends TypedMutableDocumentObject
-  >(TypedMutableDocumentObject<D, MD> document) =>
-      _FfiSaveTypedDocument(this, () => defaultCollection, document);
-
-  @override
-  bool deleteDocument(
-    covariant DelegateDocument document, [
-    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
-  ]) => defaultCollection.deleteDocument(document, concurrencyControl);
-
-  @override
-  bool deleteTypedDocument(
-    TypedDocumentObject document, [
-    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
-  ]) {
-    useWithTypedData();
-    return deleteDocument(
-      document.internal as DelegateDocument,
-      concurrencyControl,
-    );
-  }
-
-  @override
-  void purgeDocument(covariant DelegateDocument document) =>
-      defaultCollection.purgeDocument(document);
-
-  @override
-  void purgeTypedDocument(TypedDocumentObject document) {
-    useWithTypedData();
-    purgeDocument(document.internal as DelegateDocument);
-  }
-
-  @override
-  void purgeDocumentById(String id) => defaultCollection.purgeDocumentById(id);
-
-  @override
   Future<void> saveBlob(covariant BlobImpl blob) => use(
     () => blob.ensureIsInstalled(this, allowFromStreamForSyncDatabase: true),
   );
@@ -285,38 +209,6 @@ final class FfiDatabase
   @override
   void inBatchSync(void Function() fn) =>
       useSync(() => runInTransactionSync(fn, requiresNewTransaction: true));
-
-  @override
-  void setDocumentExpiration(String id, DateTime? expiration) =>
-      defaultCollection.setDocumentExpiration(id, expiration);
-
-  @override
-  DateTime? getDocumentExpiration(String id) =>
-      defaultCollection.getDocumentExpiration(id);
-
-  @override
-  ListenerToken addChangeListener(DatabaseChangeListener listener) =>
-      defaultCollection.addChangeListener(
-        (change) => listener(change.toDatabaseChange()),
-      );
-
-  @override
-  ListenerToken addDocumentChangeListener(
-    String id,
-    DocumentChangeListener listener,
-  ) => defaultCollection.addDocumentChangeListener(id, listener);
-
-  @override
-  void removeChangeListener(ListenerToken token) =>
-      defaultCollection.removeChangeListener(token);
-
-  @override
-  Stream<DatabaseChange> changes() =>
-      defaultCollection.changes().map((change) => change.toDatabaseChange());
-
-  @override
-  Stream<DocumentChange> documentChanges(String id) =>
-      defaultCollection.documentChanges(id);
 
   @override
   Future<void> performClose() async {
@@ -349,16 +241,6 @@ final class FfiDatabase
       (newKey as EncryptionKeyImpl?)?.cblKey,
     );
   });
-
-  @override
-  List<String> get indexes => defaultCollection.indexes;
-
-  @override
-  void createIndex(String name, covariant IndexImplInterface index) =>
-      defaultCollection.createIndex(name, index);
-
-  @override
-  void deleteIndex(String name) => defaultCollection.deleteIndex(name);
 
   @override
   SyncQuery createQuery(String query, {bool json = false}) => FfiQuery(

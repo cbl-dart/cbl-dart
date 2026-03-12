@@ -202,6 +202,148 @@ strategy. Applications that relied on detecting conflict resolver failures
 should catch exceptions within their `api|ConflictResolver.resolve`
 implementation and handle them explicitly.
 
+## Removed deprecated Database APIs
+
+In v3, `api|Database` provided document operations, change listeners, and index
+management directly. These were deprecated in favor of the collection-based API.
+In v4, these deprecated methods have been removed. Use the equivalent methods on
+`api|Collection` (typically via `defaultCollection`) instead.
+
+### Document operations
+
+```dart
+// Before (v3)
+final doc = await db.document('doc-id');
+await db.saveDocument(mutableDoc);
+await db.deleteDocument(doc);
+await db.purgeDocumentById('doc-id');
+await db.setDocumentExpiration('doc-id', expiry);
+final count = await db.count;
+
+// After (v4)
+final collection = await db.defaultCollection;
+final doc = await collection.document('doc-id');
+await collection.saveDocument(mutableDoc);
+await collection.deleteDocument(doc);
+await collection.purgeDocumentById('doc-id');
+await collection.setDocumentExpiration('doc-id', expiry);
+final count = collection.count;
+```
+
+The following `api|Database` methods have been removed:
+
+- `document`, `typedDocument`, `operator []`
+- `saveDocument`, `saveDocumentWithConflictHandler`, `saveTypedDocument`
+- `deleteDocument`, `deleteTypedDocument`
+- `purgeDocument`, `purgeTypedDocument`, `purgeDocumentById`
+- `setDocumentExpiration`, `getDocumentExpiration`
+- `count`
+
+### Change listeners
+
+```dart
+// Before (v3)
+db.addChangeListener((change) { /* DatabaseChange */ });
+db.addDocumentChangeListener('doc-id', (change) { ... });
+db.changes(); // Stream<DatabaseChange>
+db.documentChanges('doc-id');
+
+// After (v4)
+final collection = await db.defaultCollection;
+collection.addChangeListener((change) { /* CollectionChange */ });
+collection.addDocumentChangeListener('doc-id', (change) { ... });
+collection.changes(); // Stream<CollectionChange>
+collection.documentChanges('doc-id');
+```
+
+The `DatabaseChange` class and `DatabaseChangeListener` typedef have been
+removed. Use `api|CollectionChange` and `api|CollectionChangeListener` instead.
+
+### Index management
+
+```dart
+// Before (v3)
+await db.createIndex('myIndex', index);
+await db.deleteIndex('myIndex');
+final names = await db.indexes;
+
+// After (v4)
+final collection = await db.defaultCollection;
+await collection.createIndex('myIndex', index);
+await collection.deleteIndex('myIndex');
+final names = await collection.indexes;
+```
+
+## Removed deprecated Replicator APIs
+
+### ReplicatorConfiguration changes
+
+The `database` parameter and all collection-level options on
+`api|ReplicatorConfiguration` have been removed. Use
+`api|CollectionConfiguration` and `api|ReplicatorConfiguration.addCollection`
+instead.
+
+```dart
+// Before (v3)
+final config = ReplicatorConfiguration(
+  database: db,
+  target: urlEndpoint,
+  channels: ['channel1'],
+  pushFilter: myPushFilter,
+  conflictResolver: myResolver,
+);
+
+// After (v4)
+final collection = await db.defaultCollection;
+final config = ReplicatorConfiguration(target: urlEndpoint);
+config.addCollection(collection, CollectionConfiguration(
+  channels: ['channel1'],
+  pushFilter: myPushFilter,
+  conflictResolver: myResolver,
+));
+```
+
+The following `api|ReplicatorConfiguration` properties have been removed:
+
+- `database`
+- `channels`, `documentIds`
+- `pushFilter`, `typedPushFilter`, `pullFilter`, `typedPullFilter`
+- `conflictResolver`, `typedConflictResolver`
+
+### Pending document APIs
+
+```dart
+// Before (v3)
+final ids = await replicator.pendingDocumentIds;
+final isPending = await replicator.isDocumentPending('doc-id');
+
+// After (v4)
+final ids = await replicator.pendingDocumentIdsInCollection(collection);
+final isPending = await replicator.isDocumentPendingInCollection('doc-id', collection);
+```
+
+## Removed `DataSource.database`
+
+Use `api|DataSource.collection` instead:
+
+```dart
+// Before (v3)
+final query = const QueryBuilder()
+    .select(SelectResult.all())
+    .from(DataSource.database(db));
+
+// After (v4)
+final collection = await db.defaultCollection;
+final query = const QueryBuilder()
+    .select(SelectResult.all())
+    .from(DataSource.collection(collection));
+```
+
+## Removed `InvalidJsonException`
+
+The deprecated `InvalidJsonException` class has been removed. Use
+`api|FleeceException` instead.
+
 ## Dart SDK requirement
 
 Version 4 requires Dart SDK `^3.10.0` due to the use of Dart native assets.
@@ -247,5 +389,16 @@ No manual steps are required.
    or `0` -- they now return `true`/`false`.
 10. **Remove hardcoded revision IDs** -- revision IDs are no longer
     deterministic.
-11. **Run your app** -- native libraries will be built automatically on first
+11. **Migrate Database document/index/listener APIs** to use `defaultCollection`
+    methods instead.
+12. **Migrate ReplicatorConfiguration** -- replace `database` parameter with
+    `addCollection`, move `channels`/`documentIds`/filters/resolvers into
+    `CollectionConfiguration`.
+13. **Migrate Replicator pending document APIs** -- replace
+    `pendingDocumentIds`/`isDocumentPending` with
+    `pendingDocumentIdsInCollection`/`isDocumentPendingInCollection`.
+14. **Replace `DataSource.database(db)`** with
+    `DataSource.collection(collection)`.
+15. **Replace `InvalidJsonException`** with `FleeceException`.
+16. **Run your app** -- native libraries will be built automatically on first
     run.

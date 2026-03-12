@@ -1,6 +1,3 @@
-// TODO(blaugold): Migrate to collection API.
-// ignore_for_file: deprecated_member_use
-
 import 'dart:async';
 import 'dart:convert';
 
@@ -138,7 +135,7 @@ Future<void> updateDocumentByAdmin(
 extension ReplicatorUtilsDatabaseExtension on Database {
   /// Creates a replicator which is configured with the test sync gateway
   /// endpoint.
-  FutureOr<Replicator> createTestReplicator({
+  Future<Replicator> createTestReplicator({
     ReplicatorType? replicatorType,
     bool? continuous,
     List<String>? channels,
@@ -151,12 +148,8 @@ extension ReplicatorUtilsDatabaseExtension on Database {
     TypedConflictResolverFunction? typedConflictResolver,
     bool? enableAutoPurge,
     Authenticator? authenticator,
-  }) => Replicator.create(
-    ReplicatorConfiguration(
-      database: this,
-      target: UrlEndpoint(syncGatewayReplicationUrl),
-      replicatorType: replicatorType ?? ReplicatorType.pushAndPull,
-      continuous: continuous ?? false,
+  }) async {
+    final collectionConfig = CollectionConfiguration(
       channels: channels,
       documentIds: documentIds,
       pushFilter: pushFilter,
@@ -169,10 +162,16 @@ extension ReplicatorUtilsDatabaseExtension on Database {
       typedConflictResolver: typedConflictResolver != null
           ? TypedConflictResolver.from(typedConflictResolver)
           : null,
+    );
+    final config = ReplicatorConfiguration(
+      target: UrlEndpoint(syncGatewayReplicationUrl),
+      replicatorType: replicatorType ?? ReplicatorType.pushAndPull,
+      continuous: continuous ?? false,
       enableAutoPurge: enableAutoPurge ?? true,
       authenticator: authenticator ?? janeAuthenticator,
-    ),
-  );
+    )..addCollection(await defaultCollection, collectionConfig);
+    return Replicator.create(config);
+  }
 }
 
 final isReplicatorStatus = isA<ReplicatorStatus>();

@@ -1,5 +1,3 @@
-// ignore_for_file: deprecated_member_use
-
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
@@ -91,7 +89,8 @@ void main() {
         fullSync: true,
       );
       final db = await openTestDatabase(config: config);
-      await (await db.defaultCollection).saveDocument(MutableDocument());
+      final collection = await db.defaultCollection;
+      await collection.saveDocument(MutableDocument());
     });
 
     group('Database', () {
@@ -111,26 +110,6 @@ void main() {
           ].join(Platform.pathSeparator),
         );
         expect(db.config, config);
-      });
-
-      apiTest('count', () async {
-        final db = await openTestDatabase();
-
-        expect(await db.count, 0);
-
-        await db.saveDocument(MutableDocument());
-
-        expect(await db.count, 1);
-      });
-
-      apiTest('document fragment', () async {
-        final db = await openTestDatabase();
-
-        expect((await db['a']).exists, isFalse);
-
-        await db.saveDocument(MutableDocument.withId('a'));
-
-        expect((await db['a']).exists, isTrue);
       });
 
       apiTest('close', () async {
@@ -156,10 +135,11 @@ void main() {
 
       apiTest('performMaintenance: reindex', () async {
         final db = await openTestDatabase();
-        await db.createIndex('a', ValueIndexConfiguration(['type']));
+        final collection = await db.defaultCollection;
+        await collection.createIndex('a', ValueIndexConfiguration(['type']));
 
         final doc = MutableDocument({'type': 'A'});
-        await db.saveDocument(doc);
+        await collection.saveDocument(doc);
         await db.performMaintenance(MaintenanceType.reindex);
       });
 
@@ -220,44 +200,46 @@ void main() {
 
       apiTest('inBatch commits transaction', () async {
         final db = await openTestDatabase();
+        final collection = await db.defaultCollection;
 
         final doc = MutableDocument();
 
         await runWithApi(
           sync: () => (db as SyncDatabase).inBatchSync(() {
-            db.saveDocument(doc);
+            (collection as SyncCollection).saveDocument(doc);
           }),
           async: () => (db as AsyncDatabase).inBatch(() async {
-            await db.saveDocument(doc);
+            await (collection as AsyncCollection).saveDocument(doc);
           }),
         );
 
-        expect(await db.document(doc.id), isNotNull);
+        expect(await collection.document(doc.id), isNotNull);
       });
 
       apiTest('inBatch aborts transaction when callback throws', () async {
         final db = await openTestDatabase();
+        final collection = await db.defaultCollection;
 
         final doc = MutableDocument();
 
         await runWithApi(
           sync: () => expect(
             () => (db as SyncDatabase).inBatchSync(() {
-              db.saveDocument(doc);
+              (collection as SyncCollection).saveDocument(doc);
               throw Exception();
             }),
             throwsA(isException),
           ),
           async: () => expectLater(
             (db as AsyncDatabase).inBatch(() async {
-              await db.saveDocument(doc);
+              await (collection as AsyncCollection).saveDocument(doc);
               throw Exception();
             }),
             throwsA(isException),
           ),
         );
 
-        expect(await db.document(doc.id), isNull);
+        expect(await collection.document(doc.id), isNull);
       });
 
       apiTest('inBatch throws when called recursively', () async {
@@ -271,12 +253,14 @@ void main() {
 
       apiTest('inBatch tracks and rejects late database uses', () async {
         final db = await openTestDatabase();
+        final collection = await db.defaultCollection;
 
         late final Zone inBatchZone;
         await db.inBatch(() => inBatchZone = Zone.current);
 
         expect(
-          () => inBatchZone.run(() => db.saveDocument(MutableDocument())),
+          () =>
+              inBatchZone.run(() => collection.saveDocument(MutableDocument())),
           throwsA(isA<DatabaseException>()),
         );
       });
@@ -310,435 +294,34 @@ void main() {
         'inBatch rejects starting new sync txn while an async txn is active',
         () async {
           final db = openSyncTestDatabase();
+          final collection = db.defaultCollection;
 
           final inBatch = db.inBatch(() async {});
 
           expect(
-            () => db.saveDocument(MutableDocument()),
+            () => collection.saveDocument(MutableDocument()),
             throwsA(isA<DatabaseException>()),
           );
 
           await inBatch;
 
           // Verify that after inBatch is finished sync operations are allowed.
-          db.saveDocument(MutableDocument());
+          collection.saveDocument(MutableDocument());
         },
       );
 
       apiTest('inBatch rejects operations for the wrong database', () async {
         final dbA = await openTestDatabase();
         final dbB = await openTestDatabase();
+        final collectionB = await dbB.defaultCollection;
 
         expect(
           dbA.inBatch(() async {
-            await dbB.saveDocument(MutableDocument());
+            await collectionB.saveDocument(MutableDocument());
           }),
           throwsA(isA<DatabaseException>()),
         );
       });
-
-      apiTest(
-        'document returns null when the document does not exist',
-        () async {
-          final db = await openTestDatabase();
-          expect(await db.document('x'), isNull);
-        },
-      );
-
-      apiTest('document returns the document when it exist', () async {
-        final db = await openTestDatabase();
-
-        final doc = MutableDocument();
-        await db.saveDocument(doc);
-
-        expect(await db.document(doc.id), doc);
-      });
-
-      apiTest('saveDocument saves the document', () async {
-        final db = await openTestDatabase();
-
-        final doc = MutableDocument({'a': 'b', 'c': 4});
-        await db.saveDocument(doc);
-
-        expect((await db.document(doc.id))!.toPlainMap(), doc.toPlainMap());
-      });
-
-      apiTest(
-        'save mutable document created from unsaved mutable document',
-        () async {
-          final db = await openTestDatabase();
-
-          final initialDoc = MutableDocument({'a': 'b', 'c': 4});
-          await db.saveDocument(initialDoc);
-
-          final loadedDoc = (await db.document(initialDoc.id))!.toMutable();
-
-          final doc = loadedDoc.toMutable();
-          expect(await db.saveDocument(doc), isTrue);
-        },
-      );
-
-      apiTest('save mutable document created from changed mutable document '
-          '(lastWriteWins)', () async {
-        final db = await openTestDatabase();
-
-        final initialDoc = MutableDocument({'a': 'b', 'c': 4});
-        await db.saveDocument(initialDoc);
-
-        final loadedDoc = (await db.document(initialDoc.id))!.toMutable();
-
-        final doc = loadedDoc.toMutable();
-
-        await db.saveDocument(loadedDoc);
-
-        expect(await db.saveDocument(doc), isTrue);
-
-        expect(
-          await db.saveDocument(loadedDoc, ConcurrencyControl.failOnConflict),
-          isFalse,
-        );
-      });
-
-      apiTest('save mutable document created from changed mutable document '
-          '(failOnConflict)', () async {
-        final db = await openTestDatabase();
-
-        final initialDoc = MutableDocument({'a': 'b', 'c': 4});
-        await db.saveDocument(initialDoc);
-
-        final loadedDoc = (await db.document(initialDoc.id))!.toMutable();
-
-        final doc = loadedDoc.toMutable();
-
-        await db.saveDocument(loadedDoc);
-
-        expect(
-          await db.saveDocument(doc, ConcurrencyControl.failOnConflict),
-          isFalse,
-        );
-      });
-
-      group('saveDocumentWithConflictHandler', () {
-        apiTest('save updated document', () async {
-          final db = await openTestDatabase();
-
-          final doc = MutableDocument();
-          await db.saveDocument(doc);
-          final updatedDoc = ((await db.document(doc.id))!.toMutable())
-            ..setValue('b', key: 'a');
-          db.saveDocument(updatedDoc);
-
-          final SaveConflictHandler handler = expectAsync2((
-            documentBeingSaved,
-            conflictingDocument,
-          ) {
-            expect(documentBeingSaved, doc);
-            expect(conflictingDocument, updatedDoc);
-            documentBeingSaved.setValue('c', key: 'a');
-            return apiFutureOr(true);
-          });
-
-          await expectLater(
-            db.saveDocumentWithConflictHandler(doc, handler),
-            completion(isTrue),
-          );
-
-          expect(doc.value('a'), 'c');
-          expect((await db.document(doc.id))!.value('a'), 'c');
-        });
-
-        apiTest('save deleted document', () async {
-          final db = await openTestDatabase();
-
-          final doc = MutableDocument();
-          await db.saveDocument(doc);
-          await db.deleteDocument((await db.document(doc.id))!);
-
-          final SaveConflictHandler handler = expectAsync2((
-            documentBeingSaved,
-            conflictingDocument,
-          ) {
-            expect(documentBeingSaved, doc);
-            expect(conflictingDocument, isNull);
-            documentBeingSaved.setValue('c', key: 'a');
-            return apiFutureOr(true);
-          });
-
-          await expectLater(
-            db.saveDocumentWithConflictHandler(doc, handler),
-            completion(isTrue),
-          );
-
-          expect(doc.value('a'), 'c');
-          expect((await db.document(doc.id))!.value('a'), 'c');
-        });
-
-        apiTest('cancels save if handler returns false', () async {
-          final db = await openTestDatabase();
-
-          final doc = MutableDocument();
-          await db.saveDocument(doc);
-          final updatedDoc = ((await db.document(doc.id))!.toMutable())
-            ..setValue('b', key: 'a');
-          await db.saveDocument(updatedDoc);
-
-          final SaveConflictHandler handler = expectAsync2((
-            documentBeingSaved,
-            conflictingDocument,
-          ) {
-            expect(documentBeingSaved, doc);
-            expect(conflictingDocument, updatedDoc);
-            return apiFutureOr(false);
-          });
-
-          await expectLater(
-            db.saveDocumentWithConflictHandler(doc, handler),
-            completion(isFalse),
-          );
-        });
-
-        test('save updated document with sync conflict handler', () async {
-          final db = openSyncTestDatabase();
-
-          final doc = MutableDocument();
-          db.saveDocument(doc);
-          final updatedDoc = ((db.document(doc.id))!.toMutable())
-            ..setValue('b', key: 'a');
-          db.saveDocument(updatedDoc);
-
-          final SyncSaveConflictHandler handler = expectAsync2((
-            documentBeingSaved,
-            conflictingDocument,
-          ) {
-            expect(documentBeingSaved, doc);
-            expect(conflictingDocument, updatedDoc);
-            documentBeingSaved.setValue('c', key: 'a');
-            return true;
-          });
-
-          await expectLater(
-            db.saveDocumentWithConflictHandlerSync(doc, handler),
-            isTrue,
-          );
-
-          expect(doc.value('a'), 'c');
-          expect(db.document(doc.id)!.value('a'), 'c');
-        });
-      });
-
-      apiTest(
-        'deleteDocument should remove document from the database',
-        () async {
-          final db = await openTestDatabase();
-
-          final doc = MutableDocument();
-          await db.saveDocument(doc);
-          await db.deleteDocument(doc);
-
-          expect(await db.document(doc.id), isNull);
-        },
-      );
-
-      apiTest('delete document that was loaded from database', () async {
-        final db = await openTestDatabase();
-
-        final doc = MutableDocument();
-        await db.saveDocument(doc);
-        await db.deleteDocument((await db.document(doc.id))!);
-
-        expect(await db.document(doc.id), isNull);
-      });
-
-      apiTest(
-        'delete mutable document that was loaded from database',
-        () async {
-          final db = await openTestDatabase();
-
-          final doc = MutableDocument();
-          await db.saveDocument(doc);
-          await db.deleteDocument((await db.document(doc.id))!.toMutable());
-
-          expect(await db.document(doc.id), isNull);
-        },
-      );
-
-      apiTest('delete new unsaved document', () async {
-        final db = await openTestDatabase();
-
-        final doc = MutableDocument();
-        expect(
-          () => db.deleteDocument(doc),
-          throwsA(
-            isA<DatabaseException>().having(
-              (exception) => exception.code,
-              'code',
-              DatabaseErrorCode.notFound,
-            ),
-          ),
-        );
-      });
-
-      apiTest('purgeDocument purges a document', () async {
-        final db = await openTestDatabase();
-
-        final doc = MutableDocument();
-        await db.saveDocument(doc);
-        await db.purgeDocument(doc);
-
-        expect(await db.document(doc.id), isNull);
-      });
-
-      apiTest('purgeDocumentById purges a document by id', () async {
-        final db = await openTestDatabase();
-
-        final doc = MutableDocument();
-        await db.saveDocument(doc);
-        await db.purgeDocumentById(doc.id);
-
-        expect(await db.document(doc.id), isNull);
-      });
-
-      group('getDocumentExpiration', () {
-        apiTest('returns null if the document has no expiration', () async {
-          final db = await openTestDatabase();
-
-          final doc = MutableDocument();
-          await db.saveDocument(doc);
-
-          expect(await db.getDocumentExpiration(doc.id), isNull);
-        });
-
-        apiTest(
-          'returns the time of expiration if the document has one',
-          () async {
-            final db = await openTestDatabase();
-
-            final expiration = DateTime.now().add(const Duration(days: 1));
-            final doc = MutableDocument();
-            await db.saveDocument(doc);
-            await db.setDocumentExpiration(doc.id, expiration);
-
-            final storedExpiration = await db.getDocumentExpiration(doc.id);
-
-            expect(
-              storedExpiration!.millisecondsSinceEpoch,
-              expiration.millisecondsSinceEpoch,
-            );
-          },
-        );
-      });
-
-      group('setDocumentExpiration', () {
-        apiTest('sets a new time of expiration', () async {
-          final db = await openTestDatabase();
-
-          final expiration = DateTime.now().add(const Duration(days: 1));
-          final doc = MutableDocument();
-          await db.saveDocument(doc);
-          await db.setDocumentExpiration(doc.id, expiration);
-
-          final storedExpiration = await db.getDocumentExpiration(doc.id);
-
-          expect(
-            storedExpiration!.millisecondsSinceEpoch,
-            expiration.millisecondsSinceEpoch,
-          );
-        });
-
-        apiTest('sets the time of expiration to null', () async {
-          final db = await openTestDatabase();
-
-          final expiration = DateTime.now().add(const Duration(days: 1));
-          final doc = MutableDocument();
-          await db.saveDocument(doc);
-          await db.setDocumentExpiration(doc.id, expiration);
-          await db.setDocumentExpiration(doc.id, null);
-
-          expect(await db.getDocumentExpiration(doc.id), isNull);
-        });
-      });
-
-      apiTest('database change listener is notified while listening', () async {
-        final db = await openTestDatabase();
-        final doc = MutableDocument();
-        final listenerWasCalled = Completer<void>();
-
-        final token = await db.addChangeListener(
-          expectAsync1((change) {
-            expect(change.database, db);
-            expect(change.documentIds, [doc.id]);
-            listenerWasCalled.complete();
-          }),
-        );
-
-        // Change the database.
-        await db.saveDocument(doc);
-
-        // Wait for listener to be called and remove it.
-        await listenerWasCalled.future;
-        await db.removeChangeListener(token);
-
-        // Change the database again, to verify listener is not called anymore.
-        await db.saveDocument(MutableDocument());
-      });
-
-      apiTest('document change listener is notified while listening', () async {
-        final db = await openTestDatabase();
-        final doc = MutableDocument();
-        final listenerWasCalled = Completer<void>();
-
-        final token = await db.addDocumentChangeListener(
-          doc.id,
-          expectAsync1((change) {
-            expect(change.database, db);
-            expect(change.documentId, doc.id);
-            listenerWasCalled.complete();
-          }),
-        );
-
-        // Saved the document.
-        await db.saveDocument(doc);
-
-        // Wait for listener to be called and remove it.
-        await listenerWasCalled.future;
-        await db.removeChangeListener(token);
-
-        // Save the document again, to verify listener is not called anymore.
-        await db.saveDocument(doc);
-      });
-
-      apiTest(
-        'database change stream emits event when database changes',
-        () async {
-          final db = await openTestDatabase();
-          final doc = MutableDocument();
-
-          expect(
-            db.changes(),
-            emitsInOrder(<dynamic>[
-              DatabaseChange(db, [doc.id]),
-            ]),
-          );
-
-          await db.saveDocument(doc);
-        },
-      );
-
-      apiTest(
-        'document change stream emits event when the document changes',
-        () async {
-          final db = await openTestDatabase();
-          final collection = await db.defaultCollection;
-          final doc = MutableDocument();
-
-          expect(
-            db.documentChanges(doc.id),
-            emitsInOrder(<dynamic>[DocumentChange(db, collection, doc.id)]),
-          );
-
-          await db.saveDocument(doc);
-        },
-      );
     });
 
     group('Document', () {
@@ -764,9 +347,10 @@ void main() {
         'revisionId returns string when document has been saved',
         () async {
           final db = await openTestDatabase();
+          final collection = await db.defaultCollection;
 
           final doc = MutableDocument();
-          await db.saveDocument(doc);
+          await collection.saveDocument(doc);
 
           expect(doc.revisionId, isNotNull);
           expect(doc.revisionId, isNotEmpty);
@@ -775,13 +359,14 @@ void main() {
 
       apiTest('timestamp returns the documents timestamp', () async {
         final db = await openTestDatabase();
+        final collection = await db.defaultCollection;
 
         final doc = MutableDocument();
-        await db.saveDocument(doc);
+        await collection.saveDocument(doc);
 
         expect(doc.timestamp, isPositive);
 
-        final loadedDoc = (await db.document(doc.id))!;
+        final loadedDoc = (await collection.document(doc.id))!;
         expect(loadedDoc.timestamp, doc.timestamp);
       });
 
@@ -789,14 +374,15 @@ void main() {
         'revisionId and timestamp change when the document is updated',
         () async {
           final db = await openTestDatabase();
+          final collection = await db.defaultCollection;
 
           final doc = MutableDocument({'value': 'initial'});
-          await db.saveDocument(doc);
+          await collection.saveDocument(doc);
           final initialRevisionId = doc.revisionId;
           final initialTimestamp = doc.timestamp;
 
           doc.setValue('updated', key: 'value');
-          await db.saveDocument(doc);
+          await collection.saveDocument(doc);
 
           expect(doc.revisionId, isNot(initialRevisionId));
           expect(doc.timestamp, greaterThan(initialTimestamp));
@@ -805,9 +391,10 @@ void main() {
 
       apiTest('sequence returns the documents sequence', () async {
         final db = await openTestDatabase();
+        final collection = await db.defaultCollection;
 
         final doc = MutableDocument();
-        await db.saveDocument(doc);
+        await collection.saveDocument(doc);
 
         expect(doc.sequence, isPositive);
       });
@@ -821,9 +408,10 @@ void main() {
 
       apiTest('toMutable() returns a mutable copy of the document', () async {
         final db = await openTestDatabase();
+        final collection = await db.defaultCollection;
 
         final doc = MutableDocument({'a': 'b'});
-        await db.saveDocument(doc);
+        await collection.saveDocument(doc);
 
         expect(
           doc.toMutable(),
@@ -848,88 +436,6 @@ void main() {
 
         expect(doc.id, isNotEmpty);
       });
-    });
-
-    group('Index', () {
-      apiTest('createIndex should work with ValueIndexConfiguration', () async {
-        final db = await openTestDatabase();
-        await db.createIndex('a', ValueIndexConfiguration(['a']));
-
-        final q = await db.createQuery('SELECT * FROM _ WHERE a = "a"');
-
-        final explain = await q.explain();
-
-        expect(explain, contains('USING INDEX a'));
-      });
-
-      apiTest(
-        'createIndex should work with FullTextIndexConfiguration',
-        () async {
-          final db = await openTestDatabase();
-          await db.createIndex('a', FullTextIndexConfiguration(['a']));
-
-          final q = await db.createQuery(
-            "SELECT * FROM _ WHERE MATCH(a, 'query')",
-          );
-
-          final explain = await q.explain();
-
-          expect(explain, contains('VIRTUAL TABLE INDEX'));
-        },
-      );
-
-      apiTest('createIndex should work with ValueIndex', () async {
-        final db = await openTestDatabase();
-        await db.createIndex(
-          'a',
-          IndexBuilder.valueIndex([ValueIndexItem.property('a')]),
-        );
-
-        final q = await db.createQuery('SELECT * FROM _ WHERE a = "a"');
-
-        final explain = await q.explain();
-
-        expect(explain, contains('USING INDEX a'));
-      });
-
-      apiTest('createIndex should work with FullTextIndex', () async {
-        final db = await openTestDatabase();
-        await db.createIndex(
-          'a',
-          IndexBuilder.fullTextIndex([FullTextIndexItem.property('a')]),
-        );
-
-        final q = await db.createQuery(
-          "SELECT * FROM _ WHERE MATCH(a, 'query')",
-        );
-
-        final explain = await q.explain();
-
-        expect(explain, contains('VIRTUAL TABLE INDEX'));
-      });
-
-      apiTest('deleteIndex should delete the given index', () async {
-        final db = await openTestDatabase();
-        await db.createIndex('a', ValueIndexConfiguration(['a']));
-
-        expect(await db.indexes, ['a']);
-
-        await db.deleteIndex('a');
-
-        expect(await db.indexes, isEmpty);
-      });
-
-      apiTest(
-        'indexes should return the names of all existing indexes',
-        () async {
-          final db = await openTestDatabase();
-          expect(await db.indexes, isEmpty);
-
-          await db.createIndex('a', ValueIndexConfiguration(['a']));
-
-          expect(await db.indexes, ['a']);
-        },
-      );
     });
 
     group('Blob', () {
@@ -988,31 +494,34 @@ void main() {
         () async {
           final dbA = await openTestDatabase(name: 'A');
           final dbB = await openTestDatabase(name: 'A');
+          final collectionA = await dbA.defaultCollection;
+          final collectionB = await dbB.defaultCollection;
           final doc = MutableDocument();
 
           expect(
-            dbA.changes(),
+            collectionA.changes(),
             emitsInOrder(<dynamic>[
-              DatabaseChange(dbA, [doc.id]),
+              CollectionChange(collectionA, [doc.id]),
             ]),
           );
 
-          await dbB.saveDocument(doc);
+          await collectionB.saveDocument(doc);
         },
       );
 
       apiTest('SQL++ meal planner example', () async {
         final db = await openTestDatabase(name: 'A');
-        await db.createIndex('date', ValueIndexConfiguration(['type']));
-        await db.createIndex(
+        final collection = await db.defaultCollection;
+        await collection.createIndex('date', ValueIndexConfiguration(['type']));
+        await collection.createIndex(
           'group_index',
           ValueIndexConfiguration(['`group`']),
         );
 
         final dish = MutableDocument({'type': 'dish', 'title': 'Lasagna'});
 
-        await db.saveDocument(dish);
-        await db.saveDocument(
+        await collection.saveDocument(dish);
+        await collection.saveDocument(
           MutableDocument({
             'type': 'meal',
             'dishes': [dish.id],
@@ -1020,7 +529,7 @@ void main() {
             'date': '2020-06-30',
           }),
         );
-        await db.saveDocument(
+        await collection.saveDocument(
           MutableDocument({
             'type': 'meal',
             'dishes': [dish.id],

@@ -1,5 +1,3 @@
-// ignore_for_file: deprecated_member_use_from_same_package
-
 import 'dart:async';
 import 'dart:ffi';
 import 'dart:io';
@@ -56,7 +54,7 @@ final class FfiReplicator
     // TODO(blaugold): Use record destructuring once issue in Dart is fixed
     // https://github.com/dart-lang/sdk/issues/54414
     final replicatorCollections =
-        await resolveReplicatorCollections<
+        resolveReplicatorCollections<
           SyncDatabase,
           SyncCollection,
           FfiDatabase,
@@ -352,17 +350,6 @@ final class FfiReplicator
       parent: this,
       addListener: _addDocumentReplicationListener,
     ),
-  );
-
-  @override
-  Set<String> get pendingDocumentIds => pendingDocumentIdsInCollection(
-    _database.defaultCollection as FfiCollection,
-  );
-
-  @override
-  bool isDocumentPending(String documentId) => isDocumentPendingInCollection(
-    documentId,
-    _database.defaultCollection as FfiCollection,
   );
 
   @override

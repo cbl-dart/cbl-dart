@@ -52,12 +52,6 @@ mixin DatabaseBase<T extends DocumentDelegate> implements Database {
   /// Lock under which asynchronous transactions are executed.
   final asyncTransactionLock = Lock();
 
-  @override
-  FutureOr<D?> typedDocument<D extends TypedDocumentObject>(String id) =>
-      defaultCollection.then(
-        (collection) => (collection as CollectionBase<T>).typedDocument<D>(id),
-      );
-
   /// Whether the current transaction belongs to this database, if one exists.
   bool get ownsCurrentTransaction => _Transaction.current?.database == this;
 

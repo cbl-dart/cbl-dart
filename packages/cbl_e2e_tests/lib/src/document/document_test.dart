@@ -1,6 +1,3 @@
-// TODO(blaugold): Migrate to collection API.
-// ignore_for_file: deprecated_member_use
-
 import 'dart:typed_data';
 
 import 'package:cbl/cbl.dart';
@@ -19,14 +16,16 @@ void main() {
     Database db, [
     Map<String, Object?>? data,
   ]) async {
+    final collection = await db.defaultCollection;
     final doc = MutableDocument(data);
-    await db.saveDocument(doc);
-    return (await db.document(doc.id))!;
+    await collection.saveDocument(doc);
+    return (await collection.document(doc.id))!;
   }
 
   group('Document', () {
     apiTest('properties', () async {
       final db = await openTestDatabase();
+      final collection = await db.defaultCollection;
       final doc = MutableDocument.withId('id');
 
       expect(doc.id, 'id');
@@ -34,14 +33,14 @@ void main() {
       expect(doc.sequence, 0);
       expect(doc.timestamp, 0);
 
-      await db.saveDocument(doc);
+      await collection.saveDocument(doc);
 
       expect(doc.revisionId, isNotNull);
       expect(doc.revisionId, isNotEmpty);
       expect(doc.sequence, 1);
       expect(doc.timestamp, isPositive);
 
-      final loadedDoc = (await db.document(doc.id))!;
+      final loadedDoc = (await collection.document(doc.id))!;
 
       expect(loadedDoc.id, 'id');
       expect(loadedDoc.revisionId, doc.revisionId);
@@ -51,13 +50,14 @@ void main() {
 
     apiTest('==', () async {
       final db = await openTestDatabase();
+      final collection = await db.defaultCollection;
       final doc = await savedDocument(db, {'type': 'immutable'});
 
       // Identical docs are equal.
       expect(doc, equality(doc));
 
       // Two instances at the same revision are equal.
-      expect(await db.document(doc.id), equality(doc));
+      expect(await collection.document(doc.id), equality(doc));
 
       final mutableDoc = doc.toMutable();
 
@@ -90,10 +90,11 @@ void main() {
 
     apiTest('hashCode', () async {
       final db = await openTestDatabase();
+      final collection = await db.defaultCollection;
       final doc = await savedDocument(db, {'type': 'immutable'});
 
       expect(doc.hashCode, doc.hashCode);
-      expect((await db.document(doc.id)).hashCode, doc.hashCode);
+      expect((await collection.document(doc.id)).hashCode, doc.hashCode);
 
       expect(
         MutableDocument.withId('a').hashCode,
@@ -245,9 +246,10 @@ void main() {
 
       test('toString', () {
         final db = openSyncTestDatabase();
+        final collection = db.defaultCollection;
         final doc = MutableDocument();
-        db.saveDocument(doc);
-        final loadedDoc = db.document(doc.id);
+        collection.saveDocument(doc);
+        final loadedDoc = collection.document(doc.id);
         expect(
           loadedDoc.toString(),
           'Document('

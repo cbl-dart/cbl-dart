@@ -1,5 +1,3 @@
-// ignore_for_file: deprecated_member_use_from_same_package
-
 import 'dart:async';
 
 import 'package:meta/meta.dart';
@@ -12,7 +10,6 @@ import '../support/streams.dart';
 import '../typed_data/typed_object.dart';
 import 'collection_change.dart';
 import 'database.dart';
-import 'database_change.dart';
 import 'document_change.dart';
 import 'scope.dart';
 
@@ -71,16 +68,152 @@ typedef SyncSaveConflictHandler =
 /// {@category Database}
 typedef CollectionChangeListener = void Function(CollectionChange change);
 
-/// Listener which is called when one or more [Document]s in a [Database] have
-/// changed.
-///
-/// {@category Database}
-typedef DatabaseChangeListener = void Function(DatabaseChange change);
-
 /// Listener which is called when a single [Document] has changed.
 ///
 /// {@category Database}
 typedef DocumentChangeListener = void Function(DocumentChange change);
+
+/// The result of [Collection.saveTypedDocument], which needs to be used to
+/// actually save the document.
+///
+/// See also:
+///
+/// - [SyncSaveTypedDocument] for the synchronous version of this class, which
+///   is returned from [SyncCollection.saveTypedDocument].
+/// - [AsyncSaveTypedDocument] for the asynchronous version of this class, which
+///   is returned from [AsyncCollection.saveTypedDocument].
+///
+/// {@category Database}
+/// {@category Typed Data}
+@experimental
+abstract interface class SaveTypedDocument<
+  D extends TypedDocumentObject,
+  MD extends TypedMutableDocumentObject
+> {
+  /// Saves the document to the database, resolving conflicts through
+  /// [ConcurrencyControl].
+  ///
+  /// When write operations are executed concurrently, the last writer will win
+  /// by default. In this case the result is always `true`.
+  ///
+  /// To fail on conflict instead, pass [ConcurrencyControl.failOnConflict] to
+  /// [concurrencyControl]. In this case, if the document could not be saved the
+  /// result is `false`. On success it is `true`.
+  FutureOr<bool> withConcurrencyControl([
+    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+  ]);
+
+  /// Saves the document to the database, resolving conflicts with a
+  /// [conflictHandler].
+  ///
+  /// {@macro cbl.Collection.saveDocumentWithConflictHandler}
+  FutureOr<bool> withConflictHandler(
+    TypedSaveConflictHandler<D, MD> conflictHandler,
+  );
+}
+
+/// Custom conflict handler for saving a typed document.
+///
+/// {@template cbl.TypedSaveConflictHandler}
+/// This handler is called if the save would cause a conflict, i.e. if the
+/// document in the database has been updated (probably by a pull replicator, or
+/// by application code) since it was loaded into the document being saved.
+///
+/// The [documentBeingSaved] (same as the parameter you passed to
+/// [SaveTypedDocument.withConflictHandler].) may be modify by the callback as
+/// necessary to resolve the conflict.
+///
+/// The handler receives the revision of the [conflictingDocument] currently in
+/// the database, which has been changed since [documentBeingSaved] was loaded.
+/// It can be be `null`, meaning that the document has been deleted.
+///
+/// The handler has to make a decision by returning `true` to save the document
+/// or `false` to abort the save.
+///
+/// If the handler throws the save will be aborted.
+/// {@endtemplate}
+///
+/// See also:
+///
+/// - [SaveTypedDocument.withConflictHandler] for saving a typed document with a
+///   custom conflict handler.
+///
+/// {@category Database}
+/// {@category Typed Data}
+@experimental
+typedef TypedSaveConflictHandler<
+  D extends TypedDocumentObject,
+  MD extends TypedMutableDocumentObject
+> = FutureOr<bool> Function(MD documentBeingSaved, D? conflictingDocument);
+
+/// The result of [SyncCollection.saveTypedDocument], which needs to be used to
+/// actually save the document.
+///
+/// {@category Database}
+/// {@category Typed Data}
+@experimental
+abstract interface class SyncSaveTypedDocument<
+  D extends TypedDocumentObject,
+  MD extends TypedMutableDocumentObject
+>
+    extends SaveTypedDocument<D, MD> {
+  @override
+  bool withConcurrencyControl([
+    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+  ]);
+
+  @override
+  FutureOr<bool> withConflictHandler(
+    TypedSaveConflictHandler<D, MD> conflictHandler,
+  );
+
+  /// Saves the document to the database, resolving conflicts with a sync
+  /// [conflictHandler].
+  ///
+  /// {@macro cbl.Collection.saveDocumentWithConflictHandler}
+  bool withConflictHandlerSync(
+    TypedSyncSaveConflictHandler<D, MD> conflictHandler,
+  );
+}
+
+/// Custom sync conflict handler for saving a typed document.
+///
+/// {@macro cbl.TypedSaveConflictHandler}
+///
+/// See also:
+///
+/// - [SyncSaveTypedDocument.withConflictHandlerSync] for saving a typed
+///   document with a custom sync conflict handler.
+///
+/// {@category Database}
+/// {@category Typed Data}
+@experimental
+typedef TypedSyncSaveConflictHandler<
+  D extends TypedDocumentObject,
+  MD extends TypedMutableDocumentObject
+> = bool Function(MD documentBeingSaved, D? conflictingDocument);
+
+/// The result of [AsyncCollection.saveTypedDocument], which needs to be used to
+/// actually save the document.
+///
+/// {@category Database}
+/// {@category Typed Data}
+@experimental
+abstract interface class AsyncSaveTypedDocument<
+  D extends TypedDocumentObject,
+  MD extends TypedMutableDocumentObject
+>
+    extends SaveTypedDocument<D, MD> {
+  @override
+  Future<bool> withConcurrencyControl([
+    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+  ]);
+
+  @override
+  Future<bool> withConflictHandler(
+    TypedSaveConflictHandler<D, MD> conflictHandler,
+  );
+}
 
 /// A container for [Document]s.
 ///
@@ -111,18 +244,6 @@ typedef DocumentChangeListener = void Function(DocumentChange change);
 /// closed or the collection itself is deleted. Once deleted [Collection] will
 /// throw a [DatabaseException] with the [DatabaseErrorCode.notOpen] code when
 /// accessing its APIs.
-///
-/// ## Legacy Database and API
-///
-/// When opening a pre-collection database, the existing documents and indexes
-/// in the database will be automatically migrated to the default collection.
-///
-/// Any pre-collection database APIs that refer to documents, listeners, and
-/// indexes without specifying a collection such as [Database.document] will
-/// implicitly operate on the default collection. In other words, they behave
-/// exactly the way they used to, but collection-aware code should avoid them
-/// and use the new collection APIs instead. These legacy APIs are deprecated
-/// and will be removed eventually.
 abstract interface class Collection {
   /// The name of the default collection.
   static const defaultName = '_default';

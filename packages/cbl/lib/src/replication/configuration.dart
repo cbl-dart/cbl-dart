@@ -1,5 +1,3 @@
-// ignore_for_file: deprecated_member_use_from_same_package
-
 import 'dart:async';
 import 'dart:typed_data';
 
@@ -178,10 +176,6 @@ final class CollectionConfiguration {
 final class ReplicatorConfiguration {
   /// Creates a configuration for a [Replicator].
   ReplicatorConfiguration({
-    @Deprecated(
-      'Add a CollectionConfiguration for the default collection instead.',
-    )
-    this.database,
     required this.target,
     this.replicatorType = ReplicatorType.pushAndPull,
     this.continuous = false,
@@ -190,21 +184,6 @@ final class ReplicatorConfiguration {
     this.pinnedServerCertificate,
     this.trustedRootCertificates,
     this.headers,
-    @Deprecated('Use CollectionConfiguration.channels instead.') this.channels,
-    @Deprecated('Use CollectionConfiguration.documentIds instead.')
-    this.documentIds,
-    @Deprecated('Use CollectionConfiguration.pushFilter instead.')
-    this.pushFilter,
-    @Deprecated('Use CollectionConfiguration.typedPushFilter instead.')
-    this.typedPushFilter,
-    @Deprecated('Use CollectionConfiguration.pullFilter instead.')
-    this.pullFilter,
-    @Deprecated('Use CollectionConfiguration.typedPullFilter instead.')
-    this.typedPullFilter,
-    @Deprecated('Use CollectionConfiguration.conflictResolver instead.')
-    this.conflictResolver,
-    @Deprecated('Use CollectionConfiguration.typedConflictResolver instead.')
-    this.typedConflictResolver,
     this.enableAutoPurge = true,
     this.acceptParentDomainCookies = false,
     Duration? heartbeat,
@@ -217,19 +196,12 @@ final class ReplicatorConfiguration {
       ..heartbeat = heartbeat
       ..maxAttempts = maxAttempts
       ..maxAttemptWaitTime = maxAttemptWaitTime;
-
-    if (typedPushFilter != null ||
-        typedPullFilter != null ||
-        typedConflictResolver != null) {
-      (database as DatabaseBase?)?.useWithTypedData();
-    }
   }
 
   /// Creates a configuration for a [Replicator] from another [config] by coping
   /// it.
   ReplicatorConfiguration.from(ReplicatorConfiguration config)
     : _collections = {...config._collections},
-      database = config.database,
       target = config.target,
       replicatorType = config.replicatorType,
       continuous = config.continuous,
@@ -239,14 +211,6 @@ final class ReplicatorConfiguration {
       pinnedServerCertificate = config.pinnedServerCertificate,
       trustedRootCertificates = config.trustedRootCertificates,
       headers = config.headers,
-      channels = config.channels,
-      documentIds = config.documentIds,
-      pushFilter = config.pushFilter,
-      typedPushFilter = config.typedPushFilter,
-      pullFilter = config.pullFilter,
-      typedPullFilter = config.typedPullFilter,
-      conflictResolver = config.conflictResolver,
-      typedConflictResolver = config.typedConflictResolver,
       enableAutoPurge = config.enableAutoPurge,
       acceptParentDomainCookies = config.acceptParentDomainCookies,
       _heartbeat = config.heartbeat,
@@ -254,12 +218,6 @@ final class ReplicatorConfiguration {
       _maxAttemptWaitTime = config.maxAttemptWaitTime;
 
   final Map<Collection, CollectionConfiguration> _collections;
-
-  /// The local [Database] to replicate with the replication [target].
-  @Deprecated(
-    'Add a CollectionConfiguration for the default collection instead.',
-  )
-  final Database? database;
 
   /// The replication target to replicate with.
   final Endpoint target;
@@ -302,64 +260,6 @@ final class ReplicatorConfiguration {
 
   /// Extra HTTP headers to send in all requests to the remote target.
   Map<String, String>? headers;
-
-  /// A set of Sync Gateway channel names to pull from.
-  ///
-  /// Ignored for push replication. If unset, all accessible channels will be
-  /// pulled.
-  ///
-  /// Note: channels that are not accessible to the user will be ignored by Sync
-  /// Gateway.
-  @Deprecated('Use CollectionConfiguration.channels instead.')
-  List<String>? channels;
-
-  /// A set of document IDs to filter by.
-  ///
-  /// If given, only documents with these ids will be pushed and/or pulled.
-  @Deprecated('Use CollectionConfiguration.documentIds instead.')
-  List<String>? documentIds;
-
-  /// Filter for validating whether the [Document]s can be pushed to the remote
-  /// endpoint.
-  ///
-  /// Only documents for which the function returns `true` are replicated.
-  @Deprecated('Use CollectionConfiguration.pushFilter instead.')
-  ReplicationFilter? pushFilter;
-
-  /// Filter for validating whether the documents can be pushed to the remote
-  /// endpoint, which receives typed document instances.
-  ///
-  /// Only documents for which the function returns `true` are replicated.
-  @Deprecated('Use CollectionConfiguration.typedPushFilter instead.')
-  TypedReplicationFilter? typedPushFilter;
-
-  /// Filter for validating whether the [Document]s can be pulled from the
-  /// remote endpoint.
-  ///
-  /// Only documents for which the function returns `true` are replicated.
-  @Deprecated('Use CollectionConfiguration.pullFilter instead.')
-  ReplicationFilter? pullFilter;
-
-  /// Filter for validating whether the documents can be pulled from the remote
-  /// endpoint, which receives typed document instances.
-  ///
-  /// Only documents for which the function returns `true` are replicated.
-  @Deprecated('Use CollectionConfiguration.typedPullFilter instead.')
-  TypedReplicationFilter? typedPullFilter;
-
-  /// A custom conflict resolver.
-  ///
-  /// If this value is not set, or set to `null`, the default conflict resolver
-  /// will be applied.
-  @Deprecated('Use CollectionConfiguration.conflictResolver instead.')
-  ConflictResolver? conflictResolver;
-
-  /// A custom conflict resolver, which receives typed document instances.
-  ///
-  /// If this value is not set, or set to `null`, the default conflict resolver
-  /// will be applied.
-  @Deprecated('Use CollectionConfiguration.typedConflictResolver instead.')
-  TypedConflictResolver? typedConflictResolver;
 
   /// Whether to automatically purge a document when the user looses access to
   /// it, on the server.
@@ -471,12 +371,6 @@ final class ReplicatorConfiguration {
   /// If the collection has already been configured for replication, it's
   /// configuration will be overwritten.
   void addCollection(Collection collection, [CollectionConfiguration? config]) {
-    if (database != null) {
-      throw StateError(
-        'Cannot add a collection to a replicator configuration that uses the '
-        'deprecated database property.',
-      );
-    }
     _collections[collection] =
         config?.let(CollectionConfiguration.from) ?? CollectionConfiguration();
   }
@@ -526,7 +420,6 @@ final class ReplicatorConfiguration {
     return [
       'ReplicatorConfiguration(',
       [
-        'database: $database',
         'target: $target',
         'replicatorType: ${replicatorType.name}',
         if (continuous) 'CONTINUOUS',
@@ -537,14 +430,6 @@ final class ReplicatorConfiguration {
         if (trustedRootCertificates != null) 'TRUSTED-ROOT-CERTIFICATES',
         if (headers != null) 'headers: $headers',
         if (_collections.isNotEmpty) 'collections: $collections',
-        if (channels != null) 'channels: $channels',
-        if (documentIds != null) 'documentIds: $documentIds',
-        if (pushFilter != null) 'PUSH-FILTER',
-        if (typedPushFilter != null) 'TYPED-PUSH-FILTER',
-        if (pullFilter != null) 'PULL-FILTER',
-        if (typedPullFilter != null) 'TYPED-PULL-FILTER',
-        if (conflictResolver != null) 'CUSTOM-CONFLICT-RESOLVER',
-        if (typedConflictResolver != null) 'TYPED-CUSTOM-CONFLICT-RESOLVER',
         if (!enableAutoPurge) 'DISABLE-AUTO-PURGE',
         if (acceptParentDomainCookies) 'ACCEPT-PARENT-DOMAIN-COOKIES',
         if (heartbeat != null) 'heartbeat: ${_heartbeat!.inSeconds}s',
@@ -569,41 +454,14 @@ Map<String, String> _redactHeaders(Map<String, String> headers) {
 }
 
 extension InternalReplicatorConfiguration on ReplicatorConfiguration {
-  ReplicationFilter? get combinedPushFilter => combineReplicationFilters(
-    pushFilter,
-    typedPushFilter,
-    (database as DatabaseBase?)?.typedDataAdapter,
-  );
-
-  ReplicationFilter? get combinedPullFilter => combineReplicationFilters(
-    pullFilter,
-    typedPullFilter,
-    (database as DatabaseBase?)?.typedDataAdapter,
-  );
-
-  ConflictResolver? get combinedConflictResolver => combineConflictResolvers(
-    conflictResolver,
-    typedConflictResolver,
-    (database as DatabaseBase?)?.typedDataAdapter,
-  );
-
-  CollectionConfiguration get legacyCollectionConfiguration =>
-      CollectionConfiguration(
-        channels: channels,
-        documentIds: documentIds,
-        pushFilter: combinedPushFilter,
-        pullFilter: combinedPullFilter,
-        conflictResolver: combinedConflictResolver,
-      );
-
   Map<Collection, CollectionConfiguration> get collections => _collections;
 
   void validate() {
-    if (database == null && collections.isEmpty) {
+    if (collections.isEmpty) {
       throw ArgumentError.value(
         this,
         'config',
-        'A ReplicatorConfiguration must have a database or at least one '
+        'A ReplicatorConfiguration must have at least one '
             'CollectionConfiguration.',
       );
     }

@@ -1,6 +1,3 @@
-// TODO(blaugold): Migrate to collection API.
-// ignore_for_file: deprecated_member_use
-
 import 'dart:async';
 
 import 'package:cbl/cbl.dart';
@@ -19,8 +16,9 @@ void main() {
   group('Query', () {
     apiTest('execute simple query', () async {
       final db = await openTestDatabase();
-      await db.saveDocument(MutableDocument({'a': 0}));
-      await db.saveDocument(MutableDocument({'a': 1}));
+      final collection = await db.defaultCollection;
+      await collection.saveDocument(MutableDocument({'a': 0}));
+      await collection.saveDocument(MutableDocument({'a': 1}));
 
       final q = await db.createQuery('SELECT a FROM _ ORDER BY a');
       final resultSet = await q.execute();
@@ -39,12 +37,13 @@ void main() {
 
     apiTest('execute query from JSON representation', () async {
       final db = await openTestDatabase();
-      await db.saveDocument(MutableDocument({'a': 0}));
-      await db.saveDocument(MutableDocument({'a': 1}));
+      final collection = await db.defaultCollection;
+      await collection.saveDocument(MutableDocument({'a': 0}));
+      await collection.saveDocument(MutableDocument({'a': 1}));
 
       final builderQuery = const QueryBuilder()
           .select(SelectResult.property('a'))
-          .from(DataSource.database(db))
+          .from(DataSource.collection(collection))
           .orderBy(Ordering.property('a'));
 
       final query = await db.createQuery(
@@ -67,10 +66,11 @@ void main() {
 
     apiTest('execute query with parameters', () async {
       final db = await openTestDatabase();
+      final collection = await db.defaultCollection;
       final q = await db.createQuery(
         r'SELECT doc FROM _ WHERE META().id = $ID',
       );
-      await db.saveDocument(MutableDocument.withId('A'));
+      await collection.saveDocument(MutableDocument.withId('A'));
 
       await q.setParameters(Parameters({'ID': 'A'}));
       var resultSet = await q.execute();
@@ -132,6 +132,7 @@ void main() {
 
     apiTest('change listener is notified while listening', () async {
       final db = await openTestDatabase();
+      final collection = await db.defaultCollection;
       final query = await db.createQuery('SELECT META().id FROM _');
       final doc = MutableDocument();
       var call = 0;
@@ -149,7 +150,7 @@ void main() {
           switch (call++) {
             case 0:
               expect(results, isEmpty);
-              await db.saveDocument(doc);
+              await collection.saveDocument(doc);
               break;
             case 1:
               expect(results, [doc.id]);
@@ -165,12 +166,13 @@ void main() {
 
       // Change the database to trigger another change, which the listener
       // should not be called for.
-      await db.saveDocument(MutableDocument());
+      await collection.saveDocument(MutableDocument());
     });
 
     apiTest('listeners receive change when parameters change', () async {
       final db = await openTestDatabase();
-      await db.saveDocument(MutableDocument.withId('A'));
+      final collection = await db.defaultCollection;
+      await collection.saveDocument(MutableDocument.withId('A'));
       final query = await db.createQuery(
         r'SELECT META().id FROM _ WHERE META().id = $ID',
       );
@@ -199,6 +201,7 @@ void main() {
 
     apiTest('change stream emits when results change', () async {
       final db = await openTestDatabase();
+      final collection = await db.defaultCollection;
       final query = await db.createQuery('SELECT META().id FROM _');
       final doc = MutableDocument();
 
@@ -213,7 +216,7 @@ void main() {
             )
             .doOnData((results) {
               if (results.isEmpty) {
-                db.saveDocument(doc);
+                collection.saveDocument(doc);
               }
             }),
         emitsInOrder(<Object>[
@@ -226,9 +229,10 @@ void main() {
     apiTest('listen to change stream of query created by builder', () async {
       // https://github.com/cbl-dart/cbl-dart/issues/225
       final db = await openTestDatabase();
+      final collection = await db.defaultCollection;
       final query = const QueryBuilder()
           .select(SelectResult.all())
-          .from(DataSource.database(db));
+          .from(DataSource.collection(collection));
 
       expect(
         query.changes().asyncMap((change) => change.results.allResults()),
@@ -256,10 +260,11 @@ SELECT foo()
 
     test('get SQL++ source string', () {
       final db = openSyncTestDatabase();
+      final collection = db.defaultCollection;
       final sqlQuery = db.createQuery('SELECT * FROM _');
       final jsonQuery = const QueryBuilder()
           .select(SelectResult.all())
-          .from(DataSource.database(db));
+          .from(DataSource.collection(collection));
 
       expect(sqlQuery.sqlRepresentation, 'SELECT * FROM _');
       expect(jsonQuery.sqlRepresentation, isNull);
@@ -302,8 +307,9 @@ SELECT foo()
 
       apiTest('emits typed dictionaries', () async {
         final db = await openTestDatabase(typedDataAdapter: testAdapter);
+        final collection = await db.defaultCollection;
         final doc = MutableDocument();
-        await db.saveDocument(doc);
+        await collection.saveDocument(doc);
         final query = await db.createQuery('SELECT Meta().id FROM _');
         final resultSet = await query.execute();
         final results = await resultSet.asTypedStream<TestTypedDict>().toList();
@@ -341,8 +347,9 @@ SELECT foo()
 
       apiTest('returns typed dictionaries', () async {
         final db = await openTestDatabase(typedDataAdapter: testAdapter);
+        final collection = await db.defaultCollection;
         final doc = MutableDocument();
-        await db.saveDocument(doc);
+        await collection.saveDocument(doc);
         final query = await db.createQuery('SELECT Meta().id FROM _');
         final resultSet = await query.execute();
         final results = await resultSet.allTypedResults<TestTypedDict>();
@@ -380,8 +387,9 @@ SELECT foo()
 
       test('iterates over typed dictionaries', () {
         final db = openSyncTestDatabase(typedDataAdapter: testAdapter);
+        final collection = db.defaultCollection;
         final doc = MutableDocument();
-        db.saveDocument(doc);
+        collection.saveDocument(doc);
         final query = db.createQuery('SELECT Meta().id FROM _');
         final resultSet = query.execute();
         final results = resultSet.asTypedIterable<TestTypedDict>().toList();

@@ -1,6 +1,3 @@
-// TODO(blaugold): Migrate to collection API.
-// ignore_for_file: deprecated_member_use
-
 import 'dart:convert' hide json;
 import 'dart:math';
 import 'dart:typed_data';
@@ -83,27 +80,31 @@ void main() {
 
     apiTest('throws error when saving blob from different database', () async {
       final db = await openTestDatabase();
+      final collection = await db.defaultCollection;
       final otherDb = await openTestDatabase(name: 'other');
+      final otherCollection = await otherDb.defaultCollection;
       final blob = Blob.fromData(contentType, randomTestContent());
       final doc = MutableDocument({'blob': blob});
-      await otherDb.saveDocument(doc);
+      await otherCollection.saveDocument(doc);
 
       final docB = MutableDocument({'blob': blob});
-      expect(() => db.saveDocument(docB), throwsStateError);
+      expect(() => collection.saveDocument(docB), throwsStateError);
     });
 
     test('throws when saving document with stream blob into sync db', () {
       final db = openSyncTestDatabase();
+      final collection = db.defaultCollection;
       final blob = Blob.fromStream(
         contentType,
         Stream.value(randomTestContent()),
       );
       final doc = MutableDocument({'blob': blob});
-      expect(() => db.saveDocument(doc), throwsStateError);
+      expect(() => collection.saveDocument(doc), throwsStateError);
     });
 
     apiTest('read', () async {
       final db = await openTestDatabase();
+      final collection = await db.defaultCollection;
 
       final content = randomTestContent(
         large: blobSize.value == BlobSize.large,
@@ -143,7 +144,7 @@ void main() {
             readBlobInstance = writeBlobInstance!;
             break;
           case ReadBlob.loadedBlob:
-            final loadedDoc = (await db.document(doc.id))!;
+            final loadedDoc = (await collection.document(doc.id))!;
             readBlobInstance = loadedDoc.blob('blob')!;
             break;
         }
@@ -166,7 +167,7 @@ void main() {
           await read();
           break;
         case ReadTime.afterSave:
-          await db.saveDocument(doc);
+          await collection.saveDocument(doc);
           await read();
           break;
       }
@@ -174,20 +175,22 @@ void main() {
 
     apiTest('remove from document', () async {
       final db = await openTestDatabase();
+      final collection = await db.defaultCollection;
       final blob = blobFromData();
       final doc = MutableDocument({'blob': blob});
-      await db.saveDocument(doc);
+      await collection.saveDocument(doc);
       doc.removeValue('blob');
-      await db.saveDocument(doc);
-      final loadedDoc = (await db.document(doc.id))!;
+      await collection.saveDocument(doc);
+      final loadedDoc = (await collection.document(doc.id))!;
       expect(loadedDoc.value('blob'), isNull);
     });
 
     test('toJson returns JSON representation of saved blob', () async {
       final db = openSyncTestDatabase();
+      final collection = db.defaultCollection;
       final blob = blobFromDataWithLength();
       final doc = MutableDocument({'blob': blob});
-      db.saveDocument(doc);
+      collection.saveDocument(doc);
 
       expect(
         blob.toJson(),
