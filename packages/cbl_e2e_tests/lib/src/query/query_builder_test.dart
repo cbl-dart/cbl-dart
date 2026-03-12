@@ -208,32 +208,40 @@ void main() {
         }),
       );
 
-      Future<Object?> selectOneResult(SelectResultInterface selectResult) =>
-          Future.value(getSharedTestDatabase()).then((db) async {
-            final collection = await db.defaultCollection;
-            final resultSet = await const QueryBuilder()
-                .select(selectResult)
-                .from(DataSource.collection(collection))
-                .where(Meta.id.equalTo(Expression.string('SelectOneResult')))
-                .execute();
+      Future<Object?> selectOneResult(
+        SelectResultInterface selectResult, {
+        DataSourceInterface? dataSource,
+      }) => Future.value(getSharedTestDatabase()).then((db) async {
+        final collection = await db.defaultCollection;
+        final resultSet = await const QueryBuilder()
+            .select(selectResult)
+            .from(dataSource ?? DataSource.collection(collection))
+            .where(Meta.id.equalTo(Expression.string('SelectOneResult')))
+            .execute();
 
-            return resultSet.plainMapStream().first;
-          });
+        return resultSet.plainMapStream().first;
+      });
 
       apiTest('SelectResult.all()', () async {
-        final db = await getSharedTestDatabase();
-
         expect(await selectOneResult(SelectResult.all()), {
-          db.name: {'a': true},
+          '_default': {'a': true},
         });
       });
 
       apiTest('SelectResult.all().from()', () async {
         final db = await getSharedTestDatabase();
+        final collection = await db.defaultCollection;
+        const alias = 'myAlias';
 
-        expect(await selectOneResult(SelectResult.all().from(db.name)), {
-          db.name: {'a': true},
-        });
+        expect(
+          await selectOneResult(
+            SelectResult.all().from(alias),
+            dataSource: DataSource.collection(collection).as(alias),
+          ),
+          {
+            alias: {'a': true},
+          },
+        );
       });
 
       apiTest('SelectResult.property()', () async {

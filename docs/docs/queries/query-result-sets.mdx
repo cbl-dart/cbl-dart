@@ -66,16 +66,16 @@ final query = const QueryBuilder()
 The result set returned by queries using `api|SelectResult.all` contains
 dictionaries — one for each document matching the query criteria.
 
-Each result contains a key-value pair, where the key is the database name and
-the value is a dictionary representing each document's properties — see:
-[Example 2](#).
+Each result contains a key-value pair, where the key is the collection name (or
+its alias, if one was provided) and the value is a dictionary representing each
+document's properties — see: [Example 2](#).
 
 <CodeExample id={2} title="Format of Result Set (All Properties)">
 
 ```json
 [
   {
-    "travel-sample": {
+    "_default": {
       "callsign": "MILE-AIR",
       "country": "United States",
       "iata": "Q5",
@@ -86,7 +86,7 @@ the value is a dictionary representing each document's properties — see:
     }
   },
   {
-    "travel-sample": {
+    "_default": {
       "callsign": "ALASKAN-AIR",
       "country": "United States",
       "iata": "AA",
