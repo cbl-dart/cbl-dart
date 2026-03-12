@@ -4,7 +4,7 @@ import 'database/database_configuration_test.dart'
     as database_database_configuration;
 import 'database/database_test.dart' as database_database;
 import 'database/document_change_test.dart' as database_document_change;
-import 'database/typed_database_test.dart' as typed_database;
+import 'database/typed_collection_test.dart' as typed_collection;
 import 'document/array_test.dart' as document_array_test;
 import 'document/blob_test.dart' as document_blob_test;
 import 'document/dictionary_test.dart' as document_dictionary_test;
@@ -86,7 +86,7 @@ final tests = [
   typed_data_conversion.main,
   typed_data_helpers.main,
   typed_data_runtime_support.main,
-  typed_database.main,
+  typed_collection.main,
   url_endpoint_listener.main,
 ];
 

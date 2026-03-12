@@ -60,6 +60,9 @@ enum DocumentFlag {
 typedef ReplicationFilter =
     FutureOr<bool> Function(Document document, Set<DocumentFlag> flags);
 
+/// A function that decides whether a particular typed document should be
+/// pushed/pulled.
+///
 /// {@macro cbl.ReplicationFilter}
 ///
 /// {@category Replication}
