@@ -11,6 +11,10 @@ pre-commit:
     dart-analyze:
       glob: "*.dart"
       run: dart analyze --fatal-infos
+    clang-format:
+      glob: "*.{c,cc,cpp,h,hh,hpp}"
+      run: clang-format -i {staged_files}
+      stage_fixed: true
     docs-prettier:
       root: "docs/"
       glob: "*.{js,jsx,ts,tsx,md,mdx,json,css,scss,html,yaml,yml}"
