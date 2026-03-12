@@ -246,7 +246,7 @@ key — see [Example 8](#).
 ### Result Set Access
 
 In this case, access the properties of a document by unpacking the id and using
-it to get the document from the database — see: [Example 9](#).
+it to get the document from the collection — see: [Example 9](#).
 
 <CodeExample id={9} title="Using Returned Document Properties (Document ID)">
 
@@ -256,7 +256,7 @@ await for (final result in resultSet.asStream()) {
   final docId = result.string('docId');
   print('processing doc: $docId');
 
-  final doc = (await database.document(docId))!;
+  final doc = (await collection.document(docId))!;
   final hotelId = doc.string('id');
   final name = doc.string('name');
   final city = doc.string('city');

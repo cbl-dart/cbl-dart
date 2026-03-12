@@ -10,10 +10,10 @@ import '../log.dart';
 import '../log/log.dart';
 import '../query/prediction.dart';
 import '../query/query.dart';
+import '../replication/replicator.dart';
 import '../support/resource.dart';
 import '../support/tracing.dart';
 import '../tracing.dart';
-import '../typed_data.dart';
 import '../typed_data/adapter.dart';
 import 'collection.dart';
 import 'database_configuration.dart';
@@ -54,79 +54,6 @@ enum MaintenanceType {
   /// queries.
   fullOptimize,
 }
-
-/// The result of [Collection.saveTypedDocument], which needs to be used to
-/// actually save the document.
-///
-/// See also:
-///
-/// - [SyncSaveTypedDocument] for the synchronous version of this class, which
-///   is returned from [SyncCollection.saveTypedDocument].
-/// - [AsyncSaveTypedDocument] for the asynchronous version of this class, which
-///   is returned from [AsyncCollection.saveTypedDocument].
-///
-/// {@category Database}
-/// {@category Typed Data}
-@experimental
-abstract interface class SaveTypedDocument<
-  D extends TypedDocumentObject,
-  MD extends TypedMutableDocumentObject
-> {
-  /// Saves the document to the database, resolving conflicts through
-  /// [ConcurrencyControl].
-  ///
-  /// When write operations are executed concurrently, the last writer will win
-  /// by default. In this case the result is always `true`.
-  ///
-  /// To fail on conflict instead, pass [ConcurrencyControl.failOnConflict] to
-  /// [concurrencyControl]. In this case, if the document could not be saved the
-  /// result is `false`. On success it is `true`.
-  FutureOr<bool> withConcurrencyControl([
-    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
-  ]);
-
-  /// Saves the document to the database, resolving conflicts with a
-  /// [conflictHandler].
-  ///
-  /// {@macro cbl.Database.saveDocumentWithConflictHandler}
-  FutureOr<bool> withConflictHandler(
-    TypedSaveConflictHandler<D, MD> conflictHandler,
-  );
-}
-
-/// Custom conflict handler for saving a typed document.
-///
-/// {@template cbl.TypedSaveConflictHandler}
-/// This handler is called if the save would cause a conflict, i.e. if the
-/// document in the database has been updated (probably by a pull replicator, or
-/// by application code) since it was loaded into the document being saved.
-///
-/// The [documentBeingSaved] (same as the parameter you passed to
-/// [SaveTypedDocument.withConflictHandler].) may be modify by the callback as
-/// necessary to resolve the conflict.
-///
-/// The handler receives the revision of the [conflictingDocument] currently in
-/// the database, which has been changed since [documentBeingSaved] was loaded.
-/// It can be be `null`, meaning that the document has been deleted.
-///
-/// The handler has to make a decision by returning `true` to save the document
-/// or `false` to abort the save.
-///
-/// If the handler throws the save will be aborted.
-/// {@endtemplate}
-///
-/// See also:
-///
-/// - [SaveTypedDocument.withConflictHandler] for saving a typed document with a
-///   custom conflict handler.
-///
-/// {@category Database}
-/// {@category Typed Data}
-@experimental
-typedef TypedSaveConflictHandler<
-  D extends TypedDocumentObject,
-  MD extends TypedMutableDocumentObject
-> = FutureOr<bool> Function(MD documentBeingSaved, D? conflictingDocument);
 
 /// A Couchbase Lite database.
 ///
@@ -301,13 +228,13 @@ abstract interface class Database implements ClosableResource {
 
   /// Closes this database.
   ///
-  /// Before closing this database, replicators and change streams are closed.
+  /// Before closing this database, [Replicator]s and change streams are closed.
   @override
   Future<void> close();
 
   /// Closes and deletes this database.
   ///
-  /// Before closing this database, replicators and change streams are closed.
+  /// Before closing this database, [Replicator]s and change streams are closed.
   Future<void> delete();
 
   /// Performs database maintenance.
@@ -328,53 +255,6 @@ abstract interface class Database implements ClosableResource {
   /// [query] is expected to be the [Query.jsonRepresentation] of a query.
   FutureOr<Query> createQuery(String query, {bool json = false});
 }
-
-/// The result of [SyncCollection.saveTypedDocument], which needs to be used to
-/// actually save the document.
-///
-/// {@category Database}
-/// {@category Typed Data}
-@experimental
-abstract interface class SyncSaveTypedDocument<
-  D extends TypedDocumentObject,
-  MD extends TypedMutableDocumentObject
->
-    extends SaveTypedDocument<D, MD> {
-  @override
-  bool withConcurrencyControl([
-    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
-  ]);
-
-  @override
-  FutureOr<bool> withConflictHandler(
-    TypedSaveConflictHandler<D, MD> conflictHandler,
-  );
-
-  /// Saves the document to the database, resolving conflicts with a sync
-  /// [conflictHandler].
-  ///
-  /// {@macro cbl.Database.saveDocumentWithConflictHandler}
-  bool withConflictHandlerSync(
-    TypedSyncSaveConflictHandler<D, MD> conflictHandler,
-  );
-}
-
-/// Custom sync conflict handler for saving a typed document.
-///
-/// {@macro cbl.TypedSaveConflictHandler}
-///
-/// See also:
-///
-/// - [SyncSaveTypedDocument.withConflictHandlerSync] for saving a typed
-///   document with a custom sync conflict handler.
-///
-/// {@category Database}
-/// {@category Typed Data}
-@experimental
-typedef TypedSyncSaveConflictHandler<
-  D extends TypedDocumentObject,
-  MD extends TypedMutableDocumentObject
-> = bool Function(MD documentBeingSaved, D? conflictingDocument);
 
 /// A [Database] with a primarily synchronous API.
 ///
@@ -460,28 +340,6 @@ abstract interface class SyncDatabase implements Database {
 
   @override
   SyncQuery createQuery(String query, {bool json = false});
-}
-
-/// The result of [AsyncCollection.saveTypedDocument], which needs to be used to
-/// actually save the document.
-///
-/// {@category Database}
-/// {@category Typed Data}
-@experimental
-abstract interface class AsyncSaveTypedDocument<
-  D extends TypedDocumentObject,
-  MD extends TypedMutableDocumentObject
->
-    extends SaveTypedDocument<D, MD> {
-  @override
-  Future<bool> withConcurrencyControl([
-    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
-  ]);
-
-  @override
-  Future<bool> withConflictHandler(
-    TypedSaveConflictHandler<D, MD> conflictHandler,
-  );
 }
 
 /// A [Database] with a primarily asynchronous API.
