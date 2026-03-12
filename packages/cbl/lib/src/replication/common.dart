@@ -25,7 +25,7 @@ import 'configuration.dart';
   for (final collection in baseCollections.keys) {
     if (collection is! C) {
       throw ArgumentError(
-        'All collections in this ReplicatorConfiguration must of type $C.',
+        'All collections in this ReplicatorConfiguration must be of type $C.',
       );
     }
     if (collection.database != database) {
