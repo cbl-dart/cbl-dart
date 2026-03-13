@@ -23,7 +23,7 @@ jobs:
   formatting-dart:
     name: Formatting - Dart
     timeout-minutes: 10
-    runs-on: runs-on=${{ github.run_id }}/runner=2cpu-linux-x64/image=ubuntu22-full-x64/extras=s3-cache
+    runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu
     steps:
       - uses: runs-on/action@v2
       - name: Checkout repository
@@ -55,7 +55,7 @@ jobs:
   formatting-clang:
     name: Formatting - Clang
     timeout-minutes: 10
-    runs-on: runs-on=${{ github.run_id }}/runner=2cpu-linux-x64/image=ubuntu22-full-x64/extras=s3-cache
+    runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu
     steps:
       - uses: runs-on/action@v2
       - name: Checkout repository
@@ -70,7 +70,7 @@ jobs:
   analyze-dart:
     name: Analyze Dart code
     timeout-minutes: 10
-    runs-on: runs-on=${{ github.run_id }}/runner=2cpu-linux-x64/image=ubuntu22-full-x64/extras=s3-cache
+    runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu
     steps:
       - uses: runs-on/action@v2
       - name: Checkout repository
@@ -117,9 +117,9 @@ jobs:
       TEST_PACKAGE: ${{ matrix.package }}
     runs-on: >-
       ${{ fromJSON(format('{{
-        "Ubuntu":"runs-on={0}/runner=2cpu-linux-x64/image=ubuntu22-full-x64/extras=s3-cache",
+        "Ubuntu":"runs-on={0}/runner=ubuntu22-2cpu",
         "macOS":"macos-15",
-        "Windows":"runs-on={0}/image=windows22-full-x64/family=m7i+m7a/extras=s3-cache"
+        "Windows":"runs-on={0}/runner=windows22-2cpu"
       }}', github.run_id))[matrix.os] }}
     steps:
       - uses: runs-on/action@v2
@@ -202,8 +202,8 @@ jobs:
         "iOS":"warp-macos-15-arm64-6x",
         "macOS":"warp-macos-15-arm64-6x",
         "Android":"blacksmith-4vcpu-ubuntu-2204",
-        "Ubuntu":"runs-on={0}/runner=2cpu-linux-x64/image=ubuntu22-full-x64/extras=s3-cache",
-        "Windows":"runs-on={0}/image=windows22-full-x64/family=m7i+m7a/extras=s3-cache"
+        "Ubuntu":"runs-on={0}/runner=ubuntu22-4cpu",
+        "Windows":"runs-on={0}/runner=windows22-2cpu"
       }}', github.run_id))[matrix.os] }}
     env:
       EMBEDDER: ${{ matrix.embedder }}

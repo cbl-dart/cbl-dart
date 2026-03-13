@@ -27,12 +27,7 @@ jobs:
       contents: read
       pull-requests: write
       checks: write
-    runs-on:
-      - runs-on=${{ github.run_id }}
-      - runner=2cpu-linux-x64
-      - image=ubuntu22-full-x64
-      - family=m7a
-      - extras=s3-cache
+    runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu-benchmark
     steps:
       - uses: runs-on/action@v2
       - name: Checkout code
@@ -107,7 +102,7 @@ jobs:
     if:
       github.event_name == 'pull_request' && github.event.action == 'closed' &&
       github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: runs-on=${{ github.run_id }}/runner=2cpu-linux-x64/image=ubuntu24-full-x64/extras=s3-cache
+    runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu
     steps:
       - uses: runs-on/action@v2
       - name: Checkout code

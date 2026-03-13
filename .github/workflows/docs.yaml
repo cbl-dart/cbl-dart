@@ -12,7 +12,7 @@ on:
 
 jobs:
   docs:
-    runs-on: runs-on=${{ github.run_id }}/runner=4cpu-linux-x64/image=ubuntu22-full-x64/extras=s3-cache
+    runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu
     steps:
       - uses: runs-on/action@v2
       - name: Checkout repository
