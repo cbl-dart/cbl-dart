@@ -119,11 +119,11 @@ jobs:
       ${{ fromJSON(format('{{
         "Ubuntu":"runs-on={0}/runner=ubuntu22-2cpu",
         "macOS":"macos-15",
-        "Windows":"runs-on={0}/runner=windows22-2cpu"
+        "Windows":"windows-2025"
       }}', github.run_id))[matrix.os] }}
     steps:
       - uses: runs-on/action@v2
-        if: runner.os != 'macOS'
+        if: runner.os == 'Linux'
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -199,11 +199,11 @@ jobs:
     runs-on: >-
       ${{ matrix.os == 'macOS' && matrix.embedder == 'standalone' && 'macos-15'
        || fromJSON(format('{{
-        "iOS":"warp-macos-15-arm64-6x",
-        "macOS":"warp-macos-15-arm64-6x",
+        "iOS":"macos-15",
+        "macOS":"macos-15",
         "Android":"blacksmith-4vcpu-ubuntu-2204",
         "Ubuntu":"runs-on={0}/runner=ubuntu22-4cpu",
-        "Windows":"runs-on={0}/runner=windows22-2cpu"
+        "Windows":"windows-2025"
       }}', github.run_id))[matrix.os] }}
     env:
       EMBEDDER: ${{ matrix.embedder }}
@@ -215,7 +215,7 @@ jobs:
         }')[matrix.embedder] }}
     steps:
       - uses: runs-on/action@v2
-        if: runner.os == 'Linux' || runner.os == 'Windows'
+        if: runner.os == 'Linux'
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -268,7 +268,7 @@ jobs:
           channel: ${{ env.flutter-channel }}
           cache: true
           pub-cache-hash-pattern: pubspec.lock
-          cache-provider: ${{ ((matrix.os == 'macOS' || matrix.os == 'iOS') && matrix.embedder == 'flutter') && 'warp' || 'github' }}
+          cache-provider: github
 
       - name: Enable Flutter native assets
         if: matrix.embedder == 'flutter'
