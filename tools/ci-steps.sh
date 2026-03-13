@@ -41,11 +41,38 @@ targetOs="$TARGET_OS"
 testPackage="$TEST_PACKAGE"
 testPackageDir="packages/$testPackage"
 testAppBundleId="com.terwesten.gabriel.cblE2eTestsFlutter"
-iosVersion="18-4"
-iosDevice="iPhone 16"
 androidVersion="27"
 androidDevice="pixel_4"
 syncGatewayLogFile="$workspaceDir/.tmp/sync-gateway.log"
+
+# === iOS simulator auto-detection =============================================
+
+function _detectIosSimulator() {
+    local runtimeId
+    runtimeId=$(xcrun simctl list runtimes -j |
+        jq -r '[.runtimes[] | select(.platform == "iOS" and .isAvailable == true)] | last | .identifier // empty')
+
+    if [ -z "$runtimeId" ]; then
+        echo "ERROR: No available iOS simulator runtime found" >&2
+        xcrun simctl list runtimes >&2
+        exit 1
+    fi
+
+    local deviceName
+    deviceName=$(xcrun simctl list devices available -j |
+        jq -r --arg rt "$runtimeId" '.devices[$rt] // [] | map(select(.name | startswith("iPhone"))) | last | .name // empty')
+
+    if [ -z "$deviceName" ]; then
+        echo "ERROR: No available iPhone device found for runtime '$runtimeId'" >&2
+        xcrun simctl list devices available >&2
+        exit 1
+    fi
+
+    # Extract version from runtime id (e.g. ...iOS-18-2 -> 18-2)
+    iosVersion=$(echo "$runtimeId" | sed 's/.*iOS-//')
+    iosDevice="$deviceName"
+    echo "Detected iOS simulator: runtime=$runtimeId device=$iosDevice"
+}
 
 # === Steps ===================================================================
 
@@ -82,6 +109,7 @@ function startVirtualDevices() {
 
     case "$targetOs" in
     iOS)
+        _detectIosSimulator
         ./tools/apple-simulator.sh start -o "iOS-$iosVersion" -d "$iosDevice"
         ;;
     Android)
@@ -415,6 +443,7 @@ function _collectCblLogsIosSimulator() {
         return 0
     fi
 
+    _detectIosSimulator
     ./tools/apple-simulator.sh copyData \
         -o "iOS-$iosVersion" \
         -d "$iosDevice" \

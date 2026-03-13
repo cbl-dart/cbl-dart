@@ -12,8 +12,9 @@ on:
 
 jobs:
   docs:
-    runs-on: blacksmith-4vcpu-ubuntu-2204
+    runs-on: runs-on=${{ github.run_id }}/runner=4cpu-linux-x64/image=ubuntu22-full-x64/extras=s3-cache
     steps:
+      - uses: runs-on/action@v2
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Install and build website
