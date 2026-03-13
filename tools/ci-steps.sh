@@ -235,6 +235,21 @@ function runE2ETests() {
             publishPortFlag="--publish-port"
         fi
 
+        # On iOS, capture simulator logs in the background to diagnose
+        # silent crashes (e.g. native library loading failures). The log
+        # file is collected by collectTestResults on failure.
+        if [ "$targetOs" = "iOS" ]; then
+            local simUdid
+            simUdid=$(xcrun simctl list devices booted -j | jq -r '[.devices[][] | select(.state == "Booted")] | first | .udid')
+            if [ -n "$simUdid" ]; then
+                mkdir -p "$workspaceDir/.tmp"
+                xcrun simctl spawn "$simUdid" log stream \
+                    --level debug --style compact \
+                    --predicate 'processImagePath endswith "Runner" or eventMessage contains "crash" or eventMessage contains "dlopen"' \
+                    > "$workspaceDir/.tmp/simulator-app.log" 2>&1 &
+            fi
+        fi
+
         flutter drive \
             -d "$device" \
             $DART_DEFINES \
@@ -389,12 +404,32 @@ function _collectSetupLogs() {
     mkdir -p "$setupLogsDir"
 
     local setupDir="$workspaceDir/.tmp"
-    for logFile in "$setupDir"/couchbase-setup.log "$setupDir"/virtual-devices.log; do
+    for logFile in "$setupDir"/couchbase-setup.log "$setupDir"/virtual-devices.log "$setupDir"/simulator-app.log; do
         if [ -f "$logFile" ]; then
             echo "Copying $(basename "$logFile")"
             cp -a "$logFile" "$setupLogsDir/"
         fi
     done
+}
+
+function _collectIosDiagnostics() {
+    echo "Collecting iOS diagnostics"
+
+    local diagDir="$testResultsDir/ios-diagnostics"
+    mkdir -p "$diagDir"
+
+    echo "--- Runner process check ---"
+    ps aux | grep -i "[R]unner" > "$diagDir/runner-process.txt" 2>&1 \
+        || echo "Runner process is NOT running (likely crashed)" > "$diagDir/runner-process.txt"
+
+    echo "--- Native libraries in app bundle ---"
+    {
+        find "$testPackageDir/build/ios" -name "*.dylib" -exec lipo -info {} \; 2>/dev/null
+        find "$testPackageDir/build/ios" -path "*/Frameworks/*.framework/*" -type f \
+            ! -name "*.plist" ! -name "*.car" -exec lipo -info {} \; 2>/dev/null
+    } > "$diagDir/native-libraries.txt" 2>&1
+
+    echo "Collected iOS diagnostics"
 }
 
 function _collectCouchbaseServerLogs() {
@@ -495,6 +530,7 @@ function collectTestResults() {
         iOS)
             _collectCrashReportsMacOS
             _collectCblLogsIosSimulator
+            _collectIosDiagnostics
             ;;
         Android)
             _collectCrashReportsAndroid
