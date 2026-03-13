@@ -289,8 +289,16 @@ jobs:
           key: deriveddata-${{ matrix.os }}-${{ hashFiles('packages/cbl_e2e_tests_flutter/ios/Runner.xcodeproj/project.pbxproj', 'packages/cbl_e2e_tests_flutter/macos/Runner.xcodeproj/project.pbxproj', 'packages/cbl_e2e_tests_flutter/pubspec.lock') }}
           restore-keys: deriveddata-${{ matrix.os }}-
 
+      - name: Cache Android emulator
+        if: matrix.os == 'Android'
+        uses: actions/cache@v4
+        with:
+          path: |
+            /usr/local/lib/android/sdk/system-images/android-27
+          key: android-system-image-27-x86_64-v2
+
       - name: Start Couchbase services and virtual devices
-        if: matrix.embedder == 'flutter' && matrix.os != 'Android'
+        if: matrix.embedder == 'flutter'
         shell: bash
         run: |
           mkdir -p .tmp
@@ -316,22 +324,9 @@ jobs:
           echo "Couchbase services are ready"
 
       - name: Start Couchbase services
-        if: matrix.embedder != 'flutter' || matrix.os == 'Android'
+        if: matrix.embedder != 'flutter'
         shell: bash
         run: ./tools/ci-steps.sh startCouchbaseServices
-
-      - name: Cache Android emulator
-        if: matrix.os == 'Android'
-        uses: actions/cache@v4
-        with:
-          path: |
-            /usr/local/lib/android/sdk/system-images/android-27
-          key: android-system-image-27-x86_64-v2
-
-      - name: Start virtual devices
-        if: matrix.os == 'Android'
-        shell: bash
-        run: ./tools/ci-steps.sh startVirtualDevices
 
       - name: Run tests
         timeout-minutes: 10
