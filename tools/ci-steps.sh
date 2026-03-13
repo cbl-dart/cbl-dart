@@ -49,8 +49,17 @@ syncGatewayLogFile="$workspaceDir/.tmp/sync-gateway.log"
 
 function _detectIosSimulator() {
     local runtimeId
+
+    # Prefer iOS 18.x runtimes — they are pre-installed on macos-15 runners and
+    # boot faster than newer (beta) runtimes which trigger data-migration steps.
     runtimeId=$(xcrun simctl list runtimes -j |
-        jq -r '[.runtimes[] | select(.platform == "iOS" and .isAvailable == true)] | last | .identifier // empty')
+        jq -r '[.runtimes[] | select(.platform == "iOS" and .isAvailable == true and (.identifier | test("iOS-18")))] | last | .identifier // empty')
+
+    # Fall back to the latest available runtime if no iOS 18.x is found.
+    if [ -z "$runtimeId" ]; then
+        runtimeId=$(xcrun simctl list runtimes -j |
+            jq -r '[.runtimes[] | select(.platform == "iOS" and .isAvailable == true)] | last | .identifier // empty')
+    fi
 
     if [ -z "$runtimeId" ]; then
         echo "ERROR: No available iOS simulator runtime found" >&2
@@ -210,8 +219,7 @@ function runE2ETests() {
             flutter --version 2>&1 || true
         fi
 
-        local verboseFlag=""
-        if isDebug; then verboseFlag="-v"; fi
+        local verboseFlag="-v"
 
         # Build the app explicitly when needed:
         # - iOS: always, because we need the bundle for simulator readiness
@@ -493,6 +501,21 @@ function _collectCblLogsLinux() {
     echo "Copied files"
 }
 
+function _collectSetupLogs() {
+    echo "Collecting setup logs"
+
+    local setupLogsDir="$testResultsDir/setup-logs"
+    mkdir -p "$setupLogsDir"
+
+    local setupDir="$workspaceDir/.tmp"
+    for logFile in "$setupDir"/couchbase-setup.log "$setupDir"/virtual-devices.log; do
+        if [ -f "$logFile" ]; then
+            echo "Copying $(basename "$logFile")"
+            cp -a "$logFile" "$setupLogsDir/"
+        fi
+    done
+}
+
 function _collectCouchbaseServerLogs() {
     echo "Collecting Couchbase Server logs"
 
@@ -559,6 +582,7 @@ function collectTestResults() {
     # Wait for crash reports/core dumps.
     sleep 60
 
+    _collectSetupLogs
     _collectCouchbaseServerLogs
     _collectSyncGatewayLogs
 
