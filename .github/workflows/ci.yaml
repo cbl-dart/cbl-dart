@@ -10,7 +10,7 @@ on:
     paths-ignore:
       - docs/**
   schedule:
-    - cron: '0 0 * * *'
+    - cron: "0 0 * * *"
 
 concurrency:
   group: ${{ github.ref }}
@@ -23,8 +23,9 @@ jobs:
   formatting-dart:
     name: Formatting - Dart
     timeout-minutes: 10
-    runs-on: blacksmith-2vcpu-ubuntu-2204
+    runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu
     steps:
+      - uses: runs-on/action@v2
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -54,22 +55,24 @@ jobs:
   formatting-clang:
     name: Formatting - Clang
     timeout-minutes: 10
-    runs-on: blacksmith-2vcpu-ubuntu-2204
+    runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu
     steps:
+      - uses: runs-on/action@v2
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Check formatting
         uses: jidicula/clang-format-action@v4.16.0
         with:
-          clang-format-version: '21'
-          check-path: 'packages/cbl/native/couchbase-lite-dart'
+          clang-format-version: "21"
+          check-path: "packages/cbl/native/couchbase-lite-dart"
 
   analyze-dart:
     name: Analyze Dart code
     timeout-minutes: 10
-    runs-on: blacksmith-2vcpu-ubuntu-2204
+    runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu
     steps:
+      - uses: runs-on/action@v2
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
@@ -113,25 +116,37 @@ jobs:
       TARGET_OS: ${{ matrix.os }}
       TEST_PACKAGE: ${{ matrix.package }}
     runs-on: >-
-      ${{ fromJSON('{
-        "Ubuntu":"blacksmith-2vcpu-ubuntu-2204",
+      ${{ fromJSON(format('{{
+        "Ubuntu":"runs-on={0}/runner=ubuntu22-2cpu",
         "macOS":"macos-15",
         "Windows":"windows-2025"
-      }')[matrix.os] }}
+      }}', github.run_id))[matrix.os] }}
     steps:
+      - uses: runs-on/action@v2
+        if: runner.os == 'Linux'
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Disable Windows Defender
-        if: runner.os == 'Windows'
-        run: Set-MpPreference -DisableRealtimeMonitoring $true
-        shell: powershell
 
       - name: Install Linux cross-compilation toolchain
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+
+      - name: Setup Java
+        if: runner.os == 'Linux' && matrix.package == 'cbl'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Android SDK
+        if: runner.os == 'Linux' && matrix.package == 'cbl'
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android NDK
+        if: runner.os == 'Linux' && matrix.package == 'cbl'
+        run: ./tools/android-sdk.sh installNativeToolchain
 
       - name: Setup Flutter
         uses: ./.github/actions/setup-flutter
@@ -183,13 +198,13 @@ jobs:
             os: Android
     runs-on: >-
       ${{ matrix.os == 'macOS' && matrix.embedder == 'standalone' && 'macos-15'
-       || fromJSON('{
+       || fromJSON(format('{{
         "iOS":"warp-macos-15-arm64-6x",
-        "macOS":"warp-macos-15-arm64-6x",
+        "macOS":"macos-15",
         "Android":"blacksmith-4vcpu-ubuntu-2204",
-        "Ubuntu":"blacksmith-2vcpu-ubuntu-2204",
+        "Ubuntu":"runs-on={0}/runner=ubuntu22-4cpu",
         "Windows":"windows-2025"
-      }')[matrix.os] }}
+      }}', github.run_id))[matrix.os] }}
     env:
       EMBEDDER: ${{ matrix.embedder }}
       TARGET_OS: ${{ matrix.os }}
@@ -199,13 +214,10 @@ jobs:
           "flutter":"cbl_e2e_tests_flutter"
         }')[matrix.embedder] }}
     steps:
+      - uses: runs-on/action@v2
+        if: runner.os == 'Linux'
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Disable Windows Defender
-        if: runner.os == 'Windows'
-        run: Set-MpPreference -DisableRealtimeMonitoring $true
-        shell: powershell
 
       - name: Select Java 17
         if: ${{ matrix.os == 'Android' }}
@@ -248,7 +260,7 @@ jobs:
         if: matrix.os == 'Ubuntu' && matrix.embedder == 'flutter'
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends clang cmake ninja-build pkg-config libgtk-3-dev lld
+          sudo apt-get install -y --no-install-recommends clang cmake ninja-build pkg-config libgtk-3-dev lld llvm
 
       - name: Setup Flutter
         uses: ./.github/actions/setup-flutter
@@ -256,7 +268,7 @@ jobs:
           channel: ${{ env.flutter-channel }}
           cache: true
           pub-cache-hash-pattern: pubspec.lock
-          cache-provider: ${{ ((matrix.os == 'macOS' || matrix.os == 'iOS') && matrix.embedder == 'flutter') && 'warp' || 'github' }}
+          cache-provider: ${{ (matrix.os == 'iOS' && matrix.embedder == 'flutter') && 'warp' || 'github' }}
 
       - name: Enable Flutter native assets
         if: matrix.embedder == 'flutter'
@@ -269,10 +281,6 @@ jobs:
         shell: bash
         run: dart run melos bootstrap
 
-      - name: Start Couchbase services
-        shell: bash
-        run: ./tools/ci-steps.sh startCouchbaseServices
-
       - name: Cache Android emulator
         if: matrix.os == 'Android'
         uses: actions/cache@v4
@@ -280,6 +288,10 @@ jobs:
           path: |
             /usr/local/lib/android/sdk/system-images/android-27
           key: android-system-image-27-x86_64-v2
+
+      - name: Start Couchbase services
+        shell: bash
+        run: ./tools/ci-steps.sh startCouchbaseServices
 
       - name: Start virtual devices
         if: matrix.embedder == 'flutter'
@@ -311,4 +323,3 @@ jobs:
         shell: bash
         run: |
           ./tools/ci-steps.sh uploadCoverageData "e2e.cbl.${{ matrix.embedder }}.${{ matrix.os }}"
-

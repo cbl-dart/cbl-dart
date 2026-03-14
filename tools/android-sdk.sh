@@ -25,15 +25,32 @@ if [ -z "$sdkHome" ]; then
     fi
 fi
 
+# Find sdkmanager, checking "latest" first then any versioned directory.
+sdkmanager=""
+for dir in "$sdkHome"/cmdline-tools/*/bin; do
+    if [ -x "$dir/sdkmanager" ]; then
+        sdkmanager="$dir/sdkmanager"
+        # Prefer "latest" if available.
+        if [[ "$dir" == */latest/* ]]; then
+            break
+        fi
+    fi
+done
+
+if [ -z "$sdkmanager" ]; then
+    echo "Could not find sdkmanager in $sdkHome/cmdline-tools/*/bin."
+    exit 1
+fi
+
 function installNativeToolchain() {
-    $sdkHome/cmdline-tools/latest/bin/sdkmanager --install "ndk;$ndkVersion"
-    $sdkHome/cmdline-tools/latest/bin/sdkmanager --install "cmake;$cmakeVersion"
+    "$sdkmanager" --install "ndk;$ndkVersion"
+    "$sdkmanager" --install "cmake;$cmakeVersion"
 }
 
 function installAppBuildDeps() {
-    $sdkHome/cmdline-tools/latest/bin/sdkmanager --install "ndk;$appNdkVersion"
-    $sdkHome/cmdline-tools/latest/bin/sdkmanager --install "platforms;android-33"
-    $sdkHome/cmdline-tools/latest/bin/sdkmanager --install "platforms;android-36"
+    "$sdkmanager" --install "ndk;$appNdkVersion"
+    "$sdkmanager" --install "platforms;android-33"
+    "$sdkmanager" --install "platforms;android-36"
 }
 
 "$@"
