@@ -5,7 +5,7 @@ import 'package:hooks/hooks.dart';
 import 'package:native_toolchain_c/native_toolchain_c.dart';
 import 'package:path/path.dart' as p;
 
-import 'src/download.dart' as dl;
+import '../src/install/download.dart' as dl;
 
 const _cbliteRelease = '4.0.3';
 const _vectorSearchRelease = '2.0.0';
