@@ -199,7 +199,7 @@ jobs:
     runs-on: >-
       ${{ matrix.os == 'macOS' && matrix.embedder == 'standalone' && 'macos-15'
        || fromJSON(format('{{
-        "iOS":"macos-15",
+        "iOS":"warp-macos-15-arm64-6x",
         "macOS":"macos-15",
         "Android":"blacksmith-4vcpu-ubuntu-2204",
         "Ubuntu":"runs-on={0}/runner=ubuntu22-4cpu",
@@ -268,7 +268,7 @@ jobs:
           channel: ${{ env.flutter-channel }}
           cache: true
           pub-cache-hash-pattern: pubspec.lock
-          cache-provider: github
+          cache-provider: ${{ (matrix.os == 'iOS' && matrix.embedder == 'flutter') && 'warp' || 'github' }}
 
       - name: Enable Flutter native assets
         if: matrix.embedder == 'flutter'
@@ -281,14 +281,6 @@ jobs:
         shell: bash
         run: dart run melos bootstrap
 
-      - name: Cache Xcode DerivedData
-        if: matrix.os == 'iOS' || matrix.os == 'macOS'
-        uses: actions/cache@v4
-        with:
-          path: ~/Library/Developer/Xcode/DerivedData
-          key: deriveddata-${{ matrix.os }}-${{ hashFiles('packages/cbl_e2e_tests_flutter/ios/Runner.xcodeproj/project.pbxproj', 'packages/cbl_e2e_tests_flutter/macos/Runner.xcodeproj/project.pbxproj', 'packages/cbl_e2e_tests_flutter/pubspec.lock') }}
-          restore-keys: deriveddata-${{ matrix.os }}-
-
       - name: Cache Android emulator
         if: matrix.os == 'Android'
         uses: actions/cache@v4
@@ -297,36 +289,14 @@ jobs:
             /usr/local/lib/android/sdk/system-images/android-27
           key: android-system-image-27-x86_64-v2
 
-      - name: Start Couchbase services and virtual devices
-        if: matrix.embedder == 'flutter'
-        shell: bash
-        run: |
-          mkdir -p .tmp
-
-          # Start Couchbase services in the background, logging to a separate file.
-          (
-            ./tools/ci-steps.sh startCouchbaseServices \
-              && touch .tmp/couchbase-ready \
-              || { touch .tmp/couchbase-failed; exit 1; }
-          ) > .tmp/couchbase-setup.log 2>&1 &
-          couchbasePid=$!
-
-          # Start virtual devices in the foreground, logging to a separate file.
-          ./tools/ci-steps.sh startVirtualDevices 2>&1 | tee .tmp/virtual-devices.log
-
-          # Wait for Couchbase services to finish.
-          echo "Waiting for Couchbase services to be ready..."
-          if ! wait $couchbasePid; then
-            echo "ERROR: Couchbase services failed to start:"
-            cat .tmp/couchbase-setup.log
-            exit 1
-          fi
-          echo "Couchbase services are ready"
-
       - name: Start Couchbase services
-        if: matrix.embedder != 'flutter'
         shell: bash
         run: ./tools/ci-steps.sh startCouchbaseServices
+
+      - name: Start virtual devices
+        if: matrix.embedder == 'flutter'
+        shell: bash
+        run: ./tools/ci-steps.sh startVirtualDevices
 
       - name: Run tests
         timeout-minutes: 10

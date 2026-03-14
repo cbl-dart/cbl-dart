@@ -41,47 +41,11 @@ targetOs="$TARGET_OS"
 testPackage="$TEST_PACKAGE"
 testPackageDir="packages/$testPackage"
 testAppBundleId="com.terwesten.gabriel.cblE2eTestsFlutter"
+iosVersion="18-4"
+iosDevice="iPhone 16"
 androidVersion="27"
 androidDevice="pixel_4"
 syncGatewayLogFile="$workspaceDir/.tmp/sync-gateway.log"
-
-# === iOS simulator auto-detection =============================================
-
-function _detectIosSimulator() {
-    local runtimeId
-
-    # Prefer iOS 18.x runtimes — they are pre-installed on macos-15 runners and
-    # boot faster than newer (beta) runtimes which trigger data-migration steps.
-    runtimeId=$(xcrun simctl list runtimes -j |
-        jq -r '[.runtimes[] | select(.platform == "iOS" and .isAvailable == true and (.identifier | test("iOS-18")))] | last | .identifier // empty')
-
-    # Fall back to the latest available runtime if no iOS 18.x is found.
-    if [ -z "$runtimeId" ]; then
-        runtimeId=$(xcrun simctl list runtimes -j |
-            jq -r '[.runtimes[] | select(.platform == "iOS" and .isAvailable == true)] | last | .identifier // empty')
-    fi
-
-    if [ -z "$runtimeId" ]; then
-        echo "ERROR: No available iOS simulator runtime found" >&2
-        xcrun simctl list runtimes >&2
-        exit 1
-    fi
-
-    local deviceName
-    deviceName=$(xcrun simctl list devices available -j |
-        jq -r --arg rt "$runtimeId" '.devices[$rt] // [] | map(select(.name | startswith("iPhone"))) | last | .name // empty')
-
-    if [ -z "$deviceName" ]; then
-        echo "ERROR: No available iPhone device found for runtime '$runtimeId'" >&2
-        xcrun simctl list devices available >&2
-        exit 1
-    fi
-
-    # Extract version from runtime id (e.g. ...iOS-18-2 -> 18-2)
-    iosVersion=$(echo "$runtimeId" | sed 's/.*iOS-//')
-    iosDevice="$deviceName"
-    echo "Detected iOS simulator: runtime=$runtimeId device=$iosDevice"
-}
 
 # === Steps ===================================================================
 
@@ -118,7 +82,6 @@ function startVirtualDevices() {
 
     case "$targetOs" in
     iOS)
-        _detectIosSimulator
         ./tools/apple-simulator.sh start -o "iOS-$iosVersion" -d "$iosDevice"
         ;;
     Android)
@@ -219,41 +182,146 @@ function runE2ETests() {
             flutter --version 2>&1 || true
         fi
 
-        local verboseFlag="-v"
+        local verboseFlag=""
+        if isDebug; then verboseFlag="-v"; fi
+
+        # Build the app explicitly when needed:
+        # - iOS: always, because we need the bundle for simulator readiness
+        #   checks before flutter drive.
+        # - Debug mode: always, so we can inspect the bundle afterwards.
+        # Otherwise, let flutter drive handle the build implicitly.
+        local buildTarget
+        case "$targetOs" in
+        Ubuntu)   buildTarget="linux" ;;
+        macOS)    buildTarget="macos" ;;
+        Windows)  buildTarget="windows" ;;
+        Android)  buildTarget="apk" ;;
+        iOS)      buildTarget="ios" ;;
+        *)        buildTarget="$(echo "$device" | tr '[:upper:]' '[:lower:]')" ;;
+        esac
+        local buildFlags=""
+        case "$targetOs" in
+        iOS) buildFlags="--simulator --no-codesign" ;;
+        esac
+        local didExplicitBuild=false
+        if [ "$targetOs" = "iOS" ] || isDebug; then
+            echo "=== Building Flutter app for $targetOs ==="
+            flutter build "$buildTarget" --debug $buildFlags $verboseFlag $DART_DEFINES 2>&1
+            didExplicitBuild=true
+        fi
+
+        if isDebug; then
+            echo "=== Native assets builder cache ==="
+            find .dart_tool -path '*/native_assets_builder/*' -type f 2>/dev/null || echo "No native_assets_builder directory found"
+            find .dart_tool -path '*/hooks_runner/*' -type f 2>/dev/null || echo "No hooks_runner directory found"
+            find .dart_tool -name 'build_output.json' -o -name 'output.json' 2>/dev/null | while read -r f; do
+                echo "--- $f ---"
+                cat "$f"
+                echo ""
+            done
+
+            echo "=== Inspecting Flutter app bundle for native libraries ==="
+            case "$targetOs" in
+            Ubuntu)
+                find build/linux/ -type f \( -name '*.so' -o -name '*.so.*' \) 2>/dev/null || echo "No .so files found"
+                ls -laR build/linux/x64/debug/bundle/lib/ 2>/dev/null || echo "bundle/lib/ not found"
+                ls -laR build/native_assets/ 2>/dev/null || echo "build/native_assets/ not found"
+                ;;
+            Windows)
+                find build/windows/ -type f -name '*.dll' 2>/dev/null || echo "No .dll files found"
+                ls -laR build/windows/x64/runner/Debug/ 2>/dev/null || echo "runner/Debug/ not found"
+                ;;
+            Android)
+                if command -v unzip &>/dev/null; then
+                    local apk
+                    apk=$(find build/app/outputs -name '*.apk' 2>/dev/null | head -1)
+                    if [ -n "$apk" ]; then
+                        unzip -l "$apk" | grep -E '\.so$' || echo "No .so files in APK"
+                    fi
+                fi
+                ;;
+            macOS)
+                find build/macos -type f \( -name '*.dylib' -o -name '*.framework' \) 2>/dev/null || echo "No dylib/framework files found"
+                ls -laR build/macos/Build/Products/Debug/*.app/Contents/Frameworks/ 2>/dev/null || echo "Frameworks/ not found"
+                ;;
+            iOS)
+                find build/ios -type f \( -name '*.dylib' -o -name '*.framework' \) 2>/dev/null || echo "No dylib/framework files found"
+                ls -laR build/ios/iphonesimulator/*.app/Frameworks/ 2>/dev/null || echo "Frameworks/ not found"
+                ;;
+            esac
+            echo "=== End bundle inspection ==="
+        fi
+
+        # --- iOS: ensure simulator is fully ready before flutter drive ---
+        if [ "$targetOs" = "iOS" ]; then
+            echo "=== iOS simulator readiness ==="
+            local simId
+            simId=$(xcrun simctl list devices booted -j | jq -r '.devices[][] | select(.state == "Booted") | .udid' | head -1)
+            if [ -n "$simId" ]; then
+                echo "Booted simulator: $simId"
+
+                # Re-confirm boot status (blocks until truly ready).
+                echo "Waiting for simulator to be fully ready..."
+                xcrun simctl bootstatus "$simId" -b 2>&1 || true
+
+                # Wait for SpringBoard to be responsive — it can lag behind
+                # the "Booted" state and cause app launches to hang.
+                echo "Warming up SpringBoard..."
+                xcrun simctl launch "$simId" com.apple.springboard 2>/dev/null || true
+                sleep 5
+
+                if isDebug; then
+                    local appBundle
+                    appBundle=$(find build/ios -name "Runner.app" -path "*/iphonesimulator/*" -type d 2>/dev/null | head -1)
+                    if [ -n "$appBundle" ]; then
+                        echo "App bundle: $appBundle"
+
+                        echo "--- Framework architectures ---"
+                        for fw in "$appBundle"/Frameworks/*.framework/*; do
+                            if [ -f "$fw" ] && file "$fw" | grep -q "Mach-O"; then
+                                echo "$fw:"
+                                lipo -info "$fw" 2>&1 || true
+                            fi
+                        done
+
+                        echo "--- Code signing ---"
+                        codesign -dvv "$appBundle" 2>&1 || true
+
+                        echo "--- Pre-installing app ---"
+                        xcrun simctl install "$simId" "$appBundle" 2>&1 || true
+
+                        echo "--- Test-launching app ---"
+                        xcrun simctl launch --terminate-running-process "$simId" "$testAppBundleId" 2>&1 || true
+                        sleep 5
+
+                        echo "--- Checking if app process is alive ---"
+                        xcrun simctl spawn "$simId" launchctl list 2>&1 | grep -i "runner\|cbl" || echo "App not found in launchctl"
+
+                        echo "--- Recent crash logs ---"
+                        find ~/Library/Logs/DiagnosticReports -name "Runner*" -newer "$appBundle" 2>/dev/null || echo "No crash logs"
+
+                        echo "--- Terminate pre-launch ---"
+                        xcrun simctl terminate "$simId" "$testAppBundleId" 2>/dev/null || true
+                        sleep 2
+                    fi
+                fi
+            else
+                echo "ERROR: No booted simulator found — aborting"
+                exit 1
+            fi
+            echo "=== End iOS simulator readiness ==="
+        fi
 
         # Note: We would like to collect coverage data from tests, but
         # `flutter drive` does not support the `--coverage` flag. While
         # `flutter test` does, it does not support the `--keep-app-running`
         # flag, which we need to collect logs from devices.
-
-        local publishPortFlag=""
-        if [ "$targetOs" = "iOS" ]; then
-            # flutter drive disables VM service publication by default, which
-            # prevents mDNS discovery. On simulators this is unnecessary (no
-            # Local Network permission prompt) and causes intermittent hangs
-            # due to a race condition in the log-based fallback (#181771).
-            publishPortFlag="--publish-port"
-        fi
-
-        # On iOS, capture simulator logs in the background to diagnose
-        # silent crashes (e.g. native library loading failures). The log
-        # file is collected by collectTestResults on failure.
-        if [ "$targetOs" = "iOS" ]; then
-            local simUdid
-            simUdid=$(xcrun simctl list devices booted -j | jq -r '[.devices[][] | select(.state == "Booted")] | first | .udid')
-            if [ -n "$simUdid" ]; then
-                mkdir -p "$workspaceDir/.tmp"
-                xcrun simctl spawn "$simUdid" log stream \
-                    --level debug --style compact \
-                    --predicate 'processImagePath endswith "Runner" or eventMessage contains "crash" or eventMessage contains "dlopen"' \
-                    > "$workspaceDir/.tmp/simulator-app.log" 2>&1 &
-            fi
-        fi
-
+        local noBuildFlag=""
+        if [ "$didExplicitBuild" = true ]; then noBuildFlag="--no-build"; fi
         flutter drive \
             -d "$device" \
             $DART_DEFINES \
-            $publishPortFlag \
+            $noBuildFlag \
             --keep-app-running \
             --driver test_driver/integration_test.dart \
             --target integration_test/e2e_test.dart \
@@ -347,7 +415,6 @@ function _collectCblLogsIosSimulator() {
         return 0
     fi
 
-    _detectIosSimulator
     ./tools/apple-simulator.sh copyData \
         -o "iOS-$iosVersion" \
         -d "$iosDevice" \
@@ -395,41 +462,6 @@ function _collectCblLogsLinux() {
     echo "Copying files..."
     cp -a "$cblLogsDir" "$testResultsDir"
     echo "Copied files"
-}
-
-function _collectSetupLogs() {
-    echo "Collecting setup logs"
-
-    local setupLogsDir="$testResultsDir/setup-logs"
-    mkdir -p "$setupLogsDir"
-
-    local setupDir="$workspaceDir/.tmp"
-    for logFile in "$setupDir"/couchbase-setup.log "$setupDir"/virtual-devices.log "$setupDir"/simulator-app.log; do
-        if [ -f "$logFile" ]; then
-            echo "Copying $(basename "$logFile")"
-            cp -a "$logFile" "$setupLogsDir/"
-        fi
-    done
-}
-
-function _collectIosDiagnostics() {
-    echo "Collecting iOS diagnostics"
-
-    local diagDir="$testResultsDir/ios-diagnostics"
-    mkdir -p "$diagDir"
-
-    echo "--- Runner process check ---"
-    ps aux | grep -i "[R]unner" > "$diagDir/runner-process.txt" 2>&1 \
-        || echo "Runner process is NOT running (likely crashed)" > "$diagDir/runner-process.txt"
-
-    echo "--- Native libraries in app bundle ---"
-    {
-        find "$testPackageDir/build/ios" -name "*.dylib" -exec lipo -info {} \; 2>/dev/null
-        find "$testPackageDir/build/ios" -path "*/Frameworks/*.framework/*" -type f \
-            ! -name "*.plist" ! -name "*.car" -exec lipo -info {} \; 2>/dev/null
-    } > "$diagDir/native-libraries.txt" 2>&1
-
-    echo "Collected iOS diagnostics"
 }
 
 function _collectCouchbaseServerLogs() {
@@ -498,7 +530,6 @@ function collectTestResults() {
     # Wait for crash reports/core dumps.
     sleep 60
 
-    _collectSetupLogs
     _collectCouchbaseServerLogs
     _collectSyncGatewayLogs
 
@@ -530,7 +561,6 @@ function collectTestResults() {
         iOS)
             _collectCrashReportsMacOS
             _collectCblLogsIosSimulator
-            _collectIosDiagnostics
             ;;
         Android)
             _collectCrashReportsAndroid
