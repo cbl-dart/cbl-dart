@@ -26,7 +26,6 @@ dependencies:
   path: ^1.8.0
   stream_channel: ^2.1.0
   synchronized: ^3.0.0
-  web_socket_channel: '>=2.1.0 <4.0.0'
 
 dev_dependencies:
   ffigen: ^20.1.1

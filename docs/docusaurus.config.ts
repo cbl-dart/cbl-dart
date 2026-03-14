@@ -11,7 +11,6 @@ export default {
   url: 'https://cbl-dart.dev',
   baseUrl: '/',
   onBrokenLinks: 'throw',
-  onBrokenMarkdownLinks: 'warn',
   trailingSlash: true,
   favicon: 'img/logo.png',
 
@@ -28,6 +27,9 @@ export default {
       comments: false,
       admonitions: false,
       headingIds: false,
+    },
+    hooks: {
+      onBrokenMarkdownLinks: 'warn',
     },
   },
 
