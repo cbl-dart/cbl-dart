@@ -16,7 +16,7 @@ jobs:
     steps:
       - uses: runs-on/action@v2
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Install and build website
         working-directory: docs
         run: |
