@@ -7,7 +7,7 @@ resolution: workspace
 
 dependencies:
   benchmark_harness: ^2.3.1
-  cbl: ^4.0.0-dev.0
+  cbl: ^4.0.0-dev.1
   collection: ^1.19.1
   meta: ^1.16.0
   pool: ^1.5.1

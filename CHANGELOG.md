@@ -11,6 +11,31 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 Packages with breaking changes:
 
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`cbl` - `v4.0.0-dev.1`](#cbl---v400-dev1)
+ - [`cbl_sentry` - `v3.0.0-dev.1`](#cbl_sentry---v300-dev1)
+ - [`cbl_generator` - `v0.4.0-dev.1`](#cbl_generator---v040-dev1)
+
+---
+
+#### `cbl` - `v4.0.0-dev.1`
+
+#### `cbl_sentry` - `v3.0.0-dev.1`
+
+#### `cbl_generator` - `v0.4.0-dev.1`
+
+
+## 2026-03-14
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
  - [`cbl` - `v4.0.0-dev.0`](#cbl---v400-dev0)
  - [`cbl_generator` - `v0.4.0-dev.0`](#cbl_generator---v040-dev0)
  - [`cbl_sentry` - `v3.0.0-dev.0`](#cbl_sentry---v300-dev0)
