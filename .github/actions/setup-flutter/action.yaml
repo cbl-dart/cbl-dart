@@ -127,7 +127,7 @@ runs:
 
     - name: Cache Flutter (github)
       id: cache-flutter-github
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       if: inputs.cache == 'true' && inputs.cache-provider == 'github'
       with:
         path: ${{ steps.flutter-action.outputs.CACHE-PATH }}
@@ -145,7 +145,7 @@ runs:
 
     - name: Cache pub dependencies (github)
       id: cache-pub-github
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       if: inputs.cache == 'true' && inputs.cache-provider == 'github'
       with:
         path: ${{ steps.flutter-action.outputs.PUB-CACHE-PATH }}

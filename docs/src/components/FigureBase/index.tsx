@@ -1,4 +1,5 @@
 import React, { PropsWithChildren, ReactNode } from 'react'
+import useBrokenLinks from '@docusaurus/useBrokenLinks'
 import styles from './styles.module.css'
 
 export interface FigureBaseProps extends PropsWithChildren {
@@ -9,10 +10,13 @@ export interface FigureBaseProps extends PropsWithChildren {
 }
 
 export default function FigureBase(props: FigureBaseProps) {
+  const anchor = `${props.type}-${props.id}`
+  useBrokenLinks().collectAnchor(anchor)
+
   const typeDisplay = props.type.charAt(0).toUpperCase() + props.type.slice(1)
 
   return (
-    <figure className={styles.figure} id={`${props.type}-${props.id}`}>
+    <figure className={styles.figure} id={anchor}>
       <figcaption className={styles.caption}>
         {typeDisplay} {props.id}. {props.title ?? props.richTitle}
       </figcaption>
