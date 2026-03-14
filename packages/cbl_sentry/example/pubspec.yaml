@@ -9,7 +9,7 @@ environment:
 resolution: workspace
 
 dependencies:
-  cbl: ^3.6.0+2
+  cbl: ^4.0.0-dev.0
   cbl_sentry:
     path: ..
   sentry: ^9.14.0

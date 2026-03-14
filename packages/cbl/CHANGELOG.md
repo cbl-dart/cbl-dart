@@ -1,3 +1,18 @@
+## 4.0.0-dev.0
+
+> Note: This release has breaking changes.
+
+ - **REFACTOR**(cbl): move hook helper code into src/install ([#892](https://github.com/cbl-dart/cbl-dart/issues/892)). ([aacc9ca7](https://github.com/cbl-dart/cbl-dart/commit/aacc9ca78c9d2c816a7a58b8180a0676bc23e1d6))
+ - **REFACTOR**: simplify FFI bindings with direct @Native and static APIs ([#880](https://github.com/cbl-dart/cbl-dart/issues/880)). ([e03477c0](https://github.com/cbl-dart/cbl-dart/commit/e03477c04cd30a832506c331d0b2ed7c965c51e2))
+ - **PERF**: mark FFI functions as leaf ([#885](https://github.com/cbl-dart/cbl-dart/issues/885)). ([d48ec9c6](https://github.com/cbl-dart/cbl-dart/commit/d48ec9c6a57a41c0f02fc1231da7ff1d62f77d3c))
+ - **FIX**: disable avoid_classes_with_only_static_members lint ([#869](https://github.com/cbl-dart/cbl-dart/issues/869)). ([fab9b7a6](https://github.com/cbl-dart/cbl-dart/commit/fab9b7a62b6764b810b515d64f7533af0913d661))
+ - **FIX**: revert accidental cbl_libcblite_api version bump in dependents ([#864](https://github.com/cbl-dart/cbl-dart/issues/864)). ([0f4f3816](https://github.com/cbl-dart/cbl-dart/commit/0f4f381693d16f5cbdfdb7a75415fe9bf74b249c))
+ - **FIX**: upgrade analyzer dependencies to v10+ ([#857](https://github.com/cbl-dart/cbl-dart/issues/857)). ([0c88ee84](https://github.com/cbl-dart/cbl-dart/commit/0c88ee8454f80e13448be0bb235452e029d9cc62))
+ - **FEAT**: add typed filters and resolvers to CollectionConfiguration ([#886](https://github.com/cbl-dart/cbl-dart/issues/886)). ([cf6ea823](https://github.com/cbl-dart/cbl-dart/commit/cf6ea823fd11cac5f58c8415cd1eb8f0c6846cbe))
+ - **BREAKING** **FEAT**: remove deprecated Database/Replicator APIs, use collection-based API ([#887](https://github.com/cbl-dart/cbl-dart/issues/887)). ([d5af9966](https://github.com/cbl-dart/cbl-dart/commit/d5af99660ee39a4f560f09d8038d7a41b8b9484d))
+ - **BREAKING** **FEAT**: upgrade to CBL C SDK 4.0.3 ([#860](https://github.com/cbl-dart/cbl-dart/issues/860)). ([0a10af19](https://github.com/cbl-dart/cbl-dart/commit/0a10af196ae8f24685984371a480d33b28542782))
+ - **BREAKING** **FEAT**: migrate to Dart native assets ([#870](https://github.com/cbl-dart/cbl-dart/issues/870)). ([4fa90890](https://github.com/cbl-dart/cbl-dart/commit/4fa9089016466e371121ecc943424bc65b66591f))
+
 ## 3.6.0+2
 
 ## 3.6.0+1

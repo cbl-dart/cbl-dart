@@ -1,3 +1,9 @@
+## 3.0.0-dev.0
+
+> Note: This release has breaking changes.
+
+ - **BREAKING** **FEAT**: migrate to Dart native assets ([#870](https://github.com/cbl-dart/cbl-dart/issues/870)). ([4fa90890](https://github.com/cbl-dart/cbl-dart/commit/4fa9089016466e371121ecc943424bc65b66591f))
+
 ## 2.1.8
 
  - Update a dependency to the latest release.

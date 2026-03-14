@@ -1,3 +1,10 @@
+## 0.4.0-dev.0
+
+> Note: This release has breaking changes.
+
+ - **FIX**: upgrade analyzer dependencies to v10+ ([#857](https://github.com/cbl-dart/cbl-dart/issues/857)). ([0c88ee84](https://github.com/cbl-dart/cbl-dart/commit/0c88ee8454f80e13448be0bb235452e029d9cc62))
+ - **BREAKING** **FEAT**: migrate to Dart native assets ([#870](https://github.com/cbl-dart/cbl-dart/issues/870)). ([4fa90890](https://github.com/cbl-dart/cbl-dart/commit/4fa9089016466e371121ecc943424bc65b66591f))
+
 ## 0.3.1+7
 
  - Update a dependency to the latest release.
