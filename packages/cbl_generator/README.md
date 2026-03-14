@@ -1,61 +1,75 @@
-[![Version](https://badgen.net/pub/v/cbl_generator)](https://pub.dev/packages/cbl_generator)
-[![CI](https://github.com/cbl-dart/cbl-dart/actions/workflows/ci.yaml/badge.svg)](https://github.com/cbl-dart/cbl-dart/actions/workflows/ci.yaml)
-[![codecov](https://codecov.io/gh/cbl-dart/cbl-dart/branch/main/graph/badge.svg?token=XNUVBY3Y39)](https://codecov.io/gh/cbl-dart/cbl-dart)
+<p align="center">
+  <a href="https://cbl-dart.dev">
+    <img src="https://raw.githubusercontent.com/cbl-dart/cbl-dart/main/docs/static/img/logo.png" width="100" alt="Couchbase Lite for Dart and Flutter">
+  </a>
+</p>
 
-Couchbase Lite is an embedded, NoSQL database:
+<p align="center">
+  <strong>Code Generator for Couchbase Lite</strong>
+</p>
 
-- **Multi-Platform** - Android, iOS, macOS, Windows, Linux
-- **Standalone Dart and Flutter** - No manual setup required, just add the
-  package.
-- **Fast and Compact** - Uses efficient persisted data structures.
+<p align="center">
+  <a href="https://pub.dev/packages/cbl_generator"><img src="https://badgen.net/pub/v/cbl_generator" alt="Version"></a>
+  <a href="https://github.com/cbl-dart/cbl-dart/actions/workflows/ci.yaml"><img src="https://github.com/cbl-dart/cbl-dart/actions/workflows/ci.yaml/badge.svg" alt="CI"></a>
+  <a href="https://codecov.io/gh/cbl-dart/cbl-dart"><img src="https://codecov.io/gh/cbl-dart/cbl-dart/branch/main/graph/badge.svg?token=XNUVBY3Y39" alt="codecov"></a>
+</p>
 
-It is fully featured:
+Generates typed document model classes for
+[cbl](https://pub.dev/packages/cbl), giving you type-safe access to document
+properties with zero boilerplate.
 
-- **JSON Style Documents** - No explicit schema and supports deep nesting.
-- **Expressive Queries** - [SQL++] (SQL for JSON), QueryBuilder, Full-Text
-  Search
-- **Observable** - Get notified of changes in database, queries and data sync.
-- **Data Sync** - Pull and push data from/to server with full control over
-  synced data.
+## Getting Started
 
----
+Add the package as a dev dependency alongside `build_runner`:
 
-❤️ If you find this package useful, please ⭐ us on [pub.dev][cbl] and
-[GitHub][repository]. 🙏
+```bash
+dart pub add --dev cbl_generator build_runner
+```
 
-🐛 & ✨ Did you find a bug or have a feature request? Please open a [GitHub
-issue][issues].
+Define your document model:
 
-👋 Do you you have a question or feedback? Let us know in a [GitHub
-discussion][discussions].
+```dart
+import 'package:cbl/cbl.dart';
 
-## Proudly sponsored by
+part 'user.cbl.type.g.dart';
 
-[![Lotum](https://raw.githubusercontent.com/cbl-dart/cbl-dart/main/packages/cbl/doc/img/lotum-logo.svg)](https://lotum.com/)
+@TypedDocument()
+abstract class User with _$User {
+  factory User({
+    @DocumentId() String? id,
+    required String username,
+    required String email,
+    required DateTime createdAt,
+  }) = MutableUser;
+}
+```
 
----
+Run the code generator:
 
-This package allows you to **generated code** for **typed data access**.
+```bash
+dart run build_runner build
+```
 
-To get started, go to the [**documentation**][docs] for Typed Data.
+Use the generated classes:
 
-# 🤝 Contributing
+```dart
+final user = MutableUser(
+  username: 'alice',
+  email: 'alice@example.com',
+  createdAt: DateTime.now(),
+);
+await collection.saveTypedDocument(user).withConcurrencyControl();
+```
 
-Pull requests are welcome. For major changes, please open an issue first to
-discuss what you would like to change.
+**[Read the full documentation at cbl-dart.dev](https://cbl-dart.dev/typed-data)**
 
-Please make sure to update tests as appropriate.
+## Contributing
 
-Read [CONTRIBUTING] to get started developing.
+Pull requests are welcome. For major changes, please open an
+[issue](https://github.com/cbl-dart/cbl-dart/issues) first. Read
+[CONTRIBUTING](https://github.com/cbl-dart/cbl-dart/blob/main/CONTRIBUTING.md)
+to get started.
 
-# ⚖️ Disclaimer
+## Disclaimer
 
-> ⚠️ This is not an official Couchbase product.
-
-[repository]: https://github.com/cbl-dart/cbl-dart
-[contributing]: https://github.com/cbl-dart/cbl-dart/blob/main/CONTRIBUTING.md
-[sql++]: https://www.couchbase.com/products/n1ql
-[cbl]: https://pub.dev/packages/cbl
-[issues]: https://github.com/cbl-dart/cbl-dart/issues
-[discussions]: https://github.com/cbl-dart/cbl-dart/discussions
-[docs]: https://cbl-dart.dev/typed-data
+This is not an official Couchbase product.

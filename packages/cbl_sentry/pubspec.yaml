@@ -1,11 +1,19 @@
 name: 'cbl_sentry'
 version: 3.0.0-dev.0
 description: >-
-  Sentry integration for Couchbase Lite with support for recording breadcrumbs
-  and performance tracing.
+  Sentry integration for Couchbase Lite — automatic breadcrumb recording and
+  performance tracing for database operations and data sync.
 homepage: https://github.com/cbl-dart/cbl-dart/tree/main/packages/cbl_sentry
 repository: https://github.com/cbl-dart/cbl-dart
 issue_tracker: https://github.com/cbl-dart/cbl-dart/issues
+documentation: https://cbl-dart.dev
+
+topics:
+  - sentry
+  - tracing
+  - database
+  - monitoring
+  - observability
 
 environment:
   sdk: ^3.9.0

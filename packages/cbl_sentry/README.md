@@ -1,62 +1,64 @@
-[![Version](https://badgen.net/pub/v/cbl_sentry)](https://pub.dev/packages/cbl_sentry)
-[![CI](https://github.com/cbl-dart/cbl-dart/actions/workflows/ci.yaml/badge.svg)](https://github.com/cbl-dart/cbl-dart/actions/workflows/ci.yaml)
-[![codecov](https://codecov.io/gh/cbl-dart/cbl-dart/branch/main/graph/badge.svg?token=XNUVBY3Y39)](https://codecov.io/gh/cbl-dart/cbl-dart)
+<p align="center">
+  <a href="https://cbl-dart.dev">
+    <img src="https://raw.githubusercontent.com/cbl-dart/cbl-dart/main/docs/static/img/logo.png" width="100" alt="Couchbase Lite for Dart and Flutter">
+  </a>
+</p>
 
-Couchbase Lite is an embedded, NoSQL database:
+<p align="center">
+  <strong>Sentry Integration for Couchbase Lite</strong>
+</p>
 
-- **Multi-Platform** - Android, iOS, macOS, Windows, Linux
-- **Standalone Dart and Flutter** - No manual setup required, just add the
-  package.
-- **Fast and Compact** - Uses efficient persisted data structures.
+<p align="center">
+  <a href="https://pub.dev/packages/cbl_sentry"><img src="https://badgen.net/pub/v/cbl_sentry" alt="Version"></a>
+  <a href="https://github.com/cbl-dart/cbl-dart/actions/workflows/ci.yaml"><img src="https://github.com/cbl-dart/cbl-dart/actions/workflows/ci.yaml/badge.svg" alt="CI"></a>
+  <a href="https://codecov.io/gh/cbl-dart/cbl-dart"><img src="https://codecov.io/gh/cbl-dart/cbl-dart/branch/main/graph/badge.svg?token=XNUVBY3Y39" alt="codecov"></a>
+</p>
 
-It is fully featured:
+Supplements Sentry error reports with database context and gathers performance
+metrics for [cbl](https://pub.dev/packages/cbl) operations.
 
-- **JSON Style Documents** - No explicit schema and supports deep nesting.
-- **Expressive Queries** - [SQL++] (SQL for JSON), QueryBuilder, Full-Text
-  Search
-- **Observable** - Get notified of changes in database, queries and data sync.
-- **Data Sync** - Pull and push data from/to server with full control over
-  synced data.
+## Features
 
----
+- **Breadcrumbs** — Automatically records database operations as Sentry
+  breadcrumbs for richer error context.
+- **Performance Tracing** — Tracks database and data sync operations as Sentry
+  transactions and spans.
 
-❤️ If you find this package useful, please ⭐ us on [pub.dev][cbl] and
-[GitHub][repository]. 🙏
+## Getting Started
 
-🐛 & ✨ Did you find a bug or have a feature request? Please open a [GitHub
-issue][issues].
+Add the package:
 
-👋 Do you you have a question or feedback? Let us know in a [GitHub
-discussion][discussions].
+```bash
+dart pub add cbl_sentry
+```
 
-## Proudly sponsored by
+Add the integration to your Sentry configuration:
 
-[![Lotum](https://raw.githubusercontent.com/cbl-dart/cbl-dart/main/packages/cbl/doc/img/lotum-logo.svg)](https://lotum.com/)
+```dart
+import 'package:cbl_sentry/cbl_sentry.dart';
+import 'package:sentry/sentry.dart';
 
----
+await Sentry.init(
+  (options) => options
+    ..dsn = 'your-sentry-dsn'
+    ..tracesSampleRate = 1
+    ..addIntegration(CouchbaseLiteIntegration()),
+  appRunner: () async {
+    await CouchbaseLite.init();
+    // ...
+  },
+);
+```
 
-This package provides an **integration with Sentry** to supplement error reports
-with database related information and gather database performance metrics.
+**[Read the full documentation at cbl-dart.dev](https://cbl-dart.dev/instrumentation#sentry)**
 
-To get started, go to the [**documentation**][docs] for the Sentry integration.
+## Contributing
 
-# 🤝 Contributing
+Pull requests are welcome. For major changes, please open an
+[issue](https://github.com/cbl-dart/cbl-dart/issues) first. Read
+[CONTRIBUTING](https://github.com/cbl-dart/cbl-dart/blob/main/CONTRIBUTING.md)
+to get started.
 
-Pull requests are welcome. For major changes, please open an issue first to
-discuss what you would like to change.
+## Disclaimer
 
-Please make sure to update tests as appropriate.
-
-Read [CONTRIBUTING] to get started developing.
-
-# ⚖️ Disclaimer
-
-> ⚠️ This is not an official Couchbase product.
-
-[repository]: https://github.com/cbl-dart/cbl-dart
-[contributing]: https://github.com/cbl-dart/cbl-dart/blob/main/CONTRIBUTING.md
-[sql++]: https://www.couchbase.com/products/n1ql
-[cbl]: https://pub.dev/packages/cbl
-[issues]: https://github.com/cbl-dart/cbl-dart/issues
-[discussions]: https://github.com/cbl-dart/cbl-dart/discussions
-[docs]: https://cbl-dart.dev/instrumentation#sentry
+This is not an official Couchbase product.

@@ -1,11 +1,19 @@
 name: cbl_generator
 version: 0.4.0-dev.0
-description:
-  Code generator for Couchbase Lite, which is an embedded, NoSQL JSON Document
-  Style database.
+description: >-
+  Code generator for Couchbase Lite — generates typed document model classes
+  for the embedded, offline-first, NoSQL JSON document database.
 homepage: https://github.com/cbl-dart/cbl-dart/tree/main/packages/cbl_generator
 repository: https://github.com/cbl-dart/cbl-dart
 issue_tracker: https://github.com/cbl-dart/cbl-dart/issues
+documentation: https://cbl-dart.dev
+
+topics:
+  - serialization
+  - database
+  - code-generation
+  - nosql
+  - build-runner
 
 environment:
   sdk: ^3.9.0
