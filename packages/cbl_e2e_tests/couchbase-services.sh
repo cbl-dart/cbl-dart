@@ -290,7 +290,7 @@ function startCouchbaseServerMacOS() {
     if [ ! -d "$cbsAppDir" ]; then
         echo "::group::Install Couchbase Server"
 
-        curl -LO "$cbsUrl"
+        retry 3 10 curl --fail -LO "$cbsUrl"
         local mountOutput
         mountOutput="$(hdiutil attach "$cbsDmg" -nobrowse)"
         local mountPoint
@@ -326,7 +326,7 @@ function startCouchbaseServerWindows() {
 
     echo "::group::Install Couchbase Server"
 
-    curl -LO "$cbsUrl"
+    retry 3 10 curl --fail -LO "$cbsUrl"
     powershell.exe -Command "Start-Process msiexec.exe -Wait -ArgumentList '/i $cbsMsi /qn /norestart'"
     rm "$cbsMsi"
 
