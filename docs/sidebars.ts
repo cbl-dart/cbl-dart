@@ -122,10 +122,7 @@ export default {
       type: 'doc',
       id: 'usage-examples',
     },
-    {
-      type: 'doc',
-      id: 'instrumentation',
-    },
+
     {
       type: 'doc',
       id: 'supported-platforms',
