@@ -1,10 +1,11 @@
+import 'dart:convert';
 import 'dart:ffi';
 
 import 'base.dart';
 import 'cblite.dart' as cblite;
+import 'cblitedart.dart' as cblitedart;
 import 'fleece.dart';
 import 'global.dart';
-import 'utils.dart';
 
 export 'cblite.dart' show CBLDocument;
 
@@ -29,8 +30,16 @@ final class DocumentBindings {
 }
 
 final class MutableDocumentBindings {
-  static Pointer<cblite.CBLDocument> createWithID([String? id]) =>
-      runWithSingleFLString(id, cblite.CBLDocument_CreateWithID);
+  static Pointer<cblite.CBLDocument> createWithID([String? id]) {
+    if (id == null) {
+      return cblitedart.CBLDart_CBLDocument_CreateWithID(nullptr, 0);
+    }
+    final encoded = utf8.encode(id);
+    return cblitedart.CBLDart_CBLDocument_CreateWithID(
+      encoded.address.cast(),
+      encoded.length,
+    );
+  }
 
   static Pointer<cblite.CBLDocument> mutableCopy(
     Pointer<cblite.CBLDocument> source,
@@ -46,12 +55,12 @@ final class MutableDocumentBindings {
   ) => cblite.CBLDocument_SetProperties(doc, properties);
 
   static void setJSON(Pointer<cblite.CBLDocument> doc, String properties) {
-    runWithSingleFLString(properties, (flProperties) {
-      cblite.CBLDocument_SetJSON(
-        doc,
-        flProperties,
-        globalCBLError,
-      ).checkError();
-    });
+    final encoded = utf8.encode(properties);
+    cblitedart.CBLDart_CBLDocument_SetJSON(
+      doc,
+      encoded.address.cast(),
+      encoded.length,
+      globalCBLError,
+    ).checkError();
   }
 }

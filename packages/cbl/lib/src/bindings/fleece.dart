@@ -142,16 +142,16 @@ final class SliceBindings {
   );
 
   static bool equal(cblite.FLSlice a, cblite.FLSlice b) =>
-      cblite.FLSlice_Equal(a, b);
+      cblitedart.CBLDart_FLSlice_Equal(a.buf, a.size, b.buf, b.size);
 
   static int compare(cblite.FLSlice a, cblite.FLSlice b) =>
-      cblite.FLSlice_Compare(a, b);
+      cblitedart.CBLDart_FLSlice_Compare(a.buf, a.size, b.buf, b.size);
 
   static cblite.FLSliceResult create(int size) =>
       cblite.FLSliceResult_New(size);
 
   static cblite.FLSliceResult copy(cblite.FLSlice slice) =>
-      cblite.FLSlice_Copy(slice);
+      cblitedart.CBLDart_FLSlice_Copy(slice.buf, slice.size);
 
   static void bindToDartObject(
     Finalizable object, {
@@ -220,13 +220,17 @@ final class SlotBindings {
   }
 
   static void setString(cblite.FLSlot slot, String value) {
-    runWithSingleFLString(value, (flValue) {
-      cblite.FLSlot_SetString(slot, flValue);
-    });
+    final encoded = utf8.encode(value);
+    cblitedart.CBLDart_FLSlot_SetString(
+      slot,
+      encoded.address.cast(),
+      encoded.length,
+    );
   }
 
   static void setData(cblite.FLSlot slot, Data value) {
-    cblite.FLSlot_SetData(slot, value.toSliceResult().makeGlobal().ref);
+    final sliceResult = value.toSliceResult();
+    cblitedart.CBLDart_FLSlot_SetData(slot, sliceResult.buf, sliceResult.size);
   }
 
   static void setValue(cblite.FLSlot slot, cblite.FLValue value) {
@@ -262,19 +266,24 @@ final class DocBindings {
     cblite.FLSharedKeys? sharedKeys,
   ) {
     final sliceResult = data.toSliceResult();
-    return cblite.FLDoc_FromResultData(
-      sliceResult.makeGlobalResult().ref,
+    return cblitedart.CBLDart_FLDoc_FromResultData(
+      sliceResult.buf,
+      sliceResult.size,
       trust.value,
       sharedKeys ?? nullptr,
-      nullFLSlice.ref,
+      nullptr,
+      0,
     );
   }
 
-  static cblite.FLDoc fromJson(String json) => runWithSingleFLString(
-    json,
-    (flJson) =>
-        cblite.FLDoc_FromJSON(flJson, globalFLErrorCode).checkFleeceError(),
-  );
+  static cblite.FLDoc fromJson(String json) {
+    final encoded = utf8.encode(json);
+    return cblitedart.CBLDart_FLDoc_FromJSON(
+      encoded.address.cast(),
+      encoded.length,
+      globalFLErrorCode,
+    ).checkFleeceError();
+  }
 
   static void bindToDartObject(Finalizable object, cblite.FLDoc doc) {
     _finalizer.attach(
@@ -339,7 +348,11 @@ final class ValueBindings {
   }
 
   static cblite.FLValue? fromData(SliceResult data, FLTrust trust) =>
-      cblite.FLValue_FromData(data.makeGlobal().ref, trust.value).toNullable();
+      cblitedart.CBLDart_FLValue_FromData(
+        data.buf,
+        data.size,
+        trust.value,
+      ).toNullable();
 
   static cblite.FLDoc? findDoc(cblite.FLValue value) =>
       cblite.FLValue_FindDoc(value).toNullable();
@@ -461,16 +474,19 @@ final class MutableArrayBindings {
 // === Dict ====================================================================
 
 final class DictBindings {
-  static cblite.FLValue? get(cblite.FLDict dict, String key) =>
-      runWithSingleFLString(
-        key,
-        (flKey) => cblite.FLDict_Get(dict, flKey),
-      ).toNullable();
+  static cblite.FLValue? get(cblite.FLDict dict, String key) {
+    final encoded = utf8.encode(key);
+    return cblitedart.CBLDart_FLDict_Get(
+      dict,
+      encoded.address.cast(),
+      encoded.length,
+    ).toNullable();
+  }
 
   static cblite.FLValue? getWithFLString(
     cblite.FLDict dict,
     cblite.FLString key,
-  ) => cblite.FLDict_Get(dict, key).toNullable();
+  ) => cblitedart.CBLDart_FLDict_Get(dict, key.buf, key.size).toNullable();
 
   static int count(cblite.FLDict dict) => cblite.FLDict_Count(dict);
 
@@ -482,7 +498,7 @@ final class DictBindings {
 
 final class DictKeyBindings {
   static void init(cblite.FLDictKey dictKey, cblite.FLString key) {
-    final state = cblite.FLDictKey_Init(key);
+    final state = cblitedart.CBLDart_FLDictKey_Init(key.buf, key.size);
     dictKey
       ..private1 = state.private1
       ..private2 = state.private2
@@ -513,16 +529,21 @@ final class MutableDictBindings {
   static bool isChanged(cblite.FLMutableDict dict) =>
       cblite.FLMutableDict_IsChanged(dict);
 
-  static cblite.FLSlot set(cblite.FLMutableDict dict, String key) =>
-      runWithSingleFLString(
-        key,
-        (flKey) => cblite.FLMutableDict_Set(dict, flKey),
-      );
+  static cblite.FLSlot set(cblite.FLMutableDict dict, String key) {
+    final encoded = utf8.encode(key);
+    return cblitedart.CBLDart_FLMutableDict_Set(
+      dict,
+      encoded.address.cast(),
+      encoded.length,
+    );
+  }
 
   static void remove(cblite.FLMutableDict dict, String key) {
-    runWithSingleFLString(
-      key,
-      (flKey) => cblite.FLMutableDict_Remove(dict, flKey),
+    final encoded = utf8.encode(key);
+    cblitedart.CBLDart_FLMutableDict_Remove(
+      dict,
+      encoded.address.cast(),
+      encoded.length,
     );
   }
 
@@ -533,18 +554,26 @@ final class MutableDictBindings {
   static cblite.FLMutableArray? getMutableArray(
     cblite.FLMutableDict array,
     String key,
-  ) => runWithSingleFLString(
-    key,
-    (flKey) => cblite.FLMutableDict_GetMutableArray(array, flKey).toNullable(),
-  );
+  ) {
+    final encoded = utf8.encode(key);
+    return cblitedart.CBLDart_FLMutableDict_GetMutableArray(
+      array,
+      encoded.address.cast(),
+      encoded.length,
+    ).toNullable();
+  }
 
   static cblite.FLMutableDict? getMutableDict(
     cblite.FLMutableDict array,
     String key,
-  ) => runWithSingleFLString(
-    key,
-    (flKey) => cblite.FLMutableDict_GetMutableDict(array, flKey).toNullable(),
-  );
+  ) {
+    final encoded = utf8.encode(key);
+    return cblitedart.CBLDart_FLMutableDict_GetMutableDict(
+      array,
+      encoded.address.cast(),
+      encoded.length,
+    ).toNullable();
+  }
 }
 
 // === Decoder =================================================================
@@ -569,9 +598,13 @@ final class FleeceDecoderBindings {
     cblitedart.addresses.CBLDart_FLArrayIterator_Delete.cast(),
   );
 
-  static String dumpData(Data data) => cblite.FLData_Dump(
-    data.toSliceResult().makeGlobal().ref,
-  ).toDartStringAndRelease()!;
+  static String dumpData(Data data) {
+    final sliceResult = data.toSliceResult();
+    return cblitedart.CBLDart_FLData_Dump(
+      sliceResult.buf,
+      sliceResult.size,
+    ).toDartStringAndRelease()!;
+  }
 
   static Pointer<cblitedart.KnownSharedKeys> createKnownSharedKeys(
     Finalizable object,
@@ -594,13 +627,13 @@ final class FleeceDecoderBindings {
   }
 
   static void getLoadedValueFromDict(cblite.FLDict array, String key) {
-    runWithSingleFLString(key, (flKey) {
-      cblitedart.CBLDart_FLDict_GetLoadedFLValue(
-        array,
-        flKey,
-        globalLoadedFLValue,
-      );
-    });
+    final encoded = utf8.encode(key);
+    cblitedart.CBLDart_FLDict_GetLoadedFLValue(
+      array,
+      encoded.address.cast(),
+      encoded.length,
+      globalLoadedFLValue,
+    );
   }
 
   static Pointer<cblitedart.CBLDart_FLDictIterator> dictIteratorBegin(
@@ -737,16 +770,26 @@ final class FleeceEncoderBindings {
   }
 
   static void writeString(cblite.FLEncoder encoder, String value) {
-    runWithSingleFLString(value, (flValue) {
-      _checkError(encoder, cblite.FLEncoder_WriteString(encoder, flValue));
-    });
+    final encoded = utf8.encode(value);
+    _checkError(
+      encoder,
+      cblitedart.CBLDart_FLEncoder_WriteString(
+        encoder,
+        encoded.address.cast(),
+        encoded.length,
+      ),
+    );
   }
 
   static void writeData(cblite.FLEncoder encoder, Data value) {
     final sliceResult = value.toSliceResult();
     _checkError(
       encoder,
-      cblite.FLEncoder_WriteData(encoder, sliceResult.makeGlobal().ref),
+      cblitedart.CBLDart_FLEncoder_WriteData(
+        encoder,
+        sliceResult.buf,
+        sliceResult.size,
+      ),
     );
   }
 
@@ -754,9 +797,10 @@ final class FleeceEncoderBindings {
     final sliceResult = value.toSliceResult();
     _checkError(
       encoder,
-      cblite.FLEncoder_ConvertJSON(
+      cblitedart.CBLDart_FLEncoder_ConvertJSON(
         encoder,
-        sliceResult.makeGlobal().cast<cblite.FLString>().ref,
+        sliceResult.buf,
+        sliceResult.size,
       ),
     );
   }
@@ -774,13 +818,22 @@ final class FleeceEncoderBindings {
   }
 
   static void writeKey(cblite.FLEncoder encoder, String key) {
-    runWithSingleFLString(key, (flKey) {
-      _checkError(encoder, cblite.FLEncoder_WriteKey(encoder, flKey));
-    });
+    final encoded = utf8.encode(key);
+    _checkError(
+      encoder,
+      cblitedart.CBLDart_FLEncoder_WriteKey(
+        encoder,
+        encoded.address.cast(),
+        encoded.length,
+      ),
+    );
   }
 
   static void writeKeyFLString(cblite.FLEncoder encoder, cblite.FLString key) {
-    _checkError(encoder, cblite.FLEncoder_WriteKey(encoder, key));
+    _checkError(
+      encoder,
+      cblitedart.CBLDart_FLEncoder_WriteKey(encoder, key.buf, key.size),
+    );
   }
 
   static void writeKeyValue(cblite.FLEncoder encoder, cblite.FLValue key) {

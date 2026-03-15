@@ -11,7 +11,8 @@ import 'package:meta/meta.dart';
 import '../bindings.dart';
 import '../bindings/cblite.dart'
     hide CBLKeyUsages, CBLLogDomain, CBLLogLevel, CBLSignatureDigestAlgorithm;
-import '../bindings/cblitedart.dart' hide CBLCert, CBLKeyPair, FLSlice;
+import '../bindings/cblitedart.dart'
+    hide CBLCert, CBLKeyPair, CBLTLSIdentity, FLSlice;
 import '../errors.dart';
 import '../support/edition.dart';
 import '../support/isolate.dart';

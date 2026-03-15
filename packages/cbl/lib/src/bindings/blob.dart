@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:ffi';
 
 import 'base.dart';
@@ -17,13 +18,24 @@ final class BlobBindings {
   static Pointer<cblite.CBLBlob> createWithData(
     String? contentType,
     Data content,
-  ) => runWithSingleFLString(contentType, (flContentType) {
+  ) {
     final sliceResult = content.toSliceResult();
-    return cblite.CBLBlob_CreateWithData(
-      flContentType,
-      sliceResult.makeGlobal().ref,
+    if (contentType == null) {
+      return cblitedart.CBLDart_CBLBlob_CreateWithData(
+        nullptr,
+        0,
+        sliceResult.buf,
+        sliceResult.size,
+      );
+    }
+    final ctEncoded = utf8.encode(contentType);
+    return cblitedart.CBLDart_CBLBlob_CreateWithData(
+      ctEncoded.address.cast(),
+      ctEncoded.length,
+      sliceResult.buf,
+      sliceResult.size,
     );
-  });
+  }
 
   static bool isBlob(cblite.FLDict dict) => cblite.FLDict_IsBlob(dict);
 
@@ -112,8 +124,15 @@ final class BlobWriteStreamBindings {
   static Pointer<cblite.CBLBlob> createBlobWithStream(
     String? contentType,
     Pointer<cblite.CBLBlobWriteStream> stream,
-  ) => runWithSingleFLString(
-    contentType,
-    (flContentType) => cblite.CBLBlob_CreateWithStream(flContentType, stream),
-  );
+  ) {
+    if (contentType == null) {
+      return cblitedart.CBLDart_CBLBlob_CreateWithStream(nullptr, 0, stream);
+    }
+    final ctEncoded = utf8.encode(contentType);
+    return cblitedart.CBLDart_CBLBlob_CreateWithStream(
+      ctEncoded.address.cast(),
+      ctEncoded.length,
+      stream,
+    );
+  }
 }

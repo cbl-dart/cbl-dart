@@ -24,8 +24,6 @@ export 'bindings/global.dart'
         globalLoadedFLValue;
 export 'bindings/libraries.dart';
 export 'bindings/logging.dart';
-export 'bindings/native_utf8_string.dart'
-    show NativeUtf8String, NativeUtf8StringEncoder, nativeUtf8StringEncoder;
 export 'bindings/query.dart';
 export 'bindings/replicator.dart';
 export 'bindings/slice.dart'

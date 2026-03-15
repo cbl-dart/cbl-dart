@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:ffi';
 import 'dart:typed_data';
 
@@ -119,13 +120,14 @@ final class TlsIdentityBindings {
   static String? certSubjectNameComponent(
     Pointer<cblite.CBLCert> pointer,
     String key,
-  ) => runWithSingleFLString(
-    key,
-    (flKey) => cblite.CBLCert_SubjectNameComponent(
+  ) {
+    final encoded = utf8.encode(key);
+    return cblitedart.CBLDart_CBLCert_SubjectNameComponent(
       pointer,
-      flKey,
-    ).toDartStringAndRelease(),
-  );
+      encoded.address.cast(),
+      encoded.length,
+    ).toDartStringAndRelease();
+  }
 
   static ({DateTime created, DateTime expires}) certValidTimespan(
     Pointer<cblite.CBLCert> pointer,
@@ -167,14 +169,26 @@ final class TlsIdentityBindings {
   static Pointer<cblite.CBLKeyPair> keyPairCreateWithPrivateKey(
     Uint8List privateKey, {
     String? password,
-  }) => runWithSingleFLString(
-    password,
-    (flPassword) => cblite.CBLKeyPair_CreateWithPrivateKeyData(
-      SliceResult.fromTypedList(privateKey).makeGlobal().ref,
-      flPassword,
+  }) {
+    final pkSlice = SliceResult.fromTypedList(privateKey);
+    if (password == null) {
+      return cblitedart.CBLDart_CBLKeyPair_CreateWithPrivateKeyData(
+        pkSlice.buf,
+        pkSlice.size,
+        nullptr,
+        0,
+        globalCBLError..ref.reset(),
+      ).checkError();
+    }
+    final pwEncoded = utf8.encode(password);
+    return cblitedart.CBLDart_CBLKeyPair_CreateWithPrivateKeyData(
+      pkSlice.buf,
+      pkSlice.size,
+      pwEncoded.address.cast(),
+      pwEncoded.length,
       globalCBLError..ref.reset(),
-    ).checkError(),
-  );
+    ).checkError();
+  }
 
   static String? keyPairPublicKeyDigest(Pointer<cblite.CBLKeyPair> pointer) =>
       cblite.CBLKeyPair_PublicKeyDigest(pointer).toDartStringAndRelease();
@@ -205,16 +219,25 @@ final class TlsIdentityBindings {
     String? label,
   ) {
     final attributesDict = MutableDict(attributes);
-    return runWithSingleFLString(
-      label,
-      (flLabel) => cblite.CBLTLSIdentity_CreateIdentity(
+    if (label == null) {
+      return cblitedart.CBLDart_CBLTLSIdentity_CreateIdentity(
         keyUsages.fold(0, (value, usage) => value | usage.value),
         attributesDict.pointer.cast(),
         validityDuration.inMilliseconds,
-        flLabel,
+        nullptr,
+        0,
         globalCBLError..ref.reset(),
-      ).checkError(),
-    );
+      ).checkError();
+    }
+    final labelEncoded = utf8.encode(label);
+    return cblitedart.CBLDart_CBLTLSIdentity_CreateIdentity(
+      keyUsages.fold(0, (value, usage) => value | usage.value),
+      attributesDict.pointer.cast(),
+      validityDuration.inMilliseconds,
+      labelEncoded.address.cast(),
+      labelEncoded.length,
+      globalCBLError..ref.reset(),
+    ).checkError();
   }
 
   static Pointer<cblite.CBLTLSIdentity> createWithKeyPair(
@@ -233,14 +256,14 @@ final class TlsIdentityBindings {
     ).checkError();
   }
 
-  static Pointer<cblite.CBLTLSIdentity>? withLabel(String label) =>
-      runWithSingleFLString(
-        label,
-        (flLabel) => cblite.CBLTLSIdentity_IdentityWithLabel(
-          flLabel,
-          globalCBLError..ref.reset(),
-        ).checkError().toNullable(),
-      );
+  static Pointer<cblite.CBLTLSIdentity>? withLabel(String label) {
+    final encoded = utf8.encode(label);
+    return cblitedart.CBLDart_CBLTLSIdentity_IdentityWithLabel(
+      encoded.address.cast(),
+      encoded.length,
+      globalCBLError..ref.reset(),
+    ).checkError().toNullable();
+  }
 
   static Pointer<cblite.CBLTLSIdentity> withCerts(
     Pointer<cblite.CBLCert> certificate,
@@ -249,13 +272,14 @@ final class TlsIdentityBindings {
     globalCBLError..ref.reset(),
   ).checkError();
 
-  static void deleteWithLabel(String label) => runWithSingleFLString(
-    label,
-    (flLabel) => cblite.CBLTLSIdentity_DeleteIdentityWithLabel(
-      flLabel,
+  static void deleteWithLabel(String label) {
+    final encoded = utf8.encode(label);
+    cblitedart.CBLDart_CBLTLSIdentity_DeleteIdentityWithLabel(
+      encoded.address.cast(),
+      encoded.length,
       globalCBLError..ref.reset(),
-    ).checkError(),
-  );
+    ).checkError();
+  }
 
   static Pointer<cblite.CBLCert> identityCertificates(
     Pointer<cblite.CBLTLSIdentity> pointer,

@@ -70,16 +70,17 @@ final class CollectionBindings {
   static Pointer<cblite.CBLScope>? databaseScope(
     Pointer<cblite.CBLDatabase> db,
     String scopeName,
-  ) => runWithSingleFLString(
-    scopeName,
-    (flScopeName) => cblite.CBLDatabase_Scope(
+  ) {
+    final encoded = utf8.encode(scopeName);
+    return cblitedart.CBLDart_CBLDatabase_Scope(
       db,
-      flScopeName,
+      encoded.address.cast(),
+      encoded.length,
       // TODO(blaugold): Remove reset once bug is fixed.
       // https://github.com/couchbase/couchbase-lite-C/issues/499
       globalCBLError..ref.reset(),
-    ).checkError().toNullable(),
-  );
+    ).checkError().toNullable();
+  }
 
   static cblite.FLMutableArray scopeCollectionNames(
     Pointer<cblite.CBLScope> scope,
@@ -88,42 +89,51 @@ final class CollectionBindings {
   static Pointer<cblite.CBLCollection>? scopeCollection(
     Pointer<cblite.CBLScope> scope,
     String collectionName,
-  ) => runWithSingleFLString(
-    collectionName,
-    (flCollectionName) => cblite.CBLScope_Collection(
+  ) {
+    final encoded = utf8.encode(collectionName);
+    return cblitedart.CBLDart_CBLScope_Collection(
       scope,
-      flCollectionName,
+      encoded.address.cast(),
+      encoded.length,
       // TODO(blaugold): Remove reset once bug is fixed.
       // https://github.com/couchbase/couchbase-lite-C/issues/499
       globalCBLError..ref.reset(),
-    ).checkError().toNullable(),
-  );
+    ).checkError().toNullable();
+  }
 
   static Pointer<cblite.CBLCollection> databaseCreateCollection(
     Pointer<cblite.CBLDatabase> db,
     String collectionName,
     String scopeName,
-  ) => withGlobalArena(
-    () => cblite.CBLDatabase_CreateCollection(
+  ) {
+    final colName = utf8.encode(collectionName);
+    final scopeNm = utf8.encode(scopeName);
+    return cblitedart.CBLDart_CBLDatabase_CreateCollection(
       db,
-      collectionName.toFLString(),
-      scopeName.toFLString(),
+      colName.address.cast(),
+      colName.length,
+      scopeNm.address.cast(),
+      scopeNm.length,
       globalCBLError,
-    ).checkError(),
-  );
+    ).checkError();
+  }
 
   static void databaseDeleteCollection(
     Pointer<cblite.CBLDatabase> db,
     String collectionName,
     String scopeName,
-  ) => withGlobalArena(
-    () => cblite.CBLDatabase_DeleteCollection(
+  ) {
+    final colName = utf8.encode(collectionName);
+    final scopeNm = utf8.encode(scopeName);
+    cblitedart.CBLDart_CBLDatabase_DeleteCollection(
       db,
-      collectionName.toFLString(),
-      scopeName.toFLString(),
+      colName.address.cast(),
+      colName.length,
+      scopeNm.address.cast(),
+      scopeNm.length,
       globalCBLError,
-    ).checkError(),
-  );
+    ).checkError();
+  }
 
   static int count(Pointer<cblite.CBLCollection> collection) =>
       cblite.CBLCollection_Count(collection);
@@ -131,14 +141,18 @@ final class CollectionBindings {
   static Pointer<cblite.CBLDocument>? getDocument(
     Pointer<cblite.CBLCollection> collection,
     String docId,
-  ) => runWithSingleFLString(
-    docId,
-    (flDocId) => nativeCallTracePoint(
-      TracedNativeCall.collectionGetDocument,
-      () =>
-          cblite.CBLCollection_GetDocument(collection, flDocId, globalCBLError),
-    ).checkError().toNullable(),
-  );
+  ) {
+    final encoded = utf8.encode(docId);
+    return nativeCallTracePoint(TracedNativeCall.collectionGetDocument, () {
+      final capturedEncoded = encoded;
+      return cblitedart.CBLDart_CBLCollection_GetDocument(
+        collection,
+        capturedEncoded.address.cast(),
+        capturedEncoded.length,
+        globalCBLError,
+      );
+    }).checkError().toNullable();
+  }
 
   static void saveDocumentWithConcurrencyControl(
     Pointer<cblite.CBLCollection> collection,
@@ -173,22 +187,25 @@ final class CollectionBindings {
   static bool purgeDocumentByID(
     Pointer<cblite.CBLCollection> db,
     String docId,
-  ) => runWithSingleFLString(
-    docId,
-    (flDocId) => cblite.CBLCollection_PurgeDocumentByID(
+  ) {
+    final encoded = utf8.encode(docId);
+    return cblitedart.CBLDart_CBLCollection_PurgeDocumentByID(
       db,
-      flDocId,
+      encoded.address.cast(),
+      encoded.length,
       globalCBLError,
-    ).checkError(),
-  );
+    ).checkError();
+  }
 
   static DateTime? getDocumentExpiration(
     Pointer<cblite.CBLCollection> collection,
     String docId,
-  ) => runWithSingleFLString(docId, (flDocId) {
-    final result = cblite.CBLCollection_GetDocumentExpiration(
+  ) {
+    final encoded = utf8.encode(docId);
+    final result = cblitedart.CBLDart_CBLCollection_GetDocumentExpiration(
       collection,
-      flDocId,
+      encoded.address.cast(),
+      encoded.length,
       globalCBLError,
     );
 
@@ -197,20 +214,22 @@ final class CollectionBindings {
     }
 
     return result == 0 ? null : DateTime.fromMillisecondsSinceEpoch(result);
-  });
+  }
 
   static void setDocumentExpiration(
     Pointer<cblite.CBLCollection> collection,
     String docId,
     DateTime? expiration,
-  ) => runWithSingleFLString(docId, (flDocId) {
-    cblite.CBLCollection_SetDocumentExpiration(
+  ) {
+    final encoded = utf8.encode(docId);
+    cblitedart.CBLDart_CBLCollection_SetDocumentExpiration(
       collection,
-      flDocId,
+      encoded.address.cast(),
+      encoded.length,
       expiration?.millisecondsSinceEpoch ?? 0,
       globalCBLError,
     ).checkError();
-  });
+  }
 
   static cblite.FLArray indexNames(Pointer<cblite.CBLCollection> collection) =>
       cblite.CBLCollection_GetIndexNames(
@@ -221,14 +240,15 @@ final class CollectionBindings {
   static Pointer<cblite.CBLQueryIndex>? index(
     Pointer<cblite.CBLCollection> collection,
     String name,
-  ) => runWithSingleFLString(
-    name,
-    (flName) => cblite.CBLCollection_GetIndex(
+  ) {
+    final encoded = utf8.encode(name);
+    return cblitedart.CBLDart_CBLCollection_GetIndex(
       collection,
-      flName,
+      encoded.address.cast(),
+      encoded.length,
       globalCBLError,
-    ).checkError().toNullable(),
-  );
+    ).checkError().toNullable();
+  }
 
   static void createIndex(
     Pointer<cblite.CBLCollection> collection,
@@ -236,9 +256,11 @@ final class CollectionBindings {
     CBLIndexSpec spec,
   ) {
     withGlobalArena(() {
+      final (:buf, :size) = encodeStringToArena(name, globalArena);
       cblitedart.CBLDart_CBLCollection_CreateIndex(
         collection,
-        name.toFLString(),
+        buf.cast(),
+        size,
         _createIndexSpec(spec).ref,
         globalCBLError,
       ).checkError();
@@ -249,31 +271,44 @@ final class CollectionBindings {
     Pointer<cblite.CBLCollection> collection,
     String name,
   ) {
-    runWithSingleFLString(name, (flName) {
-      cblite.CBLCollection_DeleteIndex(
-        collection,
-        flName,
-        globalCBLError,
-      ).checkError();
-    });
+    final encoded = utf8.encode(name);
+    cblitedart.CBLDart_CBLCollection_DeleteIndex(
+      collection,
+      encoded.address.cast(),
+      encoded.length,
+      globalCBLError,
+    ).checkError();
   }
 
   static Pointer<cblitedart.CBLDart_CBLIndexSpec> _createIndexSpec(
     CBLIndexSpec spec,
   ) {
     final result = globalArena<cblitedart.CBLDart_CBLIndexSpec>();
+    final (:buf, :size) = encodeStringToArena(spec.expressions, globalArena);
     final ref = result.ref
       ..type = spec.type.value
       ..expressionLanguage = spec.expressionLanguage.value
-      ..expressions = spec.expressions.toFLString();
+      ..expressionsBuf = buf.cast()
+      ..expressionsSize = size;
 
     switch (spec.type) {
       case CBLDartIndexType.value$:
         break;
       case CBLDartIndexType.fullText:
-        ref
-          ..ignoreAccents = spec.ignoreAccents!
-          ..language = spec.language.toFLString();
+        ref.ignoreAccents = spec.ignoreAccents!;
+        if (spec.language != null) {
+          final (:buf, :size) = encodeStringToArena(
+            spec.language!,
+            globalArena,
+          );
+          ref
+            ..languageBuf = buf.cast()
+            ..languageSize = size;
+        } else {
+          ref
+            ..languageBuf = nullptr
+            ..languageSize = 0;
+        }
       case CBLDartIndexType.vector:
         final encoding = switch (spec) {
           CBLIndexSpec(:final scalarQuantizerType?) =>
@@ -311,14 +346,14 @@ final class CollectionBindings {
     String docId,
     cblitedart.CBLDart_AsyncCallback listener,
   ) {
-    runWithSingleFLString(docId, (flDocId) {
-      cblitedart.CBLDart_CBLCollection_AddDocumentChangeListener(
-        db,
-        collection,
-        flDocId,
-        listener,
-      );
-    });
+    final encoded = utf8.encode(docId);
+    cblitedart.CBLDart_CBLCollection_AddDocumentChangeListener(
+      db,
+      collection,
+      encoded.address.cast(),
+      encoded.length,
+      listener,
+    );
   }
 
   static void addChangeListener(
