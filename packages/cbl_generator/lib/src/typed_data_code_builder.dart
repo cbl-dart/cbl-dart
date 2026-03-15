@@ -160,22 +160,15 @@ class ${_classNames.mutableClassName}
     final documentIdField = object.documentIdField;
     if (documentIdField != null &&
         documentIdField.constructorParameter != null) {
-      if (documentIdField.constructorParameter!.type.isNullable) {
-        _code
-          ..write(documentIdField.name)
-          ..write(' == null ? ')
-          ..write(_mutableInternalType)
-          ..write('() : ');
-      }
       _code
         ..write(_mutableInternalType)
-        ..write('.withId(')
+        ..write('(null, id: ')
         ..write(documentIdField.name)
         ..write(')');
     } else {
       _code
         ..write(_mutableInternalType)
-        ..write('()');
+        ..write('(null)');
     }
 
     _code.write(')');

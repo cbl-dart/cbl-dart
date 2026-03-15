@@ -70,7 +70,7 @@ void main() {
       final q = await db.createQuery(
         r'SELECT doc FROM _ WHERE META().id = $ID',
       );
-      await collection.saveDocument(MutableDocument.withId('A'));
+      await collection.saveDocument(MutableDocument(null, id: 'A'));
 
       await q.setParameters(Parameters({'ID': 'A'}));
       var resultSet = await q.execute();
@@ -134,7 +134,7 @@ void main() {
       final db = await openTestDatabase();
       final collection = await db.defaultCollection;
       final query = await db.createQuery('SELECT META().id FROM _');
-      final doc = MutableDocument();
+      final doc = MutableDocument(null);
       var call = 0;
       final callsDone = Completer<void>();
 
@@ -164,13 +164,13 @@ void main() {
 
       // Change the database to trigger another change, which the listener
       // should not be called for.
-      await collection.saveDocument(MutableDocument());
+      await collection.saveDocument(MutableDocument(null));
     });
 
     apiTest('listeners receive change when parameters change', () async {
       final db = await openTestDatabase();
       final collection = await db.defaultCollection;
-      await collection.saveDocument(MutableDocument.withId('A'));
+      await collection.saveDocument(MutableDocument(null, id: 'A'));
       final query = await db.createQuery(
         r'SELECT META().id FROM _ WHERE META().id = $ID',
       );
@@ -203,7 +203,7 @@ void main() {
       final db = await openTestDatabase();
       final collection = await db.defaultCollection;
       final query = await db.createQuery('SELECT META().id FROM _');
-      final doc = MutableDocument();
+      final doc = MutableDocument(null);
 
       expect(
         query
@@ -308,7 +308,7 @@ SELECT foo()
       apiTest('emits typed dictionaries', () async {
         final db = await openTestDatabase(typedDataAdapter: testAdapter);
         final collection = await db.defaultCollection;
-        final doc = MutableDocument();
+        final doc = MutableDocument(null);
         await collection.saveDocument(doc);
         final query = await db.createQuery('SELECT Meta().id FROM _');
         final resultSet = await query.execute();
@@ -348,7 +348,7 @@ SELECT foo()
       apiTest('returns typed dictionaries', () async {
         final db = await openTestDatabase(typedDataAdapter: testAdapter);
         final collection = await db.defaultCollection;
-        final doc = MutableDocument();
+        final doc = MutableDocument(null);
         await collection.saveDocument(doc);
         final query = await db.createQuery('SELECT Meta().id FROM _');
         final resultSet = await query.execute();
@@ -388,7 +388,7 @@ SELECT foo()
       test('iterates over typed dictionaries', () {
         final db = openSyncTestDatabase(typedDataAdapter: testAdapter);
         final collection = db.defaultCollection;
-        final doc = MutableDocument();
+        final doc = MutableDocument(null);
         collection.saveDocument(doc);
         final query = db.createQuery('SELECT Meta().id FROM _');
         final resultSet = query.execute();

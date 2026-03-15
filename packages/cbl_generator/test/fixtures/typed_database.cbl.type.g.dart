@@ -67,7 +67,8 @@ class MutableCustomValueTypeMatcherDoc
           MutableCustomValueTypeMatcherDoc
         > {
   /// Creates a new mutable [CustomValueTypeMatcherDoc].
-  MutableCustomValueTypeMatcherDoc(String value) : super(MutableDocument()) {
+  MutableCustomValueTypeMatcherDoc(String value)
+    : super(MutableDocument(null)) {
     this.value = value;
   }
 

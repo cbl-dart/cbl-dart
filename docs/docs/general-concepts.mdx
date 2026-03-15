@@ -76,7 +76,7 @@ await collection.addChangeListener((change) {
 });
 
 // The listener is guaranteed to be notified of this change.
-await collection.saveDocument(MutableDocument.withId('Hey'));
+await collection.saveDocument(MutableDocument(null, id: 'Hey'));
 ```
 
 To stop receiving notifications, call `removeChangeListener` with the token that
@@ -117,7 +117,7 @@ stream.listen((change) {
 await stream.listening;
 
 // The stream is guaranteed to be notified of this change.
-await collection.saveDocument(MutableDocument.withId('Hey'));
+await collection.saveDocument(MutableDocument(null, id: 'Hey'));
 ```
 
 If you only ever open the same database file once at any given time, you don't

@@ -26,7 +26,10 @@ void main() {
     test('adds breadcrumb at start of sync operations', () {
       final delegate = SentryTracingDelegate(sentryDsn: '', hub: hub);
       delegate.traceSyncOperation(
-        SaveDocumentOp(MockCollection(name: 'a'), MutableDocument.withId('b')),
+        SaveDocumentOp(
+          MockCollection(name: 'a'),
+          MutableDocument(null, id: 'b'),
+        ),
         () {
           expect(hub.breadcrumbs, hasLength(1));
         },
@@ -45,7 +48,10 @@ void main() {
     test('adds breadcrumb at start of async operations', () async {
       final delegate = SentryTracingDelegate(sentryDsn: '', hub: hub);
       await delegate.traceAsyncOperation(
-        SaveDocumentOp(MockCollection(name: 'a'), MutableDocument.withId('b')),
+        SaveDocumentOp(
+          MockCollection(name: 'a'),
+          MutableDocument(null, id: 'b'),
+        ),
         () async {
           expect(hub.breadcrumbs, hasLength(1));
         },
@@ -139,7 +145,7 @@ void main() {
         delegate.traceSyncOperation(
           SaveDocumentOp(
             MockCollection(name: 'a'),
-            MutableDocument.withId('b'),
+            MutableDocument(null, id: 'b'),
           ),
           () {},
         );
@@ -162,7 +168,7 @@ void main() {
         await delegate.traceAsyncOperation(
           SaveDocumentOp(
             MockCollection(name: 'a'),
-            MutableDocument.withId('b'),
+            MutableDocument(null, id: 'b'),
           ),
           () async {},
         );

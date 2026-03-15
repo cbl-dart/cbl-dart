@@ -73,7 +73,7 @@ class MutableTypedDataPropertyDoc
           MutableTypedDataPropertyDoc
         > {
   /// Creates a new mutable [TypedDataPropertyDoc].
-  MutableTypedDataPropertyDoc(BoolDict value) : super(MutableDocument()) {
+  MutableTypedDataPropertyDoc(BoolDict value) : super(MutableDocument(null)) {
     this.value = value;
   }
 
@@ -175,7 +175,7 @@ class MutableOptionalTypedDataPropertyDoc
         > {
   /// Creates a new mutable [OptionalTypedDataPropertyDoc].
   MutableOptionalTypedDataPropertyDoc(BoolDict? value)
-    : super(MutableDocument()) {
+    : super(MutableDocument(null)) {
     if (value != null) {
       this.value = value;
     }

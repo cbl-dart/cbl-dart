@@ -59,7 +59,7 @@ class ImmutableParamDoc extends _ParamDocImplBase {
 class MutableParamDoc extends _ParamDocImplBase<MutableDocument>
     implements TypedMutableDocumentObject<ParamDoc, MutableParamDoc> {
   /// Creates a new mutable [ParamDoc].
-  MutableParamDoc(String a) : super(MutableDocument()) {
+  MutableParamDoc(String a) : super(MutableDocument(null)) {
     this.a = a;
   }
 
@@ -130,7 +130,7 @@ class MutableOptionalParamDoc extends _OptionalParamDocImplBase<MutableDocument>
     implements
         TypedMutableDocumentObject<OptionalParamDoc, MutableOptionalParamDoc> {
   /// Creates a new mutable [OptionalParamDoc].
-  MutableOptionalParamDoc([String? a]) : super(MutableDocument()) {
+  MutableOptionalParamDoc([String? a]) : super(MutableDocument(null)) {
     if (a != null) {
       this.a = a;
     }
@@ -221,7 +221,7 @@ class MutablePositionalMixedParamDoc
         > {
   /// Creates a new mutable [PositionalMixedParamDoc].
   MutablePositionalMixedParamDoc(String a, [String? b])
-    : super(MutableDocument()) {
+    : super(MutableDocument(null)) {
     this.a = a;
     if (b != null) {
       this.b = b;
@@ -305,7 +305,7 @@ class ImmutableNamedParamDoc extends _NamedParamDocImplBase {
 class MutableNamedParamDoc extends _NamedParamDocImplBase<MutableDocument>
     implements TypedMutableDocumentObject<NamedParamDoc, MutableNamedParamDoc> {
   /// Creates a new mutable [NamedParamDoc].
-  MutableNamedParamDoc({required String a}) : super(MutableDocument()) {
+  MutableNamedParamDoc({required String a}) : super(MutableDocument(null)) {
     this.a = a;
   }
 
@@ -380,7 +380,7 @@ class MutableNamedOptionalParamDoc
           MutableNamedOptionalParamDoc
         > {
   /// Creates a new mutable [NamedOptionalParamDoc].
-  MutableNamedOptionalParamDoc({String? a}) : super(MutableDocument()) {
+  MutableNamedOptionalParamDoc({String? a}) : super(MutableDocument(null)) {
     if (a != null) {
       this.a = a;
     }
@@ -469,7 +469,8 @@ class MutableNamedMixedParamDoc
           MutableNamedMixedParamDoc
         > {
   /// Creates a new mutable [NamedMixedParamDoc].
-  MutableNamedMixedParamDoc(String a, {String? b}) : super(MutableDocument()) {
+  MutableNamedMixedParamDoc(String a, {String? b})
+    : super(MutableDocument(null)) {
     this.a = a;
     if (b != null) {
       this.b = b;

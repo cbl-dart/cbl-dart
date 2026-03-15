@@ -26,7 +26,7 @@ void main() {
     apiTest('properties', () async {
       final db = await openTestDatabase();
       final collection = await db.defaultCollection;
-      final doc = MutableDocument.withId('id');
+      final doc = MutableDocument(null, id: 'id');
 
       expect(doc.id, 'id');
       expect(doc.revisionId, isNull);
@@ -70,21 +70,21 @@ void main() {
       expect(mutableDoc, isNot(equality(doc)));
 
       expect(
-        MutableDocument.withId('a'),
-        equality(MutableDocument.withId('a')),
+        MutableDocument(null, id: 'a'),
+        equality(MutableDocument(null, id: 'a')),
       );
       expect(
-        MutableDocument.withId('a'),
-        isNot(equality(MutableDocument.withId('b'))),
+        MutableDocument(null, id: 'a'),
+        isNot(equality(MutableDocument(null, id: 'b'))),
       );
 
       expect(
-        MutableDocument.withId('a', {'a': true}),
-        equality(MutableDocument.withId('a', {'a': true})),
+        MutableDocument({'a': true}, id: 'a'),
+        equality(MutableDocument({'a': true}, id: 'a')),
       );
       expect(
-        MutableDocument.withId('a', {'a': true}),
-        isNot(equality(MutableDocument.withId('b', {'a': false}))),
+        MutableDocument({'a': true}, id: 'a'),
+        isNot(equality(MutableDocument({'a': false}, id: 'b'))),
       );
     });
 
@@ -97,21 +97,21 @@ void main() {
       expect((await collection.document(doc.id)).hashCode, doc.hashCode);
 
       expect(
-        MutableDocument.withId('a').hashCode,
-        MutableDocument.withId('a').hashCode,
+        MutableDocument(null, id: 'a').hashCode,
+        MutableDocument(null, id: 'a').hashCode,
       );
       expect(
-        MutableDocument.withId('a').hashCode,
-        isNot(MutableDocument.withId('b').hashCode),
+        MutableDocument(null, id: 'a').hashCode,
+        isNot(MutableDocument(null, id: 'b').hashCode),
       );
 
       expect(
-        MutableDocument.withId('a', {'a': true}).hashCode,
-        MutableDocument.withId('a', {'a': true}).hashCode,
+        MutableDocument({'a': true}, id: 'a').hashCode,
+        MutableDocument({'a': true}, id: 'a').hashCode,
       );
       expect(
-        MutableDocument.withId('a', {'a': true}).hashCode,
-        isNot(MutableDocument.withId('b', {'a': false}).hashCode),
+        MutableDocument({'a': true}, id: 'a').hashCode,
+        isNot(MutableDocument({'a': false}, id: 'b').hashCode),
       );
     });
 
@@ -146,7 +146,7 @@ void main() {
           }
           '''),
       );
-      expect(MutableDocument().toJson(), '{}');
+      expect(MutableDocument(null).toJson(), '{}');
       expect(
         MutableDocument({
           'null': null,
@@ -247,7 +247,7 @@ void main() {
       test('toString', () {
         final db = openSyncTestDatabase();
         final collection = db.defaultCollection;
-        final doc = MutableDocument();
+        final doc = MutableDocument(null);
         collection.saveDocument(doc);
         final loadedDoc = collection.document(doc.id);
         expect(
@@ -294,12 +294,12 @@ void main() {
 
     group('mutable', () {
       test('create with id', () {
-        final doc = MutableDocument.withId('id');
+        final doc = MutableDocument(null, id: 'id');
         expect(doc.id, 'id');
       });
 
       test('create with generated it', () {
-        final doc = MutableDocument();
+        final doc = MutableDocument(null);
         expect(doc.id, startsWith('-'));
       });
 
@@ -319,8 +319,8 @@ void main() {
       });
 
       test('add child collection to two documents', () {
-        final docA = MutableDocument();
-        final docB = MutableDocument();
+        final docA = MutableDocument(null);
+        final docB = MutableDocument(null);
         final child = MutableDictionary({'a': 'b'});
 
         // Add child to both documents.
@@ -344,8 +344,8 @@ void main() {
       });
 
       test('move child collection between two documents', () {
-        final docA = MutableDocument();
-        final docB = MutableDocument();
+        final docA = MutableDocument(null);
+        final docB = MutableDocument(null);
         final child = MutableDictionary({'a': 'b'});
 
         // Add child to both documents and than remove it from docA.
@@ -367,7 +367,7 @@ void main() {
     });
 
     test('implements MutableDictionaryInterface for properties', () {
-      final doc = MutableDocument()
+      final doc = MutableDocument(null)
         ..setValue('x', key: 'value')
         ..setString('a', key: 'string')
         ..setInteger(1, key: 'int')
@@ -407,7 +407,7 @@ void main() {
     });
 
     test('toString', () {
-      final mutableDoc = MutableDocument();
+      final mutableDoc = MutableDocument(null);
       expect(
         mutableDoc.toString(),
         'MutableDocument('

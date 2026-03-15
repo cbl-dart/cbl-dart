@@ -111,7 +111,7 @@ class MutableUser extends _UserImplBase<MutableDocument>
     String? email,
     required String username,
     required DateTime createdAt,
-  }) : super(id == null ? MutableDocument() : MutableDocument.withId(id)) {
+  }) : super(MutableDocument(null, id: id)) {
     this.name = name;
     if (email != null) {
       this.email = email;

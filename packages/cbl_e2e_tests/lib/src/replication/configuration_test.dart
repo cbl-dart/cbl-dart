@@ -279,7 +279,7 @@ void main() {
               adapter,
             )!;
             expect(
-              () => combinedFilter(MutableDocument(), {}),
+              () => combinedFilter(MutableDocument(null), {}),
               throwsA(
                 isTypedDataException.havingCode(
                   TypedDataErrorCode.unresolvableType,
@@ -289,7 +289,7 @@ void main() {
           });
 
           test('use untyped filter as fallback', () {
-            final doc = MutableDocument();
+            final doc = MutableDocument(null);
             final adapter = TypedDataRegistry();
             final combinedFilter = combineReplicationFilters(
               expectAsync2((document, flags) {
@@ -337,11 +337,11 @@ void main() {
             }
 
             expectResolverThrows(
-              ConflictImpl('', MutableDocument(), MutableDocument()),
+              ConflictImpl('', MutableDocument(null), MutableDocument(null)),
             );
-            expectResolverThrows(ConflictImpl('', null, MutableDocument()));
+            expectResolverThrows(ConflictImpl('', null, MutableDocument(null)));
 
-            expectResolverThrows(ConflictImpl('', MutableDocument(), null));
+            expectResolverThrows(ConflictImpl('', MutableDocument(null), null));
           });
 
           test('use untyped filter as fallback', () {
@@ -357,13 +357,13 @@ void main() {
             }
 
             expectUsesUntypedResolver(
-              ConflictImpl('', MutableDocument(), MutableDocument()),
+              ConflictImpl('', MutableDocument(null), MutableDocument(null)),
             );
             expectUsesUntypedResolver(
-              ConflictImpl('', null, MutableDocument()),
+              ConflictImpl('', null, MutableDocument(null)),
             );
             expectUsesUntypedResolver(
-              ConflictImpl('', MutableDocument(), null),
+              ConflictImpl('', MutableDocument(null), null),
             );
           });
         });

@@ -9,8 +9,8 @@ void main() {
 
   group('Conflict', () {
     test('toString', () {
-      final local = MutableDocument.withId('local');
-      final remote = MutableDocument.withId('remote');
+      final local = MutableDocument(null, id: 'local');
+      final remote = MutableDocument(null, id: 'remote');
       final conflict = ConflictImpl(local.id, local, remote);
       expect(
         conflict.toString(),

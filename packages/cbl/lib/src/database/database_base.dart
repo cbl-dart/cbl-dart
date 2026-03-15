@@ -354,8 +354,9 @@ mixin CollectionBase<T extends DocumentDelegate> implements Collection {
 
           if (retry) {
             // If the document was deleted it has to be recreated.
-            conflictingDocument ??= MutableDelegateDocument.withId(
-              documentBeingSaved.id,
+            conflictingDocument ??= MutableDelegateDocument(
+              null,
+              id: documentBeingSaved.id,
             );
 
             // Replace the delegate of documentBeingSaved with a copy of that of

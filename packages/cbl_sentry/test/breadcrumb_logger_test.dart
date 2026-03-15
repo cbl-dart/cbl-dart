@@ -55,7 +55,7 @@ void main() {
       expect(
         SaveDocumentOp(
           MockCollection(name: 'a'),
-          MutableDocument.withId('b'),
+          MutableDocument(null, id: 'b'),
         ).debugDescription,
         'b',
       );
@@ -81,7 +81,7 @@ void main() {
   group('debugDetails', () {
     test('SaveDocumentOp', () {
       final collection = MockCollection(name: 'a');
-      final document = MutableDocument.withId('b');
+      final document = MutableDocument(null, id: 'b');
       expect(SaveDocumentOp(collection, document).debugDetails, {
         'withConflictHandler': true,
       });
@@ -97,7 +97,7 @@ void main() {
 
     test('DeleteDocumentOp', () {
       final database = MockCollection(name: 'a');
-      final document = MutableDocument.withId('b');
+      final document = MutableDocument(null, id: 'b');
       expect(
         DeleteDocumentOp(
           database,
