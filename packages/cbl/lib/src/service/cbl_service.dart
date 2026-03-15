@@ -810,7 +810,7 @@ final class CblService {
           state.sourceId!,
         );
 
-        if (concurrencyControl == ConcurrencyControl.failOnConflict &&
+        if (concurrencyControl == .failOnConflict &&
             source.revisionId != state.revisionId) {
           // The source document has been updated since the proxy document was
           // created, so they no longer point to the same revision.

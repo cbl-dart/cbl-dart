@@ -37,7 +37,7 @@ enum LogLevel {
 ///
 /// {@category Logging}
 abstract base class Logger {
-  Logger([LogLevel? level]) : _level = level ?? LogLevel.info;
+  Logger([LogLevel? level]) : _level = level ?? .info;
 
   void Function()? _levelChanged;
 

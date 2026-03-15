@@ -226,7 +226,7 @@ final class FfiReplicator
 
     late AbstractListenerToken token;
     token = _addChangeListener((change) {
-      if (change.status.activity == ReplicatorActivityLevel.stopped) {
+      if (change.status.activity == .stopped) {
         _isStarted = false;
         _isStopping = false;
         _stopped?.complete();
@@ -254,14 +254,14 @@ final class FfiReplicator
     // ignore: literal_only_boolean_expressions
     while (true) {
       switch (_status.activity) {
-        case ReplicatorActivityLevel.stopped:
+        case .stopped:
           return;
-        case ReplicatorActivityLevel.connecting:
+        case .connecting:
           sleep(_sleepWaitingForConnection);
           continue;
-        case ReplicatorActivityLevel.busy:
-        case ReplicatorActivityLevel.idle:
-        case ReplicatorActivityLevel.offline:
+        case .busy:
+        case .idle:
+        case .offline:
       }
       break;
     }

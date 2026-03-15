@@ -326,25 +326,25 @@ CouchbaseLiteException createCouchbaseLiteException({
   assert((errorSource == null) == (errorPosition == null));
 
   switch (domain) {
-    case CBLErrorDomain.couchbaseLite:
+    case .couchbaseLite:
       return DatabaseException(
         message,
         (code as CBLErrorCode).databaseErrorCode,
         errorPosition: errorPosition,
         queryString: errorSource,
       );
-    case CBLErrorDomain.posix:
+    case .posix:
       return PosixException(message, code as int);
-    case CBLErrorDomain.sqLite:
+    case .sqLite:
       return SQLiteException(message, code as int);
-    case CBLErrorDomain.fleece:
+    case .fleece:
       return FleeceException('$message (${(code as FLError).name}))');
-    case CBLErrorDomain.network:
+    case .network:
       return NetworkException(
         message,
         (code as CBLNetworkErrorCode).networkErrorCode,
       );
-    case CBLErrorDomain.webSocket:
+    case .webSocket:
       String formatMessage(Object? enumCode) =>
           enumCode != null ? message : '$message ($code)';
 
@@ -356,7 +356,7 @@ CouchbaseLiteException createCouchbaseLiteException({
         final code = _webSocketErrorCodeMap[statusCode];
         return WebSocketException(formatMessage(code), code);
       }
-    case CBLErrorDomain.mbedTls:
+    case .mbedTls:
       return MbedTlsException(message, code as int);
   }
 }

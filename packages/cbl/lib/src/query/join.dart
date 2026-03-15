@@ -24,21 +24,21 @@ abstract final class Join {
   ///
   /// This is the same as an `INNER JOIN`.
   static JoinOnInterface join(DataSourceInterface dataSource) =>
-      JoinOnImpl(type: JoinType.inner, dataSource: dataSource);
+      JoinOnImpl(type: .inner, dataSource: dataSource);
 
   /// Creates a `LEFT JOIN` with the given [dataSource].
   ///
   /// This is the same as an `LEFT OUTER JOIN`.
   static JoinOnInterface leftJoin(DataSourceInterface dataSource) =>
-      JoinOnImpl(type: JoinType.leftOuter, dataSource: dataSource);
+      JoinOnImpl(type: .leftOuter, dataSource: dataSource);
 
   /// Creates a `LEFT OUTER JOIN` with the given [dataSource].
   static JoinOnInterface leftOuterJoin(DataSourceInterface dataSource) =>
-      JoinOnImpl(type: JoinType.leftOuter, dataSource: dataSource);
+      JoinOnImpl(type: .leftOuter, dataSource: dataSource);
 
   /// Creates an `INNER JOIN` with the given [dataSource].
   static JoinOnInterface innerJoin(DataSourceInterface dataSource) =>
-      JoinOnImpl(type: JoinType.inner, dataSource: dataSource);
+      JoinOnImpl(type: .inner, dataSource: dataSource);
 
   /// Creates an `CROSS JOIN` with the given [dataSource].
   static JoinInterface crossJoin(DataSourceInterface dataSource) =>
@@ -81,10 +81,10 @@ final class JoinImpl implements JoinInterface {
       case null:
         join = 'CROSS';
         break;
-      case JoinType.leftOuter:
+      case .leftOuter:
         join = 'LEFT OUTER';
         break;
-      case JoinType.inner:
+      case .inner:
         join = 'INNER';
         break;
     }

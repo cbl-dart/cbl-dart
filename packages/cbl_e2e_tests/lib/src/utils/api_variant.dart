@@ -50,9 +50,9 @@ Future<void> Function() runWithApiValues(
 
 FutureOr<T> apiFutureOr<T>(T value) {
   switch (api.value) {
-    case Api.sync:
+    case .sync:
       return value;
-    case Api.async:
+    case .async:
       return Future.value(value);
   }
 }
@@ -62,9 +62,9 @@ T Function() apiProvider<T>(T Function(Api api) create) {
   late final asyncValue = create(Api.async);
   return () {
     switch (api.value) {
-      case Api.sync:
+      case .sync:
         return syncValue;
-      case Api.async:
+      case .async:
         return asyncValue;
     }
   };
@@ -75,9 +75,9 @@ FutureOr<T> runWithApi<T>({
   required FutureOr<T> Function() async,
 }) {
   switch (api.value) {
-    case Api.sync:
+    case .sync:
       return sync();
-    case Api.async:
+    case .async:
       return async();
   }
 }
@@ -87,9 +87,9 @@ FutureOr<T> runWithIsolate<T>({
   required FutureOr<T> Function() worker,
 }) {
   switch (isolate.value) {
-    case Isolate.main:
+    case .main:
       return main();
-    case Isolate.worker:
+    case .worker:
       return worker();
   }
 }

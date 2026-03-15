@@ -1255,13 +1255,13 @@ ExpressionInterface rangePredicate({
   final variable = ArrayExpression.variable('a');
   ArrayExpressionIn quantified;
   switch (quantifier) {
-    case Quantifier.any:
+    case .any:
       quantified = ArrayExpression.any(variable);
       break;
-    case Quantifier.every:
+    case .every:
       quantified = ArrayExpression.every(variable);
       break;
-    case Quantifier.anyAndEvery:
+    case .anyAndEvery:
       quantified = ArrayExpression.anyAndEvery(variable);
       break;
   }
@@ -1335,19 +1335,19 @@ extension on Database {
 
     JoinInterface join;
     switch (type) {
-      case JoinType.join:
+      case .join:
         join = Join.join(joinFrom).on(joinOn);
         break;
-      case JoinType.leftJoin:
+      case .leftJoin:
         join = Join.leftJoin(joinFrom).on(joinOn);
         break;
-      case JoinType.leftOuterJoin:
+      case .leftOuterJoin:
         join = Join.leftOuterJoin(joinFrom).on(joinOn);
         break;
-      case JoinType.innerJoin:
+      case .innerJoin:
         join = Join.innerJoin(joinFrom).on(joinOn);
         break;
-      case JoinType.crossJoin:
+      case .crossJoin:
         join = Join.crossJoin(joinFrom);
         break;
     }

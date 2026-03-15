@@ -166,10 +166,10 @@ final class Value implements Finalizable {
   ValueType get type => ValueBindings.getType(pointer).toValueType();
 
   /// Whether this value represents an `undefined` value.
-  bool get isUndefined => type == ValueType.undefined;
+  bool get isUndefined => type == .undefined;
 
   /// Whether this value represents null.
-  bool get isNull => type == ValueType.null_;
+  bool get isNull => type == .null_;
 
   /// Returns true if the value is non-null and represents an integer.
   bool get isInteger => ValueBindings.isInteger(pointer);
@@ -200,11 +200,10 @@ final class Value implements Finalizable {
 
   /// If a Value represents an array, returns it as a [Array], else null.
   Array? get asArray =>
-      type == ValueType.array ? Array.fromPointer(pointer.cast()) : null;
+      type == .array ? Array.fromPointer(pointer.cast()) : null;
 
   /// If a Value represents a dictionary, returns it as a [Dict], else null.
-  Dict? get asDict =>
-      type == ValueType.dict ? Dict.fromPointer(pointer.cast()) : null;
+  Dict? get asDict => type == .dict ? Dict.fromPointer(pointer.cast()) : null;
 
   /// Returns a string representation of any scalar value. Data values are
   /// returned in raw form. Arrays and dictionaries don't have a representation
@@ -218,23 +217,23 @@ final class Value implements Finalizable {
 
   Object? toObject() {
     switch (type) {
-      case ValueType.undefined:
+      case .undefined:
         throw UnsupportedError(
           'ValueType.undefined has no equivalent Dart type',
         );
-      case ValueType.null_:
+      case .null_:
         return null;
-      case ValueType.boolean:
+      case .boolean:
         return asBool;
-      case ValueType.number:
+      case .number:
         return isInteger ? asInt : asDouble;
-      case ValueType.string:
+      case .string:
         return asString;
-      case ValueType.array:
+      case .array:
         return asArray!.toObject();
-      case ValueType.dict:
+      case .dict:
         return asDict!.toObject();
-      case ValueType.data:
+      case .data:
         return asData;
     }
   }
@@ -247,20 +246,20 @@ final class Value implements Finalizable {
   @override
   int get hashCode {
     switch (type) {
-      case ValueType.undefined:
-      case ValueType.null_:
+      case .undefined:
+      case .null_:
         return 0;
-      case ValueType.boolean:
+      case .boolean:
         return asBool.hashCode;
-      case ValueType.number:
+      case .number:
         return asInt.hashCode;
-      case ValueType.string:
+      case .string:
         return asString.hashCode;
-      case ValueType.data:
+      case .data:
         return asData.hashCode;
-      case ValueType.array:
+      case .array:
         return asArray.hashCode;
-      case ValueType.dict:
+      case .dict:
         return asDict.hashCode;
     }
   }
@@ -268,19 +267,19 @@ final class Value implements Finalizable {
   @override
   String toString() {
     switch (type) {
-      case ValueType.undefined:
+      case .undefined:
         return 'undefined';
-      case ValueType.null_:
-      case ValueType.boolean:
-      case ValueType.number:
+      case .null_:
+      case .boolean:
+      case .number:
         return scalarToString!;
-      case ValueType.string:
+      case .string:
         return '"${asString!}"';
-      case ValueType.array:
+      case .array:
         return asArray.toString();
-      case ValueType.dict:
+      case .dict:
         return asDict.toString();
-      case ValueType.data:
+      case .data:
         return '<DATA>';
     }
   }
@@ -361,7 +360,7 @@ final class MutableArray extends Array {
   /// values are also copied.
   factory MutableArray.mutableCopy(
     Array source, {
-    FLCopyFlags flags = FLCopyFlags.defaultCopy,
+    FLCopyFlags flags = .defaultCopy,
   }) => MutableArray.fromPointer(
     MutableArrayBindings.mutableCopy(source.pointer.cast(), flags),
     adopt: true,
@@ -568,7 +567,7 @@ final class MutableDict extends Dict {
   /// values are also copied.
   factory MutableDict.mutableCopy(
     Dict source, {
-    FLCopyFlags flags = FLCopyFlags.defaultCopy,
+    FLCopyFlags flags = .defaultCopy,
   }) => MutableDict.fromPointer(
     MutableDictBindings.mutableCopy(source.pointer.cast(), flags),
     adopt: true,

@@ -426,7 +426,7 @@ final class TypedDataAnalyzer {
       return false;
     }
 
-    if (kind == TypedDataObjectKind.dictionary) {
+    if (kind == .dictionary) {
       throw InvalidGenerationSourceError(
         '@DocumentId cannot be used in a dictionary, and only in a '
         'document.',
@@ -472,9 +472,9 @@ final class TypedDataAnalyzer {
 
   String _describeTypedDataAnnotation(TypedDataObjectKind kind) {
     switch (kind) {
-      case TypedDataObjectKind.dictionary:
+      case .dictionary:
         return '@TypedDictionary';
-      case TypedDataObjectKind.document:
+      case .document:
         return '@TypedDocument';
     }
   }

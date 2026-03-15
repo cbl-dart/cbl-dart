@@ -106,28 +106,26 @@ void main() {
       final db = await openTestDatabase();
       final collection = await db.defaultCollection;
 
-      final content = randomTestContent(
-        large: blobSize.value == BlobSize.large,
-      );
+      final content = randomTestContent(large: blobSize.value == .large);
       Blob? writeBlobInstance;
       final doc = MutableDocument();
 
       switch (writeBlob.value) {
-        case WriteBlob.data:
+        case .data:
           writeBlobInstance = Blob.fromData(contentType, content);
           break;
-        case WriteBlob.properties:
+        case .properties:
           final blob = Blob.fromData(contentType, content);
           await db.saveBlob(blob);
           doc['blob'].value = blob.properties;
           break;
-        case WriteBlob.stream:
+        case .stream:
           writeBlobInstance = Blob.fromStream(
             contentType,
             Stream.value(content),
           );
 
-          if (api.value == Api.sync) {
+          if (api.value == .sync) {
             await db.saveBlob(writeBlobInstance);
           }
           break;
@@ -140,20 +138,20 @@ void main() {
       Future<void> read() async {
         Blob readBlobInstance;
         switch (readBlob.value) {
-          case ReadBlob.sourceBlob:
+          case .sourceBlob:
             readBlobInstance = writeBlobInstance!;
             break;
-          case ReadBlob.loadedBlob:
+          case .loadedBlob:
             final loadedDoc = (await collection.document(doc.id))!;
             readBlobInstance = loadedDoc.blob('blob')!;
             break;
         }
 
         switch (readMode.value) {
-          case ReadMode.future:
+          case .future:
             expect(await readBlobInstance.content(), content);
             break;
-          case ReadMode.stream:
+          case .stream:
             expect(
               await byteStreamToFuture(readBlobInstance.contentStream()),
               content,
@@ -163,10 +161,10 @@ void main() {
       }
 
       switch (readTime.value) {
-        case ReadTime.beforeSave:
+        case .beforeSave:
           await read();
           break;
-        case ReadTime.afterSave:
+        case .afterSave:
           await collection.saveDocument(doc);
           await read();
           break;

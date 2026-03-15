@@ -133,7 +133,7 @@ final class FileLoggerImpl extends FileLogger {
   @override
   LogLevel get level =>
       LoggingBindings.getLogFileConfiguration()?.level.toLogLevel() ?? _level;
-  LogLevel _level = LogLevel.none;
+  LogLevel _level = .none;
 
   @override
   set level(LogLevel level) {

@@ -35,17 +35,17 @@ final class BreadcrumbLogger extends Logger {
 extension _LogLevelExt on LogLevel {
   SentryLevel toSentryLevel() {
     switch (this) {
-      case LogLevel.debug:
-      case LogLevel.verbose:
+      case .debug:
+      case .verbose:
         return SentryLevel.debug;
-      case LogLevel.info:
+      case .info:
         return SentryLevel.info;
-      case LogLevel.warning:
+      case .warning:
         return SentryLevel.warning;
-      case LogLevel.error:
+      case .error:
         return SentryLevel.error;
       // coverage:ignore-start
-      case LogLevel.none:
+      case .none:
         unreachable();
       // coverage:ignore-end
     }

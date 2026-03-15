@@ -331,7 +331,7 @@ final class _ProxySaveTypedDocument<
 
   @override
   Future<bool> withConcurrencyControl([
-    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+    ConcurrencyControl concurrencyControl = .lastWriteWins,
   ]) => super.withConcurrencyControl(concurrencyControl) as Future<bool>;
 
   @override
@@ -445,7 +445,7 @@ final class ProxyCollection extends ProxyObject
   @override
   Future<bool> saveDocument(
     covariant MutableDelegateDocument document, [
-    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+    ConcurrencyControl concurrencyControl = .lastWriteWins,
   ]) => asyncOperationTracePoint(
     () => SaveDocumentOp(this, document, concurrencyControl),
     () => use(
@@ -491,7 +491,7 @@ final class ProxyCollection extends ProxyObject
   @override
   Future<bool> deleteDocument(
     covariant DelegateDocument document, [
-    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+    ConcurrencyControl concurrencyControl = .lastWriteWins,
   ]) => asyncOperationTracePoint(
     () => DeleteDocumentOp(this, document, concurrencyControl),
     () => use(
@@ -523,7 +523,7 @@ final class ProxyCollection extends ProxyObject
   @override
   Future<bool> deleteTypedDocument(
     TypedDocumentObject document, [
-    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+    ConcurrencyControl concurrencyControl = .lastWriteWins,
   ]) async {
     database.useWithTypedData();
     return deleteDocument(

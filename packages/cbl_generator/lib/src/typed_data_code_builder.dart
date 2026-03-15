@@ -6,10 +6,10 @@ import 'utils.dart';
 final class TypeDataCodeBuilder {
   TypeDataCodeBuilder({required this.object}) {
     switch (object.kind) {
-      case TypedDataObjectKind.document:
+      case .document:
         _internalType = 'Document';
         break;
-      case TypedDataObjectKind.dictionary:
+      case .dictionary:
         _internalType = 'Dictionary';
         break;
     }

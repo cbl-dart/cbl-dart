@@ -195,8 +195,8 @@ abstract base class QueryBase with ClosableResourceMixin implements Query {
   @override
   String toString() {
     final languageName = switch (language) {
-      CBLQueryLanguage.json => 'JSON',
-      CBLQueryLanguage.n1ql => 'SQL++',
+      .json => 'JSON',
+      .n1ql => 'SQL++',
     };
     return '$typeName($languageName: $definition)';
   }

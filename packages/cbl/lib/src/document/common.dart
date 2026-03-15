@@ -6,7 +6,6 @@ import '../bindings.dart';
 import '../database.dart';
 import '../database/database_base.dart';
 import '../fleece/containers.dart' as fl;
-import '../fleece/decoder.dart';
 import '../fleece/dict_key.dart';
 import '../fleece/encoder.dart';
 import '../fleece/integration/integration.dart';
@@ -132,7 +131,7 @@ final class CblMDelegate extends MDelegate {
 
     final flValue = globalLoadedFLValue.ref;
     switch (FLValueType.fromValue(flValue.type)) {
-      case FLValueType.undefined:
+      case .undefined:
         // `undefined` is a somewhat unusual value to be found in a Fleece
         // collection, since it is not JSON. It cannot be encoded to Fleece or
         // JSON, but is used by some APIs to signal a special condition.
@@ -142,24 +141,24 @@ final class CblMDelegate extends MDelegate {
         // would be a breaking change to start returning something other than
         // `null`.
         return null;
-      case FLValueType.null$:
+      case .null$:
         return null;
-      case FLValueType.boolean:
+      case .boolean:
         return flValue.asBool;
-      case FLValueType.number:
+      case .number:
         return flValue.isInteger ? flValue.asInt : flValue.asDouble;
-      case FLValueType.string:
-        return parent.context.sharedStringsTable.decode(StringSource.value);
-      case FLValueType.data:
+      case .string:
+        return parent.context.sharedStringsTable.decode(.value);
+      case .data:
         return flValue.asData.toData()?.toTypedList();
-      case FLValueType.array:
+      case .array:
         final array = MArray.asChild(value, parent, flValue.collectionSize);
         if (parent.hasMutableChildren) {
           return MutableArrayImpl(array);
         } else {
           return ArrayImpl(array);
         }
-      case FLValueType.dict:
+      case .dict:
         // ignore: omit_local_variable_types
         final FLDict flDict = flValue.value.cast();
 
@@ -236,7 +235,7 @@ bool valueWouldChange(
   if (flValue != null) {
     final valueType = ValueBindings.getType(flValue);
     cblReachabilityFence(container.context);
-    if (valueType == FLValueType.array || valueType == FLValueType.dict) {
+    if (valueType == .array || valueType == .dict) {
       return true;
     }
   }

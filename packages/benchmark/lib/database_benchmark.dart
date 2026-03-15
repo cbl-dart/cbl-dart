@@ -42,10 +42,10 @@ abstract class DatabaseBenchmarkBase {
 
   Future<void> _run() async {
     switch (apiTypeParameter.current) {
-      case ApiType.sync:
+      case .sync:
         runSync();
         break;
-      case ApiType.async:
+      case .async:
         await runAsync();
         break;
     }
