@@ -1,3 +1,7 @@
+// This file lives under lib/ but is test code symlinked into test/.
+// ignore_for_file: invalid_use_of_visible_for_testing_member
+// ignore_for_file: unnecessary_ignore
+
 import 'package:cbl/cbl.dart';
 import 'package:cbl/src/typed_data/registry.dart';
 
@@ -282,7 +286,6 @@ void main() {
 }
 
 void expectTypeMatches(
-  // ignore: invalid_use_of_visible_for_testing_member
   TypeMatcherImpl typeMatcher, {
   required List<Map<String, Object?>> matches,
   required List<Map<String, Object?>> matchesNot,
@@ -308,14 +311,12 @@ class _MatchesValue extends Matcher {
       .addDescriptionOf(value.toPlainMap());
 
   @override
-  // ignore: invalid_use_of_visible_for_testing_member
   bool matches(covariant TypeMatcherImpl item, Map matchState) =>
       item.isMatch(value);
 
   @override
   Description describeMismatch(
-    // ignore: invalid_use_of_visible_for_testing_member
-    covariant TypeMatcherImpl item,
+      covariant TypeMatcherImpl item,
     Description mismatchDescription,
     Map matchState,
     bool verbose,
@@ -323,7 +324,6 @@ class _MatchesValue extends Matcher {
 }
 
 void expectMakesMatch(
-  // ignore: invalid_use_of_visible_for_testing_member
   TypeMatcherImpl typeMatcher, {
   required List<Map<String, Object?>> validStates,
   required List<Map<String, Object?>> invalidStates,
