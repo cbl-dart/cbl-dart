@@ -108,6 +108,7 @@ class ProxyListenerToken<T> extends AsyncListenerToken {
 
   final int listenerId;
 
+  // ignore: unsafe_variance
   final void Function(T) listenerFn;
 
   void callListener(T event) {

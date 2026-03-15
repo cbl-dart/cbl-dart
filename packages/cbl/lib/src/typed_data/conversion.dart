@@ -129,6 +129,7 @@ final class TypedDictionaryConverter<
     extends DataConverter<T, E> {
   const TypedDictionaryConverter(this._factory);
 
+  // ignore: unsafe_variance
   final Factory<I, T> _factory;
 
   @override

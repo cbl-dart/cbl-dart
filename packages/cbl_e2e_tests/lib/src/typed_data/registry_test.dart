@@ -282,6 +282,7 @@ void main() {
 }
 
 void expectTypeMatches(
+  // ignore: invalid_use_of_visible_for_testing_member
   TypeMatcherImpl typeMatcher, {
   required List<Map<String, Object?>> matches,
   required List<Map<String, Object?>> matchesNot,
@@ -307,11 +308,13 @@ class _MatchesValue extends Matcher {
       .addDescriptionOf(value.toPlainMap());
 
   @override
+  // ignore: invalid_use_of_visible_for_testing_member
   bool matches(covariant TypeMatcherImpl item, Map matchState) =>
       item.isMatch(value);
 
   @override
   Description describeMismatch(
+    // ignore: invalid_use_of_visible_for_testing_member
     covariant TypeMatcherImpl item,
     Description mismatchDescription,
     Map matchState,
@@ -320,6 +323,7 @@ class _MatchesValue extends Matcher {
 }
 
 void expectMakesMatch(
+  // ignore: invalid_use_of_visible_for_testing_member
   TypeMatcherImpl typeMatcher, {
   required List<Map<String, Object?>> validStates,
   required List<Map<String, Object?>> invalidStates,
