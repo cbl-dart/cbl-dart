@@ -181,8 +181,9 @@ void main() {
       expect(
         query.changes().asyncMap((change) {
           if (changeIndex == 0) {
-            // ignore: discarded_futures
-            query.setParameters(Parameters({'ID': 'B'}));
+            unawaited(
+              Future.value(query.setParameters(Parameters({'ID': 'B'}))),
+            );
           }
           changeIndex++;
 
@@ -215,8 +216,7 @@ void main() {
             )
             .doOnData((results) {
               if (results.isEmpty) {
-                // ignore: discarded_futures
-                collection.saveDocument(doc);
+                unawaited(Future.value(collection.saveDocument(doc)));
               }
             }),
         emitsInOrder(<Object>[

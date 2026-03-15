@@ -796,8 +796,7 @@ void main() {
         expectAsync1((change) {
           expect(change.replicator, replicator);
           expect(change.status.activity, ReplicatorActivityLevel.busy);
-          // ignore: discarded_futures
-          replicator.removeChangeListener(token);
+          unawaited(Future.value(replicator.removeChangeListener(token)));
         }),
       );
 
@@ -871,8 +870,7 @@ void main() {
             expect(change.documents.map((it) => it.collection), [
               Collection.defaultName,
             ]);
-            // ignore: discarded_futures
-            replicator.removeChangeListener(token);
+            unawaited(Future.value(replicator.removeChangeListener(token)));
           }),
         );
 
