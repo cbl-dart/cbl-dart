@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import '../bindings.dart';
 import '../database/collection.dart';
@@ -693,8 +694,12 @@ final class CblService {
       authenticator: request.authenticator,
       acceptOnlySelfSignedServerCertificate:
           request.acceptOnlySelfSignedServerCertificate,
-      pinnedServerCertificate: request.pinnedServerCertificate?.toTypedList(),
-      trustedRootCertificates: request.trustedRootCertificates?.toTypedList(),
+      pinnedServerCertificate: request.pinnedServerCertificate?.let(
+        (data) => DerData(data.toTypedList()),
+      ),
+      trustedRootCertificates: request.trustedRootCertificates?.let(
+        (data) => PemData(utf8.decode(data.toTypedList())),
+      ),
       headers: request.headers,
       enableAutoPurge: request.enableAutoPurge,
       acceptParentDomainCookies: request.acceptParentDomainCookies,

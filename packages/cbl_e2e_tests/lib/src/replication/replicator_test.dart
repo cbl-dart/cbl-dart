@@ -33,8 +33,8 @@ void main() {
               password: 'password',
             ),
             headers: {'Client': 'test'},
-            pinnedServerCertificate: Uint8List(0),
-            trustedRootCertificates: Uint8List(0),
+            pinnedServerCertificate: DerData(Uint8List(0)),
+            trustedRootCertificates: const PemData(''),
           )..addCollection(
             await db.defaultCollection,
             CollectionConfiguration(
@@ -65,8 +65,8 @@ void main() {
               password: 'password',
             ),
             headers: {'Client': 'test'},
-            pinnedServerCertificate: Uint8List(0),
-            trustedRootCertificates: Uint8List(0),
+            pinnedServerCertificate: DerData(Uint8List(0)),
+            trustedRootCertificates: const PemData(''),
           )..addCollection(
             await db.defaultCollection,
             CollectionConfiguration(
