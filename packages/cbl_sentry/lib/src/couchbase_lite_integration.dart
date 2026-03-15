@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:cbl/cbl.dart';
+// ignore: implementation_imports
+import 'package:cbl/src/tracing.dart';
 import 'package:sentry/sentry.dart';
 
 import 'breadcrumb_logger.dart';

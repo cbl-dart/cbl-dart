@@ -1,4 +1,5 @@
 import 'package:cbl/cbl.dart';
+import 'package:cbl/src/tracing.dart';
 import 'package:cbl_sentry/src/operation_debug_info.dart';
 import 'package:test/test.dart';
 

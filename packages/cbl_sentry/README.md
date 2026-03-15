@@ -50,7 +50,7 @@ await Sentry.init(
 );
 ```
 
-**[Read the full documentation at cbl-dart.dev](https://cbl-dart.dev/instrumentation#sentry)**
+**[Read the full documentation at cbl-dart.dev](https://cbl-dart.dev)**
 
 ## Contributing
 
