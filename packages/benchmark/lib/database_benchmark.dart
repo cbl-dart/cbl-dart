@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:cbl/cbl.dart';
@@ -170,7 +171,7 @@ abstract class CblDatabaseBenchmark extends DatabaseBenchmarkBase {
     try {
       fn(database);
     } finally {
-      database.close();
+      unawaited(database.close());
     }
   }
 

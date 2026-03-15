@@ -357,10 +357,12 @@ final class Channel {
       return;
     }
 
-    Future.sync(() => handler(message.request)).then(
-      (result) => _sendCallSuccess(message.conversationId, result),
-      onError: (Object error, StackTrace stackTrace) =>
-          _sendCallError(message.conversationId, error, stackTrace),
+    unawaited(
+      Future.sync(() => handler(message.request)).then(
+        (result) => _sendCallSuccess(message.conversationId, result),
+        onError: (Object error, StackTrace stackTrace) =>
+            _sendCallError(message.conversationId, error, stackTrace),
+      ),
     );
   }
 
@@ -393,14 +395,15 @@ final class Channel {
   void _handleResumeStream(_ResumeStream message) =>
       _getStreamSubscription(message)?.resume();
 
-  void _handleCancelStream(_CancelStream message) =>
-      _takeStreamSubscription(message)?.cancel();
+  void _handleCancelStream(_CancelStream message) {
+    unawaited(_takeStreamSubscription(message)?.cancel());
+  }
 
   void _handleStreamEvent(_Message message) =>
       _getStreamController(message)?.add(message);
 
   void _handleStreamDone(_StreamDone message) {
-    _getStreamController(message)?.close();
+    unawaited(_getStreamController(message)?.close());
     _streamControllers.remove(message.conversationId);
   }
 

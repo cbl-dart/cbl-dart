@@ -253,9 +253,8 @@ class ListenerStream<T> extends AsyncListenStream<T> {
 
   void _onAddListenerError(Object error, StackTrace stackTrace) {
     if (!_isCanceled) {
-      _controller
-        ..addError(error, stackTrace)
-        ..close();
+      _controller.addError(error, stackTrace);
+      unawaited(_controller.close());
     }
     _listeningCompleter.completeError(error, stackTrace);
   }
@@ -315,7 +314,7 @@ class RepeatableStream<T> extends Stream<T> {
           _sourceSub = null;
 
           for (final controller in _destinations) {
-            controller.close();
+            unawaited(controller.close());
           }
 
           _destinations.clear();
@@ -337,7 +336,7 @@ class RepeatableStream<T> extends Stream<T> {
       if (_sourceError != null) {
         destination.addError(_sourceError!, _sourceStackTrace);
       }
-      destination.close();
+      unawaited(destination.close());
     }
   });
 

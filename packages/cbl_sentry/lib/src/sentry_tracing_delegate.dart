@@ -133,7 +133,7 @@ final class SentryTracingDelegate extends TracingDelegate {
       rethrow;
     } finally {
       span.status ??= const SpanStatus.ok();
-      _finishOperationSpan(span);
+      unawaited(_finishOperationSpan(span));
     }
   }
 
@@ -184,7 +184,9 @@ final class SentryTracingDelegate extends TracingDelegate {
       return;
     }
 
-    _hub.addBreadcrumb(_createBreadcrumbForOperationStart(operation));
+    unawaited(
+      _hub.addBreadcrumb(_createBreadcrumbForOperationStart(operation)),
+    );
   }
 
   Breadcrumb _createBreadcrumbForOperationStart(TracedOperation operation) =>

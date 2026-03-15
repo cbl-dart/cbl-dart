@@ -229,7 +229,10 @@ final class FfiReplicator
         _isStopping = false;
         _stopped?.complete();
         _stopped = null;
-        token.removeListener();
+        final result = token.removeListener();
+        if (result is Future) {
+          unawaited(result);
+        }
       }
     });
 

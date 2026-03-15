@@ -141,18 +141,20 @@ class AsyncCallback implements Finalizable {
       sendPort.send([callAddress, result]);
     }
 
-    Future.sync(() async {
-      try {
-        final result = await handler(args);
-        assert(result == null || sendPort != null);
-        sendResult(result);
-      } catch (e) {
-        sendResult(errorResult);
-        if (!ignoreErrorsInDart) {
-          rethrow;
+    unawaited(
+      Future.sync(() async {
+        try {
+          final result = await handler(args);
+          assert(result == null || sendPort != null);
+          sendResult(result);
+        } catch (e) {
+          sendResult(errorResult);
+          if (!ignoreErrorsInDart) {
+            rethrow;
+          }
         }
-      }
-    });
+      }),
+    );
   }
 
   @pragma('vm:prefer-inline')

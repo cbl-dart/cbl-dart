@@ -79,10 +79,12 @@ final class CouchbaseLiteIntegration extends Integration {
   @override
   FutureOr<void> call(Hub hub, SentryOptions options) {
     if (TracingDelegate.hasBeenInstalled) {
-      Sentry.captureException(
-        'CouchbaseLiteIntegration: Cannot install SentryTracingDelegate '
-        'because another delegate has already been installed.',
-        stackTrace: StackTrace.current,
+      unawaited(
+        Sentry.captureException(
+          'CouchbaseLiteIntegration: Cannot install SentryTracingDelegate '
+          'because another delegate has already been installed.',
+          stackTrace: StackTrace.current,
+        ),
       );
       return null;
     }
@@ -100,7 +102,7 @@ final class CouchbaseLiteIntegration extends Integration {
         }
       },
     );
-    TracingDelegate.install(tracingDelegate);
+    unawaited(TracingDelegate.install(tracingDelegate));
 
     options.sdk.addIntegration('couchbaseLiteIntegration');
   }

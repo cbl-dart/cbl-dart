@@ -218,7 +218,7 @@ class TestIsolateConfig {
 }
 
 void testIsolateMain(TestIsolateConfig config) {
-  initSecondaryIsolate(config.context);
+  unawaited(initSecondaryIsolate(config.context));
 
   final remote = Channel(
     transport: IsolateChannel.connectSend(config.sendPort!),

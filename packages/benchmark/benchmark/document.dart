@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:benchmark/utils.dart';
@@ -34,7 +35,7 @@ class DocumentPropertyLookup extends BenchmarkBase {
 
   @override
   void teardown() {
-    db.close();
+    unawaited(db.close());
     tempDir.deleteSync(recursive: true);
   }
 
@@ -78,7 +79,7 @@ class DocumentToPlainMap extends BenchmarkBase {
 
   @override
   void teardown() {
-    db.close();
+    unawaited(db.close());
     tempDir.deleteSync(recursive: true);
   }
 

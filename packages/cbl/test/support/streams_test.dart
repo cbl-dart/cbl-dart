@@ -159,7 +159,7 @@ void main() {
 
       addListenerCompleter.complete(TestToken());
 
-      sub.cancel();
+      unawaited(sub.cancel());
 
       listener('A');
     });

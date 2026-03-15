@@ -82,7 +82,7 @@ final class IsolateWorker {
       transport: IsolateChannel.connectReceive(receivePort),
     );
 
-    onError.onError(_close);
+    unawaited(onError.onError(_close));
 
     return receivePort.sendPort;
   }
