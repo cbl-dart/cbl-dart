@@ -316,7 +316,7 @@ class _MatchesValue extends Matcher {
 
   @override
   Description describeMismatch(
-      covariant TypeMatcherImpl item,
+    covariant TypeMatcherImpl item,
     Description mismatchDescription,
     Map matchState,
     bool verbose,
