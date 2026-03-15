@@ -1584,7 +1584,7 @@ CBLTLSIdentity* CBLDart_CBLTLSIdentity_CreateIdentity(
 CBLTLSIdentity* CBLDart_CBLTLSIdentity_IdentityWithLabel(const void* labelBuf,
                                                          size_t labelSize,
                                                          CBLError* errorOut) {
-#ifdef COUCHBASE_ENTERPRISE
+#if defined(COUCHBASE_ENTERPRISE) && (defined(__APPLE__) || defined(_WIN32))
   return CBLTLSIdentity_IdentityWithLabel(
       FLSLICE_FROM_ARGS(labelBuf, labelSize), errorOut);
 #else
@@ -1595,7 +1595,7 @@ CBLTLSIdentity* CBLDart_CBLTLSIdentity_IdentityWithLabel(const void* labelBuf,
 bool CBLDart_CBLTLSIdentity_DeleteIdentityWithLabel(const void* labelBuf,
                                                     size_t labelSize,
                                                     CBLError* errorOut) {
-#ifdef COUCHBASE_ENTERPRISE
+#if defined(COUCHBASE_ENTERPRISE) && (defined(__APPLE__) || defined(_WIN32))
   return CBLTLSIdentity_DeleteIdentityWithLabel(
       FLSLICE_FROM_ARGS(labelBuf, labelSize), errorOut);
 #else
