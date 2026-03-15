@@ -105,8 +105,10 @@ final class ProxyReplicator extends ProxyObject
           authenticator: config.authenticator,
           acceptOnlySelfSignedServerCertificate:
               config.acceptOnlySelfSignedServerCertificate,
-          pinnedServerCertificate: config.pinnedServerCertificate?.toData(),
-          trustedRootCertificates: config.trustedRootCertificates?.toData(),
+          pinnedServerCertificate: config.pinnedServerCertificate?.bytes
+              .toData(),
+          trustedRootCertificates: config.trustedRootCertificates?.bytes
+              .toData(),
           headers: config.headers,
           enableAutoPurge: config.enableAutoPurge,
           acceptParentDomainCookies: config.acceptParentDomainCookies,
