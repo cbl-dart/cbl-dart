@@ -330,9 +330,9 @@ final class _ProxySaveTypedDocument<
   );
 
   @override
-  Future<bool> withConcurrencyControl([
+  Future<void> withConcurrencyControl([
     ConcurrencyControl concurrencyControl = .lastWriteWins,
-  ]) => super.withConcurrencyControl(concurrencyControl) as Future<bool>;
+  ]) async => super.withConcurrencyControl(concurrencyControl);
 
   @override
   Future<bool> withConflictHandler(
@@ -443,7 +443,7 @@ final class ProxyCollection extends ProxyObject
       super.typedDocument<D>(id)! as Future<D?>;
 
   @override
-  Future<bool> saveDocument(
+  Future<void> saveDocument(
     covariant MutableDelegateDocument document, [
     ConcurrencyControl concurrencyControl = .lastWriteWins,
   ]) => asyncOperationTracePoint(
@@ -460,12 +460,13 @@ final class ProxyCollection extends ProxyObject
         );
 
         if (state == null) {
-          return false;
+          throw DatabaseException(
+            'Conflict saving document.',
+            DatabaseErrorCode.conflict,
+          );
         }
 
         delegate.updateMetadata(state, database: database);
-
-        return true;
       }),
     ),
   );
@@ -489,7 +490,7 @@ final class ProxyCollection extends ProxyObject
       _ProxySaveTypedDocument(database, () => this, document);
 
   @override
-  Future<bool> deleteDocument(
+  Future<void> deleteDocument(
     covariant DelegateDocument document, [
     ConcurrencyControl concurrencyControl = .lastWriteWins,
   ]) => asyncOperationTracePoint(
@@ -510,18 +511,19 @@ final class ProxyCollection extends ProxyObject
         );
 
         if (state == null) {
-          return false;
+          throw DatabaseException(
+            'Conflict deleting document.',
+            DatabaseErrorCode.conflict,
+          );
         }
 
         delegate.updateMetadata(state, database: database);
-
-        return true;
       }),
     ),
   );
 
   @override
-  Future<bool> deleteTypedDocument(
+  Future<void> deleteTypedDocument(
     TypedDocumentObject document, [
     ConcurrencyControl concurrencyControl = .lastWriteWins,
   ]) {

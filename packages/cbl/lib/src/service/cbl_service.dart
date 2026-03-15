@@ -7,6 +7,7 @@ import '../database/database_configuration.dart';
 import '../database/ffi_database.dart';
 import '../document/document.dart';
 import '../document/ffi_document.dart';
+import '../errors.dart';
 import '../fleece/decoder.dart';
 import '../query/ffi_query.dart';
 import '../query/index/ffi_index_updater.dart';
@@ -484,14 +485,19 @@ final class CblService {
 
     document.setEncodedProperties(request.state.properties!.encodedValue!);
 
-    if (collection.saveDocument(document, request.concurrencyControl)) {
-      return document.createState(
-        withProperties: false,
-        objectRegistry: _objectRegistry,
-      );
-    } else {
-      return null;
+    try {
+      collection.saveDocument(document, request.concurrencyControl);
+    } on DatabaseException catch (e) {
+      if (e.code == DatabaseErrorCode.conflict) {
+        return null;
+      }
+      rethrow;
     }
+
+    return document.createState(
+      withProperties: false,
+      objectRegistry: _objectRegistry,
+    );
   }
 
   Future<DocumentState?> _deleteDocument(DeleteDocument request) async {
@@ -506,14 +512,19 @@ final class CblService {
       return null;
     }
 
-    if (collection.deleteDocument(document, request.concurrencyControl)) {
-      return document.createState(
-        withProperties: false,
-        objectRegistry: _objectRegistry,
-      );
-    } else {
-      return null;
+    try {
+      collection.deleteDocument(document, request.concurrencyControl);
+    } on DatabaseException catch (e) {
+      if (e.code == DatabaseErrorCode.conflict) {
+        return null;
+      }
+      rethrow;
     }
+
+    return document.createState(
+      withProperties: false,
+      objectRegistry: _objectRegistry,
+    );
   }
 
   void _purgeDocument(PurgeDocument request) => _getCollectionById(

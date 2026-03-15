@@ -34,10 +34,7 @@ void main() {
         final collection = await db.defaultCollection;
         final doc = MutableTestDocA();
 
-        expect(
-          await collection.saveTypedDocument(doc).withConcurrencyControl(),
-          isTrue,
-        );
+        await collection.saveTypedDocument(doc).withConcurrencyControl();
         expect(doc.internal.revisionId, isNotNull);
       });
 
@@ -368,7 +365,7 @@ void main() {
         final doc = MutableTestDocA();
         await collection.saveTypedDocument(doc).withConcurrencyControl();
 
-        expect(await collection.deleteTypedDocument(doc), isTrue);
+        await collection.deleteTypedDocument(doc);
         expect(
           await collection.typedDocument<TestDocA>(doc.internal.id),
           isNull,

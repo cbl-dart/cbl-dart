@@ -9,7 +9,6 @@ import '../document/blob.dart';
 import '../document/document.dart';
 import '../document/ffi_document.dart';
 import '../document/fragment.dart';
-import '../errors.dart';
 import '../fleece/containers.dart' as fl;
 import '../fleece/decoder.dart';
 import '../fleece/dict_key.dart';
@@ -355,7 +354,7 @@ final class FfiCollection
       super.typedDocument<D>(id) as D?;
 
   @override
-  bool saveDocument(
+  void saveDocument(
     covariant MutableDelegateDocument document, [
     ConcurrencyControl concurrencyControl = .lastWriteWins,
   ]) => syncOperationTracePoint(
@@ -367,13 +366,11 @@ final class FfiCollection
           () => prepareDocument(document) as FfiDocumentDelegate,
         );
 
-        return _catchConflictException(() {
-          CollectionBindings.saveDocumentWithConcurrencyControl(
-            pointer,
-            delegate.pointer.cast(),
-            concurrencyControl.toCBLConcurrencyControl(),
-          );
-        });
+        CollectionBindings.saveDocumentWithConcurrencyControl(
+          pointer,
+          delegate.pointer.cast(),
+          concurrencyControl.toCBLConcurrencyControl(),
+        );
       }),
     ),
   );
@@ -412,7 +409,7 @@ final class FfiCollection
       _FfiSaveTypedDocument(database, () => this, document);
 
   @override
-  bool deleteDocument(
+  void deleteDocument(
     covariant DelegateDocument document, [
     ConcurrencyControl concurrencyControl = .lastWriteWins,
   ]) => syncOperationTracePoint(
@@ -426,27 +423,22 @@ final class FfiCollection
                   as FfiDocumentDelegate,
         );
 
-        return _catchConflictException(() {
-          CollectionBindings.deleteDocumentWithConcurrencyControl(
-            pointer,
-            delegate.pointer.cast(),
-            concurrencyControl.toCBLConcurrencyControl(),
-          );
-        });
+        CollectionBindings.deleteDocumentWithConcurrencyControl(
+          pointer,
+          delegate.pointer.cast(),
+          concurrencyControl.toCBLConcurrencyControl(),
+        );
       }),
     ),
   );
 
   @override
-  Future<bool> deleteTypedDocument(
+  Future<void> deleteTypedDocument(
     TypedDocumentObject<Object> document, [
     ConcurrencyControl concurrencyControl = .lastWriteWins,
   ]) async {
     database.useWithTypedData();
-    return deleteDocument(
-      document.internal as DelegateDocument,
-      concurrencyControl,
-    );
+    deleteDocument(document.internal as DelegateDocument, concurrencyControl);
   }
 
   @override
@@ -602,18 +594,6 @@ extension on DatabaseConfiguration {
       );
 }
 
-bool _catchConflictException(void Function() fn) {
-  try {
-    fn();
-    return true;
-  } on DatabaseException catch (e) {
-    if (e.code == DatabaseErrorCode.conflict) {
-      return false;
-    }
-    rethrow;
-  }
-}
-
 final class _FfiSaveTypedDocument<
   D extends TypedDocumentObject,
   MD extends TypedMutableDocumentObject
@@ -627,9 +607,9 @@ final class _FfiSaveTypedDocument<
   );
 
   @override
-  bool withConcurrencyControl([
+  void withConcurrencyControl([
     ConcurrencyControl concurrencyControl = .lastWriteWins,
-  ]) => super.withConcurrencyControl(concurrencyControl) as bool;
+  ]) => super.withConcurrencyControl(concurrencyControl);
 
   @override
   bool withConflictHandlerSync(
