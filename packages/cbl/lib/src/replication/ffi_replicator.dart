@@ -162,8 +162,6 @@ final class FfiReplicator
         database: database,
         closeCallbacks: closeCallbacks,
       );
-
-      // ignore: avoid_catches_without_on_clauses
     } catch (e) {
       closeCallbacks();
       rethrow;
@@ -251,7 +249,6 @@ final class FfiReplicator
     // when it is not connecting. The bug can cause a crash if a replicator is
     // stopped before the web socket connection to the target has been
     // established.
-    // ignore: literal_only_boolean_expressions
     while (true) {
       switch (_status.activity) {
         case ReplicatorActivityLevel.stopped:

@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_constructors_over_static_methods, avoid_print
+// ignore_for_file: avoid_print
 
 import 'dart:async';
 import 'dart:collection';
@@ -131,7 +131,7 @@ final class Channel {
   final MessageContextCapturer _captureMessageContext;
   final MessageContextRestorer _restoreMessageContext;
 
-  int _nextConversationId = 0;
+  var _nextConversationId = 0;
 
   var _status = ChannelStatus.initial;
   ChannelStatus get status => _status;
@@ -359,7 +359,6 @@ final class Channel {
 
     Future.sync(() => handler(message.request)).then(
       (result) => _sendCallSuccess(message.conversationId, result),
-      // ignore: avoid_types_on_closure_parameters
       onError: (Object error, StackTrace stackTrace) =>
           _sendCallError(message.conversationId, error, stackTrace),
     );
@@ -382,7 +381,6 @@ final class Channel {
               (event) {
                 _sendStreamData(message.conversationId, event);
               },
-              // ignore: avoid_types_on_closure_parameters
               onError: (Object error, StackTrace stackTrace) =>
                   _sendStreamError(message.conversationId, error, stackTrace),
               onDone: () => _sendStreamDone(message.conversationId),

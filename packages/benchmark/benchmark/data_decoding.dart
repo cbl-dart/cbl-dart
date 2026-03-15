@@ -39,7 +39,6 @@ class FleeceRecursiveDecodingBenchmark extends DecodingBenchmark {
 
   @override
   void run() {
-    // ignore: deprecated_member_use
     RecursiveFleeceDecoder(
       trust: FLTrust.trusted,
       sharedKeys: sharedKeys,

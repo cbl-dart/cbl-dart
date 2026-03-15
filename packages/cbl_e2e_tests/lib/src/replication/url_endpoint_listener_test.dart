@@ -37,7 +37,7 @@ void main() {
           attributes: const CertificateAttributes(commonName: 'test'),
           expiration: DateTime(2100),
         ),
-        authenticator: ListenerPasswordAuthenticator((_, __) => true),
+        authenticator: ListenerPasswordAuthenticator((_, _) => true),
         enableDeltaSync: true,
       );
       final configCopy = UrlEndpointListenerConfiguration.from(config);
@@ -91,7 +91,7 @@ void main() {
         attributes: const CertificateAttributes(commonName: 'test'),
         expiration: DateTime(2100),
       );
-      final authenticator = ListenerPasswordAuthenticator((_, __) => true);
+      final authenticator = ListenerPasswordAuthenticator((_, _) => true);
       final config = UrlEndpointListenerConfiguration(
         collections: [await db.defaultCollection],
         port: 1234,

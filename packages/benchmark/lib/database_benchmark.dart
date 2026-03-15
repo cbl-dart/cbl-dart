@@ -44,10 +44,8 @@ abstract class DatabaseBenchmarkBase {
     switch (apiTypeParameter.current) {
       case ApiType.sync:
         runSync();
-        break;
       case ApiType.async:
         await runAsync();
-        break;
     }
   }
 

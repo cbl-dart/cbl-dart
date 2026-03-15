@@ -77,7 +77,7 @@ abstract base class TracingDelegate {
   /// - [install] for installing a [TracingDelegate] for this isolate.
   /// - [uninstall] for uninstalling the current [TracingDelegate].
   static bool get hasBeenInstalled => _hasBeenInstalled;
-  static bool _hasBeenInstalled = false;
+  static var _hasBeenInstalled = false;
 
   /// Installs a [TracingDelegate] for the current isolate.
   ///

@@ -146,7 +146,6 @@ class AsyncCallback implements Finalizable {
         final result = await handler(args);
         assert(result == null || sendPort != null);
         sendResult(result);
-        // ignore: avoid_catches_without_on_clauses
       } catch (e) {
         sendResult(errorResult);
         if (!ignoreErrorsInDart) {

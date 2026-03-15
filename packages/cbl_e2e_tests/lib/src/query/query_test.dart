@@ -151,12 +151,10 @@ void main() {
             case 0:
               expect(results, isEmpty);
               await collection.saveDocument(doc);
-              break;
             case 1:
               expect(results, [doc.id]);
               await query.removeChangeListener(token);
               callsDone.complete();
-              break;
           }
         }, count: 2),
       );

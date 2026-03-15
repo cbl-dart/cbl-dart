@@ -31,7 +31,6 @@ final class ArrayExpressionInImpl implements ArrayExpressionIn {
   final VariableExpressionImpl _variable;
 
   @override
-  // ignore: non_constant_identifier_names
   ArrayExpressionSatisfies in_(ExpressionInterface expression) =>
       ArrayExpressionSatisfiesImpl(_quantifier, _variable, expression);
 }

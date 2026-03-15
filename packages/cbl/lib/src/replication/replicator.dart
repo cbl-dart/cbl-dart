@@ -56,7 +56,6 @@ final class ReplicatorProgress {
   String toString() =>
       'ReplicatorProgress('
       '${(progress * 100).toStringAsFixed(1)}%; '
-      // ignore: missing_whitespace_between_adjacent_strings
       'completed: $completed'
       ')';
 }

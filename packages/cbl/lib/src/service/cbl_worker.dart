@@ -63,7 +63,7 @@ final class CblWorker {
               channel: receivePort.sendPort,
             ),
           )
-          // ignore: unawaited_futures, void_checks
+          // ignore: unawaited_futures
           ..onError.onError<Object>((error, stackTrace) {
             _status = _WorkerStatus.crashed;
             _channel.close(error, stackTrace);

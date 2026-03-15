@@ -115,12 +115,10 @@ void main() {
       switch (writeBlob.value) {
         case WriteBlob.data:
           writeBlobInstance = Blob.fromData(contentType, content);
-          break;
         case WriteBlob.properties:
           final blob = Blob.fromData(contentType, content);
           await db.saveBlob(blob);
           doc['blob'].value = blob.properties;
-          break;
         case WriteBlob.stream:
           writeBlobInstance = Blob.fromStream(
             contentType,
@@ -130,7 +128,6 @@ void main() {
           if (api.value == Api.sync) {
             await db.saveBlob(writeBlobInstance);
           }
-          break;
       }
 
       if (writeBlobInstance != null) {
@@ -142,34 +139,28 @@ void main() {
         switch (readBlob.value) {
           case ReadBlob.sourceBlob:
             readBlobInstance = writeBlobInstance!;
-            break;
           case ReadBlob.loadedBlob:
             final loadedDoc = (await collection.document(doc.id))!;
             readBlobInstance = loadedDoc.blob('blob')!;
-            break;
         }
 
         switch (readMode.value) {
           case ReadMode.future:
             expect(await readBlobInstance.content(), content);
-            break;
           case ReadMode.stream:
             expect(
               await byteStreamToFuture(readBlobInstance.contentStream()),
               content,
             );
-            break;
         }
       }
 
       switch (readTime.value) {
         case ReadTime.beforeSave:
           await read();
-          break;
         case ReadTime.afterSave:
           await collection.saveDocument(doc);
           await read();
-          break;
       }
     }, variants: [writeBlob, readTime, readMode, readBlob, blobSize]);
 

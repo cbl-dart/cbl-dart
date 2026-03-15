@@ -237,7 +237,7 @@ void Function(T) _bindListenerToZone<T>(void Function(T) fn) {
       // Errors in listeners should just be unhandled errors, in the zone
       // the listener was created in, which is what `_bindCallbackToZone`
       // already does.
-      .onError((_, __) {});
+      .onError((_, _) {});
 }
 
 final class CblService {
@@ -906,7 +906,7 @@ final class _Query {
 
   final FfiQuery query;
 
-  int _nextResultSetId = 0;
+  var _nextResultSetId = 0;
   final _resultSets = <int, ResultSet>{};
 
   int execute() => _storeResultSet(query.execute());

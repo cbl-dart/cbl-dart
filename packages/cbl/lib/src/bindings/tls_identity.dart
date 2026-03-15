@@ -40,7 +40,6 @@ enum CBLSignatureDigestAlgorithm {
 
   const CBLSignatureDigestAlgorithm(this.value);
 
-  // ignore: flutter_style_todos
   // TODO(https://github.com/cbl-dart/cbl-dart/issues/861): Remove workaround
   // for mbedTLS 3.6.5 enum renumbering.
   //

@@ -116,7 +116,6 @@ Future<_FfiBlob> _createBlobFromStream(
       BlobWriteStreamBindings.createBlobWithStream(contentType, writeStream),
       adopt: true,
     );
-    // ignore: avoid_catches_without_on_clauses
   } catch (e) {
     BlobWriteStreamBindings.close(writeStream);
     rethrow;

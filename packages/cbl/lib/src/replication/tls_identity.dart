@@ -11,7 +11,7 @@ import 'package:meta/meta.dart';
 import '../bindings.dart';
 import '../bindings/cblite.dart'
     hide CBLKeyUsages, CBLLogDomain, CBLLogLevel, CBLSignatureDigestAlgorithm;
-import '../bindings/cblitedart.dart' hide FLSlice, CBLCert, CBLKeyPair;
+import '../bindings/cblitedart.dart' hide CBLCert, CBLKeyPair, FLSlice;
 import '../errors.dart';
 import '../support/edition.dart';
 import '../support/isolate.dart';
@@ -508,30 +508,18 @@ final class _FfiCertificateAttributes extends CertificateAttributes {
 extension _CertificateAttributesToMapExtension on CertificateAttributes {
   Map<String, String> _toAttributesMap() => {
     TlsIdentityBindings.kCBLCertAttrKeyCommonName: commonName,
-    if (pseudonym case final pseudonym?)
-      TlsIdentityBindings.kCBLCertAttrKeyPseudonym: pseudonym,
-    if (givenName case final givenName?)
-      TlsIdentityBindings.kCBLCertAttrKeyGivenName: givenName,
-    if (surname case final surname?)
-      TlsIdentityBindings.kCBLCertAttrKeySurname: surname,
-    if (organization case final organization?)
-      TlsIdentityBindings.kCBLCertAttrKeyOrganization: organization,
-    if (organizationUnit case final organizationUnit?)
-      TlsIdentityBindings.kCBLCertAttrKeyOrganizationUnit: organizationUnit,
-    if (postalAddress case final postalAddress?)
-      TlsIdentityBindings.kCBLCertAttrKeyPostalAddress: postalAddress,
-    if (locality case final locality?)
-      TlsIdentityBindings.kCBLCertAttrKeyLocality: locality,
-    if (postalCode case final postalCode?)
-      TlsIdentityBindings.kCBLCertAttrKeyPostalCode: postalCode,
-    if (stateOrProvince case final stateOrProvince?)
-      TlsIdentityBindings.kCBLCertAttrKeyStateOrProvince: stateOrProvince,
-    if (country case final country?)
-      TlsIdentityBindings.kCBLCertAttrKeyCountry: country,
-    if (emailAddress case final emailAddress?)
-      TlsIdentityBindings.kCBLCertAttrKeyEmailAddress: emailAddress,
-    if (hostname case final hostname?)
-      TlsIdentityBindings.kCBLCertAttrKeyHostname: hostname,
+    TlsIdentityBindings.kCBLCertAttrKeyPseudonym: ?pseudonym,
+    TlsIdentityBindings.kCBLCertAttrKeyGivenName: ?givenName,
+    TlsIdentityBindings.kCBLCertAttrKeySurname: ?surname,
+    TlsIdentityBindings.kCBLCertAttrKeyOrganization: ?organization,
+    TlsIdentityBindings.kCBLCertAttrKeyOrganizationUnit: ?organizationUnit,
+    TlsIdentityBindings.kCBLCertAttrKeyPostalAddress: ?postalAddress,
+    TlsIdentityBindings.kCBLCertAttrKeyLocality: ?locality,
+    TlsIdentityBindings.kCBLCertAttrKeyPostalCode: ?postalCode,
+    TlsIdentityBindings.kCBLCertAttrKeyStateOrProvince: ?stateOrProvince,
+    TlsIdentityBindings.kCBLCertAttrKeyCountry: ?country,
+    TlsIdentityBindings.kCBLCertAttrKeyEmailAddress: ?emailAddress,
+    TlsIdentityBindings.kCBLCertAttrKeyHostname: ?hostname,
     if (url case final url?)
       TlsIdentityBindings.kCBLCertAttrKeyURL: url.toString(),
     if (ipAddress case final ipAddress?)

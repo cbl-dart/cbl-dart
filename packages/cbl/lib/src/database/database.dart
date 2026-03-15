@@ -1,5 +1,3 @@
-// ignore_for_file: unused_result
-
 import 'dart:async';
 
 import 'package:meta/meta.dart';

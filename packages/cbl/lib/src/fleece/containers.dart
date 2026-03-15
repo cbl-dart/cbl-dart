@@ -514,7 +514,7 @@ final class _DictKeyIterator implements Iterator<String> {
 
   final Dict dict;
 
-  late final DictIterator iterator = DictIterator(
+  late final iterator = DictIterator(
     dict.pointer.cast(),
     keyOut: globalLoadedDictKey,
   );

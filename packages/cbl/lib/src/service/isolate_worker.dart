@@ -1,5 +1,4 @@
-// ignore: lines_longer_than_80_chars
-// ignore_for_file: avoid_types_on_closure_parameters, prefer_void_to_null, prefer_constructors_over_static_methods
+// ignore_for_file: avoid_types_on_closure_parameters, prefer_void_to_null
 
 import 'dart:async';
 import 'dart:isolate';

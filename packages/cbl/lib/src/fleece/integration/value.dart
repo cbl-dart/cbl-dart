@@ -152,7 +152,6 @@ base class MValue {
       'hasValue: $hasValue, '
       'hasNative: $hasNative, '
       'value: $_value, '
-      // ignore: missing_whitespace_between_adjacent_strings
       'native: $_native'
       ')';
 }

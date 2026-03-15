@@ -16,6 +16,6 @@ export 'document/fragment.dart'
         Fragment,
         FragmentInterface,
         MutableArrayFragment,
+        MutableDictionaryFragment,
         MutableFragment,
-        MutableFragmentInterface,
-        MutableDictionaryFragment;
+        MutableFragmentInterface;

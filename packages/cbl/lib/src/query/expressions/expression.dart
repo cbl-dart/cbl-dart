@@ -224,7 +224,6 @@ abstract base class ExpressionImpl implements ExpressionInterface {
       BinaryExpression('regexp_like()', this, expression);
 
   @override
-  // ignore: non_constant_identifier_names
   ExpressionInterface is_(ExpressionInterface expression) =>
       BinaryExpression('IS', this, expression);
 
@@ -254,7 +253,6 @@ abstract base class ExpressionImpl implements ExpressionInterface {
   }) => TernaryExpression('BETWEEN', this, expression, and);
 
   @override
-  // ignore: non_constant_identifier_names
   ExpressionInterface in_(Iterable<ExpressionInterface> expressions) =>
       BinaryExpression('IN', this, Expression.value(expressions));
 
@@ -401,7 +399,6 @@ final class RangePredicateExpression extends ExpressionImpl {
   RangePredicateExpression(
     Quantifier quantifier,
     VariableExpressionInterface variable,
-    // ignore: non_constant_identifier_names
     ExpressionInterface in_,
     ExpressionInterface satisfies,
   ) : _quantifier = quantifier,
@@ -420,13 +417,10 @@ final class RangePredicateExpression extends ExpressionImpl {
     switch (_quantifier) {
       case Quantifier.any:
         operator = 'ANY';
-        break;
       case Quantifier.every:
         operator = 'EVERY';
-        break;
       case Quantifier.anyAndEvery:
         operator = 'ANY AND EVERY';
-        break;
     }
     return [
       operator,
