@@ -1,6 +1,7 @@
 // ignore_for_file: cascade_invocations
 
 import 'package:cbl/cbl.dart';
+import 'package:cbl/src/tracing.dart';
 import 'package:cbl_sentry/cbl_sentry.dart';
 import 'package:cbl_sentry/src/sentry_tracing_delegate.dart';
 import 'package:sentry/sentry.dart';

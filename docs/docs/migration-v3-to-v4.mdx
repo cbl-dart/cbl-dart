@@ -344,6 +344,17 @@ final query = const QueryBuilder()
 The deprecated `InvalidJsonException` class has been removed. Use
 `api|FleeceException` instead.
 
+## Removed `TracingDelegate` API
+
+The `TracingDelegate` API and related tracing types (`TracedOperation`,
+`ChannelCallOp`, `NativeCallOp`, etc.) have been removed from the public API.
+This API will be replaced by an OpenTelemetry-based instrumentation API in a
+future release.
+
+If you were using `TracingDelegate` directly, remove any references to it. The
+`cbl_sentry` package continues to provide Sentry integration for Couchbase Lite
+operations and does not require any changes.
+
 ## Dart SDK requirement
 
 Version 4 requires Dart SDK `^3.10.0` due to the use of Dart native assets.
@@ -400,5 +411,7 @@ No manual steps are required.
 14. **Replace `DataSource.database(db)`** with
     `DataSource.collection(collection)`.
 15. **Replace `InvalidJsonException`** with `FleeceException`.
-16. **Run your app** -- native libraries will be built automatically on first
+16. **Remove `TracingDelegate` usage** -- the tracing API has been removed from
+    the public API.
+17. **Run your app** -- native libraries will be built automatically on first
     run.

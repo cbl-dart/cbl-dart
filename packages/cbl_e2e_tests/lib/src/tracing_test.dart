@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:cbl/cbl.dart';
+import 'package:cbl/src/tracing.dart';
 
 import '../test_binding_impl.dart';
 import 'test_binding.dart';
