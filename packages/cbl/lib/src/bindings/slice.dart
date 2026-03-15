@@ -184,8 +184,6 @@ final class SliceResult extends Slice {
       ? null
       : SliceResult._fromFLSliceResult(slice, retain: retain);
 
-  static final _keepAliveForTypedList = Expando<SliceResult>();
-
   /// Sets the [globalFLSliceResult] to this slice and returns it.
   Pointer<cblite.FLSliceResult> makeGlobalResult() {
     globalFLSliceResult.ref
@@ -205,9 +203,12 @@ final class SliceResult extends Slice {
 
   @override
   Uint8List asTypedList() {
-    final list = super.asTypedList();
-    _keepAliveForTypedList[list] = this;
-    return list;
+    SliceBindings.retainSliceResultByBuf(buf);
+    return buf.cast<Uint8>().asTypedList(
+      size,
+      finalizer: SliceBindings.sliceResultReleaseByBufPtr,
+      token: buf,
+    );
   }
 
   @override

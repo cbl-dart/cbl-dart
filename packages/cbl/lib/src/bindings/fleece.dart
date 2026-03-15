@@ -137,8 +137,12 @@ extension FLStringResultExt on cblite.FLStringResult {
 }
 
 final class SliceBindings {
+  static final Pointer<NativeFinalizerFunction> sliceResultReleaseByBufPtr =
+      cblitedart.addresses.CBLDart_FLSliceResult_ReleaseByBuf
+          .cast<NativeFinalizerFunction>();
+
   static final _sliceResultFinalizer = NativeFinalizer(
-    cblitedart.addresses.CBLDart_FLSliceResult_ReleaseByBuf.cast(),
+    sliceResultReleaseByBufPtr,
   );
 
   static bool equal(cblite.FLSlice a, cblite.FLSlice b) =>
