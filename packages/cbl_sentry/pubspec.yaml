@@ -16,7 +16,7 @@ topics:
   - observability
 
 environment:
-  sdk: ^3.9.0
+  sdk: ^3.10.0
 
 resolution: workspace
 

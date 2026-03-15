@@ -100,7 +100,7 @@ abstract interface class SaveTypedDocument<
   /// [concurrencyControl]. In this case, if the document could not be saved the
   /// result is `false`. On success it is `true`.
   FutureOr<bool> withConcurrencyControl([
-    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+    ConcurrencyControl concurrencyControl = .lastWriteWins,
   ]);
 
   /// Saves the document to the database, resolving conflicts with a
@@ -159,7 +159,7 @@ abstract interface class SyncSaveTypedDocument<
     extends SaveTypedDocument<D, MD> {
   @override
   bool withConcurrencyControl([
-    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+    ConcurrencyControl concurrencyControl = .lastWriteWins,
   ]);
 
   @override
@@ -206,7 +206,7 @@ abstract interface class AsyncSaveTypedDocument<
     extends SaveTypedDocument<D, MD> {
   @override
   Future<bool> withConcurrencyControl([
-    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+    ConcurrencyControl concurrencyControl = .lastWriteWins,
   ]);
 
   @override
@@ -279,7 +279,7 @@ abstract interface class Collection {
   /// result is `false`. On success it is `true`.
   FutureOr<bool> saveDocument(
     MutableDocument document, [
-    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+    ConcurrencyControl concurrencyControl = .lastWriteWins,
   ]);
 
   /// Saves a [document] to this collection, resolving conflicts with a
@@ -326,7 +326,7 @@ abstract interface class Collection {
   /// the result is `false`. On success it is `true`.
   FutureOr<bool> deleteDocument(
     Document document, [
-    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+    ConcurrencyControl concurrencyControl = .lastWriteWins,
   ]);
 
   /// Deletes a typed [document] from this collection, resolving conflicts
@@ -341,7 +341,7 @@ abstract interface class Collection {
   @experimental
   Future<bool> deleteTypedDocument(
     TypedDocumentObject document, [
-    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+    ConcurrencyControl concurrencyControl = .lastWriteWins,
   ]);
 
   /// Purges a [document] from this collection.
@@ -503,7 +503,7 @@ abstract interface class SyncCollection extends Collection {
   @override
   bool saveDocument(
     MutableDocument document, [
-    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+    ConcurrencyControl concurrencyControl = .lastWriteWins,
   ]);
 
   /// Saves a [document] to this database, resolving conflicts with an sync
@@ -526,14 +526,14 @@ abstract interface class SyncCollection extends Collection {
   @override
   bool deleteDocument(
     Document document, [
-    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+    ConcurrencyControl concurrencyControl = .lastWriteWins,
   ]);
 
   @override
   @experimental
   Future<bool> deleteTypedDocument(
     TypedDocumentObject document, [
-    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+    ConcurrencyControl concurrencyControl = .lastWriteWins,
   ]);
 
   @override
@@ -598,7 +598,7 @@ abstract interface class AsyncCollection extends Collection {
   @override
   Future<bool> saveDocument(
     MutableDocument document, [
-    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+    ConcurrencyControl concurrencyControl = .lastWriteWins,
   ]);
 
   @override
@@ -618,14 +618,14 @@ abstract interface class AsyncCollection extends Collection {
   @override
   Future<bool> deleteDocument(
     Document document, [
-    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+    ConcurrencyControl concurrencyControl = .lastWriteWins,
   ]);
 
   @override
   @experimental
   Future<bool> deleteTypedDocument(
     TypedDocumentObject document, [
-    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+    ConcurrencyControl concurrencyControl = .lastWriteWins,
   ]);
 
   @override

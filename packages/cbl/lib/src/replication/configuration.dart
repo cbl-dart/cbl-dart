@@ -539,7 +539,7 @@ ConflictResolver? combineConflictResolvers(
     allowUnmatchedDocument: conflictResolver != null,
   );
 
-  return ConflictResolver.from((conflict) {
+  return .from((conflict) {
     final localTypedDocument = conflict.localDocument?.let(factory);
     final remoteTypedDocument = conflict.remoteDocument?.let(factory);
     if (_equalNullability(conflict.localDocument, localTypedDocument) &&

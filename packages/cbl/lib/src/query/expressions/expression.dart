@@ -413,11 +413,11 @@ final class RangePredicateExpression extends ExpressionImpl {
   Object? toJson() {
     String operator;
     switch (_quantifier) {
-      case Quantifier.any:
+      case .any:
         operator = 'ANY';
-      case Quantifier.every:
+      case .every:
         operator = 'EVERY';
-      case Quantifier.anyAndEvery:
+      case .anyAndEvery:
         operator = 'ANY AND EVERY';
     }
     return [

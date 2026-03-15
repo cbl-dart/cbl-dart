@@ -120,7 +120,7 @@ final class FfiDatabase
   String? _path;
 
   @override
-  DatabaseConfiguration get config => DatabaseConfiguration.from(_config);
+  DatabaseConfiguration get config => .from(_config);
 
   @override
   late final SyncScope defaultScope = scope(Scope.defaultName)!;
@@ -357,7 +357,7 @@ final class FfiCollection
   @override
   bool saveDocument(
     covariant MutableDelegateDocument document, [
-    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+    ConcurrencyControl concurrencyControl = .lastWriteWins,
   ]) => syncOperationTracePoint(
     () => SaveDocumentOp(this, document, concurrencyControl),
     () => useSync(
@@ -414,7 +414,7 @@ final class FfiCollection
   @override
   bool deleteDocument(
     covariant DelegateDocument document, [
-    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+    ConcurrencyControl concurrencyControl = .lastWriteWins,
   ]) => syncOperationTracePoint(
     () => DeleteDocumentOp(this, document, concurrencyControl),
     () => useSync(
@@ -440,7 +440,7 @@ final class FfiCollection
   @override
   Future<bool> deleteTypedDocument(
     TypedDocumentObject<Object> document, [
-    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+    ConcurrencyControl concurrencyControl = .lastWriteWins,
   ]) async {
     database.useWithTypedData();
     return deleteDocument(
@@ -628,7 +628,7 @@ final class _FfiSaveTypedDocument<
 
   @override
   bool withConcurrencyControl([
-    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+    ConcurrencyControl concurrencyControl = .lastWriteWins,
   ]) => super.withConcurrencyControl(concurrencyControl) as bool;
 
   @override

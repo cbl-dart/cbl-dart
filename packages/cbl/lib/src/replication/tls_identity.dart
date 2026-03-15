@@ -587,8 +587,7 @@ final class FfiCertificate implements Certificate, Finalizable {
     bindCBLRefCountedToDartObject(this, pointer: pointer, adopt: adopt);
   }
 
-  // ignore: prefer_constructors_over_static_methods
-  static FfiCertificate _decode(CryptoData data) => FfiCertificate.fromPointer(
+  static FfiCertificate _decode(CryptoData data) => .fromPointer(
     TlsIdentityBindings.certCreateWithData(data._data),
     adopt: true,
   );

@@ -39,7 +39,7 @@ final class NoopSharedKeysTable extends SharedKeysTable {
 
   @override
   String decode(SharedStringsTable sharedStringsTable) =>
-      sharedStringsTable.decode(StringSource.dictKey);
+      sharedStringsTable.decode(.dictKey);
 }
 
 final class _SharedKeysTable extends SharedKeysTable implements Finalizable {
@@ -82,7 +82,7 @@ final class _SharedKeysTable extends SharedKeysTable implements Finalizable {
         );
       }
     } else {
-      return sharedStringsTable.decode(StringSource.dictKey);
+      return sharedStringsTable.decode(.dictKey);
     }
   }
 }
@@ -130,10 +130,10 @@ final class NoopSharedStringsTable extends SharedStringsTable {
     final int size;
     final Pointer<Void> buf;
     switch (source) {
-      case StringSource.dictKey:
+      case .dictKey:
         size = globalLoadedDictKey.ref.stringSize;
         buf = globalLoadedDictKey.ref.stringBuf;
-      case StringSource.value:
+      case .value:
         size = globalLoadedFLValue.ref.stringSize;
         buf = globalLoadedFLValue.ref.stringBuf;
     }
@@ -165,10 +165,10 @@ final class _SharedStringsTable extends SharedStringsTable {
     final int size;
     final Pointer<Void> buf;
     switch (source) {
-      case StringSource.dictKey:
+      case .dictKey:
         size = _loadedKey.stringSize;
         buf = _loadedKey.stringBuf;
-      case StringSource.value:
+      case .value:
         size = _loadedValue.stringSize;
         buf = _loadedValue.stringBuf;
     }
@@ -265,7 +265,7 @@ final class FleeceDecoder extends Converter<Data, Object?> {
   Object? convert(Data input) {
     final doc = Doc.fromResultData(input, trust, sharedKeys: sharedKeys);
     final root = doc.root;
-    if (root.type == ValueType.undefined) {
+    if (root.type == .undefined) {
       throw ArgumentError('Invalid Fleece data');
     }
 
@@ -306,7 +306,7 @@ class RecursiveFleeceDecoder extends Converter<Data, Object?> {
   Object? convert(Data input) {
     final doc = Doc.fromResultData(input, trust, sharedKeys: sharedKeys);
     final root = doc.root;
-    if (root.type == ValueType.undefined) {
+    if (root.type == .undefined) {
       throw ArgumentError('Invalid Fleece data');
     }
 
@@ -318,26 +318,26 @@ class RecursiveFleeceDecoder extends Converter<Data, Object?> {
   Object? _decodeGlobalLoadedValue(SharedStringsTable sharedStringsTable) {
     final value = globalLoadedFLValue.ref;
     switch (FLValueType.fromValue(value.type)) {
-      case FLValueType.undefined:
+      case .undefined:
         _throwUndefinedDartRepresentation();
-      case FLValueType.null$:
+      case .null$:
         return null;
-      case FLValueType.boolean:
+      case .boolean:
         return value.asBool;
-      case FLValueType.number:
+      case .number:
         return value.isInteger ? value.asInt : value.asDouble;
-      case FLValueType.string:
-        return sharedStringsTable.decode(StringSource.value);
-      case FLValueType.data:
+      case .string:
+        return sharedStringsTable.decode(.value);
+      case .data:
         return value.asData.toData()?.toTypedList();
-      case FLValueType.array:
+      case .array:
         // ignore: omit_local_variable_types
         final FLArray array = value.value.cast();
         return List<Object?>.generate(value.collectionSize, (index) {
           FleeceDecoderBindings.getLoadedValueFromArray(array, index);
           return _decodeGlobalLoadedValue(sharedStringsTable);
         });
-      case FLValueType.dict:
+      case .dict:
         // ignore: omit_local_variable_types
         final FLDict dict = value.value.cast();
         final iterator = DictIterator(
@@ -411,35 +411,33 @@ final class _FleeceListenerDecoder {
         }
 
         switch (FLValueType.fromValue(value.type)) {
-          case FLValueType.undefined:
+          case .undefined:
             _listener.handleUndefined();
             _currentLoader.handleValue();
-          case FLValueType.null$:
+          case .null$:
             _listener.handleNull();
             _currentLoader.handleValue();
-          case FLValueType.boolean:
+          case .boolean:
             _listener.handleBool(value.asBool);
             _currentLoader.handleValue();
-          case FLValueType.number:
+          case .number:
             _listener.handleNumber(
               value.isInteger ? value.asInt : value.asDouble,
             );
             _currentLoader.handleValue();
-          case FLValueType.string:
-            _listener.handleString(
-              _sharedStringsTable.decode(StringSource.value),
-            );
+          case .string:
+            _listener.handleString(_sharedStringsTable.decode(.value));
             _currentLoader.handleValue();
-          case FLValueType.data:
+          case .data:
             _listener.handleData(value.asData.toData()!.toTypedList());
             _currentLoader.handleValue();
-          case FLValueType.array:
+          case .array:
             _currentLoader = _ArrayIndexLoader(
               value.value.cast(),
               value.collectionSize,
               _listener,
             )..parent = _currentLoader;
-          case FLValueType.dict:
+          case .dict:
             _currentLoader = _DictIteratorLoader(
               value.value.cast(),
               _listener,

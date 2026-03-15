@@ -95,9 +95,9 @@ final class ReplicatedDocumentImpl implements ReplicatedDocument {
       id,
       'collection: $scope.$collection',
       for (final flag in flags)
-        if (flag == DocumentFlag.accessRemoved)
+        if (flag == .accessRemoved)
           'ACCESS-REMOVED'
-        else if (flag == DocumentFlag.deleted)
+        else if (flag == .deleted)
           'DELETED',
       if (error != null) 'error: $error',
     ].join(', '),

@@ -133,7 +133,7 @@ final class ProxyReplicator extends ProxyObject
   late final _listenerTokens = ListenerTokenRegistry(this);
 
   @override
-  ReplicatorConfiguration get config => ReplicatorConfiguration.from(_config);
+  ReplicatorConfiguration get config => .from(_config);
   final ReplicatorConfiguration _config;
 
   @override

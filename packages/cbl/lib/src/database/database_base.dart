@@ -214,7 +214,7 @@ abstract base class SaveTypedDocumentBase<
 
   @override
   FutureOr<bool> withConcurrencyControl([
-    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+    ConcurrencyControl concurrencyControl = .lastWriteWins,
   ]) => collection().then((collection) {
     database.typedDataAdapter!.willSaveDocument(document);
 

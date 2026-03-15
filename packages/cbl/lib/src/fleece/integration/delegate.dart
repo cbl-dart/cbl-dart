@@ -4,7 +4,6 @@ import 'dart:typed_data';
 
 import '../../bindings.dart';
 import '../../document/common.dart' show CblMDelegate;
-import '../decoder.dart';
 import '../encoder.dart';
 import 'array.dart';
 import 'collection.dart';
@@ -40,23 +39,23 @@ final class SimpleMDelegate extends MDelegate {
 
     final flValue = globalLoadedFLValue.ref;
     switch (FLValueType.fromValue(flValue.type)) {
-      case FLValueType.undefined:
-      case FLValueType.null$:
+      case .undefined:
+      case .null$:
         return null;
-      case FLValueType.boolean:
+      case .boolean:
         return flValue.asBool;
-      case FLValueType.number:
+      case .number:
         return flValue.isInteger ? flValue.asInt : flValue.asDouble;
-      case FLValueType.string:
+      case .string:
         cacheIt();
-        return parent.context.sharedStringsTable.decode(StringSource.value);
-      case FLValueType.data:
+        return parent.context.sharedStringsTable.decode(.value);
+      case .data:
         cacheIt();
         return flValue.asData.toData()?.toTypedList();
-      case FLValueType.array:
+      case .array:
         cacheIt();
         return MArray.asChild(value, parent, flValue.collectionSize);
-      case FLValueType.dict:
+      case .dict:
         cacheIt();
         return MDict.asChild(value, parent, flValue.collectionSize);
     }

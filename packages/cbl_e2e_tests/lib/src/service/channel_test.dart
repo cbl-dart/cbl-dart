@@ -161,13 +161,13 @@ Future<Channel> openTestChannel() async {
   StreamChannel<Object?> localTransport;
 
   switch (channelTransport.value) {
-    case ChannelTransport.controller:
+    case .controller:
       final controller = StreamChannelController<Object?>();
       localTransport = controller.local;
       final remote = Channel(transport: controller.foreign);
       addTearDown(remote.close);
       registerTestHandlers(remote);
-    case ChannelTransport.isolatePort:
+    case .isolatePort:
       final receivePort = ReceivePort();
       localTransport = IsolateChannel.connectReceive(receivePort);
       final isolate = await Isolate.spawn(

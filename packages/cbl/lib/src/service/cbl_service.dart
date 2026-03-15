@@ -820,7 +820,7 @@ final class CblService {
           state.sourceId!,
         );
 
-        if (concurrencyControl == ConcurrencyControl.failOnConflict &&
+        if (concurrencyControl == .failOnConflict &&
             source.revisionId != state.revisionId) {
           // The source document has been updated since the proxy document was
           // created, so they no longer point to the same revision.
@@ -845,7 +845,7 @@ final class CblService {
       };
 
   ConflictResolver _createConflictResolverForwarder(int resolverId) =>
-      ConflictResolver.from((conflict) async {
+      .from((conflict) async {
         final localDocument = conflict.localDocument as DelegateDocument?;
         final remoteDocument = conflict.remoteDocument as DelegateDocument?;
         final localState = await localDocument?.createState(

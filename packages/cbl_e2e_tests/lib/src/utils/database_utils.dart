@@ -18,7 +18,7 @@ import 'api_variant.dart';
 Future<void> removeDatabaseWithSharedIsolate(
   String name, {
   String? directory,
-  Isolate isolate = Isolate.worker,
+  Isolate isolate = .worker,
 }) => ProxyDatabase.remove(
   name,
   directory: directory,
@@ -28,7 +28,7 @@ Future<void> removeDatabaseWithSharedIsolate(
 Future<bool> databaseExistsWithSharedIsolate(
   String name, {
   String? directory,
-  Isolate isolate = Isolate.worker,
+  Isolate isolate = .worker,
 }) => ProxyDatabase.exists(
   name,
   directory: directory,
@@ -39,7 +39,7 @@ Future<void> copyDatabaseWithSharedIsolate({
   required String from,
   required String name,
   DatabaseConfiguration? config,
-  Isolate isolate = Isolate.worker,
+  Isolate isolate = .worker,
 }) => ProxyDatabase.copy(
   from: from,
   name: name,
@@ -101,10 +101,10 @@ Future<AsyncDatabase> openAsyncTestDatabase({
   DatabaseConfiguration? config,
   bool tearDown = true,
   TypedDataAdapter? typedDataAdapter,
-  Isolate isolate = Isolate.worker,
+  Isolate isolate = .worker,
   bool? usePublicApi,
 }) async {
-  assert(usePublicApi == null || isolate == Isolate.worker);
+  assert(usePublicApi == null || isolate == .worker);
 
   config ??= DatabaseConfiguration(directory: databaseDirectoryForTest());
 
@@ -151,13 +151,12 @@ FutureOr<Database> getSharedTestDatabase() => runWithApi(
 SyncDatabase getSharedSyncTestDatabase() => _sharedSyncDatabase ??=
     openSyncTestDatabase(name: 'shared-sync', tearDown: false);
 
-Future<AsyncDatabase> getSharedAsyncTestDatabase({
-  Isolate isolate = Isolate.worker,
-}) => _sharedServiceDatabase ??= openAsyncTestDatabase(
-  name: 'shared-async-${isolate.name}',
-  tearDown: false,
-  isolate: isolate,
-);
+Future<AsyncDatabase> getSharedAsyncTestDatabase({Isolate isolate = .worker}) =>
+    _sharedServiceDatabase ??= openAsyncTestDatabase(
+      name: 'shared-async-${isolate.name}',
+      tearDown: false,
+      isolate: isolate,
+    );
 
 SyncDatabase? _sharedSyncDatabase;
 Future<AsyncDatabase>? _sharedServiceDatabase;

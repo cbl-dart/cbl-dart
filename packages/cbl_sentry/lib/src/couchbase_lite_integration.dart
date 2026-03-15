@@ -53,7 +53,7 @@ final class CouchbaseLiteIntegration extends Integration {
     this.tracingEnabled,
     this.traceInternalOperations = false,
     this.operationBreadcrumbs = true,
-    this.breadcrumbLogLevel = LogLevel.warning,
+    this.breadcrumbLogLevel = .warning,
   });
 
   /// Whether tracing of Couchbase Lite operations is enabled.

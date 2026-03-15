@@ -50,9 +50,9 @@ final class TypeDataBaseCodeBuilder {
 
   void _writeTypedDataMetadata(TypedDataObjectModel object) {
     switch (object.kind) {
-      case TypedDataObjectKind.dictionary:
+      case .dictionary:
         _code.write('TypedDictionaryMetadata');
-      case TypedDataObjectKind.document:
+      case .document:
         _code.write('TypedDocumentMetadata');
     }
 

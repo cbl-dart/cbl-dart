@@ -106,26 +106,24 @@ void main() {
       final db = await openTestDatabase();
       final collection = await db.defaultCollection;
 
-      final content = randomTestContent(
-        large: blobSize.value == BlobSize.large,
-      );
+      final content = randomTestContent(large: blobSize.value == .large);
       Blob? writeBlobInstance;
       final doc = MutableDocument();
 
       switch (writeBlob.value) {
-        case WriteBlob.data:
+        case .data:
           writeBlobInstance = Blob.fromData(contentType, content);
-        case WriteBlob.properties:
+        case .properties:
           final blob = Blob.fromData(contentType, content);
           await db.saveBlob(blob);
           doc['blob'].value = blob.properties;
-        case WriteBlob.stream:
+        case .stream:
           writeBlobInstance = Blob.fromStream(
             contentType,
             Stream.value(content),
           );
 
-          if (api.value == Api.sync) {
+          if (api.value == .sync) {
             await db.saveBlob(writeBlobInstance);
           }
       }
@@ -137,17 +135,17 @@ void main() {
       Future<void> read() async {
         Blob readBlobInstance;
         switch (readBlob.value) {
-          case ReadBlob.sourceBlob:
+          case .sourceBlob:
             readBlobInstance = writeBlobInstance!;
-          case ReadBlob.loadedBlob:
+          case .loadedBlob:
             final loadedDoc = (await collection.document(doc.id))!;
             readBlobInstance = loadedDoc.blob('blob')!;
         }
 
         switch (readMode.value) {
-          case ReadMode.future:
+          case .future:
             expect(await readBlobInstance.content(), content);
-          case ReadMode.stream:
+          case .stream:
             expect(
               await byteStreamToFuture(readBlobInstance.contentStream()),
               content,
@@ -156,9 +154,9 @@ void main() {
       }
 
       switch (readTime.value) {
-        case ReadTime.beforeSave:
+        case .beforeSave:
           await read();
-        case ReadTime.afterSave:
+        case .afterSave:
           await collection.saveDocument(doc);
           await read();
       }
@@ -291,10 +289,10 @@ const contentType = 'application/octet-stream';
 // ignore: unnecessary_cast
 final fixedTestContent = utf8.encode('content') as Uint8List;
 
-Blob blobFromData() => Blob.fromData(contentType, fixedTestContent);
+Blob blobFromData() => .fromData(contentType, fixedTestContent);
 
 Blob blobFromDataWithLength([int length = 0]) =>
-    Blob.fromData(contentType, Uint8List(length));
+    .fromData(contentType, Uint8List(length));
 
 /// Returns random bytes for blob.
 ///

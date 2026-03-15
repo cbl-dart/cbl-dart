@@ -1,5 +1,4 @@
 import 'array_expression_in.dart';
-import 'expression.dart';
 import 'variable_expression.dart';
 
 /// Array expression.
@@ -60,14 +59,14 @@ abstract final class ArrayExpression {
   /// An `ANY` quantified range predicate returns `true` if **at least one** of
   /// the elements in the array matches.
   static ArrayExpressionIn any(VariableExpressionInterface variable) =>
-      ArrayExpressionInImpl(Quantifier.any, variable);
+      ArrayExpressionInImpl(.any, variable);
 
   /// Starts an `EVERY` quantified range predicate and defines a [variable].
   ///
   /// An `EVERY` quantified array expression returns `true` if the array **is
   /// empty** or **every** element in the array matches.
   static ArrayExpressionIn every(VariableExpressionInterface variable) =>
-      ArrayExpressionInImpl(Quantifier.every, variable);
+      ArrayExpressionInImpl(.every, variable);
 
   /// Starts an `ANY AND EVERY` quantified range predicate and defines a
   /// [variable].
@@ -76,5 +75,5 @@ abstract final class ArrayExpression {
   /// **is NOT empty** and **at least one** of the elements in the array
   /// matches.
   static ArrayExpressionIn anyAndEvery(VariableExpressionInterface variable) =>
-      ArrayExpressionInImpl(Quantifier.anyAndEvery, variable);
+      ArrayExpressionInImpl(.anyAndEvery, variable);
 }

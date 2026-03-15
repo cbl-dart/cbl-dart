@@ -164,11 +164,11 @@ final class _Equality extends Matcher {
   ) {
     final failure = matchState['EQUALITY_FAILURE'] as _EqualityFailure;
     switch (failure) {
-      case _EqualityFailure.expected:
+      case .expected:
         return mismatchDescription.add('expected == actual was not true');
-      case _EqualityFailure.actual:
+      case .actual:
         return mismatchDescription.add('actual == expected was not true');
-      case _EqualityFailure.hash:
+      case .hash:
         return mismatchDescription.add(
           'actual.hashCode == expected.hashCode was not true',
         );
