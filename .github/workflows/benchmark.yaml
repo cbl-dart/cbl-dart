@@ -77,8 +77,7 @@ jobs:
             --threshold-upper-boundary _ \
             --thresholds-reset \
             --adapter json \
-            --file results.json \
-            --github-actions '${{ secrets.GITHUB_TOKEN }}'
+            --file results.json
 
       - name: Upload benchmark results for PR branch
         if: github.ref != 'refs/heads/main'
