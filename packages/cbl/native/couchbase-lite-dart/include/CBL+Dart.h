@@ -112,9 +112,11 @@ CBLDART_EXPORT
 void CBLDart_CBL_LogMessage(CBLLogDomain domain, CBLLogLevel level,
                             const void* msgBuf, size_t msgSize);
 
+#ifdef COUCHBASE_ENTERPRISE
 CBLDART_EXPORT
 bool CBLDart_CBL_EnableVectorSearch(const void* dirBuf, size_t dirSize,
                                     CBLError* errorOut);
+#endif
 
 // === Database
 
@@ -160,9 +162,11 @@ CBLDART_EXPORT
 bool CBLDart_CBL_DatabaseExists(const void* nameBuf, size_t nameSize,
                                 const void* inDirBuf, size_t inDirSize);
 
+#ifdef COUCHBASE_ENTERPRISE
 CBLDART_EXPORT
 bool CBLDart_CBLEncryptionKey_FromPassword(CBLEncryptionKey* key,
                                            const void* pwBuf, size_t pwSize);
+#endif
 
 CBLDART_EXPORT
 CBLScope* CBLDart_CBLDatabase_Scope(CBLDatabase* db, const void* nameBuf,
@@ -309,9 +313,11 @@ CBLDart_PredictiveModel CBLDart_PredictiveModel_New(
 CBLDART_EXPORT
 void CBLDart_PredictiveModel_Delete(CBLDart_PredictiveModel model);
 
+#ifdef COUCHBASE_ENTERPRISE
 CBLDART_EXPORT
 void CBLDart_CBL_UnregisterPredictiveModel(const void* nameBuf,
                                            size_t nameSize);
+#endif
 
 // === Blob
 
@@ -416,6 +422,7 @@ void CBLDart_CBLReplicator_AddDocumentReplicationListener(
 
 // === UrlEndpointListener
 
+#ifdef COUCHBASE_ENTERPRISE
 CBLDART_EXPORT
 CBLURLEndpointListener* CBLDart_CBLURLEndpointListener_Create(
     CBLCollection** collections, size_t collectionCount, uint16_t port,
@@ -423,6 +430,7 @@ CBLURLEndpointListener* CBLDart_CBLURLEndpointListener_Create(
     bool disableTLS, CBLTLSIdentity* tlsIdentity,
     CBLListenerAuthenticator* authenticator, bool enableDeltaSync,
     bool readOnly, CBLError* errorOut);
+#endif
 
 // === FileLogSink
 
@@ -432,6 +440,8 @@ void CBLDart_CBLLog_SetFileSinkV2(CBLLogLevel level, const void* dirBuf,
                                   size_t maxSize, bool usePlaintext);
 
 // === TLS Identity
+
+#ifdef COUCHBASE_ENTERPRISE
 
 CBLDART_EXPORT
 FLSliceResult CBLDart_CBLCert_SubjectNameComponent(CBLCert* cert,
@@ -459,8 +469,6 @@ CBLDART_EXPORT
 bool CBLDart_CBLTLSIdentity_DeleteIdentityWithLabel(const void* labelBuf,
                                                     size_t labelSize,
                                                     CBLError* errorOut);
-
-#ifdef COUCHBASE_ENTERPRISE
 
 typedef void (*CBLDartExternalKeyPublicKeyData)(CBLDart_Completer completer,
                                                 void* output,

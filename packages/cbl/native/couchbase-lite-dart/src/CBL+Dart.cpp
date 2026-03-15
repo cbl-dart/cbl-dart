@@ -553,10 +553,12 @@ bool CBLDart_CBL_DatabaseExists(const void* nameBuf, size_t nameSize,
                             FLSLICE_FROM_ARGS(inDirBuf, inDirSize));
 }
 
+#ifdef COUCHBASE_ENTERPRISE
 bool CBLDart_CBLEncryptionKey_FromPassword(CBLEncryptionKey* key,
                                            const void* pwBuf, size_t pwSize) {
   return CBLEncryptionKey_FromPassword(key, FLSLICE_FROM_ARGS(pwBuf, pwSize));
 }
+#endif
 
 CBLScope* CBLDart_CBLDatabase_Scope(CBLDatabase* db, const void* nameBuf,
                                     size_t nameSize, CBLError* errorOut) {
@@ -591,10 +593,12 @@ void CBLDart_CBL_LogMessage(CBLLogDomain domain, CBLLogLevel level,
   CBL_LogMessage(domain, level, FLSLICE_FROM_ARGS(msgBuf, msgSize));
 }
 
+#ifdef COUCHBASE_ENTERPRISE
 bool CBLDart_CBL_EnableVectorSearch(const void* dirBuf, size_t dirSize,
                                     CBLError* errorOut) {
   return CBL_EnableVectorSearch(FLSLICE_FROM_ARGS(dirBuf, dirSize), errorOut);
 }
+#endif
 
 void CBLDart_CBLDatabase_Release(CBLDatabase* database) {
   CBLError error;
@@ -945,10 +949,12 @@ void CBLDart_PredictiveModel_Delete(CBLDart_PredictiveModel model) {
 #endif
 }
 
+#ifdef COUCHBASE_ENTERPRISE
 void CBLDart_CBL_UnregisterPredictiveModel(const void* nameBuf,
                                            size_t nameSize) {
   CBL_UnregisterPredictiveModel(FLSLICE_FROM_ARGS(nameBuf, nameSize));
 }
+#endif
 
 // === Blob
 
@@ -1519,13 +1525,13 @@ void CBLDart_CBLLog_SetFileSinkV2(CBLLogLevel level, const void* dirBuf,
 
 // === UrlEndpointListener
 
+#ifdef COUCHBASE_ENTERPRISE
 CBLURLEndpointListener* CBLDart_CBLURLEndpointListener_Create(
     CBLCollection** collections, size_t collectionCount, uint16_t port,
     const void* networkInterfaceBuf, size_t networkInterfaceSize,
     bool disableTLS, CBLTLSIdentity* tlsIdentity,
     CBLListenerAuthenticator* authenticator, bool enableDeltaSync,
     bool readOnly, CBLError* errorOut) {
-#ifdef COUCHBASE_ENTERPRISE
   CBLURLEndpointListenerConfiguration config{};
   config.collections = collections;
   config.collectionCount = collectionCount;
@@ -1538,21 +1544,17 @@ CBLURLEndpointListener* CBLDart_CBLURLEndpointListener_Create(
   config.enableDeltaSync = enableDeltaSync;
   config.readOnly = readOnly;
   return CBLURLEndpointListener_Create(&config, errorOut);
-#else
-  return nullptr;
-#endif
 }
+#endif
 
 // === TLS Identity
+
+#ifdef COUCHBASE_ENTERPRISE
 
 FLSliceResult CBLDart_CBLCert_SubjectNameComponent(CBLCert* cert,
                                                    const void* keyBuf,
                                                    size_t keySize) {
-#ifdef COUCHBASE_ENTERPRISE
   return CBLCert_SubjectNameComponent(cert, FLSLICE_FROM_ARGS(keyBuf, keySize));
-#else
-  return {nullptr, 0};
-#endif
 }
 
 CBLKeyPair* CBLDart_CBLKeyPair_CreateWithPrivateKeyData(const void* pkBuf,
@@ -1560,48 +1562,48 @@ CBLKeyPair* CBLDart_CBLKeyPair_CreateWithPrivateKeyData(const void* pkBuf,
                                                         const void* pwBuf,
                                                         size_t pwSize,
                                                         CBLError* errorOut) {
-#ifdef COUCHBASE_ENTERPRISE
   return CBLKeyPair_CreateWithPrivateKeyData(FLSLICE_FROM_ARGS(pkBuf, pkSize),
                                              FLSLICE_FROM_ARGS(pwBuf, pwSize),
                                              errorOut);
-#else
-  return nullptr;
-#endif
 }
 
 CBLTLSIdentity* CBLDart_CBLTLSIdentity_CreateIdentity(
     int keyUsages, FLDict attrs, int64_t validityMs, const void* labelBuf,
     size_t labelSize, CBLError* errorOut) {
-#ifdef COUCHBASE_ENTERPRISE
   return CBLTLSIdentity_CreateIdentity(keyUsages, attrs, validityMs,
                                        FLSLICE_FROM_ARGS(labelBuf, labelSize),
                                        errorOut);
-#else
-  return nullptr;
-#endif
 }
 
+#if defined(__APPLE__) || defined(_WIN32)
 CBLTLSIdentity* CBLDart_CBLTLSIdentity_IdentityWithLabel(const void* labelBuf,
                                                          size_t labelSize,
                                                          CBLError* errorOut) {
-#if defined(COUCHBASE_ENTERPRISE) && (defined(__APPLE__) || defined(_WIN32))
   return CBLTLSIdentity_IdentityWithLabel(
       FLSLICE_FROM_ARGS(labelBuf, labelSize), errorOut);
-#else
-  return nullptr;
-#endif
 }
 
 bool CBLDart_CBLTLSIdentity_DeleteIdentityWithLabel(const void* labelBuf,
                                                     size_t labelSize,
                                                     CBLError* errorOut) {
-#if defined(COUCHBASE_ENTERPRISE) && (defined(__APPLE__) || defined(_WIN32))
   return CBLTLSIdentity_DeleteIdentityWithLabel(
       FLSLICE_FROM_ARGS(labelBuf, labelSize), errorOut);
-#else
-  return false;
-#endif
 }
+#else
+CBLTLSIdentity* CBLDart_CBLTLSIdentity_IdentityWithLabel(const void* labelBuf,
+                                                         size_t labelSize,
+                                                         CBLError* errorOut) {
+  return nullptr;
+}
+
+bool CBLDart_CBLTLSIdentity_DeleteIdentityWithLabel(const void* labelBuf,
+                                                    size_t labelSize,
+                                                    CBLError* errorOut) {
+  return false;
+}
+#endif
+
+#endif  // COUCHBASE_ENTERPRISE
 
 #ifdef COUCHBASE_ENTERPRISE
 
