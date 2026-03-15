@@ -480,8 +480,7 @@ AsyncCallback _createReplicationFilterCallback(
   FfiCollection collection, {
   required bool ignoreErrorsInDart,
 }) => AsyncCallback(
-  // ignore: unnecessary_async
-  (arguments) async {
+  (arguments) {
     final message = ReplicationFilterCallbackMessage.fromArguments(arguments);
     final doc = DelegateDocument(
       FfiDocumentDelegate.fromPointer(message.document),
