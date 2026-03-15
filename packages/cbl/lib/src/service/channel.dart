@@ -145,7 +145,7 @@ final class Channel {
   final _streamSubscriptions = HashMap<int, StreamSubscription>();
 
   /// Makes a call to an endpoint at other side of the channel.
-  Future<R> call<R>(Request<R> request) async {
+  Future<R> call<R>(Request<R> request) {
     late final requestName = request.runtimeType.toString();
 
     return asyncOperationTracePoint(() => ChannelCallOp(requestName), () async {

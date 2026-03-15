@@ -1079,7 +1079,7 @@ void main() {
             expect(repl.start, exceptionMatcher);
           });
         } else {
-          await db.inBatch(() async {
+          await db.inBatch(() {
             expect(repl.start, exceptionMatcher);
           });
         }

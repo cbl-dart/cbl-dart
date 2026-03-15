@@ -18,7 +18,7 @@ void main() {
         expect(() => EncryptionKey.key(Uint8List(0)), throwsArgumentError);
       });
 
-      test('creates key from raw key', () async {
+      test('creates key from raw key', () {
         final databaseDirectory = databaseDirectoryForTest();
         final rawKey = randomRawEncryptionKey();
 

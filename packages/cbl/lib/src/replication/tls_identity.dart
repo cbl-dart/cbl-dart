@@ -984,9 +984,7 @@ final class FfiKeyPair implements KeyPair, Finalizable {
     return keyPair;
   }
 
-  static Future<FfiKeyPair> fromExternal(
-    ExternalKeyPairDelegate delegate,
-  ) async {
+  static Future<FfiKeyPair> fromExternal(ExternalKeyPairDelegate delegate) {
     useEnterpriseFeature(EnterpriseFeature.peerToPeerSync);
 
     final pointer = TlsIdentityBindings.keyPairCreateWithExternalKey(

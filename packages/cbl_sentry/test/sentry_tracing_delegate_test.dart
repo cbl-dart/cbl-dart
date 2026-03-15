@@ -265,6 +265,7 @@ void main() {
 
       await expectLater(
         () => runWithCblSentrySpan(root, () async {
+          // ignore: unnecessary_async
           await delegate.traceAsyncOperation(InitializeOp(), () async {
             throw exception;
           });

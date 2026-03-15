@@ -36,7 +36,7 @@ abstract class BaseCommand extends Command<void> {
 
   @override
   @mustCallSuper
-  Future run() async => doRun();
+  Future run() => doRun();
 }
 
 /// Finds the project root by walking up from the current working directory,

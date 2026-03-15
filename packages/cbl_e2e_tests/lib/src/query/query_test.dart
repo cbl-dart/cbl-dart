@@ -108,7 +108,7 @@ void main() {
 
         // First listener gets current results.
         await query.addChangeListener(
-          expectAsync1((change) async {
+          expectAsync1((change) {
             expect(change.query, query);
             expect(
               Future.value(change.results.allResults()),
@@ -119,7 +119,7 @@ void main() {
 
         // Seconds listener gets current results, too.
         await query.addChangeListener(
-          expectAsync1((change) async {
+          expectAsync1((change) {
             expect(change.query, query);
             expect(
               Future.value(change.results.allResults()),

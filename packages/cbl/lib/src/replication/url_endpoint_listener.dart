@@ -498,7 +498,7 @@ final class FfiUrlEndpointListener implements UrlEndpointListener, Finalizable {
     required Pointer<CBLListenerAuthenticator>? authenticatorPointer,
     required bool enableDeltaSync,
     required bool readOnly,
-  }) async => runInSecondaryIsolate(
+  }) => runInSecondaryIsolate(
     () => UrlEndpointListenerBindings.create(
       collections: collections,
       port: port,

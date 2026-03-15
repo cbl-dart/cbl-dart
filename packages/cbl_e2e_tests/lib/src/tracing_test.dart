@@ -31,14 +31,14 @@ void main() {
       },
     );
 
-    test('install throws if another delegate is already installed', () async {
+    test('install throws if another delegate is already installed', () {
       expect(
         () => TracingDelegate.install(TestDelegate()),
         throwsA(isA<StateError>()),
       );
     });
 
-    test('uninstall throws if the given delegate is not installed', () async {
+    test('uninstall throws if the given delegate is not installed', () {
       expect(
         () => TracingDelegate.uninstall(TestDelegate()),
         throwsA(isA<StateError>()),
@@ -142,7 +142,7 @@ final class TestDelegate extends TracingDelegate {
   Future<T> traceAsyncOperation<T>(
     TracedOperation operation,
     Future<T> Function() execute,
-  ) async {
+  ) {
     // Filter out ReleaseObject calls which are triggered by GC finalizers
     // and can non-deterministically appear from previous tests.
     if (operation is! ChannelCallOp || operation.name != 'ReleaseObject') {

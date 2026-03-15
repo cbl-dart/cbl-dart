@@ -176,7 +176,7 @@ void main() {
       expect(loadedDoc.value('blob'), isNull);
     });
 
-    test('toJson returns JSON representation of saved blob', () async {
+    test('toJson returns JSON representation of saved blob', () {
       final db = openSyncTestDatabase();
       final collection = db.defaultCollection;
       final blob = blobFromDataWithLength();
