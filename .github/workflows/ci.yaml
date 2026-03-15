@@ -95,6 +95,36 @@ jobs:
       - name: Analyze Dart code
         run: melos analyze
 
+  publish-dry-run:
+    name: Publish dry run
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        package: [cbl, cbl_sentry, cbl_generator]
+    runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu
+    steps:
+      - uses: runs-on/action@v2
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Flutter
+        uses: ./.github/actions/setup-flutter
+        with:
+          channel: ${{ env.flutter-channel }}
+          cache: true
+          pub-cache-hash-pattern: pubspec.lock
+
+      - name: Get dependencies
+        run: dart pub get
+
+      - name: Bootstrap repository
+        run: dart run melos bootstrap
+
+      - name: Publish dry run
+        working-directory: packages/${{ matrix.package }}
+        run: dart pub publish --dry-run
+
   test-dart-unit:
     name: Dart unit tests
     timeout-minutes: 15
