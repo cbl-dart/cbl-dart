@@ -253,18 +253,6 @@ jobs:
         if: ${{ matrix.os == 'Android' }}
         run: echo "JAVA_HOME=$JAVA_HOME_17_X64" >> $GITHUB_ENV
 
-      - name: Cache Android NDK and CMake
-        if: ${{ matrix.os == 'Android' }}
-        uses: actions/cache@v5
-        with:
-          path: |
-            /usr/local/lib/android/sdk/ndk/28.0.13004108
-            /usr/local/lib/android/sdk/ndk/28.2.13676358
-            /usr/local/lib/android/sdk/cmake/3.18.1
-            /usr/local/lib/android/sdk/platforms/android-33
-            /usr/local/lib/android/sdk/platforms/android-36
-          key: android-ndk-28.0.13004108-28.2.13676358-cmake-3.18.1-platforms-33-36
-
       - name: Install Android Native Toolchain
         if: ${{ matrix.os == 'Android' }}
         run: ./tools/android-sdk.sh installNativeToolchain
