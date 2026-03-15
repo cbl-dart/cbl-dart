@@ -261,10 +261,10 @@ packages:
     dependency: "direct dev"
     description:
       name: daco
-      sha256: "924d451f28d742b6a7b61681c29bd1da27887e0074e0732584f2f25596adab1d"
+      sha256: "9e53560b7514508b01c6f700c37b45c97066b0a7221fabb295f83120d9885fae"
       url: "https://pub.dev"
     source: hosted
-    version: "0.5.0+1"
+    version: "0.5.1"
   dart_style:
     dependency: transitive
     description:
