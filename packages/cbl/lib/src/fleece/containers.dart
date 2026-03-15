@@ -52,15 +52,14 @@ final class Doc implements Finalizable {
       trust,
       sharedKeys?.pointer,
     );
-    return Doc.fromPointer(docPointer);
+    return .fromPointer(docPointer);
   }
 
   /// Creates a [Doc] from JSON-encoded data.
   ///
   /// The data is first encoded into Fleece, and the Fleece data is kept by the
   /// doc.
-  factory Doc.fromJson(String json) =>
-      Doc.fromPointer(DocBindings.fromJson(json));
+  factory Doc.fromJson(String json) => .fromPointer(DocBindings.fromJson(json));
 
   /// Creates an [Doc] based on a [pointer] to the the native value.
   ///
@@ -75,7 +74,7 @@ final class Doc implements Finalizable {
   SliceResult? get allocedData => DocBindings.getAllocedData(pointer);
 
   /// Returns the root value in the [Doc], usually an [Dict].
-  Value get root => Value.fromPointer(DocBindings.getRoot(pointer));
+  Value get root => .fromPointer(DocBindings.getRoot(pointer));
 
   /// Returns the [SharedKeys] used by this [Doc], as specified when it was
   /// created.
@@ -198,11 +197,10 @@ final class Value implements Finalizable {
   Uint8List? get asData => ValueBindings.asData(pointer)?.toTypedList();
 
   /// If a Value represents an array, returns it as a [Array], else null.
-  Array? get asArray =>
-      type == .array ? Array.fromPointer(pointer.cast()) : null;
+  Array? get asArray => type == .array ? .fromPointer(pointer.cast()) : null;
 
   /// If a Value represents a dictionary, returns it as a [Dict], else null.
-  Dict? get asDict => type == .dict ? Dict.fromPointer(pointer.cast()) : null;
+  Dict? get asDict => type == .dict ? .fromPointer(pointer.cast()) : null;
 
   /// Returns a string representation of any scalar value. Data values are
   /// returned in raw form. Arrays and dictionaries don't have a representation
@@ -315,7 +313,7 @@ final class Array extends Value with ListMixin<Value> {
   List<Object?> toObject() => map((element) => element.toObject()).toList();
 
   @override
-  Value operator [](int index) => Value.fromPointer(
+  Value operator [](int index) => .fromPointer(
     ArrayBindings.get(pointer.cast(), index),
     isRefCounted: false,
   );
@@ -360,7 +358,7 @@ final class MutableArray extends Array {
   factory MutableArray.mutableCopy(
     Array source, {
     FLCopyFlags flags = .defaultCopy,
-  }) => MutableArray.fromPointer(
+  }) => .fromPointer(
     MutableArrayBindings.mutableCopy(source.pointer.cast(), flags),
     adopt: true,
   );
@@ -469,7 +467,7 @@ final class Dict extends Value with MapMixin<String, Value> {
   late final Iterable<String> keys = _DictKeyIterable(this);
 
   @override
-  Value operator [](Object? key) => Value.fromPointer(
+  Value operator [](Object? key) => .fromPointer(
     DictBindings.get(pointer.cast(), assertKey(key)) ?? nullptr,
     isRefCounted: false,
   );
@@ -567,7 +565,7 @@ final class MutableDict extends Dict {
   factory MutableDict.mutableCopy(
     Dict source, {
     FLCopyFlags flags = .defaultCopy,
-  }) => MutableDict.fromPointer(
+  }) => .fromPointer(
     MutableDictBindings.mutableCopy(source.pointer.cast(), flags),
     adopt: true,
   );
