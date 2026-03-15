@@ -429,7 +429,7 @@ final class ArrayImpl
 }
 
 final class MutableArrayImpl extends ArrayImpl implements MutableArray {
-  MutableArrayImpl(super.array);
+  MutableArrayImpl(super._array);
 
   // === Set ===================================================================
 

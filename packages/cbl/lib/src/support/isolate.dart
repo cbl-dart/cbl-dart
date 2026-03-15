@@ -98,7 +98,7 @@ Future<void> _runPostIsolateInitTasks() async {
   }
 }
 
-Future<T> runInSecondaryIsolate<T>(FutureOr<T> Function() fn) async {
+Future<T> runInSecondaryIsolate<T>(FutureOr<T> Function() fn) {
   final context = IsolateContext.instance.forSecondaryIsolate();
   return Isolate.run(() async {
     await initSecondaryIsolate(context);

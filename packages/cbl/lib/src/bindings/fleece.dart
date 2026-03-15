@@ -33,11 +33,11 @@ export 'cblite.dart'
         FLValueType;
 export 'cblitedart.dart'
     show
-        KnownSharedKeys,
-        CBLDart_LoadedFLValue,
-        CBLDart_LoadedDictKey,
+        CBLDart_FLArrayIterator,
         CBLDart_FLDictIterator,
-        CBLDart_FLArrayIterator;
+        CBLDart_LoadedDictKey,
+        CBLDart_LoadedFLValue,
+        KnownSharedKeys;
 
 // === Error ===================================================================
 

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cbl/cbl.dart';
 import 'package:sentry/sentry.dart';
 
@@ -21,12 +23,14 @@ final class BreadcrumbLogger extends Logger {
 
   @override
   void log(LogLevel level, LogDomain domain, String message) {
-    _hub.addBreadcrumb(
-      Breadcrumb(
-        message: message,
-        type: 'debug',
-        category: 'cbl.${domain.name}',
-        level: level.toSentryLevel(),
+    unawaited(
+      _hub.addBreadcrumb(
+        Breadcrumb(
+          message: message,
+          type: 'debug',
+          category: 'cbl.${domain.name}',
+          level: level.toSentryLevel(),
+        ),
       ),
     );
   }

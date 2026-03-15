@@ -134,7 +134,6 @@ mixin DatabaseBase<T extends DocumentDelegate> implements Database {
           final result = await transaction.runWith(fn);
           commit = true;
           return result;
-          // ignore: avoid_catches_without_on_clauses
         } finally {
           transaction.end();
           await endTransaction(commit: commit);
@@ -147,7 +146,6 @@ mixin DatabaseBase<T extends DocumentDelegate> implements Database {
         final result = transaction.runWith(fn);
         commit = true;
         return result;
-        // ignore: avoid_catches_without_on_clauses
       } finally {
         transaction.end();
         final endTransactionResult = endTransaction(commit: commit);
@@ -356,7 +354,6 @@ mixin CollectionBase<T extends DocumentDelegate> implements Collection {
 
           if (retry) {
             // If the document was deleted it has to be recreated.
-            // ignore: parameter_assignments
             conflictingDocument ??= MutableDelegateDocument.withId(
               documentBeingSaved.id,
             );

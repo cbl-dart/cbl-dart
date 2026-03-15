@@ -1,4 +1,4 @@
-// ignore_for_file: invalid_use_of_internal_member, cascade_invocations
+// ignore_for_file: cascade_invocations
 
 import 'package:cbl/cbl.dart';
 import 'package:cbl/src/typed_data/collection.dart';

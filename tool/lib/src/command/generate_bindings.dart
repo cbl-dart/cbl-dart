@@ -1,5 +1,3 @@
-// ignore_for_file: cascade_invocations
-
 import 'package:cli_util/cli_logging.dart';
 import 'package:path/path.dart' as p;
 

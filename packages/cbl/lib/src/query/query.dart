@@ -170,7 +170,7 @@ abstract base class QueryBase with ClosableResourceMixin implements Query {
   final CBLQueryLanguage language;
   String? definition;
 
-  bool _didAttachToParentResource = false;
+  var _didAttachToParentResource = false;
 
   @override
   T useSync<T>(T Function() f) {

@@ -59,7 +59,6 @@ class ResourceStream<T> extends Stream<T> with ClosableResourceMixin {
   var _isDone = false;
   late final _doneCompleter = Completer<void>();
 
-  // ignore: cancel_subscriptions
   late StreamSubscription<T> _subscription;
   late Future<void> _cancellation;
 
@@ -87,7 +86,6 @@ class ResourceStream<T> extends Stream<T> with ClosableResourceMixin {
 
       _subscription = stream.listen(
         onData,
-        // ignore: avoid_types_on_closure_parameters
         onError: (Object error, StackTrace stackTrace) {
           if (cancelOnError ?? false) {
             _makeDone();
@@ -240,7 +238,6 @@ class ListenerStream<T> extends AsyncListenStream<T> {
 
     await listening.then(
       (_) => _token.removeListener(),
-      // ignore: avoid_types_on_closure_parameters
       onError: (Object _) {
         // If listening threw an error there is no token and no listener to
         // remove.
@@ -256,9 +253,8 @@ class ListenerStream<T> extends AsyncListenStream<T> {
 
   void _onAddListenerError(Object error, StackTrace stackTrace) {
     if (!_isCanceled) {
-      _controller
-        ..addError(error, stackTrace)
-        ..close();
+      _controller.addError(error, stackTrace);
+      unawaited(_controller.close());
     }
     _listeningCompleter.completeError(error, stackTrace);
   }
@@ -286,7 +282,7 @@ class RepeatableStream<T> extends Stream<T> {
   // ignore: cancel_subscriptions
   StreamSubscription<T>? _sourceSub;
   var _sourceDone = false;
-  final List<T> _sourceChunks = <T>[];
+  final _sourceChunks = <T>[];
   Object? _sourceError;
   StackTrace? _sourceStackTrace;
   final List<MultiStreamController<T>> _destinations = [];
@@ -318,11 +314,10 @@ class RepeatableStream<T> extends Stream<T> {
           _sourceSub = null;
 
           for (final controller in _destinations) {
-            controller.close();
+            unawaited(controller.close());
           }
 
           _destinations.clear();
-          // ignore: avoid_types_on_closure_parameters
         },
         onError: (Object error, StackTrace stackTrace) {
           _sourceDone = true;
@@ -341,7 +336,7 @@ class RepeatableStream<T> extends Stream<T> {
       if (_sourceError != null) {
         destination.addError(_sourceError!, _sourceStackTrace);
       }
-      destination.close();
+      unawaited(destination.close());
     }
   });
 

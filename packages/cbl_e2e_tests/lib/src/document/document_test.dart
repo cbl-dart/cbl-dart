@@ -256,7 +256,6 @@ void main() {
           'id: ${doc.id}, '
           'revisionId: ${doc.revisionId}, '
           'sequence: ${doc.sequence}, '
-          // ignore: missing_whitespace_between_adjacent_strings
           'timestamp: ${loadedDoc!.timestamp}'
           ')',
         );
@@ -415,7 +414,6 @@ void main() {
         'id: ${mutableDoc.id}, '
         'revisionId: ${mutableDoc.revisionId}, '
         'sequence: ${mutableDoc.sequence}, '
-        // ignore: missing_whitespace_between_adjacent_strings
         'timestamp: ${mutableDoc.timestamp}'
         ')',
       );

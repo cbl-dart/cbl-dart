@@ -209,7 +209,6 @@ extension ReplicatorUtilsExtension on Replicator {
   /// you can receive status changes from before the current status and wont be
   /// able to put them and the current status into the correct order.
   Stream<ReplicatorStatus> pollStatus() async* {
-    // ignore: literal_only_boolean_expressions
     while (true) {
       final currentStatus = await _readStatusOrNull();
       if (currentStatus == null) {

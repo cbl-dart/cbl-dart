@@ -296,7 +296,7 @@ void main() {
           final db = openSyncTestDatabase();
           final collection = db.defaultCollection;
 
-          final inBatch = db.inBatch(() async {});
+          final inBatch = db.inBatch(() {});
 
           expect(
             () => collection.saveDocument(MutableDocument()),
@@ -571,7 +571,7 @@ FutureOr<void> removeDatabase(String name, {String? directory}) => runWithApi(
 
 FutureOr<bool> databaseExists(String name, {String? directory}) => runWithApi(
   sync: () => Database.existsSync(name, directory: directory),
-  async: () async => runWithIsolate(
+  async: () => runWithIsolate(
     main: () => databaseExistsWithSharedIsolate(
       name,
       directory: directory,
@@ -587,7 +587,7 @@ FutureOr<void> copyDatabase({
   DatabaseConfiguration? config,
 }) => runWithApi(
   sync: () => Database.copySync(from: from, name: name, config: config),
-  async: () async => runWithIsolate(
+  async: () => runWithIsolate(
     main: () => copyDatabaseWithSharedIsolate(
       from: from,
       name: name,

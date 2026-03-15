@@ -11,7 +11,7 @@ bool _isEnabled =
         Platform.environment['ENABLE_TIME_BOMB'] != 'false') ||
     // ignore: do_not_use_environment
     const bool.fromEnvironment('enableTimeBomb');
-Duration _testTimeout = const Duration(minutes: 10);
+var _testTimeout = const Duration(minutes: 10);
 
 /// Sets up test hooks to start and stop a time bomb, to timeout tests in a
 /// deadlock safe way.

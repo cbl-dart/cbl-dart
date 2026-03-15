@@ -19,6 +19,7 @@ final class TestVariant<T extends Object?> {
 
   final String name;
 
+  // ignore: unsafe_variance
   final VariantIsCompatible<T>? _isCompatible;
 
   final int order;

@@ -133,11 +133,9 @@ final class NoopSharedStringsTable extends SharedStringsTable {
       case .dictKey:
         size = globalLoadedDictKey.ref.stringSize;
         buf = globalLoadedDictKey.ref.stringBuf;
-        break;
       case .value:
         size = globalLoadedFLValue.ref.stringSize;
         buf = globalLoadedFLValue.ref.stringBuf;
-        break;
     }
     return decodeFLString(buf, size);
   }
@@ -170,11 +168,9 @@ final class _SharedStringsTable extends SharedStringsTable {
       case .dictKey:
         size = _loadedKey.stringSize;
         buf = _loadedKey.stringBuf;
-        break;
       case .value:
         size = _loadedValue.stringSize;
         buf = _loadedValue.stringBuf;
-        break;
     }
 
     if (size < _minSharedStringSize || size > _maxSharedStringSize) {
@@ -418,36 +414,29 @@ final class _FleeceListenerDecoder {
           case .undefined:
             _listener.handleUndefined();
             _currentLoader.handleValue();
-            break;
           case .null$:
             _listener.handleNull();
             _currentLoader.handleValue();
-            break;
           case .boolean:
             _listener.handleBool(value.asBool);
             _currentLoader.handleValue();
-            break;
           case .number:
             _listener.handleNumber(
               value.isInteger ? value.asInt : value.asDouble,
             );
             _currentLoader.handleValue();
-            break;
           case .string:
             _listener.handleString(_sharedStringsTable.decode(.value));
             _currentLoader.handleValue();
-            break;
           case .data:
             _listener.handleData(value.asData.toData()!.toTypedList());
             _currentLoader.handleValue();
-            break;
           case .array:
             _currentLoader = _ArrayIndexLoader(
               value.value.cast(),
               value.collectionSize,
               _listener,
             )..parent = _currentLoader;
-            break;
           case .dict:
             _currentLoader = _DictIteratorLoader(
               value.value.cast(),
@@ -455,10 +444,8 @@ final class _FleeceListenerDecoder {
               _sharedKeysTable,
               _sharedStringsTable,
             )..parent = _currentLoader;
-            break;
         }
       }
-      // ignore: avoid_catches_without_on_clauses
     } catch (e) {
       _drainLoaders();
       rethrow;
@@ -595,7 +582,7 @@ final class _BuildDartObjectListener extends _FleeceListener {
   Object? _currentContainer;
 
   /// The most recently read property key.
-  String _key = '';
+  var _key = '';
 
   /// The most recently read value.
   Object? _value;

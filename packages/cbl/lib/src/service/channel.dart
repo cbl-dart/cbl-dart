@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_constructors_over_static_methods, avoid_print
+// ignore_for_file: avoid_print
 
 import 'dart:async';
 import 'dart:collection';
@@ -131,7 +131,7 @@ final class Channel {
   final MessageContextCapturer _captureMessageContext;
   final MessageContextRestorer _restoreMessageContext;
 
-  int _nextConversationId = 0;
+  var _nextConversationId = 0;
 
   var _status = ChannelStatus.initial;
   ChannelStatus get status => _status;
@@ -145,7 +145,7 @@ final class Channel {
   final _streamSubscriptions = HashMap<int, StreamSubscription>();
 
   /// Makes a call to an endpoint at other side of the channel.
-  Future<R> call<R>(Request<R> request) async {
+  Future<R> call<R>(Request<R> request) {
     late final requestName = request.runtimeType.toString();
 
     return asyncOperationTracePoint(() => ChannelCallOp(requestName), () async {
@@ -357,11 +357,12 @@ final class Channel {
       return;
     }
 
-    Future.sync(() => handler(message.request)).then(
-      (result) => _sendCallSuccess(message.conversationId, result),
-      // ignore: avoid_types_on_closure_parameters
-      onError: (Object error, StackTrace stackTrace) =>
-          _sendCallError(message.conversationId, error, stackTrace),
+    unawaited(
+      Future.sync(() => handler(message.request)).then(
+        (result) => _sendCallSuccess(message.conversationId, result),
+        onError: (Object error, StackTrace stackTrace) =>
+            _sendCallError(message.conversationId, error, stackTrace),
+      ),
     );
   }
 
@@ -382,7 +383,6 @@ final class Channel {
               (event) {
                 _sendStreamData(message.conversationId, event);
               },
-              // ignore: avoid_types_on_closure_parameters
               onError: (Object error, StackTrace stackTrace) =>
                   _sendStreamError(message.conversationId, error, stackTrace),
               onDone: () => _sendStreamDone(message.conversationId),
@@ -395,14 +395,15 @@ final class Channel {
   void _handleResumeStream(_ResumeStream message) =>
       _getStreamSubscription(message)?.resume();
 
-  void _handleCancelStream(_CancelStream message) =>
-      _takeStreamSubscription(message)?.cancel();
+  void _handleCancelStream(_CancelStream message) {
+    unawaited(_takeStreamSubscription(message)?.cancel());
+  }
 
   void _handleStreamEvent(_Message message) =>
       _getStreamController(message)?.add(message);
 
   void _handleStreamDone(_StreamDone message) {
-    _getStreamController(message)?.close();
+    unawaited(_getStreamController(message)?.close());
     _streamControllers.remove(message.conversationId);
   }
 

@@ -108,7 +108,7 @@ void main() {
 
         // First listener gets current results.
         await query.addChangeListener(
-          expectAsync1((change) async {
+          expectAsync1((change) {
             expect(change.query, query);
             expect(
               Future.value(change.results.allResults()),
@@ -119,7 +119,7 @@ void main() {
 
         // Seconds listener gets current results, too.
         await query.addChangeListener(
-          expectAsync1((change) async {
+          expectAsync1((change) {
             expect(change.query, query);
             expect(
               Future.value(change.results.allResults()),
@@ -151,12 +151,10 @@ void main() {
             case 0:
               expect(results, isEmpty);
               await collection.saveDocument(doc);
-              break;
             case 1:
               expect(results, [doc.id]);
               await query.removeChangeListener(token);
               callsDone.complete();
-              break;
           }
         }, count: 2),
       );
@@ -183,7 +181,9 @@ void main() {
       expect(
         query.changes().asyncMap((change) {
           if (changeIndex == 0) {
-            query.setParameters(Parameters({'ID': 'B'}));
+            unawaited(
+              Future.value(query.setParameters(Parameters({'ID': 'B'}))),
+            );
           }
           changeIndex++;
 
@@ -216,7 +216,7 @@ void main() {
             )
             .doOnData((results) {
               if (results.isEmpty) {
-                collection.saveDocument(doc);
+                unawaited(Future.value(collection.saveDocument(doc)));
               }
             }),
         emitsInOrder(<Object>[

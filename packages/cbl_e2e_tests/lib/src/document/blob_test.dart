@@ -113,12 +113,10 @@ void main() {
       switch (writeBlob.value) {
         case .data:
           writeBlobInstance = Blob.fromData(contentType, content);
-          break;
         case .properties:
           final blob = Blob.fromData(contentType, content);
           await db.saveBlob(blob);
           doc['blob'].value = blob.properties;
-          break;
         case .stream:
           writeBlobInstance = Blob.fromStream(
             contentType,
@@ -128,7 +126,6 @@ void main() {
           if (api.value == .sync) {
             await db.saveBlob(writeBlobInstance);
           }
-          break;
       }
 
       if (writeBlobInstance != null) {
@@ -140,34 +137,28 @@ void main() {
         switch (readBlob.value) {
           case .sourceBlob:
             readBlobInstance = writeBlobInstance!;
-            break;
           case .loadedBlob:
             final loadedDoc = (await collection.document(doc.id))!;
             readBlobInstance = loadedDoc.blob('blob')!;
-            break;
         }
 
         switch (readMode.value) {
           case .future:
             expect(await readBlobInstance.content(), content);
-            break;
           case .stream:
             expect(
               await byteStreamToFuture(readBlobInstance.contentStream()),
               content,
             );
-            break;
         }
       }
 
       switch (readTime.value) {
         case .beforeSave:
           await read();
-          break;
         case .afterSave:
           await collection.saveDocument(doc);
           await read();
-          break;
       }
     }, variants: [writeBlob, readTime, readMode, readBlob, blobSize]);
 
@@ -183,7 +174,7 @@ void main() {
       expect(loadedDoc.value('blob'), isNull);
     });
 
-    test('toJson returns JSON representation of saved blob', () async {
+    test('toJson returns JSON representation of saved blob', () {
       final db = openSyncTestDatabase();
       final collection = db.defaultCollection;
       final blob = blobFromDataWithLength();
@@ -297,7 +288,6 @@ const contentType = 'application/octet-stream';
 // TODO(blaugold): Remove ignore when Dart 3.2 is a minimum requirement.
 // ignore: unnecessary_cast
 final fixedTestContent = utf8.encode('content') as Uint8List;
-const fixedTestContentDigest = 'sha1-BA8G/XdAkkeNRQd09bowxdp4rMg=';
 
 Blob blobFromData() => Blob.fromData(contentType, fixedTestContent);
 

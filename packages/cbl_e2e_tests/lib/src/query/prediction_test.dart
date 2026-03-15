@@ -10,7 +10,7 @@ import '../utils/database_utils.dart';
 void main() {
   setupTestBinding();
 
-  apiTest('register and unregister model', () async {
+  apiTest('register and unregister model', () {
     Database.prediction.registerModel('uppercase', UppercaseModel());
     Database.prediction.unregisterModel('uppercase');
   });

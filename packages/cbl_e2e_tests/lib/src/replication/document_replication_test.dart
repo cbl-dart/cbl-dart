@@ -8,7 +8,7 @@ void main() {
   setupTestBinding();
 
   group('DocumentReplication', () {
-    test('toString', () async {
+    test('toString', () {
       final replicator = _Replicator();
       final doc = ReplicatedDocumentImpl('id', 'scope', 'collection');
       final docRep = DocumentReplicationImpl(replicator, true, [doc]);

@@ -17,7 +17,9 @@ abstract final class TypedDataMetadata<I, MI, D, MD> {
   });
 
   final String dartName;
+  // ignore: unsafe_variance
   final Factory<I, D> factory;
+  // ignore: unsafe_variance
   final Factory<MI, MD> mutableFactory;
   final TypeMatcher? typeMatcher;
 

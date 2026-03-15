@@ -128,7 +128,6 @@ final class SentryTracingDelegate extends TracingDelegate {
 
     try {
       return runWithCblSentrySpan(span, execute);
-      // ignore: avoid_catches_without_on_clauses
     } catch (error) {
       span
         ..throwable = error
@@ -136,7 +135,7 @@ final class SentryTracingDelegate extends TracingDelegate {
       rethrow;
     } finally {
       span.status ??= const SpanStatus.ok();
-      _finishOperationSpan(span);
+      unawaited(_finishOperationSpan(span));
     }
   }
 
@@ -154,7 +153,6 @@ final class SentryTracingDelegate extends TracingDelegate {
 
     try {
       return await runWithCblSentrySpan(span, execute);
-      // ignore: avoid_catches_without_on_clauses
     } catch (error) {
       span
         ..throwable = error
@@ -188,7 +186,9 @@ final class SentryTracingDelegate extends TracingDelegate {
       return;
     }
 
-    _hub.addBreadcrumb(_createBreadcrumbForOperationStart(operation));
+    unawaited(
+      _hub.addBreadcrumb(_createBreadcrumbForOperationStart(operation)),
+    );
   }
 
   Breadcrumb _createBreadcrumbForOperationStart(TracedOperation operation) =>

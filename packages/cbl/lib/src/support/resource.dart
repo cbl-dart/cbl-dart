@@ -51,7 +51,7 @@ mixin ClosableResourceMixin implements ClosableResource {
   /// Even if this property is `false`, the parent might still closed it.
   @protected
   bool get needsToBeClosedByParent => _needsToBeClosedByParent;
-  bool _needsToBeClosedByParent = true;
+  var _needsToBeClosedByParent = true;
 
   set needsToBeClosedByParent(bool value) {
     _checkIsNotClosed();

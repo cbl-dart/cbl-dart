@@ -33,7 +33,6 @@ final class ConflictImpl implements Conflict {
   String toString() =>
       'Conflict('
       'local: $localDocument, '
-      // ignore: missing_whitespace_between_adjacent_strings
       'remote: $remoteDocument'
       ')';
 }
@@ -73,7 +72,6 @@ final class TypedConflictImpl implements TypedConflict {
   String toString() =>
       'TypedConflict('
       'local: $localDocument, '
-      // ignore: missing_whitespace_between_adjacent_strings
       'remote: $remoteDocument'
       ')';
 }

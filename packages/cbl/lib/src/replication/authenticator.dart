@@ -24,7 +24,6 @@ final class BasicAuthenticator extends Authenticator {
   String toString() =>
       'BasicAuthenticator('
       'username: $username, '
-      // ignore: missing_whitespace_between_adjacent_strings
       'password: ${redact(password)}'
       ')';
 }
@@ -51,7 +50,6 @@ final class SessionAuthenticator extends Authenticator {
   String toString() =>
       'SessionAuthenticator('
       'sessionId: ${redact(sessionId)}, '
-      // ignore: missing_whitespace_between_adjacent_strings
       'cookieName: $cookieName'
       ')';
 }

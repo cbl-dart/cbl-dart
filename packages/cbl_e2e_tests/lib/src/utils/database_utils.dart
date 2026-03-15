@@ -137,10 +137,8 @@ CblServiceClient _sharedIsolateClient(Isolate isolate) {
   switch (isolate) {
     case Isolate.main:
       client = sharedMainIsolateClient;
-      break;
     case Isolate.worker:
       client = sharedWorkerIsolateClient;
-      break;
   }
   return client;
 }

@@ -796,7 +796,7 @@ void main() {
         expectAsync1((change) {
           expect(change.replicator, replicator);
           expect(change.status.activity, ReplicatorActivityLevel.busy);
-          replicator.removeChangeListener(token);
+          unawaited(Future.value(replicator.removeChangeListener(token)));
         }),
       );
 
@@ -870,7 +870,7 @@ void main() {
             expect(change.documents.map((it) => it.collection), [
               Collection.defaultName,
             ]);
-            replicator.removeChangeListener(token);
+            unawaited(Future.value(replicator.removeChangeListener(token)));
           }),
         );
 
@@ -1079,7 +1079,7 @@ void main() {
             expect(repl.start, exceptionMatcher);
           });
         } else {
-          await db.inBatch(() async {
+          await db.inBatch(() {
             expect(repl.start, exceptionMatcher);
           });
         }

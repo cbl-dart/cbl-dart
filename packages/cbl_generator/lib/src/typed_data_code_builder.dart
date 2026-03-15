@@ -8,17 +8,15 @@ final class TypeDataCodeBuilder {
     switch (object.kind) {
       case .document:
         _internalType = 'Document';
-        break;
       case .dictionary:
         _internalType = 'Dictionary';
-        break;
     }
   }
 
   final TypedDataObjectModel object;
 
   late final String _internalType;
-  late final String _mutableInternalType = 'Mutable$_internalType';
+  late final _mutableInternalType = 'Mutable$_internalType';
 
   final _code = StringBuffer();
 

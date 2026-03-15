@@ -454,15 +454,13 @@ void main() {
         Future<bool> evalAny({
           required Iterable<Object?> values,
           required Object? equalTo,
-        }) =>
-            // ignore: cast_nullable_to_non_nullable
-            evalExpr(
-              rangePredicate(
-                quantifier: Quantifier.any,
-                values: values,
-                equalTo: equalTo,
-              ),
-            );
+        }) => evalExpr(
+          rangePredicate(
+            quantifier: Quantifier.any,
+            values: values,
+            equalTo: equalTo,
+          ),
+        );
 
         expect(await evalAny(values: [], equalTo: 'a'), false);
         expect(await evalAny(values: ['b'], equalTo: 'a'), false);
@@ -1037,7 +1035,6 @@ void main() {
       });
 
       apiTest('millisToString', () async {
-        // ignore: cast_nullable_to_non_nullable
         final result = await evalExpr(Function_.millisToString(valExpr(0)));
         expect(DateTime.parse(result! as String), DateTime.utc(1970));
       });
@@ -1257,13 +1254,10 @@ ExpressionInterface rangePredicate({
   switch (quantifier) {
     case .any:
       quantified = ArrayExpression.any(variable);
-      break;
     case .every:
       quantified = ArrayExpression.every(variable);
-      break;
     case .anyAndEvery:
       quantified = ArrayExpression.anyAndEvery(variable);
-      break;
   }
   return quantified
       .in_(Expression.array(values))
@@ -1307,10 +1301,10 @@ extension on Database {
 enum JoinType { join, leftJoin, leftOuterJoin, innerJoin, crossJoin }
 
 MutableDocument leftJoinDoc({required String id, String? on}) =>
-    MutableDocument.withId(id, {'side': 'left', if (on != null) 'on': on});
+    MutableDocument.withId(id, {'side': 'left', 'on': ?on});
 
 MutableDocument rightJoinDoc({required String id, String? on}) =>
-    MutableDocument.withId(id, {'side': 'right', if (on != null) 'on': on});
+    MutableDocument.withId(id, {'side': 'right', 'on': ?on});
 
 extension on Database {
   Future<Object?> evalJoin({
@@ -1337,19 +1331,14 @@ extension on Database {
     switch (type) {
       case .join:
         join = Join.join(joinFrom).on(joinOn);
-        break;
       case .leftJoin:
         join = Join.leftJoin(joinFrom).on(joinOn);
-        break;
       case .leftOuterJoin:
         join = Join.leftOuterJoin(joinFrom).on(joinOn);
-        break;
       case .innerJoin:
         join = Join.innerJoin(joinFrom).on(joinOn);
-        break;
       case .crossJoin:
         join = Join.crossJoin(joinFrom);
-        break;
     }
 
     final resultSet = await const QueryBuilder()

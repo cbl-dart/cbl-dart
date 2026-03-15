@@ -72,7 +72,6 @@ void main() {
         'PULL-FILTER, '
         'TYPED-PULL-FILTER, '
         'CUSTOM-CONFLICT-RESOLVER, '
-        // ignore: missing_whitespace_between_adjacent_strings
         'TYPED-CUSTOM-CONFLICT-RESOLVER'
         ')',
       );

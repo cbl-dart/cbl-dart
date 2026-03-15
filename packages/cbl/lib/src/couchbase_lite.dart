@@ -10,7 +10,7 @@ import 'support/tracing.dart';
 import 'tracing.dart';
 
 export 'support/listener_token.dart' show ListenerToken;
-export 'support/resource.dart' show Resource, ClosableResource;
+export 'support/resource.dart' show ClosableResource, Resource;
 export 'support/streams.dart' show AsyncListenStream;
 
 /// Initializes global resources and configures global settings, such as

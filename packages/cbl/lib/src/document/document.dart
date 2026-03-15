@@ -348,7 +348,6 @@ final class DelegateDocument with IterableMixin<String> implements Document {
       'id: $id, '
       'revisionId: $revisionId, '
       'sequence: $sequence, '
-      // ignore: missing_whitespace_between_adjacent_strings
       'timestamp: $timestamp'
       ')';
 }
