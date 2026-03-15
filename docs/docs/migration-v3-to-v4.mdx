@@ -168,6 +168,29 @@ final config = ReplicatorConfiguration(
 );
 ```
 
+## `MutableDocument` constructor changes
+
+The `MutableDocument()` and `MutableDocument.withId()` constructors have been
+merged into a single constructor where `id` is now a named parameter:
+
+```dart
+// Before (v3)
+final doc1 = MutableDocument();
+final doc2 = MutableDocument({'key': 'value'});
+final doc3 = MutableDocument.withId('my-id');
+final doc4 = MutableDocument.withId('my-id', {'key': 'value'});
+
+// After (v4)
+final doc1 = MutableDocument({});
+final doc2 = MutableDocument({'key': 'value'});
+final doc3 = MutableDocument(id: 'my-id', {});
+final doc4 = MutableDocument(id: 'my-id', {'key': 'value'});
+```
+
+The `data` parameter is now required and non-nullable. For an empty document,
+pass `{}`. The `MutableDocument.withId` constructor has been removed. When
+providing an `id`, the convention is to pass it before the data.
+
 ## `LogFileConfiguration.maxRotateCount` renamed to `maxKeptFiles`
 
 The `maxRotateCount` property on `api|LogFileConfiguration` has been renamed to
@@ -419,24 +442,27 @@ No manual steps are required.
 8. **Update certificate fields** on `ReplicatorConfiguration` -- wrap
    `pinnedServerCertificate` bytes with `DerData` or `PemData`, and
    `trustedRootCertificates` bytes with `PemData`.
-9. **Rename `maxRotateCount`** to `maxKeptFiles` in any `LogFileConfiguration`
-   usage.
-10. **Update query result checks** that compare boolean expressions against `1`
+9. **Update `MutableDocument` constructors** -- replace `MutableDocument()` with
+   `MutableDocument({})` and `MutableDocument.withId(id, data)` with
+   `MutableDocument(id: id, data)`.
+10. **Rename `maxRotateCount`** to `maxKeptFiles` in any `LogFileConfiguration`
+    usage.
+11. **Update query result checks** that compare boolean expressions against `1`
     or `0` -- they now return `true`/`false`.
-11. **Remove hardcoded revision IDs** -- revision IDs are no longer
+12. **Remove hardcoded revision IDs** -- revision IDs are no longer
     deterministic.
-12. **Migrate Database document/index/listener APIs** to use `defaultCollection`
+13. **Migrate Database document/index/listener APIs** to use `defaultCollection`
     methods instead.
-13. **Migrate ReplicatorConfiguration** -- replace `database` parameter with
+14. **Migrate ReplicatorConfiguration** -- replace `database` parameter with
     `addCollection`, move `channels`/`documentIds`/filters/resolvers into
     `CollectionConfiguration`.
-14. **Migrate Replicator pending document APIs** -- replace
+15. **Migrate Replicator pending document APIs** -- replace
     `pendingDocumentIds`/`isDocumentPending` with
     `pendingDocumentIdsInCollection`/`isDocumentPendingInCollection`.
-15. **Replace `DataSource.database(db)`** with
+16. **Replace `DataSource.database(db)`** with
     `DataSource.collection(collection)`.
-16. **Replace `InvalidJsonException`** with `FleeceException`.
-17. **Remove `TracingDelegate` usage** -- the tracing API has been removed from
+17. **Replace `InvalidJsonException`** with `FleeceException`.
+18. **Remove `TracingDelegate` usage** -- the tracing API has been removed from
     the public API.
-18. **Run your app** -- native libraries will be built automatically on first
+19. **Run your app** -- native libraries will be built automatically on first
     run.

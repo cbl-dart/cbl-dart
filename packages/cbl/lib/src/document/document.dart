@@ -68,7 +68,7 @@ abstract final class MutableDocument
   /// If no [id] is provided, a random UUID will be assigned.
   ///
   /// {@macro cbl.MutableArray.allowedValueTypes}
-  factory MutableDocument(Map<String, Object?>? data, {String? id}) =>
+  factory MutableDocument(Map<String, Object?> data, {String? id}) =>
       MutableDelegateDocument(data, id: id);
 }
 
@@ -349,15 +349,15 @@ final class DelegateDocument with IterableMixin<String> implements Document {
 
 final class MutableDelegateDocument extends DelegateDocument
     implements MutableDocument {
-  MutableDelegateDocument(Map<String, Object?>? data, {String? id})
+  MutableDelegateDocument(Map<String, Object?> data, {String? id})
     : this.fromDelegate(NewDocumentDelegate(id), data: data);
 
   MutableDelegateDocument.fromDelegate(
     super.delegate, {
     super.collection,
-    Map<String, Object?>? data,
+    Map<String, Object?> data = const {},
   }) {
-    if (data != null) {
+    if (data.isNotEmpty) {
       setData(data);
     }
   }

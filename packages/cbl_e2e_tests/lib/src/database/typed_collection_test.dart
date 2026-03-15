@@ -425,7 +425,7 @@ class TestDocA<I extends Document>
 class MutableTestDocA extends TestDocA<MutableDocument>
     implements TypedMutableDocumentObject<TestDocA, MutableTestDocA> {
   MutableTestDocA([MutableDocument? document])
-    : super(document ?? MutableDocument(null));
+    : super(document ?? MutableDocument({}));
 
   @override
   String toString({String? indent}) => super.toString();
@@ -448,7 +448,7 @@ class TestDocB<I extends Document>
 class MutableTestDocB extends TestDocB<MutableDocument>
     implements TypedMutableDocumentObject<TestDocB, MutableTestDocB> {
   MutableTestDocB([MutableDocument? document])
-    : super(document ?? MutableDocument(null));
+    : super(document ?? MutableDocument({}));
 }
 
 class TestDocWithoutTypeMatcher<I extends Document>
@@ -474,7 +474,7 @@ class MutableTestDocWithoutTypeMatcher
           MutableTestDocWithoutTypeMatcher
         > {
   MutableTestDocWithoutTypeMatcher([MutableDocument? document])
-    : super(document ?? MutableDocument(null));
+    : super(document ?? MutableDocument({}));
 }
 
 final testAdapter = TypedDataRegistry(

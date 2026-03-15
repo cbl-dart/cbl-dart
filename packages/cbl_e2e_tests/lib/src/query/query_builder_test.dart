@@ -203,7 +203,7 @@ void main() {
         runWithApiValues(() async {
           final db = await getSharedTestDatabase();
           final collection = await db.defaultCollection;
-          final doc = MutableDocument({'a': true}, id: 'SelectOneResult');
+          final doc = MutableDocument(id: 'SelectOneResult', {'a': true});
           await collection.saveDocument(doc);
         }),
       );
@@ -408,7 +408,7 @@ void main() {
       apiTest('orderBy', () async {
         final db = await openTestDatabase();
         final collection = await db.defaultCollection;
-        final docs = List.generate(5, (_) => MutableDocument(null));
+        final docs = List.generate(5, (_) => MutableDocument({}));
 
         await db.saveAllDocuments(docs);
 
@@ -429,7 +429,7 @@ void main() {
       apiTest('limit', () async {
         final db = await openTestDatabase();
         final collection = await db.defaultCollection;
-        final docs = List.generate(5, (_) => MutableDocument(null));
+        final docs = List.generate(5, (_) => MutableDocument({}));
 
         await db.saveAllDocuments(docs);
 
@@ -760,8 +760,8 @@ void main() {
 
     group('Meta', () {
       final expirationDate = DateTime.now().add(const Duration(days: 1));
-      final doc = apiProvider((_) => MutableDocument(null));
-      final deletedDoc = apiProvider((_) => MutableDocument(null));
+      final doc = apiProvider((_) => MutableDocument({}));
+      final deletedDoc = apiProvider((_) => MutableDocument({}));
 
       setUpAll(
         runWithApiValues(() async {
@@ -1200,7 +1200,7 @@ void setupEvalExprUtils() {
     runWithApiValues(() async {
       final db = await getSharedTestDatabase();
       final collection = await db.defaultCollection;
-      await collection.saveDocument(MutableDocument(null, id: 'EvalExpr'));
+      await collection.saveDocument(MutableDocument(id: 'EvalExpr', {}));
     }),
   );
 }
@@ -1301,10 +1301,10 @@ extension on Database {
 enum JoinType { join, leftJoin, leftOuterJoin, innerJoin, crossJoin }
 
 MutableDocument leftJoinDoc({required String id, String? on}) =>
-    MutableDocument({'side': 'left', 'on': ?on}, id: id);
+    MutableDocument(id: id, {'side': 'left', 'on': ?on});
 
 MutableDocument rightJoinDoc({required String id, String? on}) =>
-    MutableDocument({'side': 'right', 'on': ?on}, id: id);
+    MutableDocument(id: id, {'side': 'right', 'on': ?on});
 
 extension on Database {
   Future<Object?> evalJoin({

@@ -811,7 +811,7 @@ final class CblService {
   }) {
     if (state.revisionId == null) {
       // The document is new.
-      return MutableDocument(null, id: state.docId) as T;
+      return MutableDocument(id: state.docId, {}) as T;
     } else {
       if (state.id != null) {
         // A document has already been obtained and added to the object

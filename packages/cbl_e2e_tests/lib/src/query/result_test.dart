@@ -195,9 +195,9 @@ void main() {
       apiTest('access column by name', () async {
         final db = await openTestDatabase();
         final collection = await db.defaultCollection;
-        final doc = MutableDocument({
+        final doc = MutableDocument(id: 'ResultSetColumnByName', {
           'a': {'b': true},
-        }, id: 'ResultSetColumnByName');
+        });
         await collection.saveDocument(doc);
         final q = await db.createQuery(
           r'SELECT a AS alias, a.b, count() FROM _ WHERE META().id = $ID',
@@ -215,7 +215,7 @@ void main() {
       apiTest('access column by index', () async {
         final db = await openTestDatabase();
         final collection = await db.defaultCollection;
-        final doc = MutableDocument(null, id: 'ResultSetColumnByIndex');
+        final doc = MutableDocument(id: 'ResultSetColumnByIndex', {});
         await collection.saveDocument(doc);
 
         final q = await db.createQuery(

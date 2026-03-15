@@ -49,7 +49,7 @@ class ImmutableEmptyDoc extends _EmptyDocImplBase {
 class MutableEmptyDoc extends _EmptyDocImplBase<MutableDocument>
     implements TypedMutableDocumentObject<EmptyDoc, MutableEmptyDoc> {
   /// Creates a new mutable [EmptyDoc].
-  MutableEmptyDoc() : super(MutableDocument(null));
+  MutableEmptyDoc() : super(MutableDocument({}));
 
   MutableEmptyDoc.internal(super.internal);
 }

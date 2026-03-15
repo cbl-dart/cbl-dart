@@ -60,7 +60,7 @@ class ImmutableStringDoc extends _StringDocImplBase {
 class MutableStringDoc extends _StringDocImplBase<MutableDocument>
     implements TypedMutableDocumentObject<StringDoc, MutableStringDoc> {
   /// Creates a new mutable [StringDoc].
-  MutableStringDoc(String value) : super(MutableDocument(null)) {
+  MutableStringDoc(String value) : super(MutableDocument({})) {
     this.value = value;
   }
 
@@ -128,7 +128,7 @@ class ImmutableIntDoc extends _IntDocImplBase {
 class MutableIntDoc extends _IntDocImplBase<MutableDocument>
     implements TypedMutableDocumentObject<IntDoc, MutableIntDoc> {
   /// Creates a new mutable [IntDoc].
-  MutableIntDoc(int value) : super(MutableDocument(null)) {
+  MutableIntDoc(int value) : super(MutableDocument({})) {
     this.value = value;
   }
 
@@ -197,7 +197,7 @@ class ImmutableDoubleDoc extends _DoubleDocImplBase {
 class MutableDoubleDoc extends _DoubleDocImplBase<MutableDocument>
     implements TypedMutableDocumentObject<DoubleDoc, MutableDoubleDoc> {
   /// Creates a new mutable [DoubleDoc].
-  MutableDoubleDoc(double value) : super(MutableDocument(null)) {
+  MutableDoubleDoc(double value) : super(MutableDocument({})) {
     this.value = value;
   }
 
@@ -265,7 +265,7 @@ class ImmutableNumDoc extends _NumDocImplBase {
 class MutableNumDoc extends _NumDocImplBase<MutableDocument>
     implements TypedMutableDocumentObject<NumDoc, MutableNumDoc> {
   /// Creates a new mutable [NumDoc].
-  MutableNumDoc(num value) : super(MutableDocument(null)) {
+  MutableNumDoc(num value) : super(MutableDocument({})) {
     this.value = value;
   }
 
@@ -333,7 +333,7 @@ class ImmutableBoolDoc extends _BoolDocImplBase {
 class MutableBoolDoc extends _BoolDocImplBase<MutableDocument>
     implements TypedMutableDocumentObject<BoolDoc, MutableBoolDoc> {
   /// Creates a new mutable [BoolDoc].
-  MutableBoolDoc(bool value) : super(MutableDocument(null)) {
+  MutableBoolDoc(bool value) : super(MutableDocument({})) {
     this.value = value;
   }
 
@@ -402,7 +402,7 @@ class ImmutableDateTimeDoc extends _DateTimeDocImplBase {
 class MutableDateTimeDoc extends _DateTimeDocImplBase<MutableDocument>
     implements TypedMutableDocumentObject<DateTimeDoc, MutableDateTimeDoc> {
   /// Creates a new mutable [DateTimeDoc].
-  MutableDateTimeDoc(DateTime value) : super(MutableDocument(null)) {
+  MutableDateTimeDoc(DateTime value) : super(MutableDocument({})) {
     this.value = value;
   }
 
@@ -470,7 +470,7 @@ class ImmutableBlobDoc extends _BlobDocImplBase {
 class MutableBlobDoc extends _BlobDocImplBase<MutableDocument>
     implements TypedMutableDocumentObject<BlobDoc, MutableBlobDoc> {
   /// Creates a new mutable [BlobDoc].
-  MutableBlobDoc(Blob value) : super(MutableDocument(null)) {
+  MutableBlobDoc(Blob value) : super(MutableDocument({})) {
     this.value = value;
   }
 
@@ -540,7 +540,7 @@ class ImmutableEnumDoc extends _EnumDocImplBase {
 class MutableEnumDoc extends _EnumDocImplBase<MutableDocument>
     implements TypedMutableDocumentObject<EnumDoc, MutableEnumDoc> {
   /// Creates a new mutable [EnumDoc].
-  MutableEnumDoc(TestEnum value) : super(MutableDocument(null)) {
+  MutableEnumDoc(TestEnum value) : super(MutableDocument({})) {
     this.value = value;
   }
 

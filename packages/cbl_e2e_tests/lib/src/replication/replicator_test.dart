@@ -152,8 +152,8 @@ void main() {
 
       final timestamp = DateTime.now().microsecondsSinceEpoch;
       final doc = MutableDocument(
-        null,
         id: 'continuouslyReplicatedDoc-$timestamp',
+        {},
       );
 
       expect(pullDb.watchAllIds(), emitsThrough(contains(doc.id)));
@@ -186,9 +186,9 @@ void main() {
       final pullDb = await openTestDatabase(name: 'Pull');
       final pushCollection = await pushDb.defaultCollection;
 
-      final docA = MutableDocument(null);
+      final docA = MutableDocument({});
       await pushCollection.saveDocument(docA);
-      final docB = MutableDocument(null);
+      final docB = MutableDocument({});
       await pushCollection.saveDocument(docB);
 
       final pusher = await pushDb.createTestReplicator(
@@ -220,7 +220,7 @@ void main() {
 
       final docA = MutableDocument({'channels': 'A'});
       await pushCollection.saveDocument(docA);
-      final docB = MutableDocument(null);
+      final docB = MutableDocument({});
       await pushCollection.saveDocument(docB);
 
       final pusher = await pushDb.createTestReplicator(
@@ -245,9 +245,9 @@ void main() {
       final pullDb = await openTestDatabase(name: 'Pull');
       final pushCollection = await pushDb.defaultCollection;
 
-      final docA = MutableDocument(null);
+      final docA = MutableDocument({});
       await pushCollection.saveDocument(docA);
-      final docB = MutableDocument(null);
+      final docB = MutableDocument({});
       await pushCollection.saveDocument(docB);
 
       final pusher = await pushDb.createTestReplicator(
@@ -373,7 +373,7 @@ void main() {
           final pushCollection = await pushDb.defaultCollection;
           final pullCollection = await pullDb.defaultCollection;
 
-          final doc = MutableDocument(null);
+          final doc = MutableDocument({});
           await pushCollection.saveDocument(doc);
 
           final pusher = await pushDb.createTestReplicator(
@@ -408,9 +408,9 @@ void main() {
       final pullDb = await openTestDatabase(name: 'Pull');
       final pushCollection = await pushDb.defaultCollection;
 
-      final docA = MutableDocument(null);
+      final docA = MutableDocument({});
       await pushCollection.saveDocument(docA);
-      final docB = MutableDocument(null);
+      final docB = MutableDocument({});
       await pushCollection.saveDocument(docB);
 
       final pusher = await pushDb.createTestReplicator(
@@ -542,7 +542,7 @@ void main() {
           final pushCollection = await pushDb.defaultCollection;
           final pullCollection = await pullDb.defaultCollection;
 
-          final doc = MutableDocument(null);
+          final doc = MutableDocument({});
           await pushCollection.saveDocument(doc);
 
           final pusher = await pushDb.createTestReplicator(
@@ -858,7 +858,7 @@ void main() {
         final collection = await db.defaultCollection;
         final replicator = await db.createTestReplicator();
         addTearDown(replicator.close);
-        final doc = MutableDocument(null);
+        final doc = MutableDocument({});
         await collection.saveDocument(doc);
 
         late final ListenerToken token;
@@ -904,7 +904,7 @@ void main() {
       final collection = await db.defaultCollection;
       final replicator = await db.createTestReplicator();
       addTearDown(replicator.close);
-      final doc = MutableDocument(null);
+      final doc = MutableDocument({});
       await collection.saveDocument(doc);
 
       expect(
@@ -937,7 +937,7 @@ void main() {
         final collection = await db.defaultCollection;
         final replicator = await db.createTestReplicator();
         addTearDown(replicator.close);
-        final doc = MutableDocument(null);
+        final doc = MutableDocument({});
         await collection.saveDocument(doc);
         expect(await replicator.pendingDocumentIdsInCollection(collection), [
           doc.id,
@@ -955,7 +955,7 @@ void main() {
         final collection = await db.defaultCollection;
         final replicator = await db.createTestReplicator();
         addTearDown(replicator.close);
-        final doc = MutableDocument(null);
+        final doc = MutableDocument({});
         await collection.saveDocument(doc);
         expect(
           await replicator.isDocumentPendingInCollection(doc.id, collection),
@@ -1003,7 +1003,7 @@ void main() {
       final repl = await Replicator.create(config);
       addTearDown(repl.close);
 
-      final doc = MutableDocument(null);
+      final doc = MutableDocument({});
       await collectionA.saveDocument(doc);
 
       await repl.replicateOneShot();
@@ -1035,7 +1035,7 @@ void main() {
       final repl = await db.createTestReplicator();
       addTearDown(repl.close);
 
-      final documentSave = collection.saveDocument(MutableDocument(null));
+      final documentSave = collection.saveDocument(MutableDocument({}));
       final replStart = repl.start();
 
       await documentSave;
@@ -1161,7 +1161,7 @@ class TestTypedDoc<I extends Document>
 class MutableTestTypedDoc extends TestTypedDoc<MutableDocument>
     implements TypedMutableDocumentObject<TestTypedDoc, MutableTestTypedDoc> {
   MutableTestTypedDoc([MutableDocument? document])
-    : super(document ?? MutableDocument(null));
+    : super(document ?? MutableDocument({}));
 }
 
 final testAdapter = TypedDataRegistry(

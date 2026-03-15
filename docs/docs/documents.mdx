@@ -150,7 +150,7 @@ Because we will be adding data to the document we must use its mutable form.
 
 ```dart
 // Create your new document.
-final mutableDoc = MutableDocument(null, id: 'hotel::1');
+final mutableDoc = MutableDocument(id: 'hotel::1', {});
 ```
 
 For more on using **Documents**, see:
@@ -325,7 +325,7 @@ final mutableDictionary = MutableDictionary()
   ..setString('San Francisco', key: 'city');
 
 // Add the dictionary to a document's properties and save the document.
-final mutableDocumemt = MutableDocument(null, id: 'hotel::1')
+final mutableDocumemt = MutableDocument(id: 'hotel::1', {})
   ..setDictionary(mutableDictionary, key: 'address');
 await collection.saveDocument(mutableDocumemt);
 ```
@@ -373,7 +373,7 @@ final mutableArray = MutableArray()
   ..addString('650-000-0001');
 
 // Set the array to document's properties and save the document.
-final mutableDocumemt = MutableDocument(null, id: 'hotel::1')
+final mutableDocumemt = MutableDocument(id: 'hotel::1', {})
   ..setArray(mutableArray, key: 'phones');
 await collection.saveDocument(mutableDocumemt);
 ```
@@ -401,7 +401,7 @@ if a document with a given ID already exists in the database.
 The following code example creates a document and persists it to the database.
 
 ```dart
-final document = MutableDocument(null)
+final document = MutableDocument({})
   ..setString('task', key: 'type')
   ..setString('todo', key: 'owner')
   ..setDate(DateTime.now(), key: 'createdAt');
@@ -469,7 +469,7 @@ them together. The following example persists a few documents in batch.
 ```dart
 await database.inBatch(() async {
   for (final i in Iterable.generate(10)) {
-    final document = MutableDocument(null)
+    final document = MutableDocument({})
       ..setValue('user', key: 'type')
       ..setValue('user $i' key: 'name')
       ..setBoolean(false, key: 'admin');
