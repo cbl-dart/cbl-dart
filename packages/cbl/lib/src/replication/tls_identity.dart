@@ -1308,3 +1308,7 @@ final class FfiTlsIdentity implements TlsIdentity, Finalizable {
     ')',
   ].join('');
 }
+
+extension InternalCryptoData on CryptoData {
+  Uint8List get bytes => _data;
+}
