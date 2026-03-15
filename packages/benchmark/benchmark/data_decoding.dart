@@ -12,7 +12,7 @@ import 'package:cbl/src/fleece/integration/context.dart';
 import 'package:cbl/src/fleece/integration/root.dart';
 
 abstract class DecodingBenchmark extends BenchmarkBase {
-  DecodingBenchmark(super.description);
+  DecodingBenchmark(super.name);
 
   final jsonString = loadFixtureAsString('1000people');
 }
@@ -39,7 +39,6 @@ class FleeceRecursiveDecodingBenchmark extends DecodingBenchmark {
 
   @override
   void run() {
-    // ignore: deprecated_member_use
     RecursiveFleeceDecoder(
       trust: FLTrust.trusted,
       sharedKeys: sharedKeys,

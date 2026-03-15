@@ -92,7 +92,6 @@ enum ValueType {
   undefined,
 
   /// Equivalent to a JSON 'null'.
-  // ignore: constant_identifier_names
   null_,
 
   /// A `true` or `false` value.
@@ -514,7 +513,7 @@ final class _DictKeyIterator implements Iterator<String> {
 
   final Dict dict;
 
-  late final DictIterator iterator = DictIterator(
+  late final iterator = DictIterator(
     dict.pointer.cast(),
     keyOut: globalLoadedDictKey,
   );

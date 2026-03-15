@@ -10,7 +10,7 @@ void main() {
   setupTestBinding();
 
   group('Dictionary', () {
-    test('toString', () async {
+    test('toString', () {
       final dictionary = immutableDictionary({
         'a': 'b',
         'c': ['d'],

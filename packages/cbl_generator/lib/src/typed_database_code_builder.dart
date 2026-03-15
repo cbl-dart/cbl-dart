@@ -52,10 +52,8 @@ final class TypeDataBaseCodeBuilder {
     switch (object.kind) {
       case TypedDataObjectKind.dictionary:
         _code.write('TypedDictionaryMetadata');
-        break;
       case TypedDataObjectKind.document:
         _code.write('TypedDocumentMetadata');
-        break;
     }
 
     _code

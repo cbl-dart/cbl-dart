@@ -1,15 +1,15 @@
 export 'database/collection.dart'
     show
+        AsyncCollection,
         AsyncSaveTypedDocument,
         Collection,
-        AsyncCollection,
-        SyncCollection,
+        CollectionChangeListener,
+        DocumentChangeListener,
         SaveConflictHandler,
         SaveTypedDocument,
+        SyncCollection,
         SyncSaveConflictHandler,
         SyncSaveTypedDocument,
-        DocumentChangeListener,
-        CollectionChangeListener,
         TypedSaveConflictHandler,
         TypedSyncSaveConflictHandler;
 export 'database/collection_change.dart' show CollectionChange;
@@ -23,4 +23,4 @@ export 'database/database.dart'
 export 'database/database_configuration.dart'
     show DatabaseConfiguration, EncryptionKey;
 export 'database/document_change.dart' show DocumentChange;
-export 'database/scope.dart' show Scope, AsyncScope, SyncScope;
+export 'database/scope.dart' show AsyncScope, Scope, SyncScope;

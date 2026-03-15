@@ -12,15 +12,15 @@ import 'utils/utils.dart';
 
 export 'package:test/test.dart'
     hide
-        test,
-        group,
-        setUpAll,
-        setUp,
-        tearDownAll,
-        tearDown,
         addTearDown,
+        group,
+        printOnFailure,
         registerException,
-        printOnFailure;
+        setUp,
+        setUpAll,
+        tearDown,
+        tearDownAll,
+        test;
 
 typedef TestFn =
     void Function(
@@ -153,7 +153,7 @@ abstract base class CblE2eTestBinding {
     final currentPid = await pidFile
         .readAsString()
         .then<int?>(int.parse)
-        .onError<FileSystemException>((_, __) => null);
+        .onError<FileSystemException>((_, _) => null);
 
     // Each process should only reset the tmp directory once, so isolates
     // don't delete the data written to the directory by other isolates.

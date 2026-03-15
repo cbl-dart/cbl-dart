@@ -14,7 +14,7 @@ abstract class BaseCommand extends Command<void> {
 
   bool get verbose => globalResults!['verbose'] as bool;
 
-  late final Logger logger = verbose ? Logger.verbose() : Logger.standard();
+  late final logger = verbose ? Logger.verbose() : Logger.standard();
 
   late final projectLayout = ProjectLayout(_findProjectRoot());
 
@@ -36,7 +36,7 @@ abstract class BaseCommand extends Command<void> {
 
   @override
   @mustCallSuper
-  Future run() async => doRun();
+  Future run() => doRun();
 }
 
 /// Finds the project root by walking up from the current working directory,

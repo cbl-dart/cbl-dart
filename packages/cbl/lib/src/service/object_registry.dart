@@ -1,7 +1,7 @@
 import 'dart:collection';
 
 final class ObjectRegistry {
-  int _nextId = 0;
+  var _nextId = 0;
 
   final _idToObject = HashMap<int, Object>();
   final _objectToId = HashMap<Object, int>.identity();

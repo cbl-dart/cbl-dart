@@ -1,5 +1,4 @@
-// ignore: lines_longer_than_80_chars
-// ignore_for_file: prefer_constructors_over_static_methods,prefer_void_to_null
+// ignore_for_file: prefer_void_to_null
 
 import 'dart:ffi';
 

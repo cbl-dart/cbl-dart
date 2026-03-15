@@ -89,7 +89,7 @@ class FfiListenerToken extends SyncListenerToken {
 
   @override
   void removeListener() {
-    super.removeListener();
+    unawaited(Future.value(super.removeListener()));
     _callback.close();
   }
 }
@@ -108,6 +108,7 @@ class ProxyListenerToken<T> extends AsyncListenerToken {
 
   final int listenerId;
 
+  // ignore: unsafe_variance
   final void Function(T) listenerFn;
 
   void callListener(T event) {
@@ -121,7 +122,7 @@ class ProxyListenerToken<T> extends AsyncListenerToken {
 
   @override
   Future<void> removeListener() {
-    super.removeListener();
+    unawaited(Future.value(super.removeListener()));
     return client.channel
         .call(
           RemoveChangeListener(

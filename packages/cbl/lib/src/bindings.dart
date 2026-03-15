@@ -1,14 +1,14 @@
 export 'bindings/async_callback.dart';
 export 'bindings/base.dart'
     hide
-        OptionIterable,
         CBLErrorExt,
         CheckErrorFLSliceResultExt,
         CheckErrorIntExt,
         CheckErrorPointerExt,
+        IntErrorCodeExt,
+        OptionIterable,
         checkError,
-        throwError,
-        IntErrorCodeExt;
+        throwError;
 export 'bindings/blob.dart';
 export 'bindings/collection.dart';
 export 'bindings/data.dart';
@@ -17,11 +17,11 @@ export 'bindings/document.dart';
 export 'bindings/fleece.dart' hide FLResultSliceExt, FLStringResultExt;
 export 'bindings/global.dart'
     show
-        globalLoadedDictKey,
-        globalLoadedFLValue,
         globalFLSlice,
+        globalFLSliceResult,
         globalFLString,
-        globalFLSliceResult;
+        globalLoadedDictKey,
+        globalLoadedFLValue;
 export 'bindings/libraries.dart';
 export 'bindings/logging.dart';
 export 'bindings/native_utf8_string.dart'
@@ -30,12 +30,12 @@ export 'bindings/query.dart';
 export 'bindings/replicator.dart';
 export 'bindings/slice.dart'
     hide
-        cachedSliceResultAllocator,
-        sliceResultAllocator,
         SingleSliceResultAllocator,
-        SliceResultAllocator;
+        SliceResultAllocator,
+        cachedSliceResultAllocator,
+        sliceResultAllocator;
 export 'bindings/tls_identity.dart';
 export 'bindings/tracing.dart'
-    show cblIncludeTracePoints, TracedNativeCall, TracedCallHandler;
+    show TracedCallHandler, TracedNativeCall, cblIncludeTracePoints;
 export 'bindings/url_endpoint_listener.dart';
 export 'bindings/utils.dart' show cblReachabilityFence;

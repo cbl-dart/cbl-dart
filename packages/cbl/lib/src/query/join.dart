@@ -80,13 +80,10 @@ final class JoinImpl implements JoinInterface {
     switch (_type) {
       case null:
         join = 'CROSS';
-        break;
       case JoinType.leftOuter:
         join = 'LEFT OUTER';
-        break;
       case JoinType.inner:
         join = 'INNER';
-        break;
     }
 
     return {

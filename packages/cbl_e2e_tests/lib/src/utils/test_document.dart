@@ -1,5 +1,5 @@
 /// This file contains helpers for testing with a single simple document.
-library test_document;
+library;
 
 import 'package:cbl/cbl.dart';
 

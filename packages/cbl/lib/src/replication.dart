@@ -2,16 +2,16 @@ export 'replication/authenticator.dart'
     show
         Authenticator,
         BasicAuthenticator,
-        SessionAuthenticator,
-        ClientCertificateAuthenticator;
+        ClientCertificateAuthenticator,
+        SessionAuthenticator;
 export 'replication/configuration.dart'
     show
-        ReplicatorConfiguration,
+        CollectionConfiguration,
         DocumentFlag,
-        ReplicatorType,
         ReplicationFilter,
-        TypedReplicationFilter,
-        CollectionConfiguration;
+        ReplicatorConfiguration,
+        ReplicatorType,
+        TypedReplicationFilter;
 export 'replication/conflict.dart' show Conflict, TypedConflict;
 export 'replication/conflict_resolver.dart'
     show
@@ -21,36 +21,36 @@ export 'replication/conflict_resolver.dart'
         TypedConflictResolverFunction;
 export 'replication/document_replication.dart'
     show DocumentReplication, ReplicatedDocument;
-export 'replication/endpoint.dart' show Endpoint, UrlEndpoint, DatabaseEndpoint;
+export 'replication/endpoint.dart' show DatabaseEndpoint, Endpoint, UrlEndpoint;
 export 'replication/replicator.dart'
     show
+        AsyncReplicator,
         Replicator,
-        ReplicatorProgress,
         ReplicatorActivityLevel,
+        ReplicatorProgress,
         ReplicatorStatus,
-        SyncReplicator,
-        AsyncReplicator;
+        SyncReplicator;
 export 'replication/replicator_change.dart' show ReplicatorChange;
 export 'replication/tls_identity.dart'
     show
-        CertificateAttributes,
-        TlsIdentity,
         Certificate,
+        CertificateAttributes,
+        CryptoData,
+        DerData,
+        ExternalKeyPairDelegate,
         KeyPair,
         KeyUsage,
-        SignatureDigestAlgorithm,
         OID,
-        CryptoData,
         PemData,
-        DerData,
-        ExternalKeyPairDelegate;
+        SignatureDigestAlgorithm,
+        TlsIdentity;
 export 'replication/url_endpoint_listener.dart'
     show
-        ListenerAuthenticator,
-        ListenerPasswordAuthenticator,
-        ListenerCertificateAuthenticatorFunction,
-        ListenerPasswordAuthenticatorFunction,
-        ListenerCertificateAuthenticator,
-        UrlEndpointListenerConfiguration,
         ConnectionStatus,
-        UrlEndpointListener;
+        ListenerAuthenticator,
+        ListenerCertificateAuthenticator,
+        ListenerCertificateAuthenticatorFunction,
+        ListenerPasswordAuthenticator,
+        ListenerPasswordAuthenticatorFunction,
+        UrlEndpointListener,
+        UrlEndpointListenerConfiguration;

@@ -104,7 +104,7 @@ final class EncryptionKeyImpl implements EncryptionKey {
     return EncryptionKeyImpl(key);
   }
 
-  static Future<EncryptionKeyImpl> passwordAsync(String password) async {
+  static Future<EncryptionKeyImpl> passwordAsync(String password) {
     useEnterpriseFeature(EnterpriseFeature.databaseEncryption);
     return CblWorker.executeCall(
       EncryptionKeyFromPassword(password),

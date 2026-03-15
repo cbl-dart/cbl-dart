@@ -21,16 +21,16 @@ final class NativeUtf8String {
 // coverage:ignore-start
 
 // UTF-8 constants.
-const int _oneByteLimit = 0x7f; // 7 bits
-const int _twoByteLimit = 0x7ff; // 11 bits
-const int _threeByteLimit = 0xffff; // 16 bits
-const int _fourByteLimit = 0x10ffff; // 21 bits, truncated to Unicode max.
+const _oneByteLimit = 0x7f; // 7 bits
+const _twoByteLimit = 0x7ff; // 11 bits
+const _threeByteLimit = 0xffff; // 16 bits
+const _fourByteLimit = 0x10ffff; // 21 bits, truncated to Unicode max.
 
 // UTF-16 constants.
-const int _surrogateTagMask = 0xFC00;
-const int _surrogateValueMask = 0x3FF;
-const int _leadSurrogateMin = 0xD800;
-const int _tailSurrogateMin = 0xDC00;
+const _surrogateTagMask = 0xFC00;
+const _surrogateValueMask = 0x3FF;
+const _leadSurrogateMin = 0xD800;
+const _tailSurrogateMin = 0xDC00;
 
 bool _isLeadSurrogate(int codeUnit) =>
     (codeUnit & _surrogateTagMask) == _leadSurrogateMin;
@@ -121,7 +121,7 @@ final class NativeUtf8StringEncoder {
 final class _Utf8Encoder {
   _Utf8Encoder(this._buffer);
 
-  int _bufferIndex = 0;
+  var _bufferIndex = 0;
   final Uint8List _buffer;
 
   /// Write a replacement character (U+FFFD). Used for unpaired surrogates.

@@ -10,7 +10,7 @@ void main() {
   setupTestBinding();
 
   group('Array', () {
-    test('toString', () async {
+    test('toString', () {
       final array = immutableArray([
         'a',
         {'b': 'c'},

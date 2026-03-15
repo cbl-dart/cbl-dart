@@ -3,7 +3,7 @@ import 'dart:ffi';
 
 import '../bindings.dart';
 import '../bindings/cblite.dart' hide CBLLogDomain, CBLLogLevel;
-import '../bindings/cblitedart.dart' hide FLSlice, CBLCert, CBLCollection;
+import '../bindings/cblitedart.dart' hide CBLCert, CBLCollection, FLSlice;
 import '../database.dart';
 import '../database/ffi_database.dart';
 import '../database/proxy_database.dart';
@@ -41,7 +41,7 @@ final class FfiListenAuthenticator
   final Pointer<CBLListenerAuthenticator> pointer;
   final NativeCallable? _callable;
 
-  int _activeListeners = 0;
+  var _activeListeners = 0;
 
   void _onListenerStarted() {
     _activeListeners++;
@@ -104,7 +104,6 @@ final class _ListenerPasswordAuthenticator extends FfiListenAuthenticator
           username.toDartString()!,
           password.toDartString()!,
         );
-        // ignore: avoid_catches_without_on_clauses
       } catch (error, stackTrace) {
         LoggingBindings.logMessage(
           CBLLogDomain.listener,
@@ -192,7 +191,6 @@ final class _ListenerCertificateAuthenticator extends FfiListenAuthenticator
 
       try {
         result = await handler(FfiCertificate.fromPointer(certificate));
-        // ignore: avoid_catches_without_on_clauses
       } catch (error, stackTrace) {
         LoggingBindings.logMessage(
           CBLLogDomain.listener,
@@ -500,7 +498,7 @@ final class FfiUrlEndpointListener implements UrlEndpointListener, Finalizable {
     required Pointer<CBLListenerAuthenticator>? authenticatorPointer,
     required bool enableDeltaSync,
     required bool readOnly,
-  }) async => runInSecondaryIsolate(
+  }) => runInSecondaryIsolate(
     () => UrlEndpointListenerBindings.create(
       collections: collections,
       port: port,

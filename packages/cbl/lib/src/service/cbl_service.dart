@@ -237,7 +237,7 @@ void Function(T) _bindListenerToZone<T>(void Function(T) fn) {
       // Errors in listeners should just be unhandled errors, in the zone
       // the listener was created in, which is what `_bindCallbackToZone`
       // already does.
-      .onError((_, __) {});
+      .onError((_, _) {});
 }
 
 final class CblService {
@@ -549,10 +549,12 @@ final class CblService {
   void _addCollectionChangeListener(AddCollectionChangeListener request) {
     _listenerIdsToTokens[request.listenerId] =
         _getCollectionById(request.collectionId).addChangeListener((change) {
-          channel.call(
-            CallCollectionChangeListener(
-              listenerId: request.listenerId,
-              documentIds: change.documentIds,
+          unawaited(
+            channel.call(
+              CallCollectionChangeListener(
+                listenerId: request.listenerId,
+                documentIds: change.documentIds,
+              ),
             ),
           );
         });
@@ -563,8 +565,10 @@ final class CblService {
         _getCollectionById(request.collectionId).addDocumentChangeListener(
           request.documentId,
           (_) {
-            channel.call(
-              CallDocumentChangeListener(listenerId: request.listenerId),
+            unawaited(
+              channel.call(
+                CallDocumentChangeListener(listenerId: request.listenerId),
+              ),
             );
           },
         );
@@ -629,10 +633,12 @@ final class CblService {
   void _addQueryChangeListener(AddQueryChangeListener request) {
     _listenerIdsToTokens[request.listenerId] = _getQueryById(request.queryId)
         .addChangeListener((resultSetId) {
-          channel.call(
-            CallQueryChangeListener(
-              listenerId: request.listenerId,
-              resultSetId: resultSetId,
+          unawaited(
+            channel.call(
+              CallQueryChangeListener(
+                listenerId: request.listenerId,
+                resultSetId: resultSetId,
+              ),
             ),
           );
         });
@@ -742,10 +748,12 @@ final class CblService {
   void _addReplicatorChangeListener(AddReplicatorChangeListener request) {
     _listenerIdsToTokens[request.listenerId] =
         _getReplicatorById(request.replicatorId).addChangeListener((change) {
-          channel.call(
-            CallReplicatorChangeListener(
-              listenerId: request.listenerId,
-              status: change.status,
+          unawaited(
+            channel.call(
+              CallReplicatorChangeListener(
+                listenerId: request.listenerId,
+                status: change.status,
+              ),
             ),
           );
         });
@@ -757,12 +765,14 @@ final class CblService {
     _listenerIdsToTokens[request.listenerId] =
         _getReplicatorById(request.replicatorId).addDocumentReplicationListener(
           (change) {
-            channel.call(
-              CallDocumentReplicationListener(
-                listenerId: request.listenerId,
-                event: DocumentReplicationEvent(
-                  isPush: change.isPush,
-                  documents: change.documents,
+            unawaited(
+              channel.call(
+                CallDocumentReplicationListener(
+                  listenerId: request.listenerId,
+                  event: DocumentReplicationEvent(
+                    isPush: change.isPush,
+                    documents: change.documents,
+                  ),
                 ),
               ),
             );
@@ -906,7 +916,7 @@ final class _Query {
 
   final FfiQuery query;
 
-  int _nextResultSetId = 0;
+  var _nextResultSetId = 0;
   final _resultSets = <int, ResultSet>{};
 
   int execute() => _storeResultSet(query.execute());

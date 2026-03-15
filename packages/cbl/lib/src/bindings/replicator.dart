@@ -10,7 +10,7 @@ import 'data.dart';
 import 'global.dart';
 import 'utils.dart';
 
-export 'cblite.dart' show CBLReplicator, CBLEndpoint, CBLAuthenticator;
+export 'cblite.dart' show CBLAuthenticator, CBLEndpoint, CBLReplicator;
 
 // === ReplicatorConfiguration =================================================
 

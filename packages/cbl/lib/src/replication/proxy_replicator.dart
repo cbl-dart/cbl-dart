@@ -122,9 +122,7 @@ final class ProxyReplicator extends ProxyObject
         config: config,
         unregisterCallbacks: unregisterCallbacks,
       );
-    }
-    // ignore: avoid_catches_without_on_clauses
-    catch (e) {
+    } catch (e) {
       unregisterCallbacks();
       rethrow;
     }
@@ -143,7 +141,7 @@ final class ProxyReplicator extends ProxyObject
       use(() => channel.call(GetReplicatorStatus(replicatorId: objectId)));
 
   @override
-  Future<Certificate?> get serverCertificate async => use(() async {
+  Future<Certificate?> get serverCertificate => use(() async {
     final response = await channel.call(
       GetReplicatorServerCertificate(replicatorId: objectId),
     );
@@ -151,7 +149,6 @@ final class ProxyReplicator extends ProxyObject
   });
 
   @override
-  // ignore: prefer_expression_function_bodies
   Future<void> start({bool reset = false}) => use(() {
     if (_database.ownsCurrentTransaction) {
       throw DatabaseException(

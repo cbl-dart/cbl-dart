@@ -110,9 +110,9 @@ void main() {
 
     test('contains', () {
       final result = testResult(['a'], [true]);
-      // ignore: iterable_contains_unrelated_type
+      // ignore: collection_methods_unrelated_type
       expect(result.contains(0), isTrue);
-      // ignore: iterable_contains_unrelated_type
+      // ignore: collection_methods_unrelated_type
       expect(result.contains(1), isFalse);
       expect(result.contains('a'), isTrue);
       expect(result.contains('b'), isFalse);

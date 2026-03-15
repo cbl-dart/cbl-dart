@@ -20,7 +20,6 @@ void main() {
         change.toString(),
         'ReplicatorChange('
         'replicator: _Replicator(), '
-        // ignore: missing_whitespace_between_adjacent_strings
         'status: $status'
         ')',
       );

@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'package:cbl/cbl.dart';
 
 Future<void> main() async {

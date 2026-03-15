@@ -55,21 +55,21 @@ final class CblWorker {
           currentTracingDelegate.captureTracingContext(),
     );
 
-    _worker =
-        IsolateWorker(
-            debugName: 'CblWorker($debugName)',
-            delegate: _ServiceWorkerDelegate(
-              context: IsolateContext.instance.forSecondaryIsolate(),
-              channel: receivePort.sendPort,
-            ),
-          )
-          // ignore: unawaited_futures, void_checks
-          ..onError.onError<Object>((error, stackTrace) {
-            _status = _WorkerStatus.crashed;
-            _channel.close(error, stackTrace);
-            // ignore: only_throw_errors
-            throw error;
-          });
+    _worker = IsolateWorker(
+      debugName: 'CblWorker($debugName)',
+      delegate: _ServiceWorkerDelegate(
+        context: IsolateContext.instance.forSecondaryIsolate(),
+        channel: receivePort.sendPort,
+      ),
+    );
+    unawaited(
+      _worker.onError.onError<Object>((error, stackTrace) {
+        _status = _WorkerStatus.crashed;
+        unawaited(_channel.close(error, stackTrace));
+        // ignore: only_throw_errors
+        throw error;
+      }),
+    );
 
     await _worker.start();
     _status = _WorkerStatus.running;

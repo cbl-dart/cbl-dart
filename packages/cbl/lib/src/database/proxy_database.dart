@@ -524,7 +524,7 @@ final class ProxyCollection extends ProxyObject
   Future<bool> deleteTypedDocument(
     TypedDocumentObject document, [
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
-  ]) async {
+  ]) {
     database.useWithTypedData();
     return deleteDocument(
       document.internal as DelegateDocument,
@@ -670,7 +670,7 @@ final class ProxyCollection extends ProxyObject
   }
 
   @override
-  Future<void> removeChangeListener(ListenerToken token) async =>
+  Future<void> removeChangeListener(ListenerToken token) =>
       use(() => _listenerTokens.remove(token));
 
   @override

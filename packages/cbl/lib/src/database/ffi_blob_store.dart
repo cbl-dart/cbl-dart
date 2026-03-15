@@ -116,7 +116,6 @@ Future<_FfiBlob> _createBlobFromStream(
       BlobWriteStreamBindings.createBlobWithStream(contentType, writeStream),
       adopt: true,
     );
-    // ignore: avoid_catches_without_on_clauses
   } catch (e) {
     BlobWriteStreamBindings.close(writeStream);
     rethrow;
@@ -159,7 +158,7 @@ final class _BlobReadStream extends Stream<Data> implements Finalizable {
 
         // The read stream is done (EOF).
         if (buffer == null) {
-          _controller.close();
+          unawaited(_controller.close());
           break;
         }
 
@@ -167,9 +166,8 @@ final class _BlobReadStream extends Stream<Data> implements Finalizable {
       }
       // ignore: avoid_catches_without_on_clauses
     } catch (error, stackTrace) {
-      _controller
-        ..addError(error, stackTrace)
-        ..close();
+      _controller.addError(error, stackTrace);
+      unawaited(_controller.close());
     }
   }
 

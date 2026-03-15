@@ -98,23 +98,20 @@ void main() {
   });
 
   group('ListenerStream', () {
-    test(
-      'resolves listening future when addListener future resolves',
-      () async {
-        final addListenerCompleter = Completer<AbstractListenerToken>();
-        final stream = ListenerStream(
-          parent: TestResource(),
-          addListener: (_) => addListenerCompleter.future,
-        );
+    test('resolves listening future when addListener future resolves', () {
+      final addListenerCompleter = Completer<AbstractListenerToken>();
+      final stream = ListenerStream(
+        parent: TestResource(),
+        addListener: (_) => addListenerCompleter.future,
+      );
 
-        expect(stream.listening, completes);
+      expect(stream.listening, completes);
 
-        stream.listen(null);
-        addListenerCompleter.complete(TestToken());
-      },
-    );
+      stream.listen(null);
+      addListenerCompleter.complete(TestToken());
+    });
 
-    test('closes down stream when addListener future rejects', () async {
+    test('closes down stream when addListener future rejects', () {
       final addListenerCompleter = Completer<AbstractListenerToken>();
       final stream = ListenerStream(
         parent: TestResource(),
@@ -130,7 +127,7 @@ void main() {
       addListenerCompleter.completeError(StateError(''));
     });
 
-    test('emits event when listener is called', () async {
+    test('emits event when listener is called', () {
       late void Function(String) listener;
       final addListenerCompleter = Completer<AbstractListenerToken>();
       final stream = ListenerStream<String>(
@@ -162,7 +159,7 @@ void main() {
 
       addListenerCompleter.complete(TestToken());
 
-      sub.cancel();
+      unawaited(sub.cancel());
 
       listener('A');
     });
@@ -186,19 +183,19 @@ void main() {
   });
 
   group('RepeatableStream', () {
-    test('sends events to parallel subscribers', () async {
+    test('sends events to parallel subscribers', () {
       final stream = RepeatableStream(Stream.value('A'));
       expect(stream, emitsInOrder(<Object>['A', emitsDone]));
       expect(stream, emitsInOrder(<Object>['A', emitsDone]));
     });
 
-    test('replay error to parallel subscribers', () async {
+    test('replay error to parallel subscribers', () {
       final stream = RepeatableStream(Stream<void>.error('A'));
       expect(stream, emitsInOrder(<Object>[emitsError('A'), emitsDone]));
       expect(stream, emitsInOrder(<Object>[emitsError('A'), emitsDone]));
     });
 
-    test('replay done to parallel subscriber', () async {
+    test('replay done to parallel subscriber', () {
       final stream = RepeatableStream(const Stream<void>.empty());
       expect(stream, emitsInOrder(<Object>[emitsDone]));
       expect(stream, emitsInOrder(<Object>[emitsDone]));

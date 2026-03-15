@@ -27,7 +27,7 @@ enum VectorSearchStatus {
 
 /// Manage Couchbase Lite extensions.
 abstract final class Extension {
-  static bool _vectorSearchEnabled = false;
+  static var _vectorSearchEnabled = false;
 
   /// Returns the [VectorSearchStatus] of the vector search extension.
   ///

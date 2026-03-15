@@ -242,7 +242,7 @@ final class ReplicatorConfiguration {
   /// using this mode with non-self-signed certificates in production.
   bool get acceptOnlySelfSignedServerCertificate =>
       _acceptOnlySelfSignedServerCertificate;
-  bool _acceptOnlySelfSignedServerCertificate = false;
+  var _acceptOnlySelfSignedServerCertificate = false;
 
   set acceptOnlySelfSignedServerCertificate(bool value) {
     if (value) {

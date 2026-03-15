@@ -9,7 +9,7 @@ import 'package:cbl/src/fleece/encoder.dart';
 import 'package:cbl/src/fleece/integration/integration.dart';
 
 abstract class EncodingBenchmark extends BenchmarkBase {
-  EncodingBenchmark(super.description);
+  EncodingBenchmark(super.name);
 
   final jsonValue = loadFixtureAsJson('1000people')! as List<Object?>;
 }

@@ -338,7 +338,7 @@ final class TypedDataAnalyzer {
     ClassElement clazz,
     TypedDataObjectKind kind,
     LibraryElement cblLibrary,
-  ) async => Future.wait(
+  ) => Future.wait(
     clazz.unnamedConstructor!.formalParameters.map((parameter) async {
       final annotations = parameter.metadata.annotations
           .map((annotation) => annotation.computeConstantValue())

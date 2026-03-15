@@ -62,7 +62,6 @@ abstract interface class ExpressionInterface {
 
   /// Returns a new expression which evaluates whether this expression `IS`
   /// equal to given [expression].
-  // ignore: non_constant_identifier_names
   ExpressionInterface is_(ExpressionInterface expression);
 
   /// Returns a new expression which evaluates whether this expression `IS NOT`
@@ -94,7 +93,6 @@ abstract interface class ExpressionInterface {
 
   /// Returns a new expression which evaluates to whether this expression is in
   /// the given [expressions].
-  // ignore: non_constant_identifier_names
   ExpressionInterface in_(Iterable<ExpressionInterface> expressions);
 
   /// Returns a new expression which applies the given [collation] to this
@@ -122,8 +120,8 @@ abstract final class Expression {
   /// Creates a literal value expression.
   ///
   /// The supported value types are [String], [num], [int], [double], [bool],
-  /// [DateTime], [Map] (Map<String, Object?>) and [Iterable]
-  /// (Iterable<String?>).
+  /// [DateTime], [Map] (`Map<String, Object?>`) and [Iterable]
+  /// (`Iterable<String?>`).
   static ExpressionInterface value(Object? value) => ValueExpression(value);
 
   /// Creates a literal [String] expression.
@@ -224,7 +222,6 @@ abstract base class ExpressionImpl implements ExpressionInterface {
       BinaryExpression('regexp_like()', this, expression);
 
   @override
-  // ignore: non_constant_identifier_names
   ExpressionInterface is_(ExpressionInterface expression) =>
       BinaryExpression('IS', this, expression);
 
@@ -254,7 +251,6 @@ abstract base class ExpressionImpl implements ExpressionInterface {
   }) => TernaryExpression('BETWEEN', this, expression, and);
 
   @override
-  // ignore: non_constant_identifier_names
   ExpressionInterface in_(Iterable<ExpressionInterface> expressions) =>
       BinaryExpression('IN', this, Expression.value(expressions));
 
@@ -401,7 +397,6 @@ final class RangePredicateExpression extends ExpressionImpl {
   RangePredicateExpression(
     Quantifier quantifier,
     VariableExpressionInterface variable,
-    // ignore: non_constant_identifier_names
     ExpressionInterface in_,
     ExpressionInterface satisfies,
   ) : _quantifier = quantifier,
@@ -420,13 +415,10 @@ final class RangePredicateExpression extends ExpressionImpl {
     switch (_quantifier) {
       case Quantifier.any:
         operator = 'ANY';
-        break;
       case Quantifier.every:
         operator = 'EVERY';
-        break;
       case Quantifier.anyAndEvery:
         operator = 'ANY AND EVERY';
-        break;
     }
     return [
       operator,

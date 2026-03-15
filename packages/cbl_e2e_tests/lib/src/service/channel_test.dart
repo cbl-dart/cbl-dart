@@ -1,5 +1,4 @@
-// ignore: lines_longer_than_80_chars
-// ignore_for_file: avoid_types_on_closure_parameters,prefer_constructors_over_static_methods,prefer_void_to_null
+// ignore_for_file: avoid_types_on_closure_parameters,prefer_void_to_null
 
 import 'dart:async';
 import 'dart:isolate';
@@ -219,7 +218,7 @@ class TestIsolateConfig {
 }
 
 void testIsolateMain(TestIsolateConfig config) {
-  initSecondaryIsolate(config.context);
+  unawaited(initSecondaryIsolate(config.context));
 
   final remote = Channel(
     transport: IsolateChannel.connectSend(config.sendPort!),

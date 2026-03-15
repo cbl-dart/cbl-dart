@@ -121,7 +121,6 @@ abstract final class Blob {
 
 // The semantics of a Blob are that it is immutable but the implementation is
 // not.
-// ignore: must_be_immutable
 final class BlobImpl implements Blob, FleeceEncodable, CblConversions {
   BlobImpl.fromData(String contentType, Uint8List data)
     : _contentType = contentType,

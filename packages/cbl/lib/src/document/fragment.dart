@@ -155,7 +155,7 @@ final class FragmentImpl implements Fragment {
   static final Fragment _emptyInstance = FragmentImpl._empty();
 
   Object? _parent;
-  int _index = 0;
+  var _index = 0;
   String? _key;
 
   @override

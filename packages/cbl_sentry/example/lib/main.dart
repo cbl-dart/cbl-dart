@@ -73,7 +73,6 @@ Future<T> runAppOperation<T>(String name, Future<T> Function() fn) =>
 Future<T> _runAppSpan<T>(ISentrySpan span, Future<T> Function() fn) async {
   try {
     return await runWithCblSentrySpan(span, fn);
-    // ignore: avoid_catches_without_on_clauses
   } catch (e) {
     span
       ..throwable = e
