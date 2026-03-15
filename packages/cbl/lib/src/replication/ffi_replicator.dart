@@ -144,8 +144,8 @@ final class FfiReplicator
       headers: headersDict?.pointer.cast(),
       acceptOnlySelfSignedServerCertificate:
           config.acceptOnlySelfSignedServerCertificate,
-      pinnedServerCertificate: config.pinnedServerCertificate?.toData(),
-      trustedRootCertificates: config.trustedRootCertificates?.toData(),
+      pinnedServerCertificate: config.pinnedServerCertificate?.bytes.toData(),
+      trustedRootCertificates: config.trustedRootCertificates?.bytes.toData(),
       collections: replicationCollections,
       disableAutoPurge: !config.enableAutoPurge,
       acceptParentDomainCookies: config.acceptParentDomainCookies,

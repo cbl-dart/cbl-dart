@@ -25,7 +25,7 @@ workspace:
 dev_dependencies:
   cbd:
     path: tool
-  daco: ^0.5.0
+  daco: ^0.5.1
   melos: ^7.4.0
   path: ^1.9.1
 

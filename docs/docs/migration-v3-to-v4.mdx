@@ -146,6 +146,28 @@ hooks:
 Vector search requires the Enterprise edition and is supported on ARM64 and
 x86-64.
 
+## `pinnedServerCertificate` and `trustedRootCertificates` type changes
+
+The `pinnedServerCertificate` and `trustedRootCertificates` fields on
+`api|ReplicatorConfiguration` have changed types from `Uint8List?` to
+`api|CryptoData?` and `api|PemData?` respectively.
+
+```dart
+// Before (v3)
+final config = ReplicatorConfiguration(
+  target: urlEndpoint,
+  pinnedServerCertificate: certBytes, // Uint8List
+  trustedRootCertificates: pemBytes, // Uint8List
+);
+
+// After (v4)
+final config = ReplicatorConfiguration(
+  target: urlEndpoint,
+  pinnedServerCertificate: DerData(certBytes), // or PemData(certString)
+  trustedRootCertificates: PemData(pemString),
+);
+```
+
 ## `LogFileConfiguration.maxRotateCount` renamed to `maxKeptFiles`
 
 The `maxRotateCount` property on `api|LogFileConfiguration` has been renamed to
@@ -204,8 +226,9 @@ implementation and handle them explicitly.
 
 ## Conflict handling in `saveDocument` and `deleteDocument`
 
-In v3, `api|Collection.saveDocument` and `api|Collection.deleteDocument` returned
-`false` when a conflict occurred with `api|enum:ConcurrencyControl.failOnConflict`.
+In v3, `api|Collection.saveDocument` and `api|Collection.deleteDocument`
+returned `false` when a conflict occurred with
+`api|enum:ConcurrencyControl.failOnConflict`.
 
 In v4, these methods return `void` and throw a `api|DatabaseException` with
 `api|enum:DatabaseErrorCode.conflict` instead. This aligns with other Couchbase
@@ -431,26 +454,29 @@ No manual steps are required.
    - Replace `CouchbaseLiteDart.init(...)` with `api|CouchbaseLite.init`.
 7. **Enable vector search** (if needed) via `pubspec.yaml` config and an
    explicit call to `api|Extension.enableVectorSearch`.
-8. **Rename `maxRotateCount`** to `maxKeptFiles` in any `LogFileConfiguration`
+8. **Update certificate fields** on `ReplicatorConfiguration` -- wrap
+   `pinnedServerCertificate` bytes with `DerData` or `PemData`, and
+   `trustedRootCertificates` bytes with `PemData`.
+9. **Rename `maxRotateCount`** to `maxKeptFiles` in any `LogFileConfiguration`
    usage.
-9. **Update query result checks** that compare boolean expressions against `1`
-   or `0` -- they now return `true`/`false`.
-10. **Remove hardcoded revision IDs** -- revision IDs are no longer
+10. **Update query result checks** that compare boolean expressions against `1`
+    or `0` -- they now return `true`/`false`.
+11. **Remove hardcoded revision IDs** -- revision IDs are no longer
     deterministic.
-11. **Update conflict handling** -- `saveDocument` and `deleteDocument` with
+12. **Update conflict handling** -- `saveDocument` and `deleteDocument` with
     `failOnConflict` now throw `DatabaseException` instead of returning `false`.
-12. **Migrate Database document/index/listener APIs** to use `defaultCollection`
+13. **Migrate Database document/index/listener APIs** to use `defaultCollection`
     methods instead.
-13. **Migrate ReplicatorConfiguration** -- replace `database` parameter with
+14. **Migrate ReplicatorConfiguration** -- replace `database` parameter with
     `addCollection`, move `channels`/`documentIds`/filters/resolvers into
     `CollectionConfiguration`.
-14. **Migrate Replicator pending document APIs** -- replace
+15. **Migrate Replicator pending document APIs** -- replace
     `pendingDocumentIds`/`isDocumentPending` with
     `pendingDocumentIdsInCollection`/`isDocumentPendingInCollection`.
-15. **Replace `DataSource.database(db)`** with
+16. **Replace `DataSource.database(db)`** with
     `DataSource.collection(collection)`.
-16. **Replace `InvalidJsonException`** with `FleeceException`.
-17. **Remove `TracingDelegate` usage** -- the tracing API has been removed from
+17. **Replace `InvalidJsonException`** with `FleeceException`.
+18. **Remove `TracingDelegate` usage** -- the tracing API has been removed from
     the public API.
-18. **Run your app** -- native libraries will be built automatically on first
+19. **Run your app** -- native libraries will be built automatically on first
     run.
