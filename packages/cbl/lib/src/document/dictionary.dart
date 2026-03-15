@@ -297,7 +297,7 @@ final class DictionaryImpl
 
 final class MutableDictionaryImpl extends DictionaryImpl
     implements MutableDictionary {
-  MutableDictionaryImpl(super.dictionary);
+  MutableDictionaryImpl(super._dict);
 
   @override
   void setValue(Object? value, {required String key}) {

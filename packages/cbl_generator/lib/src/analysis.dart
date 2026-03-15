@@ -24,6 +24,7 @@ final class _ClassHasRedirectingUnnamedConstructorVisitor
 
   final String targetConstructor;
 
+  // ignore: omit_obvious_property_types
   bool hasRedirectingConstructor = false;
 
   @override
@@ -48,6 +49,7 @@ final class _ClassHasMixinVisitor extends RecursiveAstVisitor<void> {
 
   final String mixinName;
 
+  // ignore: omit_obvious_property_types
   bool hasMixin = false;
 
   @override

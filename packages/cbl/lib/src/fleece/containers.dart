@@ -92,7 +92,6 @@ enum ValueType {
   undefined,
 
   /// Equivalent to a JSON 'null'.
-  // ignore: constant_identifier_names
   null_,
 
   /// A `true` or `false` value.

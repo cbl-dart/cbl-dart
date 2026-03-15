@@ -18,13 +18,11 @@ final class QueryBuilder {
   /// {@template cbl.QueryBuilder.createAsync}
   /// Creates an [AsyncQueryBuilder] for building [AsyncQuery]s.
   /// {@endtemplate}
-  // ignore: prefer_constructors_over_static_methods
   static AsyncQueryBuilder createAsync() => const AsyncQueryBuilder();
 
   /// {@template cbl.QueryBuilder.createSync}
   /// Creates a [SyncQueryBuilder] for building [SyncQuery]s.
   /// {@endtemplate}
-  // ignore: prefer_constructors_over_static_methods
   static SyncQueryBuilder createSync() => const SyncQueryBuilder();
 
   /// Starts a new query and defines the selected columns.

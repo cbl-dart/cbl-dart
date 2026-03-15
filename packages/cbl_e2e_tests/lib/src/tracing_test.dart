@@ -111,6 +111,7 @@ void main() {
 }
 
 final class TestDelegate extends TracingDelegate {
+  // ignore: omit_obvious_property_types
   TestWorkerDelegate workerDelegate = TestWorkerDelegate();
 
   @override

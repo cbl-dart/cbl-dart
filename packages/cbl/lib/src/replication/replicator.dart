@@ -139,7 +139,6 @@ abstract interface class Replicator implements ClosableResource {
   /// Creates a replicator for replicating [Document]s between a local
   /// [SyncDatabase] and a target database.
   /// {@endtemplate}
-  // ignore: prefer_constructors_over_static_methods
   static Future<SyncReplicator> createSync(ReplicatorConfiguration config) =>
       SyncReplicator.create(config);
 
