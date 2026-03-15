@@ -3,6 +3,38 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2026-03-15
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - [`cbl` - `v4.0.0-dev.2`](#cbl---v400-dev2)
+ - [`cbl_sentry` - `v3.0.0-dev.2`](#cbl_sentry---v300-dev2)
+
+Packages with other changes:
+
+ - [`cbl_generator` - `v0.4.0-dev.2`](#cbl_generator---v040-dev2)
+
+Packages with dependency updates only:
+
+> Packages listed below depend on other packages in this workspace that have had changes. Their versions have been incremented to bump the minimum dependency versions of the packages they depend upon in this project.
+
+ - `cbl_generator` - `v0.4.0-dev.2`
+
+---
+
+#### `cbl` - `v4.0.0-dev.2`
+
+ - **BREAKING** **FEAT**(cbl): make instrumentation API private ([#896](https://github.com/cbl-dart/cbl-dart/issues/896)). ([63b64592](https://github.com/cbl-dart/cbl-dart/commit/63b64592cd20ef2d3ac806e9b3cada7ae55c5a52))
+
+#### `cbl_sentry` - `v3.0.0-dev.2`
+
+ - **BREAKING** **FEAT**(cbl): make instrumentation API private ([#896](https://github.com/cbl-dart/cbl-dart/issues/896)). ([63b64592](https://github.com/cbl-dart/cbl-dart/commit/63b64592cd20ef2d3ac806e9b3cada7ae55c5a52))
+
+
 ## 2026-03-14
 
 ### Changes

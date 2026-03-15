@@ -1,3 +1,9 @@
+## 3.0.0-dev.2
+
+> Note: This release has breaking changes.
+
+ - **BREAKING** **FEAT**(cbl): make instrumentation API private ([#896](https://github.com/cbl-dart/cbl-dart/issues/896)). ([63b64592](https://github.com/cbl-dart/cbl-dart/commit/63b64592cd20ef2d3ac806e9b3cada7ae55c5a52))
+
 ## 3.0.0-dev.1
 
 ## 3.0.0-dev.0

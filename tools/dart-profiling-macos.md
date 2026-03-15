@@ -2,278 +2,286 @@
 
 ## Overview
 
-There are two main approaches to profiling Dart CLI apps on macOS:
+| Approach                          | Dart Symbols | Native/FFI | Setup  |
+| --------------------------------- | ------------ | ---------- | ------ |
+| DevTools (JIT)                    | Yes          | No         | Low    |
+| AOT assembly + native profiler    | Yes          | Yes        | Medium |
+| Native profiler without assembly  | No           | Yes        | Low    |
 
-1. **Dart DevTools** — The VM's built-in sampling profiler. Works with JIT code,
-   shows Dart function names and call stacks. Best for pure Dart profiling.
-2. **Native profilers** (Instruments, samply, flamegraph) — Work at the OS level.
-   By default they cannot see Dart symbols, but with the **AOT assembly
-   workaround** you get full Dart symbol visibility in native flame graphs.
+**Recommended for FFI-heavy code:** Section 2 (or Section 3 for native assets) gives
+full Dart + native symbolication in Instruments, `sample`, or samply.
 
 ## 1. Dart DevTools (JIT Profiling)
-
-The Dart VM includes a sampling CPU profiler accessible through DevTools.
-
-### Basic Usage
 
 ```bash
 dart run --observe main.dart
 ```
 
-This prints a DevTools URL. Open it in a browser to access:
+Opens a DevTools URL with CPU Profiler (flame charts, call trees), Memory (heap
+snapshots), and Timeline Events.
 
-> **Note:** `--observe` pauses isolates on start and exit, so the process will
-> not terminate on its own after `main()` completes. This is useful for
-> inspecting the final state in DevTools, but can be surprising. If you just
-> want the VM service without pausing, use `--enable-vm-service` instead:
->
-> ```bash
-> dart run --enable-vm-service main.dart
-> ```
+> `--observe` pauses isolates on start/exit. Use `--enable-vm-service` instead if you
+> don't want pausing.
 
-- **CPU Profiler**: flame charts, call trees, bottom-up views
-- **Memory**: heap snapshots, allocation profiles
-- **Timeline Events**: VM, Isolate, GC events
+### VM Flags
 
-### Useful VM Flags
-
-These flags are VM-internal options and cannot be passed directly to `dart run`.
-Use the `DART_VM_OPTIONS` environment variable instead:
+Pass via `DART_VM_OPTIONS` (not directly to `dart run`):
 
 ```bash
-DART_VM_OPTIONS="--sample-buffer-duration=120 --profile-period=250 --max_profile_depth=255 --timeline_streams=VM,Isolate,GC,Dart" \
+DART_VM_OPTIONS="--sample-buffer-duration=120 --profile-period=250" \
   dart run --observe main.dart
 ```
 
 | Flag                         | Effect                                        |
 | ---------------------------- | --------------------------------------------- |
 | `--sample-buffer-duration=N` | Keep N seconds of samples (default is small)  |
-| `--profile-period=N`         | Sample interval in µs (default ~1000, min 50) |
+| `--profile-period=N`         | Sample interval in us (default ~1000, min 50) |
 | `--max_profile_depth=N`      | Max stack depth per sample                    |
 | `--timeline_streams=...`     | Enable timeline event streams                 |
-| `--complete-timeline`        | Record all timeline events (higher overhead)  |
 
 ### Programmatic Instrumentation
 
 ```dart
 import 'dart:developer';
 
-// Timeline events (visible in DevTools Timeline tab)
 Timeline.startSync('MyOperation');
-try {
-  // ... code ...
-} finally {
-  Timeline.finishSync();
-}
+try { /* ... */ } finally { Timeline.finishSync(); }
 
-// UserTag for filtering CPU samples
 final tag = UserTag('MyHotPath');
 final previous = tag.makeCurrent();
-try {
-  // ... code to profile ...
-} finally {
-  previous.makeCurrent();
-}
+try { /* ... */ } finally { previous.makeCurrent(); }
 ```
 
 ### Limitations
 
-- Only works with JIT (requires a running VM service)
-- Cannot profile AOT-compiled executables
+- JIT only (requires running VM service), no AOT support
 - Does not show native/FFI call stacks
 
-## 2. Native Profiling with AOT Assembly (Full Dart Symbols)
+## 2. Native Profiling with AOT Assembly
 
-By default, `dart compile exe` and `dart compile aot-snapshot` produce ELF
-output even on macOS. Native profilers cannot symbolicate this. The workaround
-is to compile through assembly to produce a native shared library with symbols.
-
-This method was documented by mkustermann in
-[dart-lang/sdk#54207](https://github.com/dart-lang/sdk/issues/54207).
+By default, `dart compile exe` produces ELF even on macOS — native profilers can't
+symbolicate it. The workaround: compile through assembly to produce a Mach-O shared
+library with Dart symbols. (See
+[dart-lang/sdk#54207](https://github.com/dart-lang/sdk/issues/54207).)
 
 ### Finding the Dart SDK
 
-The AOT toolchain (`dartaotruntime`, `gen_snapshot`, `gen_kernel_aot.dart.snapshot`)
-lives inside the Dart SDK directory. The standard detection method is:
-
-```bash
-DART_SDK=$(dirname $(dirname $(which dart)))
-```
-
-However, this does **not** work when using the Dart SDK embedded in Flutter,
-where `which dart` points to a Flutter wrapper and the real SDK is nested at
-`<flutter-sdk>/bin/cache/dart-sdk/`.
-
-To find the correct path, verify that `$DART_SDK/bin/dartaotruntime` exists:
-
 ```bash
 DART_SDK=$(dirname $(dirname $(which dart)))
 
-# If using Flutter's embedded Dart, the SDK is nested under bin/cache/dart-sdk
-if [ ! -f "$DART_SDK/bin/dartaotruntime" ] && [ -f "$DART_SDK/bin/cache/dart-sdk/bin/dartaotruntime" ]; then
+# Flutter embeds the SDK under bin/cache/dart-sdk
+if [ ! -f "$DART_SDK/bin/dartaotruntime" ] && \
+   [ -f "$DART_SDK/bin/cache/dart-sdk/bin/dartaotruntime" ]; then
   DART_SDK="$DART_SDK/bin/cache/dart-sdk"
 fi
-
-# Verify
-ls "$DART_SDK/bin/dartaotruntime" "$DART_SDK/bin/utils/gen_snapshot" \
-   "$DART_SDK/bin/snapshots/gen_kernel_aot.dart.snapshot" \
-   "$DART_SDK/lib/_internal/vm_platform_strong.dill" > /dev/null
 ```
 
-### Step-by-Step
+### Build Steps
 
 ```bash
-# 1. Compile Dart source to kernel (dill)
+# 1. Compile to kernel
+$DART_SDK/bin/dartaotruntime \
+  $DART_SDK/bin/snapshots/gen_kernel_aot.dart.snapshot \
+  --platform=$DART_SDK/lib/_internal/vm_platform_strong.dill \
+  --aot --tfa -o app.dill main.dart
+
+# 2. Generate assembly
+$DART_SDK/bin/utils/gen_snapshot \
+  --snapshot-kind=app-aot-assembly --assembly=app.S app.dill
+
+# 3. Compile to shared library
+gcc -shared -o app.dylib app.S
+
+# 4. Run
+$DART_SDK/bin/dartaotruntime app.dylib
+```
+
+### Profiling with `sample`
+
+The most reliable option — uses `task_for_pid`, unaffected by SIP:
+
+```bash
+$DART_SDK/bin/dartaotruntime app.dylib &
+sample $! 10 -f output.txt
+```
+
+### Profiling with Instruments
+
+Instruments can't resolve symbols from dylibs that are unloaded before recording ends.
+The Dart runtime unloads the AOT snapshot on exit (`dlclose` in `~DylibAppSnapshot`).
+See [dart-lang/sdk#60484](https://github.com/dart-lang/sdk/issues/60484).
+
+**Workaround:** Call `DynamicLibrary.open()` on the snapshot path at program start to
+bump the `dlopen` refcount. The snapshot stays mapped after the runtime's `dlclose`.
+`DynamicLibrary` does not auto-close on GC — only an explicit `.close()` releases it.
+
+```dart
+import 'dart:ffi';
+import 'dart:io';
+
+void main() {
+  final snapshotPath = Platform.environment['PROFILE_SNAPSHOT_PATH'];
+  if (snapshotPath != null && snapshotPath.isNotEmpty) {
+    DynamicLibrary.open(snapshotPath);
+  }
+  // ... rest of program ...
+}
+```
+
+```bash
+SNAPSHOT=/path/to/app.dylib
+xcrun xctrace record --template 'Time Profiler' \
+  --env "PROFILE_SNAPSHOT_PATH=$SNAPSHOT" \
+  --launch -- $DART_SDK/bin/dartaotruntime "$SNAPSHOT"
+```
+
+**Alternative (no code changes):** Add `sleep(Duration(hours: 1))` at the end of your
+program and use `--time-limit 30s`, or stop manually with `Ctrl-C`.
+
+### Profiling with samply
+
+```bash
+samply record $DART_SDK/bin/dartaotruntime app.dylib
+```
+
+### Bypassing Hardened Runtime for dtrace
+
+dtrace-based tools (e.g., flamegraph) require stripping hardened runtime entitlements.
+Instruments and `sample` do **not** need this.
+
+```bash
+cp $DART_SDK/bin/dartaotruntime /tmp/dartaotruntime
+codesign -s - /tmp/dartaotruntime   # ad-hoc re-sign strips entitlements
+sudo flamegraph -- /tmp/dartaotruntime app.dylib
+```
+
+> Do **not** use this re-signed copy with Instruments — it strips the entitlements
+> that Instruments and `DYLD_INSERT_LIBRARIES` require.
+
+## 3. Native Assets (`@ffi.DefaultAsset` / `DynamicLoadingBundled`)
+
+When your code uses native assets, `dartaotruntime` can't resolve `@ffi.DefaultAsset`
+lookups (no native assets manifest). Pre-load the libraries with
+`DYLD_INSERT_LIBRARIES` to make symbols available via `dlsym(RTLD_DEFAULT, ...)`.
+
+> **Why not `DYLD_LIBRARY_PATH`?** `@ffi.DefaultAsset` resolves via
+> `dlsym(RTLD_DEFAULT, ...)`, not `dlopen()` by name. Only
+> `DYLD_INSERT_LIBRARIES` makes symbols globally available.
+
+### Build Steps
+
+Steps 2-4 are identical to Section 2. Step 1 additionally builds native assets:
+
+```bash
+# 1. Build native assets (downloads/compiles native libraries)
+dart build cli --target=main.dart --output=build/profile
+
+# 2-4. Same as Section 2, producing build/profile/app.dylib
+```
+
+### Running and Profiling
+
+```bash
+NATIVE_LIBS=build/profile/bundle/lib
+
+# With sample
+DYLD_INSERT_LIBRARIES="$NATIVE_LIBS/libfoo.dylib:$NATIVE_LIBS/libbar.dylib" \
+  $DART_SDK/bin/dartaotruntime build/profile/app.dylib &
+sample $! 30 -f profile_output.txt
+
+# With Instruments (use --env; shell env vars are NOT forwarded by xctrace)
+SNAPSHOT=build/profile/app.dylib
+xcrun xctrace record --template 'Time Profiler' \
+  --env "PROFILE_SNAPSHOT_PATH=$SNAPSHOT" \
+  --env "DYLD_INSERT_LIBRARIES=$NATIVE_LIBS/libfoo.dylib:$NATIVE_LIBS/libbar.dylib" \
+  --launch -- $DART_SDK/bin/dartaotruntime "$SNAPSHOT"
+```
+
+### Native Library Debug Symbols (dSYM)
+
+Pre-compiled native libraries are typically stripped. Download the dSYM package and
+place it next to the binary for full internal symbolication.
+
+**Couchbase Lite C SDK** provides `-symbols` packages:
+
+```bash
+# URL pattern: ...-{edition}-{version}-macos-symbols.zip
+curl -L -o cblite-symbols.zip \
+  "https://packages.couchbase.com/releases/couchbase-lite-c/4.0.3/couchbase-lite-c-enterprise-4.0.3-macos-symbols.zip"
+unzip cblite-symbols.zip
+cp -R libcblite-4.0.3/libcblite.dylib.dSYM build/profile/bundle/lib/
+
+# Verify UUIDs match
+dwarfdump -u build/profile/bundle/lib/libcblite.dylib
+dwarfdump -u build/profile/bundle/lib/libcblite.dylib.dSYM
+```
+
+### Concrete Example: Benchmarks in This Repo
+
+```bash
+cd packages/benchmark
+
+# 1. Build native assets
+dart build cli \
+  --target=benchmark/cbl_insert.dart \
+  --output=.dart_tool/benchmark-aot/profile_run
+
+# 1b. (Optional) Download dSYM for full native symbolication
+curl -L -o /tmp/cblite-symbols.zip \
+  "https://packages.couchbase.com/releases/couchbase-lite-c/4.0.3/couchbase-lite-c-enterprise-4.0.3-macos-symbols.zip"
+unzip -o /tmp/cblite-symbols.zip -d /tmp/cblite-symbols
+cp -R /tmp/cblite-symbols/libcblite-4.0.3/libcblite.dylib.dSYM \
+  .dart_tool/benchmark-aot/profile_run/bundle/lib/
+
+# 2-4. Compile to assembly shared library
 $DART_SDK/bin/dartaotruntime \
   $DART_SDK/bin/snapshots/gen_kernel_aot.dart.snapshot \
   --platform=$DART_SDK/lib/_internal/vm_platform_strong.dill \
   --aot --tfa \
-  -o app.dill \
-  main.dart
+  -o .dart_tool/benchmark-aot/profile_run/app.dill \
+  benchmark/cbl_insert.dart
 
-# 2. Generate native assembly from AOT compiler
 $DART_SDK/bin/utils/gen_snapshot \
   --snapshot-kind=app-aot-assembly \
-  --assembly=app.S \
-  app.dill
+  --assembly=.dart_tool/benchmark-aot/profile_run/app.S \
+  .dart_tool/benchmark-aot/profile_run/app.dill
 
-# 3. Compile assembly into a native shared library
-gcc -shared -o app.so app.S
+gcc -shared \
+  -o .dart_tool/benchmark-aot/profile_run/app.dylib \
+  .dart_tool/benchmark-aot/profile_run/app.S
 
-# 4. Run with dartaotruntime
-$DART_SDK/bin/dartaotruntime app.so
-```
+# 5. Profile
+NATIVE_LIBS=.dart_tool/benchmark-aot/profile_run/bundle/lib
+SNAPSHOT=.dart_tool/benchmark-aot/profile_run/app.dylib
 
-The resulting `app.so` is a native Mach-O shared library with Dart symbol names
-visible to any native profiler.
+# 5a. With sample (text output)
+EXECUTION_MODE=aot API_TYPE=sync OPERATION_COUNT=10000 BATCH_SIZE=10 FIXTURE=users \
+DYLD_INSERT_LIBRARIES="$NATIVE_LIBS/libcblite.dylib:$NATIVE_LIBS/libcblitedart.dylib:$NATIVE_LIBS/CouchbaseLiteVectorSearch.dylib" \
+  $DART_SDK/bin/dartaotruntime "$SNAPSHOT" &
+sample $! 30 -f profile_output.txt
 
-### Bypassing Hardened Runtime for dtrace
-
-macOS System Integrity Protection blocks dtrace from attaching to binaries
-with hardened runtime entitlements. Instruments and `sample` work without this
-workaround, but dtrace-based tools (e.g., flamegraph) require it. Make a copy
-of `dartaotruntime` and re-sign it with an ad-hoc signature (which strips the
-hardened runtime entitlements):
-
-```bash
-cp $DART_SDK/bin/dartaotruntime /tmp/dartaotruntime
-codesign -s - /tmp/dartaotruntime
-```
-
-> **Note:** On Apple Silicon, `codesign --remove-signature` will not work —
-> macOS requires all arm64 binaries to have at least an ad-hoc signature.
-> Using `codesign -s -` re-signs the binary without the original entitlements
-> and works on both Intel and Apple Silicon.
-
-Then use the re-signed copy:
-
-```bash
-sudo flamegraph -- /tmp/dartaotruntime app.so
-```
-
-### Using with Instruments
-
-```bash
+# 5b. With Instruments (GUI)
 xcrun xctrace record --template 'Time Profiler' \
-  --launch -- $DART_SDK/bin/dartaotruntime app.so
+  --output profile.trace \
+  --env EXECUTION_MODE=aot --env API_TYPE=sync \
+  --env OPERATION_COUNT=10000 --env BATCH_SIZE=10 --env FIXTURE=users \
+  --env "PROFILE_SNAPSHOT_PATH=$SNAPSHOT" \
+  --env "DYLD_INSERT_LIBRARIES=$NATIVE_LIBS/libcblite.dylib:$NATIVE_LIBS/libcblitedart.dylib:$NATIVE_LIBS/CouchbaseLiteVectorSearch.dylib" \
+  --launch -- $DART_SDK/bin/dartaotruntime "$SNAPSHOT"
 ```
 
-You may see a `Failed to stop recording session: Failed stoping ktrace session`
-error — this is a known SIP-related issue on macOS and does not affect the
-recorded data. The trace file is saved and can be opened in Instruments normally.
-
-### Using with `sample`
-
-The built-in macOS `sample` command works without any extra setup. Launch the
-AOT binary, then sample by PID:
-
-```bash
-$DART_SDK/bin/dartaotruntime app.so &
-sample $! 10 -f output.txt
-```
-
-Because `app.so` is a native Mach-O with symbols, the output will include Dart
-function names in the call graph.
-
-### Using with samply
-
-[samply](https://github.com/mstange/samply) produces profiles viewable in the
-Firefox Profiler:
-
-```bash
-# Install: cargo install samply  (or: brew install samply)
-samply record $DART_SDK/bin/dartaotruntime app.so
-```
-
-## 3. Native Profilers Without the Assembly Workaround
-
-Without the assembly workaround, native profilers can still attach to any Dart
-process, but Dart function names will be missing. This is useful when you only
-care about native/FFI code.
-
-### Instruments
-
-```bash
-# Attach to running process
-xcrun xctrace record --template 'Time Profiler' --attach <PID> --output profile.trace
-
-# Or launch directly
-xcrun xctrace record --template 'Time Profiler' --launch -- dart run main.dart
-```
-
-### samply
-
-```bash
-samply record dart run main.dart
-```
-
-### macOS `sample` Command
-
-```bash
-sample <PID> 10 -f output.txt
-```
-
-Without the assembly workaround, Dart code will appear as `???` in the call
-graph. Use the AOT assembly approach from Section 2 to get Dart symbol names.
-
-### What You Can See
-
-- Time spent in the Dart VM (GC, compiler, interpreter)
-- Native C/C++ code called via FFI
-- System library calls
-- Thread activity and scheduling
-
-### What You Cannot See
-
-- Dart function names (appear as anonymous memory regions in JIT, or hidden
-  ELF symbols in AOT)
-
-## 4. Combined Dart + Native Profiling
-
-There is no single tool that shows both Dart and native symbols in one view.
-The practical approach:
-
-1. **DevTools** for Dart-level profiling
-2. **Native profiler + AOT assembly** for a unified native view including Dart
-   symbols
-3. Correlate manually using timestamps when using DevTools alongside a native
-   profiler
-
-## 5. Summary
-
-| Approach                       | Dart Symbols | Native/FFI Symbols | Setup Effort |
-| ------------------------------ | ------------ | ------------------ | ------------ |
-| DevTools (JIT)                 | Yes          | No                 | Low          |
-| AOT assembly + native profiler | Yes          | Yes                | Medium       |
-| Native profiler (no assembly)  | No           | Yes                | Low          |
+With the dSYM in place (step 1b), profiles show fully symbolicated frames across all
+layers: Dart (`CblInsertBenchmark.runSync`, `FleeceEncoder.writeDartObject`), Fleece
+(`fleece::impl::Encoder::writeValue`), LiteCore, and SQLite (`sqlite3VdbeExec`).
 
 ## References
 
 - [dart-lang/sdk#54207](https://github.com/dart-lang/sdk/issues/54207) — AOT
   assembly workaround for native profiling
-- [dart-lang/sdk#54254](https://github.com/dart-lang/sdk/issues/54254) —
-  Feature request: make `dart compile` produce profilable output natively
-- [dart-lang/sdk#60307](https://github.com/dart-lang/sdk/issues/60307) —
-  Native Mach-O writer in gen_snapshot (landed, used by Flutter)
-- [Dart DevTools documentation](https://dart.dev/tools/dart-devtools)
-- [CPU Profiler guide](https://docs.flutter.dev/tools/devtools/cpu-profiler)
+- [dart-lang/sdk#54254](https://github.com/dart-lang/sdk/issues/54254) — Feature
+  request: make `dart compile` produce profilable output natively
+- [dart-lang/sdk#60307](https://github.com/dart-lang/sdk/issues/60307) — Native
+  Mach-O writer in gen_snapshot (landed, used by Flutter)
+- [dart-lang/sdk#60484](https://github.com/dart-lang/sdk/issues/60484) — Instruments
+  dylib unload workaround
+- [Dart DevTools](https://dart.dev/tools/dart-devtools)

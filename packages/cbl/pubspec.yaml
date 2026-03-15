@@ -1,5 +1,5 @@
 name: 'cbl'
-version: 4.0.0-dev.1
+version: 4.0.0-dev.2
 description: >-
   An offline-first NoSQL document database with SQL++ queries, vector search,
   full-text search, live queries, encryption, bi-directional and peer-to-peer
