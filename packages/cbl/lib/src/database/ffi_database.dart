@@ -120,7 +120,7 @@ final class FfiDatabase
   String? _path;
 
   @override
-  DatabaseConfiguration get config => DatabaseConfiguration.from(_config);
+  DatabaseConfiguration get config => .from(_config);
 
   @override
   late final SyncScope defaultScope = scope(Scope.defaultName)!;

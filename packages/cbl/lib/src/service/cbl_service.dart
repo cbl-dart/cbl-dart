@@ -845,7 +845,7 @@ final class CblService {
       };
 
   ConflictResolver _createConflictResolverForwarder(int resolverId) =>
-      ConflictResolver.from((conflict) async {
+      .from((conflict) async {
         final localDocument = conflict.localDocument as DelegateDocument?;
         final remoteDocument = conflict.remoteDocument as DelegateDocument?;
         final localState = await localDocument?.createState(

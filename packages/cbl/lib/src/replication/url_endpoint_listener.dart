@@ -482,11 +482,7 @@ final class FfiUrlEndpointListener implements UrlEndpointListener, Finalizable {
       readOnly: config.readOnly,
     );
 
-    return FfiUrlEndpointListener.fromPointer(
-      pointer,
-      config: config,
-      adopt: true,
-    );
+    return .fromPointer(pointer, config: config, adopt: true);
   }
 
   static Future<Pointer<CBLURLEndpointListener>> _create({

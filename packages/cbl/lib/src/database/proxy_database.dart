@@ -109,7 +109,7 @@ final class ProxyDatabase extends ProxyObject
   String? path;
 
   @override
-  DatabaseConfiguration get config => DatabaseConfiguration.from(_config);
+  DatabaseConfiguration get config => .from(_config);
 
   @override
   late final Future<AsyncScope> defaultScope = scope(

@@ -289,10 +289,10 @@ const contentType = 'application/octet-stream';
 // ignore: unnecessary_cast
 final fixedTestContent = utf8.encode('content') as Uint8List;
 
-Blob blobFromData() => Blob.fromData(contentType, fixedTestContent);
+Blob blobFromData() => .fromData(contentType, fixedTestContent);
 
 Blob blobFromDataWithLength([int length = 0]) =>
-    Blob.fromData(contentType, Uint8List(length));
+    .fromData(contentType, Uint8List(length));
 
 /// Returns random bytes for blob.
 ///

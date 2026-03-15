@@ -190,7 +190,7 @@ final class FfiReplicator
   Completer<void>? _stopped;
 
   @override
-  ReplicatorConfiguration get config => ReplicatorConfiguration.from(_config);
+  ReplicatorConfiguration get config => .from(_config);
 
   @override
   ReplicatorStatus get status => useSync(() => _status);
