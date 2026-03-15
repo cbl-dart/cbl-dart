@@ -1,4 +1,5 @@
 import 'package:cbl/cbl.dart';
+import 'package:cbl/src/tracing.dart';
 import 'package:cbl_sentry/cbl_sentry.dart';
 import 'package:cbl_sentry/src/couchbase_lite_integration.dart';
 import 'package:sentry/sentry.dart';
