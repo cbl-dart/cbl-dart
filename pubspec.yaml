@@ -25,10 +25,12 @@ workspace:
 dev_dependencies:
   cbd:
     path: tool
-  # daco removed: requires analyzer ^7.0.0, incompatible with tool's ^10.0.0.
-  # Needs daco update to support analyzer 10+.
+  daco: ^0.5.0
   melos: ^7.4.0
   path: ^1.9.1
+
+dependency_overrides:
+  meta: ^1.18.0
 
 melos:
   repository: https://github.com/cbl-dart/cbl-dart
