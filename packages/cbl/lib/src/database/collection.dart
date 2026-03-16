@@ -26,7 +26,7 @@ import 'scope.dart';
 ///
 /// The handler receives the revision of the [conflictingDocument] currently in
 /// the database, which has been changed since [documentBeingSaved] was loaded.
-/// It can be be `null`, meaning that the document has been deleted.
+/// It can be `null`, meaning that the document has been deleted.
 ///
 /// The handler has to make a decision by returning `true` to save the document
 /// or `false` to abort the save.
@@ -125,7 +125,7 @@ abstract interface class SaveTypedDocument<
 ///
 /// The handler receives the revision of the [conflictingDocument] currently in
 /// the database, which has been changed since [documentBeingSaved] was loaded.
-/// It can be be `null`, meaning that the document has been deleted.
+/// It can be `null`, meaning that the document has been deleted.
 ///
 /// The handler has to make a decision by returning `true` to save the document
 /// or `false` to abort the save.

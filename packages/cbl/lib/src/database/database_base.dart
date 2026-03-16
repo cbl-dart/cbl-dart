@@ -55,11 +55,11 @@ mixin DatabaseBase<T extends DocumentDelegate> implements Database {
   /// Whether the current transaction belongs to this database, if one exists.
   bool get ownsCurrentTransaction => _Transaction.current?.database == this;
 
-  /// Method to implement by by [Database] implementations to begin a new
+  /// Method to implement by [Database] implementations to begin a new
   /// transaction.
   FutureOr<void> beginTransaction();
 
-  /// Method to implement by by [Database] implementations to commit the current
+  /// Method to implement by [Database] implementations to commit the current
   /// transaction.
   FutureOr<void> endTransaction({required bool commit});
 

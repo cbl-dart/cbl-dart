@@ -22,7 +22,7 @@ final class SharedKeys implements Finalizable {
   /// Creates new empty [SharedKeys].
   SharedKeys() : this.fromPointer(SharedKeysBindings.create(), adopt: true);
 
-  /// Creates [SharedKeys] from an exiting native instance.
+  /// Creates [SharedKeys] from an existing native instance.
   SharedKeys.fromPointer(this.pointer, {bool adopt = false}) {
     SharedKeysBindings.bindToDartObject(this, pointer, retain: !adopt);
   }
@@ -604,9 +604,9 @@ final class MutableDict extends Dict {
     return value;
   }
 
-  /// Convenience function for getting an dict-valued property in mutable form.
+  /// Convenience function for getting a dict-valued property in mutable form.
   ///
-  /// - If the value for the key is not an dict, returns null.
+  /// - If the value for the key is not a dict, returns null.
   /// - If the value is a mutable dict, returns it.
   /// - If the value is an immutable dict, this function makes a mutable copy,
   ///   assigns the copy as the property value, and returns the copy.

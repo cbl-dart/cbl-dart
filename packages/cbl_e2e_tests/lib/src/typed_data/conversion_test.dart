@@ -100,7 +100,7 @@ void main() {
         expect(typedDict.internal, same(dict));
       });
 
-      test('throws if value is not a of the expected type', () {
+      test('throws if value is not of the expected type', () {
         const converter = TypedDictionaryConverter(ConverterTestDict.new);
         expect(
           () => converter.toTyped(1),
@@ -182,7 +182,7 @@ void main() {
         expect(converter.toTyped(MutableArray()), isA<CachedTypedDataList>());
       });
 
-      test('throws if value is not a of the expected type', () {
+      test('throws if value is not of the expected type', () {
         const converter = TypedListConverter(
           converter: TypedDataHelpers.stringConverter,
           isCached: false,

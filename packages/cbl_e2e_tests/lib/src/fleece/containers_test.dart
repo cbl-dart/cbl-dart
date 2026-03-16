@@ -317,7 +317,7 @@ void main() {
         expect(array[2].type, ValueType.null_);
       });
 
-      test('mutableDict returns null when value at index is not an dict', () {
+      test('mutableDict returns null when value at index is not a dict', () {
         final array = MutableArray()..add(true);
         expect(array.mutableDict(0), isNull);
       });
@@ -332,7 +332,7 @@ void main() {
         expect(array.mutableArray(0), isNull);
       });
 
-      test('mutableArray returns dict when value at index is a dict', () {
+      test('mutableArray returns array when value at index is an array', () {
         final array = MutableArray()..add(MutableArray());
         expect(array.mutableArray(0), isNotNull);
       });
@@ -503,7 +503,7 @@ void main() {
     });
 
     group('plain object conversion', () {
-      test('throws when a incompatible type is added to collection', () {
+      test('throws when an incompatible type is added to collection', () {
         expect(() => MutableArray([Object()]), throwsArgumentError);
 
         expect(() => MutableDict({'a': Object()}), throwsArgumentError);
