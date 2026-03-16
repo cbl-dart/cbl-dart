@@ -153,11 +153,11 @@ to `language`:
 
 ```dart
 // Before (v3)
-final index = IndexBuilder.fullTextIndex([FullTextIndexItem.property('text')])
+final index = FullTextIndex([FullTextIndexItem.property('text')])
     .langauge(FullTextLanguage.english);
 
 // After (v4)
-final index = IndexBuilder.fullTextIndex([FullTextIndexItem.property('text')])
+final index = FullTextIndex([FullTextIndexItem.property('text')])
     .language(FullTextLanguage.english);
 ```
 
