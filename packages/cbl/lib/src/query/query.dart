@@ -60,7 +60,7 @@ abstract interface class Query implements Resource {
   ///   that if you see "SCAN TABLE", it means that SQLite is doing a slow
   ///   linear scan of the documents instead of using an index.
   /// - The third sections is this queries JSON representation. This is the data
-  ///   structure that is built to describe this query, either by the the query
+  ///   structure that is built to describe this query, either by the query
   ///   builder or when an SQL++ query is compiled.
   FutureOr<String> explain();
 

@@ -89,7 +89,7 @@ final class CollectionConfiguration {
   });
 
   /// Creates a replication configuration for a [Collection] from another
-  /// [config] by coping it.
+  /// [config] by copying it.
   CollectionConfiguration.from(CollectionConfiguration config)
     : channels = config.channels,
       documentIds = config.documentIds,
@@ -198,8 +198,8 @@ final class ReplicatorConfiguration {
       ..maxAttemptWaitTime = maxAttemptWaitTime;
   }
 
-  /// Creates a configuration for a [Replicator] from another [config] by coping
-  /// it.
+  /// Creates a configuration for a [Replicator] from another [config] by
+  /// copying it.
   ReplicatorConfiguration.from(ReplicatorConfiguration config)
     : _collections = {...config._collections},
       target = config.target,

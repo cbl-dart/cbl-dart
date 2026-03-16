@@ -25,7 +25,7 @@ Matcher isTestDocument(String value) =>
     );
 
 extension TestDocumentDatabaseExtension on Database {
-  /// Writes [value] in the properties of the test document. If its does not
+  /// Writes [value] in the properties of the test document. If it does not
   /// exist already in this database, it is created.
   Future<Document> writeTestDocument(String value, {String? type}) async {
     final doc = (await getTestDocumentOrNull()) ?? MutableDocument({});

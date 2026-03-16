@@ -28,8 +28,8 @@ TraceDataHandler get _onTraceData => onTraceData;
 ///
 /// # Lifecycle
 ///
-/// The [initialize] method is called when a isolate is [install]ed, if CBL Dart
-/// has already been initialized. If CBL Dart has not been initialized when
+/// The [initialize] method is called when an isolate is [install]ed, if CBL
+/// Dart has already been initialized. If CBL Dart has not been initialized when
 /// [install] is called, the delegate is initialized after CBL Dart has been
 /// initialized.
 ///
@@ -153,7 +153,7 @@ abstract base class TracingDelegate {
   void onTraceData(Object? data) {}
 
   /// Returns the current tracing context and is called just before a message is
-  /// sent from an user to a worker isolate.
+  /// sent from a user to a worker isolate.
   ///
   /// The returned value must be JSON serializable.
   Object? captureTracingContext() => null;

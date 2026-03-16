@@ -73,7 +73,7 @@ final class MDict extends MCollection {
       return;
     }
 
-    // Clear out all entires.
+    // Clear out all entries.
     markMutated();
     for (final value in _values.values) {
       value.removeFromParent();

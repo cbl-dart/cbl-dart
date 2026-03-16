@@ -120,7 +120,7 @@ abstract final class Function_ {
     ExpressionInterface? digits,
   }) => BinaryExpression('round()', expression, digits);
 
-  /// Creates a function expression which evaluates to the sing (1: positive,
+  /// Creates a function expression which evaluates to the sign (1: positive,
   /// -1: negative, 0: zero) of the given degree numeric [expression].
   static ExpressionInterface sign(ExpressionInterface expression) =>
       UnaryExpression('sign()', expression);
@@ -199,7 +199,7 @@ abstract final class Function_ {
   /// The time zone can be in one of three forms: `(+/-)HH:MM`, `(+/-)HHMM` and
   /// `Z` which represents UTC.
   ///
-  /// If no time zone is present the the device local time zone is used.
+  /// If no time zone is present, the device local time zone is used.
   static ExpressionInterface stringToMillis(ExpressionInterface expression) =>
       UnaryExpression('str_to_millis()', expression);
 
@@ -217,7 +217,7 @@ abstract final class Function_ {
   /// The time zone can be in one of three forms: `(+/-)HH:MM`, `(+/-)HHMM` and
   /// `Z` which represents UTC.
   ///
-  /// If no time zone is present the the device local time zone is used.
+  /// If no time zone is present, the device local time zone is used.
   static ExpressionInterface stringToUTC(ExpressionInterface expression) =>
       UnaryExpression('str_to_utc()', expression);
 

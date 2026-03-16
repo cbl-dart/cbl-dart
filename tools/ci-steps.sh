@@ -586,7 +586,7 @@ function checkBuildRunnerOutput() {
 
     dart run build_runner build --delete-conflicting-outputs --verbose
 
-    # Verify that the the build output did not change by checking if the repo is dirty.
+    # Verify that the build output did not change by checking if the repo is dirty.
     # This check is flaky in CI. We check multiple times on the hunch that there is some kind of
     # race condition.
     local checkAttempt=0
@@ -608,7 +608,7 @@ function checkBuildRunnerOutput() {
 
 # Uploads coverage data to codecov.
 #
-# The first and only paramter is a comma separated list of flags to be
+# The first and only parameter is a comma separated list of flags to be
 # associated with the uploaded coverage data.
 function uploadCoverageData() {
     requireEnvVar EMBEDDER

@@ -1401,7 +1401,7 @@ extension on Database {
 /// Matches numbers which are close to [value].
 ///
 /// This matcher is necessary because the results of database functions vary
-/// slightly between different platforms, usually only in the leas significant
+/// slightly between different platforms, usually only in the least significant
 /// decimal point. We just want to confirm we are using the right function.
 Matcher closeEnough(num value) => closeTo(value, .00000000001);
 

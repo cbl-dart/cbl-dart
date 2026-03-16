@@ -38,15 +38,15 @@ abstract final class Result
   ///
   /// Returns `null` if the column is `null`.
   ///
-  /// Throws a [RangeError] if [nameOrIndex] is ouf of range.
+  /// Throws a [RangeError] if [nameOrIndex] is out of range.
   T? value<T extends Object>(Object nameOrIndex);
 
   /// Returns the column at the given [nameOrIndex] as a [String].
   ///
   /// {@template cbl.Result.typedNullableGetter}
-  /// Returns `null` if the value is not a of the expected typ or it is `null`.
+  /// Returns `null` if the value is not of the expected type or it is `null`.
   ///
-  /// Throws a [RangeError] if the [nameOrIndex] is ouf of range.
+  /// Throws a [RangeError] if the [nameOrIndex] is out of range.
   /// {@endtemplate}
   String? string(Object nameOrIndex);
 
@@ -56,11 +56,11 @@ abstract final class Result
   /// Returns a default value (integer: `0`, double: `0.0`, boolean: `false`) if
   /// the column is not of the expected type or is `null`.
   ///
-  /// Throws a [RangeError] if the [nameOrIndex] is ouf of range.
+  /// Throws a [RangeError] if the [nameOrIndex] is out of range.
   /// {@endtemplate}
   int integer(Object nameOrIndex);
 
-  /// Returns the column at the given [nameOrIndex] as an floating point number.
+  /// Returns the column at the given [nameOrIndex] as a floating point number.
   ///
   /// {@macro cbl.Result.typedDefaultedGetter}
   double float(Object nameOrIndex);
@@ -109,7 +109,7 @@ abstract final class Result
 }
 
 final class ResultImpl with IterableMixin<String> implements Result {
-  /// Creates a result from a fleece [array] fo the column values.
+  /// Creates a result from a fleece [array] of the column values.
   ///
   /// The [context] can be shared with other [Result]s, if it is guaranteed that
   /// all results are from the same chunk of encoded Fleece data.

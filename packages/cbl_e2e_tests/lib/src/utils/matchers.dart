@@ -37,9 +37,9 @@ class _IsDirectory extends Matcher {
 
 // === JSON Matcher ============================================================
 
-/// Returns a [Matcher] wich matches plain Dart objects, JSON strings and Fleece
-/// data (in [Slice]s) against [expected], which can be a JSON string or plain
-/// Dart objects.
+/// Returns a [Matcher] which matches plain Dart objects, JSON strings and
+/// Fleece data (in [Slice]s) against [expected], which can be a JSON string or
+/// plain Dart objects.
 Matcher json(Object? expected) => _JsonMatcher(expected);
 
 final class _JsonMatcher extends Matcher {
@@ -112,7 +112,7 @@ final class _JsonMatcher extends Matcher {
 
 // === equality ================================================================
 
-/// Returns a matcher which checks wether the matched value implements mutual
+/// Returns a matcher which checks whether the matched value implements mutual
 /// equality with [expected].
 ///
 /// Mutual equality is implemented when:

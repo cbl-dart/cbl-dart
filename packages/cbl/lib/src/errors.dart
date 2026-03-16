@@ -69,7 +69,7 @@ enum DatabaseErrorCode {
   cantUpgradeDatabase,
 }
 
-/// Exception throw when there is a failure interacting with a Couchbase Lite
+/// Exception thrown when there is a failure interacting with a Couchbase Lite
 /// database.
 final class DatabaseException extends CouchbaseLiteException {
   /// Creates an exception which is thrown when there is a failure interacting
@@ -87,10 +87,10 @@ final class DatabaseException extends CouchbaseLiteException {
   @override
   final DatabaseErrorCode code;
 
-  /// If this is an query parsing exception the invalid query string.
+  /// If this is a query parsing exception the invalid query string.
   final String? queryString;
 
-  /// If this is an query parsing exception the position of the error in the
+  /// If this is a query parsing exception the position of the error in the
   /// [queryString].
   final int? errorPosition;
 
@@ -262,9 +262,9 @@ enum WebSocketErrorCode {
   cantFulfill,
 }
 
-/// Exception thrown when there is an WebSocket error.
+/// Exception thrown when there is a WebSocket error.
 final class WebSocketException extends CouchbaseLiteException {
-  /// Creates an exception which is thrown when there is an WebSocket error.
+  /// Creates an exception which is thrown when there is a WebSocket error.
   WebSocketException(this.message, this.code);
 
   @override
@@ -277,9 +277,9 @@ final class WebSocketException extends CouchbaseLiteException {
   String get _typeName => 'WebSocketException';
 }
 
-/// Exception thrown when there is an Mbed TLS error.
+/// Exception thrown when there is a Mbed TLS error.
 final class MbedTlsException extends CouchbaseLiteException {
-  /// Creates an exception which is thrown when there is an Mbed TLS error.
+  /// Creates an exception which is thrown when there is a Mbed TLS error.
   MbedTlsException(this.message, this.code);
 
   @override
@@ -328,7 +328,7 @@ enum TypedDataErrorCode {
   dataMismatch,
 }
 
-/// Exception throw when there is a failure related to typed data.
+/// Exception thrown when there is a failure related to typed data.
 ///
 /// {@category Typed Data}
 @experimental

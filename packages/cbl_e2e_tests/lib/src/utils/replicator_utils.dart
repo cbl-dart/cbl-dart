@@ -205,8 +205,8 @@ extension ReplicatorUtilsExtension on Replicator {
   /// If you get the current status and then start to listen for changes you
   /// might miss changes in between.
   ///
-  /// If you start to listen for changes first and than get the current status
-  /// you can receive status changes from before the current status and wont be
+  /// If you start to listen for changes first and then get the current status
+  /// you can receive status changes from before the current status and won't be
   /// able to put them and the current status into the correct order.
   Stream<ReplicatorStatus> pollStatus() async* {
     while (true) {
@@ -265,7 +265,7 @@ extension ReplicatorUtilsExtension on Replicator {
 
   /// Drives the status of this replicator to match [statusMatcher].
   ///
-  /// If the current status does not mach, this method calls [fn] and waits
+  /// If the current status does not match, this method calls [fn] and waits
   /// until the status matches [statusMatcher].
   ///
   /// [validStatusMatcher] is a matcher which every status must match. The

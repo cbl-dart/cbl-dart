@@ -34,7 +34,7 @@ typedef GroupFn =
 
 typedef TestHook = void Function(dynamic Function() body);
 
-/// The properties which end are the functions used to declare tests, groups and
+/// The properties below are the functions used to declare tests, groups and
 /// lifecycle hooks. Per default these properties return the corresponding
 /// functions from the `test` package.
 ///
@@ -53,7 +53,7 @@ abstract base class CblE2eTestBinding {
 
   static CblE2eTestBinding? _instance;
 
-  /// The global instance of [CblE2eTestBinding] by which is used by tests.
+  /// The global instance of [CblE2eTestBinding] which is used by tests.
   static CblE2eTestBinding get instance => _instance!;
 
   FutureOr<void> initCouchbaseLite();
