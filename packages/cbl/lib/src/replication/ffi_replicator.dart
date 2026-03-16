@@ -155,6 +155,7 @@ final class FfiReplicator
       final pointer = ReplicatorBindings.createReplicator(ffiConfig);
 
       cblReachabilityFence(fleeceContainers);
+      cblReachabilityFence(collections.keys);
 
       return FfiReplicator._(
         config: config,
