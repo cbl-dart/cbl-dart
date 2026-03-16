@@ -23,3 +23,8 @@ abstract class BoolDictListDict with _$BoolDictListDict {
 abstract class BoolListListDict with _$BoolListListDict {
   factory BoolListListDict(List<List<bool>> value) = MutableBoolListListDict;
 }
+
+@TypedDictionary()
+abstract class EnumListDict with _$EnumListDict {
+  factory EnumListDict(List<TestEnum> value) = MutableEnumListDict;
+}
