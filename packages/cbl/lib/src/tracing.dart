@@ -28,8 +28,8 @@ TraceDataHandler get _onTraceData => onTraceData;
 ///
 /// # Lifecycle
 ///
-/// The [initialize] method is called when a isolate is [install]ed, if CBL Dart
-/// has already been initialized. If CBL Dart has not been initialized when
+/// The [initialize] method is called when an isolate is [install]ed, if CBL
+/// Dart has already been initialized. If CBL Dart has not been initialized when
 /// [install] is called, the delegate is initialized after CBL Dart has been
 /// initialized.
 ///

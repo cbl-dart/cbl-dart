@@ -88,7 +88,7 @@ void main() {
       expect(channel.stream(InfiniteStream()), emits(null));
     });
 
-    channelTest('list to stream of non-existente endpoint', () async {
+    channelTest('list to stream of non-existent endpoint', () async {
       final channel = await openTestChannel();
 
       expect(

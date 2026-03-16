@@ -427,7 +427,7 @@ final class MutableArray extends Array {
     index,
   )?.let(MutableDict.fromPointer);
 
-  /// Convenience function for getting a array-valued property in mutable form.
+  /// Convenience function for getting an array-valued property in mutable form.
   ///
   /// - If the value for the [index] is not an array, returns null.
   /// - If the value is a mutable array, returns it.
@@ -615,9 +615,9 @@ final class MutableDict extends Dict {
     key,
   )?.let(MutableDict.fromPointer);
 
-  /// Convenience function for getting a array-valued property in mutable form.
+  /// Convenience function for getting an array-valued property in mutable form.
   ///
-  /// - If the value for the key is not a array, returns null.
+  /// - If the value for the key is not an array, returns null.
   /// - If the value is a mutable array, returns it.
   /// - If the value is an immutable array, this function makes a mutable copy,
   ///   assigns the copy as the property value, and returns the copy.

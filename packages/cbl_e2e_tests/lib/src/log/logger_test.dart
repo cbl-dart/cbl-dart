@@ -76,7 +76,7 @@ void main() {
           emits(
             isA<LogMessage>()
                 .having((it) => it.domain, 'domain', LogDomain.network)
-                .having((it) => it.level, 'lever', LogLevel.warning)
+                .having((it) => it.level, 'level', LogLevel.warning)
                 .having((it) => it.message, 'message', 'A'),
           ),
         );

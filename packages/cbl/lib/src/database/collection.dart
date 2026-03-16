@@ -506,7 +506,7 @@ abstract interface class SyncCollection extends Collection {
     ConcurrencyControl concurrencyControl = .lastWriteWins,
   ]);
 
-  /// Saves a [document] to this database, resolving conflicts with an sync
+  /// Saves a [document] to this database, resolving conflicts with a sync
   /// [conflictHandler].
   ///
   /// {@macro cbl.Collection.saveDocumentWithConflictHandler}

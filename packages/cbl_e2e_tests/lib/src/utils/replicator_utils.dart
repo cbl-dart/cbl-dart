@@ -265,7 +265,7 @@ extension ReplicatorUtilsExtension on Replicator {
 
   /// Drives the status of this replicator to match [statusMatcher].
   ///
-  /// If the current status does not mach, this method calls [fn] and waits
+  /// If the current status does not match, this method calls [fn] and waits
   /// until the status matches [statusMatcher].
   ///
   /// [validStatusMatcher] is a matcher which every status must match. The

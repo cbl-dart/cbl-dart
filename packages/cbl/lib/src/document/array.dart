@@ -44,7 +44,7 @@ abstract interface class ArrayInterface implements ArrayFragment {
   /// {@endtemplate}
   int integer(int index);
 
-  /// Returns the element at the given [index] as an floating point number.
+  /// Returns the element at the given [index] as a floating point number.
   ///
   /// {@macro cbl.ArrayInterface.typedDefaultedGetter}
   double float(int index);
@@ -185,7 +185,7 @@ abstract interface class MutableArrayInterface
   /// Adds a [num] at the end of this array.
   void addNumber(num? value);
 
-  /// Adds a integer number at the end of this array.
+  /// Adds an integer number at the end of this array.
   void addInteger(int value);
 
   /// Adds a floating point number at the end of this array.

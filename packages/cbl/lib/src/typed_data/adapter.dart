@@ -22,7 +22,7 @@ abstract interface class TypedDataAdapter {
   /// Returns a factory for creating typed representations of [Document]s, which
   /// determines the typed document to instantiate based on its properties.
   ///
-  /// The type argument [D] can be used whether a immutable or mutable variant
+  /// The type argument [D] can be used whether an immutable or mutable variant
   /// of the document is created by specifying either [TypedDocumentObject] or
   /// [TypedMutableDocumentObject].
   ///

@@ -51,7 +51,7 @@ final class Slice implements Finalizable {
   /// The size of this slice in bytes.
   final int size;
 
-  /// Interprets the data of this slice as an UTF-8 encoded string.
+  /// Interprets the data of this slice as a UTF-8 encoded string.
   String toDartString() => buf.cast<Utf8>().toDartString(length: size);
 
   /// Sets the [globalFLSlice] to this slice and returns it.

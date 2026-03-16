@@ -262,9 +262,9 @@ enum WebSocketErrorCode {
   cantFulfill,
 }
 
-/// Exception thrown when there is an WebSocket error.
+/// Exception thrown when there is a WebSocket error.
 final class WebSocketException extends CouchbaseLiteException {
-  /// Creates an exception which is thrown when there is an WebSocket error.
+  /// Creates an exception which is thrown when there is a WebSocket error.
   WebSocketException(this.message, this.code);
 
   @override
@@ -277,9 +277,9 @@ final class WebSocketException extends CouchbaseLiteException {
   String get _typeName => 'WebSocketException';
 }
 
-/// Exception thrown when there is an Mbed TLS error.
+/// Exception thrown when there is a Mbed TLS error.
 final class MbedTlsException extends CouchbaseLiteException {
-  /// Creates an exception which is thrown when there is an Mbed TLS error.
+  /// Creates an exception which is thrown when there is a Mbed TLS error.
   MbedTlsException(this.message, this.code);
 
   @override

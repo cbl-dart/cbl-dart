@@ -60,7 +60,7 @@ abstract final class Result
   /// {@endtemplate}
   int integer(Object nameOrIndex);
 
-  /// Returns the column at the given [nameOrIndex] as an floating point number.
+  /// Returns the column at the given [nameOrIndex] as a floating point number.
   ///
   /// {@macro cbl.Result.typedDefaultedGetter}
   double float(Object nameOrIndex);
