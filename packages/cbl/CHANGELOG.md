@@ -1,3 +1,14 @@
+## 4.0.0-dev.3
+
+> Note: This release has breaking changes.
+
+ - **REFACTOR**(cbl): use asTypedList(finalizer) in SliceResult ([#904](https://github.com/cbl-dart/cbl-dart/issues/904)). ([8fff901f](https://github.com/cbl-dart/cbl-dart/commit/8fff901f098dc2dcf4b409a06f7937c296f49764))
+ - **REFACTOR**: adopt Dart dot shorthand notation across codebase ([#901](https://github.com/cbl-dart/cbl-dart/issues/901)). ([3861bb7c](https://github.com/cbl-dart/cbl-dart/commit/3861bb7c2c7c1c5e775ac268479df419f62d9fcf))
+ - **BREAKING** **FIX**(cbl): rename `FullTextIndex.langauge` to `language` ([#908](https://github.com/cbl-dart/cbl-dart/issues/908)). ([72c96158](https://github.com/cbl-dart/cbl-dart/commit/72c961584a705ec08ea644986a009d275351c5fd))
+ - **BREAKING** **FEAT**(cbl): make `MutableDocument.withId` a named parameter and `data` non-nullable ([#909](https://github.com/cbl-dart/cbl-dart/issues/909)). ([a51ffb14](https://github.com/cbl-dart/cbl-dart/commit/a51ffb14864e7e0a9433729776cff808833dd816))
+ - **BREAKING** **FEAT**(cbl): throw `DatabaseException` on conflict instead of returning false ([#910](https://github.com/cbl-dart/cbl-dart/issues/910)). ([cfe03e7f](https://github.com/cbl-dart/cbl-dart/commit/cfe03e7f00f3c766e0db06c98d3e937ac8e9fb0f))
+ - **BREAKING** **FEAT**(cbl): use typed CryptoData/PemData for certificate fields ([#907](https://github.com/cbl-dart/cbl-dart/issues/907)). ([3cb6aa81](https://github.com/cbl-dart/cbl-dart/commit/3cb6aa81de47d8b46d96f6614a908c5c23230cb7))
+
 ## 4.0.0-dev.2
 
 > Note: This release has breaking changes.
