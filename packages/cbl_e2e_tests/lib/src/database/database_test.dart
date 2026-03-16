@@ -90,7 +90,7 @@ void main() {
       );
       final db = await openTestDatabase(config: config);
       final collection = await db.defaultCollection;
-      await collection.saveDocument(MutableDocument());
+      await collection.saveDocument(MutableDocument({}));
     });
 
     group('Database', () {
@@ -202,7 +202,7 @@ void main() {
         final db = await openTestDatabase();
         final collection = await db.defaultCollection;
 
-        final doc = MutableDocument();
+        final doc = MutableDocument({});
 
         await runWithApi(
           sync: () => (db as SyncDatabase).inBatchSync(() {
@@ -220,7 +220,7 @@ void main() {
         final db = await openTestDatabase();
         final collection = await db.defaultCollection;
 
-        final doc = MutableDocument();
+        final doc = MutableDocument({});
 
         await runWithApi(
           sync: () => expect(
@@ -259,8 +259,9 @@ void main() {
         await db.inBatch(() => inBatchZone = Zone.current);
 
         expect(
-          () =>
-              inBatchZone.run(() => collection.saveDocument(MutableDocument())),
+          () => inBatchZone.run(
+            () => collection.saveDocument(MutableDocument({})),
+          ),
           throwsA(isA<DatabaseException>()),
         );
       });
@@ -299,14 +300,14 @@ void main() {
           final inBatch = db.inBatch(() {});
 
           expect(
-            () => collection.saveDocument(MutableDocument()),
+            () => collection.saveDocument(MutableDocument({})),
             throwsA(isA<DatabaseException>()),
           );
 
           await inBatch;
 
           // Verify that after inBatch is finished sync operations are allowed.
-          collection.saveDocument(MutableDocument());
+          collection.saveDocument(MutableDocument({}));
         },
       );
 
@@ -317,7 +318,7 @@ void main() {
 
         expect(
           dbA.inBatch(() async {
-            await collectionB.saveDocument(MutableDocument());
+            await collectionB.saveDocument(MutableDocument({}));
           }),
           throwsA(isA<DatabaseException>()),
         );
@@ -326,19 +327,19 @@ void main() {
 
     group('Document', () {
       test("id returns the document's id", () {
-        final doc = MutableDocument.withId('a');
+        final doc = MutableDocument(id: 'a', {});
 
         expect(doc.id, 'a');
       });
 
       test('revisionId returns `null` when the document is new', () {
-        final doc = MutableDocument();
+        final doc = MutableDocument({});
 
         expect(doc.revisionId, isNull);
       });
 
       test('timestamp returns `0` when the document is new', () {
-        final doc = MutableDocument();
+        final doc = MutableDocument({});
 
         expect(doc.timestamp, 0);
       });
@@ -349,7 +350,7 @@ void main() {
           final db = await openTestDatabase();
           final collection = await db.defaultCollection;
 
-          final doc = MutableDocument();
+          final doc = MutableDocument({});
           await collection.saveDocument(doc);
 
           expect(doc.revisionId, isNotNull);
@@ -361,7 +362,7 @@ void main() {
         final db = await openTestDatabase();
         final collection = await db.defaultCollection;
 
-        final doc = MutableDocument();
+        final doc = MutableDocument({});
         await collection.saveDocument(doc);
 
         expect(doc.timestamp, isPositive);
@@ -393,7 +394,7 @@ void main() {
         final db = await openTestDatabase();
         final collection = await db.defaultCollection;
 
-        final doc = MutableDocument();
+        final doc = MutableDocument({});
         await collection.saveDocument(doc);
 
         expect(doc.sequence, isPositive);
@@ -426,13 +427,13 @@ void main() {
 
     group('MutableDocument', () {
       test('supports specifying an id', () {
-        final doc = MutableDocument.withId('id');
+        final doc = MutableDocument(id: 'id', {});
 
         expect(doc.id, 'id');
       });
 
       test('supports generating an id', () {
-        final doc = MutableDocument();
+        final doc = MutableDocument({});
 
         expect(doc.id, isNotEmpty);
       });
@@ -496,7 +497,7 @@ void main() {
           final dbB = await openTestDatabase(name: 'A');
           final collectionA = await dbA.defaultCollection;
           final collectionB = await dbB.defaultCollection;
-          final doc = MutableDocument();
+          final doc = MutableDocument({});
 
           expect(
             collectionA.changes(),

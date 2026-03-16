@@ -84,7 +84,7 @@ await collection.saveDocument(doc);
 It's also possible to create a document with a specific id:
 
 ```dart
-final doc = MutableDocument.withId('ali', {
+final doc = MutableDocument(id: 'ali', {
   'name': 'Alice',
   'age': 29,
 });
