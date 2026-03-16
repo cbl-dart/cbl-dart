@@ -146,6 +146,21 @@ hooks:
 Vector search requires the Enterprise edition and is supported on ARM64 and
 x86-64.
 
+## `FullTextIndex.langauge` renamed to `language`
+
+The `langauge` method on `api|FullTextIndex` was misspelled. It has been renamed
+to `language`:
+
+```dart
+// Before (v3)
+final index = FullTextIndex([FullTextIndexItem.property('text')])
+    .langauge(FullTextLanguage.english);
+
+// After (v4)
+final index = FullTextIndex([FullTextIndexItem.property('text')])
+    .language(FullTextLanguage.english);
+```
+
 ## `pinnedServerCertificate` and `trustedRootCertificates` type changes
 
 The `pinnedServerCertificate` and `trustedRootCertificates` fields on
@@ -454,29 +469,30 @@ No manual steps are required.
    - Replace `CouchbaseLiteDart.init(...)` with `api|CouchbaseLite.init`.
 7. **Enable vector search** (if needed) via `pubspec.yaml` config and an
    explicit call to `api|Extension.enableVectorSearch`.
-8. **Update certificate fields** on `ReplicatorConfiguration` -- wrap
+8. **Rename `langauge`** to `language` on `FullTextIndex`.
+9. **Update certificate fields** on `ReplicatorConfiguration` -- wrap
    `pinnedServerCertificate` bytes with `DerData` or `PemData`, and
    `trustedRootCertificates` bytes with `PemData`.
-9. **Rename `maxRotateCount`** to `maxKeptFiles` in any `LogFileConfiguration`
-   usage.
-10. **Update query result checks** that compare boolean expressions against `1`
+10. **Rename `maxRotateCount`** to `maxKeptFiles` in any `LogFileConfiguration`
+    usage.
+11. **Update query result checks** that compare boolean expressions against `1`
     or `0` -- they now return `true`/`false`.
-11. **Remove hardcoded revision IDs** -- revision IDs are no longer
+12. **Remove hardcoded revision IDs** -- revision IDs are no longer
     deterministic.
-12. **Update conflict handling** -- `saveDocument` and `deleteDocument` with
+13. **Update conflict handling** -- `saveDocument` and `deleteDocument` with
     `failOnConflict` now throw `DatabaseException` instead of returning `false`.
-13. **Migrate Database document/index/listener APIs** to use `defaultCollection`
+14. **Migrate Database document/index/listener APIs** to use `defaultCollection`
     methods instead.
-14. **Migrate ReplicatorConfiguration** -- replace `database` parameter with
+15. **Migrate ReplicatorConfiguration** -- replace `database` parameter with
     `addCollection`, move `channels`/`documentIds`/filters/resolvers into
     `CollectionConfiguration`.
-15. **Migrate Replicator pending document APIs** -- replace
+16. **Migrate Replicator pending document APIs** -- replace
     `pendingDocumentIds`/`isDocumentPending` with
     `pendingDocumentIdsInCollection`/`isDocumentPendingInCollection`.
-16. **Replace `DataSource.database(db)`** with
+17. **Replace `DataSource.database(db)`** with
     `DataSource.collection(collection)`.
-17. **Replace `InvalidJsonException`** with `FleeceException`.
-18. **Remove `TracingDelegate` usage** -- the tracing API has been removed from
+18. **Replace `InvalidJsonException`** with `FleeceException`.
+19. **Remove `TracingDelegate` usage** -- the tracing API has been removed from
     the public API.
-19. **Run your app** -- native libraries will be built automatically on first
+20. **Run your app** -- native libraries will be built automatically on first
     run.
