@@ -608,7 +608,7 @@ function checkBuildRunnerOutput() {
 
 # Uploads coverage data to codecov.
 #
-# The first and only paramter is a comma separated list of flags to be
+# The first and only parameter is a comma separated list of flags to be
 # associated with the uploaded coverage data.
 function uploadCoverageData() {
     requireEnvVar EMBEDDER

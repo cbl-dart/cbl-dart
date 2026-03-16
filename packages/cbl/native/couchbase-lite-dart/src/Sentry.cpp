@@ -26,7 +26,7 @@ bool CBLDart_InitSentryAPI() {
   static std::once_flag initFlag;
   std::call_once(initFlag, []() {
 #if defined(SENTRY_PLATFORM_LINUX)
-    // Load libsentry as a shared libray. We expect the dynamic loader to
+    // Load libsentry as a shared library. We expect the dynamic loader to
     // be able to find it. If the library is next to libcblitedart it will be
     // found, since libcblitedart is compiled with an RPATH which looks for
     // libraries in the same directory as libcblitedart.

@@ -5,7 +5,7 @@ import 'logger.dart';
 ///
 /// {@category Logging}
 abstract final class ConsoleLogger {
-  /// The minium [LogLevel] of the log messages to be logged.
+  /// The minimum [LogLevel] of the log messages to be logged.
   ///
   /// The default log level is [LogLevel.warning].
   LogLevel get level;

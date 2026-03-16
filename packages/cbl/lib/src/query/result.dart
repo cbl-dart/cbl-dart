@@ -109,7 +109,7 @@ abstract final class Result
 }
 
 final class ResultImpl with IterableMixin<String> implements Result {
-  /// Creates a result from a fleece [array] fo the column values.
+  /// Creates a result from a fleece [array] of the column values.
   ///
   /// The [context] can be shared with other [Result]s, if it is guaranteed that
   /// all results are from the same chunk of encoded Fleece data.

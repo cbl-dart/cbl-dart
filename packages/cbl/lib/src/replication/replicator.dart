@@ -103,7 +103,7 @@ typedef DocumentReplicationListener = void Function(DocumentReplication change);
 /// target database.
 ///
 /// The replicator can be bidirectional or either push or pull. The replicator
-/// can also be one-shot ore continuous. The replicator runs asynchronously, so
+/// can also be one-shot or continuous. The replicator runs asynchronously, so
 /// observe the [status] to be notified of progress.
 ///
 /// {@category Replication}
