@@ -15,7 +15,6 @@ import '../replication/document_replication.dart';
 import '../replication/endpoint.dart';
 import '../replication/replicator.dart';
 import '../replication/tls_identity.dart';
-import '../support/native_object.dart';
 import '../support/utils.dart';
 import '../tracing.dart';
 import 'channel.dart';
@@ -440,7 +439,7 @@ final class IndexUpdaterFinish extends Request<Null> {
   final int updaterId;
 }
 
-final class ServiceDatabaseEndpoint implements Endpoint, Finalizable {
+final class ServiceDatabaseEndpoint implements Endpoint {
   ServiceDatabaseEndpoint(this.databasePointer);
 
   final Pointer<cblite.CBLDatabase> databasePointer;
@@ -519,13 +518,6 @@ final class CreateReplicator extends Request<int> implements SendAware {
       final identity = FfiTlsIdentity.fromPointer(pointer, adopt: true);
       _authenticator = ClientCertificateAuthenticator(identity);
       _certificateAuthenticatorIdentityPointer = null;
-    }
-
-    if (target case final ServiceDatabaseEndpoint endpoint) {
-      bindCBLRefCountedToDartObject(
-        endpoint,
-        pointer: endpoint.databasePointer,
-      );
     }
 
     _pinnedServerCertificate?.didReceive();

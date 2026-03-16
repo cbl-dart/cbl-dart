@@ -448,9 +448,13 @@ extension on ReplicatorConfiguration {
       final db = target.database as FfiDatabase;
       return ReplicatorBindings.createEndpointWithLocalDB(db.pointer);
     } else if (target is ServiceDatabaseEndpoint) {
-      return ReplicatorBindings.createEndpointWithLocalDB(
+      final endpoint = ReplicatorBindings.createEndpointWithLocalDB(
         target.databasePointer,
       );
+      // Release the extra retain added in CreateReplicator.willSend().
+      // The CBL endpoint now holds its own reference to the database.
+      BaseBindings.releaseRefCounted(target.databasePointer.cast());
+      return endpoint;
     } else {
       throw UnimplementedError('Endpoint type is not implemented: $target');
     }
