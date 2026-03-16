@@ -101,6 +101,10 @@ final class TypedDataRegistry implements TypedDataAdapter {
       return dictionaryFactory;
     }
 
+    if (_isDocumentType<D>()) {
+      throw _documentTypeInQueryError(D);
+    }
+
     throw _unknownTypeError(D);
   }
 
@@ -234,6 +238,10 @@ final class TypedDataRegistry implements TypedDataAdapter {
   _dictionaryFactoryFor<D extends TypedDictionaryObject>() =>
       _dictionaryMetadataForType[D]?.factory as Factory<Dictionary, D>?;
 
+  bool _isDocumentType<D extends TypedDictionaryObject>() =>
+      _documentMetadataForType.containsKey(D) ||
+      _documentMetadataForMutableType.containsKey(D);
+
   Factory<Document, D>? _documentFactoryFor<D extends TypedDocumentObject>() =>
       _documentMetadataForType[D]?.factory as Factory<Document, D>?;
 
@@ -257,6 +265,14 @@ final class TypedDataRegistry implements TypedDataAdapter {
 
 Exception _unknownTypeError(Type type) => TypedDataException(
   '$type is not a known typed data type.',
+  TypedDataErrorCode.unknownType,
+);
+
+Exception _documentTypeInQueryError(Type type) => TypedDataException(
+  '$type is a typed document and cannot be used with query result sets. '
+  'Typed documents carry database metadata (id, revision, sequence) that '
+  'is not available in query results. Use a @TypedDictionary instead to '
+  'represent query results.',
   TypedDataErrorCode.unknownType,
 );
 
