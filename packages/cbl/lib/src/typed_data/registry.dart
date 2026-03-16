@@ -270,9 +270,9 @@ Exception _unknownTypeError(Type type) => TypedDataException(
 
 Exception _documentTypeInQueryError(Type type) => TypedDataException(
   '$type is a typed document and cannot be used with query result sets. '
-  'Typed documents carry database metadata (id, revision, sequence) that '
-  'is not available in query results. Use a @TypedDictionary instead to '
-  'represent query results.',
+  'It is not possible to reconstruct a document from a query result that '
+  'behaves the same as a document loaded from the database. '
+  'Use a @TypedDictionary instead to represent query results.',
   TypedDataErrorCode.unknownType,
 );
 
