@@ -58,7 +58,7 @@ final class ProxyReplicator extends ProxyObject
                 'config.target.database',
               )
               as ProxyDatabase;
-      target = ServiceDatabaseEndpoint(database.objectId);
+      target = ServiceDatabaseEndpoint(database.state.pointer);
     }
 
     final client = database.client;

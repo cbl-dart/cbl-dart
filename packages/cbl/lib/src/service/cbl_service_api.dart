@@ -15,6 +15,7 @@ import '../replication/document_replication.dart';
 import '../replication/endpoint.dart';
 import '../replication/replicator.dart';
 import '../replication/tls_identity.dart';
+import '../support/native_object.dart';
 import '../support/utils.dart';
 import '../tracing.dart';
 import 'channel.dart';
@@ -439,10 +440,10 @@ final class IndexUpdaterFinish extends Request<Null> {
   final int updaterId;
 }
 
-final class ServiceDatabaseEndpoint implements Endpoint {
-  ServiceDatabaseEndpoint(this.databaseId);
+final class ServiceDatabaseEndpoint implements Endpoint, Finalizable {
+  ServiceDatabaseEndpoint(this.databasePointer);
 
-  final int databaseId;
+  final Pointer<cblite.CBLDatabase> databasePointer;
 }
 
 final class CreateReplicator extends Request<int> implements SendAware {
@@ -504,6 +505,10 @@ final class CreateReplicator extends Request<int> implements SendAware {
       _authenticator = null;
     }
 
+    if (target case final ServiceDatabaseEndpoint endpoint) {
+      BaseBindings.retainRefCounted(endpoint.databasePointer.cast());
+    }
+
     _pinnedServerCertificate?.willSend();
     _trustedRootCertificates?.willSend();
   }
@@ -514,6 +519,13 @@ final class CreateReplicator extends Request<int> implements SendAware {
       final identity = FfiTlsIdentity.fromPointer(pointer, adopt: true);
       _authenticator = ClientCertificateAuthenticator(identity);
       _certificateAuthenticatorIdentityPointer = null;
+    }
+
+    if (target case final ServiceDatabaseEndpoint endpoint) {
+      bindCBLRefCountedToDartObject(
+        endpoint,
+        pointer: endpoint.databasePointer,
+      );
     }
 
     _pinnedServerCertificate?.didReceive();
@@ -736,11 +748,17 @@ final class SendableValue implements SendAware {
 }
 
 final class DatabaseState {
-  DatabaseState({required this.id, required this.name, required this.path});
+  DatabaseState({
+    required this.id,
+    required this.name,
+    required this.path,
+    required this.pointer,
+  });
 
   final int id;
   final String name;
   final String? path;
+  final Pointer<cblite.CBLDatabase> pointer;
 }
 
 final class ScopeState {

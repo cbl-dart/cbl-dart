@@ -9,6 +9,7 @@ import '../document/document.dart';
 import '../document/ffi_document.dart';
 import '../errors.dart';
 import '../fleece/containers.dart' as fl;
+import '../service/cbl_service_api.dart';
 import '../support/async_callback.dart';
 import '../support/edition.dart';
 import '../support/errors.dart';
@@ -442,6 +443,10 @@ extension on ReplicatorConfiguration {
     } else if (target is DatabaseEndpoint) {
       final db = target.database as FfiDatabase;
       return ReplicatorBindings.createEndpointWithLocalDB(db.pointer);
+    } else if (target is ServiceDatabaseEndpoint) {
+      return ReplicatorBindings.createEndpointWithLocalDB(
+        target.databasePointer,
+      );
     } else {
       throw UnimplementedError('Endpoint type is not implemented: $target');
     }
