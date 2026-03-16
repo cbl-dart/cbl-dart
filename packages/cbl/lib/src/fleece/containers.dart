@@ -61,7 +61,7 @@ final class Doc implements Finalizable {
   /// doc.
   factory Doc.fromJson(String json) => .fromPointer(DocBindings.fromJson(json));
 
-  /// Creates an [Doc] based on a [pointer] to the the native value.
+  /// Creates an [Doc] based on a [pointer] to the native value.
   ///
   /// Note: Does not retain the native doc.
   Doc.fromPointer(this.pointer) {
@@ -128,7 +128,7 @@ extension on FLValueType {
 ///   [asDict]. If the value is not of that type, null is returned. (Array and
 ///   Dict are documented fully in their own sections.)
 final class Value implements Finalizable {
-  /// Creates a [Value] based on a [pointer] to the the native value.
+  /// Creates a [Value] based on a [pointer] to the native value.
   ///
   /// Accessing immutable values is only allowed, while the enclosing container
   /// ([Doc], [MutableArray], [MutableDict] and other objects, holding Fleece
@@ -286,7 +286,7 @@ final class Value implements Finalizable {
 
 /// A Fleece array.
 final class Array extends Value with ListMixin<Value> {
-  /// Creates an [Array] based on a [pointer] to the the native value.
+  /// Creates an [Array] based on a [pointer] to the native value.
   Array.fromPointer(FLArray pointer, {super.isRefCounted, super.adopt})
     : super.fromPointer(pointer.cast());
 
@@ -342,7 +342,7 @@ final class MutableArray extends Array {
     return result;
   }
 
-  /// Creates a [MutableArray] based on a [pointer] to the the native value.
+  /// Creates a [MutableArray] based on a [pointer] to the native value.
   MutableArray.fromPointer(FLMutableArray pointer, {super.adopt})
     : super.fromPointer(pointer.cast(), isRefCounted: true);
 
@@ -443,7 +443,7 @@ final class MutableArray extends Array {
 
 /// A Fleece dictionary.
 final class Dict extends Value with MapMixin<String, Value> {
-  /// Creates a [Dict] based on a [pointer] to the the native value.
+  /// Creates a [Dict] based on a [pointer] to the native value.
   Dict.fromPointer(FLDict pointer, {super.isRefCounted, super.adopt})
     : super.fromPointer(pointer.cast());
 
@@ -546,7 +546,7 @@ final class MutableDict extends Dict {
     return result;
   }
 
-  /// Creates a [MutableDict] based on a [pointer] to the the native value.
+  /// Creates a [MutableDict] based on a [pointer] to the native value.
   MutableDict.fromPointer(
     FLMutableDict pointer, {
     super.isRefCounted,

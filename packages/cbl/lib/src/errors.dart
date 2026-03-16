@@ -69,7 +69,7 @@ enum DatabaseErrorCode {
   cantUpgradeDatabase,
 }
 
-/// Exception throw when there is a failure interacting with a Couchbase Lite
+/// Exception thrown when there is a failure interacting with a Couchbase Lite
 /// database.
 final class DatabaseException extends CouchbaseLiteException {
   /// Creates an exception which is thrown when there is a failure interacting
@@ -87,10 +87,10 @@ final class DatabaseException extends CouchbaseLiteException {
   @override
   final DatabaseErrorCode code;
 
-  /// If this is an query parsing exception the invalid query string.
+  /// If this is a query parsing exception the invalid query string.
   final String? queryString;
 
-  /// If this is an query parsing exception the position of the error in the
+  /// If this is a query parsing exception the position of the error in the
   /// [queryString].
   final int? errorPosition;
 
@@ -328,7 +328,7 @@ enum TypedDataErrorCode {
   dataMismatch,
 }
 
-/// Exception throw when there is a failure related to typed data.
+/// Exception thrown when there is a failure related to typed data.
 ///
 /// {@category Typed Data}
 @experimental

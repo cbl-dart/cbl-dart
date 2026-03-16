@@ -175,8 +175,8 @@ final class SliceResult extends Slice {
 
   /// Creates a [SliceResult] from [cblite.FLSliceResult].
   ///
-  /// If the the slice should be retained, set [retain] to `true`. The slice
-  /// will be release when this object is garbage collected.
+  /// If the slice should be retained, set [retain] to `true`. The slice will be
+  /// released when this object is garbage collected.
   static SliceResult? fromFLSliceResult(
     cblite.FLSliceResult slice, {
     bool retain = false,

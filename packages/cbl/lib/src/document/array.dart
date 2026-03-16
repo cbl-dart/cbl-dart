@@ -22,16 +22,15 @@ abstract interface class ArrayInterface implements ArrayFragment {
   ///
   /// Returns `null` if the element is `null`.
   ///
-  /// Throws a [RangeError] if the [index] is ouf of range.
+  /// Throws a [RangeError] if the [index] is out of range.
   T? value<T extends Object>(int index);
 
   /// Returns the element at the given [index] as a [String].
   ///
   /// {@template cbl.ArrayInterface.typedNullableGetter}
-  /// Returns `null` if the element is not a of the expected typ or it is
-  /// `null`.
+  /// Returns `null` if the element is not of the expected type or it is `null`.
   ///
-  /// Throws a [RangeError] if the [index] is ouf of range.
+  /// Throws a [RangeError] if the [index] is out of range.
   /// {@endtemplate}
   String? string(int index);
 
@@ -41,7 +40,7 @@ abstract interface class ArrayInterface implements ArrayFragment {
   /// Returns a default value (integer: `0`, double: `0.0`, boolean: `false`) if
   /// the element is not of the expected type or is `null`.
   ///
-  /// Throws a [RangeError] if the [index] is ouf of range.
+  /// Throws a [RangeError] if the [index] is out of range.
   /// {@endtemplate}
   int integer(int index);
 
@@ -123,7 +122,7 @@ abstract interface class MutableArrayInterface
   /// {@macro cbl.MutableArray.allowedValueTypes}
   ///
   /// {@template cbl.MutableArrayInterface.setter}
-  /// Throws a [RangeError] if the index is ouf of range.
+  /// Throws a [RangeError] if the index is out of range.
   /// {@endtemplate}
   void setValue(Object? value, {required int at});
 
@@ -215,7 +214,7 @@ abstract interface class MutableArrayInterface
   /// {@macro cbl.MutableArray.allowedValueTypes}
   ///
   /// {@template cbl.MutableArrayInterface.inserter}
-  /// Throws a [RangeError] if the index is ouf of range.
+  /// Throws a [RangeError] if the index is out of range.
   /// {@endtemplate}
   void insertValue(Object? value, {required int at});
 

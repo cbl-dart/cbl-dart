@@ -13,11 +13,11 @@ import 'variable_expression.dart';
 /// The `ANY` quantifier requires at least one of the array elements to match
 /// the condition.
 ///
-/// The `EVERY` quantifier requires all of of the array elements to match the
+/// The `EVERY` quantifier requires all of the array elements to match the
 /// condition, or for the array to be empty.
 ///
-/// The `ANY AND EVERY` quantifier requires all of of the array elements to
-/// match the condition, and for the array **not** to be empty.
+/// The `ANY AND EVERY` quantifier requires all of the array elements to match
+/// the condition, and for the array **not** to be empty.
 ///
 /// Here is how to build a range predicate expression:
 ///

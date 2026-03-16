@@ -42,9 +42,9 @@ abstract base class ConflictResolver {
   ///
   /// Inside of [conflict] this method receives the id of the conflicted
   /// document, the local revision of the document in the database, or `null` if
-  /// the local document has been deleted and the the remote revision of the
-  /// document found on the server or `null` if the document has been deleted on
-  /// the server.
+  /// the local document has been deleted, and the remote revision of the
+  /// document found on the server, or `null` if the document has been deleted
+  /// on the server.
   ///
   /// Return the resolved document to save locally (and push, if the replicator
   /// is pushing.) This can be the same as [Conflict.localDocument] or

@@ -31,7 +31,7 @@ enum FullTextLanguage {
 
 // === Impl ====================================================================
 
-/// Interface for classes wich implement [Index].
+/// Interface for classes which implement [Index].
 abstract interface class IndexImplInterface extends Index {
   /// Returns this index specified as a [CBLIndexSpec].
   CBLIndexSpec toCBLIndexSpec();

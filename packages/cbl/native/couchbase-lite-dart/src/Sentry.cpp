@@ -36,7 +36,7 @@ bool CBLDart_InitSentryAPI() {
       return;
     }
 
-    // Initialize the fuction pointers.
+    // Initialize the function pointers.
     sentry_value_new_string_fp =
         (sentry_value_new_string_t)dlsym(handle, "sentry_value_new_string");
     sentry_value_set_by_key_fp =
