@@ -213,7 +213,7 @@ abstract base class SaveTypedDocumentBase<
   final D Function(Document) _documentFactory;
 
   @override
-  FutureOr<bool> withConcurrencyControl([
+  FutureOr<void> withConcurrencyControl([
     ConcurrencyControl concurrencyControl = .lastWriteWins,
   ]) => collection().then((collection) {
     database.typedDataAdapter!.willSaveDocument(document);
@@ -311,6 +311,32 @@ mixin CollectionBase<T extends DocumentDelegate> implements Collection {
     return delegate;
   }
 
+  /// Tries to save [document] with [ConcurrencyControl.failOnConflict] and
+  /// returns whether the save succeeded (no conflict).
+  ///
+  /// This is used internally by [saveDocumentWithConflictHandlerHelper] to
+  /// attempt the save and detect conflicts, supporting both sync and async
+  /// implementations.
+  FutureOr<bool> _trySaveDocument(MutableDelegateDocument document) {
+    try {
+      final result = saveDocument(document, ConcurrencyControl.failOnConflict);
+      if (result is Future<void>) {
+        return result.then((_) => true).onError<DatabaseException>((e, st) {
+          if (e.code == DatabaseErrorCode.conflict) {
+            return false;
+          }
+          Error.throwWithStackTrace(e, st);
+        });
+      }
+      return true;
+    } on DatabaseException catch (e) {
+      if (e.code == DatabaseErrorCode.conflict) {
+        return false;
+      }
+      rethrow;
+    }
+  }
+
   /// Implements the algorithm to save a document with a [SaveConflictHandler].
   ///
   /// If the [conflictHandler] is synchronous and this collection is synchronous
@@ -331,9 +357,8 @@ mixin CollectionBase<T extends DocumentDelegate> implements Collection {
       do {
         late bool noConflict;
 
-        yield saveDocument(
+        yield _trySaveDocument(
           documentBeingSaved,
-          ConcurrencyControl.failOnConflict,
         ).then((value) => noConflict = value);
 
         if (noConflict) {

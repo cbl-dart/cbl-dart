@@ -239,6 +239,44 @@ strategy. Applications that relied on detecting conflict resolver failures
 should catch exceptions within their `api|ConflictResolver.resolve`
 implementation and handle them explicitly.
 
+## Conflict handling in `saveDocument` and `deleteDocument`
+
+In v3, `api|Collection.saveDocument` and `api|Collection.deleteDocument`
+returned `false` when a conflict occurred with
+`api|enum:ConcurrencyControl.failOnConflict`.
+
+In v4, these methods return `void` and throw a `api|DatabaseException` with
+`api|enum:DatabaseErrorCode.conflict` instead. This aligns with other Couchbase
+Lite SDKs and makes conflicts harder to accidentally ignore.
+
+The same applies to `api|Collection.deleteTypedDocument` and
+`api|SaveTypedDocument.withConcurrencyControl`.
+
+```dart
+// Before (v3)
+final saved = await collection.saveDocument(
+  doc,
+  ConcurrencyControl.failOnConflict,
+);
+if (!saved) {
+  // handle conflict
+}
+
+// After (v4)
+try {
+  await collection.saveDocument(
+    doc,
+    ConcurrencyControl.failOnConflict,
+  );
+} on DatabaseException catch (e) {
+  if (e.code == DatabaseErrorCode.conflict) {
+    // handle conflict
+  } else {
+    rethrow;
+  }
+}
+```
+
 ## Removed deprecated Database APIs
 
 In v3, `api|Database` provided document operations, change listeners, and index
@@ -441,18 +479,20 @@ No manual steps are required.
     or `0` -- they now return `true`/`false`.
 12. **Remove hardcoded revision IDs** -- revision IDs are no longer
     deterministic.
-13. **Migrate Database document/index/listener APIs** to use `defaultCollection`
+13. **Update conflict handling** -- `saveDocument` and `deleteDocument` with
+    `failOnConflict` now throw `DatabaseException` instead of returning `false`.
+14. **Migrate Database document/index/listener APIs** to use `defaultCollection`
     methods instead.
-14. **Migrate ReplicatorConfiguration** -- replace `database` parameter with
+15. **Migrate ReplicatorConfiguration** -- replace `database` parameter with
     `addCollection`, move `channels`/`documentIds`/filters/resolvers into
     `CollectionConfiguration`.
-15. **Migrate Replicator pending document APIs** -- replace
+16. **Migrate Replicator pending document APIs** -- replace
     `pendingDocumentIds`/`isDocumentPending` with
     `pendingDocumentIdsInCollection`/`isDocumentPendingInCollection`.
-16. **Replace `DataSource.database(db)`** with
+17. **Replace `DataSource.database(db)`** with
     `DataSource.collection(collection)`.
-17. **Replace `InvalidJsonException`** with `FleeceException`.
-18. **Remove `TracingDelegate` usage** -- the tracing API has been removed from
+18. **Replace `InvalidJsonException`** with `FleeceException`.
+19. **Remove `TracingDelegate` usage** -- the tracing API has been removed from
     the public API.
-19. **Run your app** -- native libraries will be built automatically on first
+20. **Run your app** -- native libraries will be built automatically on first
     run.
