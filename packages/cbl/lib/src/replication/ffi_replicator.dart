@@ -155,6 +155,9 @@ final class FfiReplicator
       final pointer = ReplicatorBindings.createReplicator(ffiConfig);
 
       cblReachabilityFence(fleeceContainers);
+      // The collections map is not Finalizable, so the GC can collect it
+      // (and finalize the FfiCollection keys) after its last use above.
+      // Keep the keys alive through the FFI call. See #856.
       cblReachabilityFence(collections.keys);
 
       return FfiReplicator._(
