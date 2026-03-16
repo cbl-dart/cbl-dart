@@ -62,7 +62,7 @@ void main() {
 
       expect(await collection.count, 0);
 
-      await collection.saveDocument(MutableDocument());
+      await collection.saveDocument(MutableDocument({}));
 
       expect(await collection.count, 1);
     });
@@ -73,7 +73,7 @@ void main() {
 
       expect((await collection['a']).exists, isFalse);
 
-      await collection.saveDocument(MutableDocument.withId('a'));
+      await collection.saveDocument(MutableDocument(id: 'a', {}));
 
       expect((await collection['a']).exists, isTrue);
     });
@@ -89,7 +89,7 @@ void main() {
         final db = await openTestDatabase();
         final collection = await db.defaultCollection;
 
-        final doc = MutableDocument();
+        final doc = MutableDocument({});
         await collection.saveDocument(doc);
 
         expect(await collection.document(doc.id), doc);
@@ -189,7 +189,7 @@ void main() {
         final db = await openTestDatabase();
         final collection = await db.defaultCollection;
 
-        final doc = MutableDocument();
+        final doc = MutableDocument({});
         await collection.saveDocument(doc);
         final updatedDoc = ((await collection.document(doc.id))!.toMutable())
           ..setValue('b', key: 'a');
@@ -218,7 +218,7 @@ void main() {
         final db = await openTestDatabase();
         final collection = await db.defaultCollection;
 
-        final doc = MutableDocument();
+        final doc = MutableDocument({});
         await collection.saveDocument(doc);
         await collection.deleteDocument((await collection.document(doc.id))!);
 
@@ -245,7 +245,7 @@ void main() {
         final db = await openTestDatabase();
         final collection = await db.defaultCollection;
 
-        final doc = MutableDocument();
+        final doc = MutableDocument({});
         await collection.saveDocument(doc);
         final updatedDoc = ((await collection.document(doc.id))!.toMutable())
           ..setValue('b', key: 'a');
@@ -270,7 +270,7 @@ void main() {
         final db = openSyncTestDatabase();
         final collection = db.defaultCollection;
 
-        final doc = MutableDocument();
+        final doc = MutableDocument({});
         collection.saveDocument(doc);
         final updatedDoc = ((collection.document(doc.id))!.toMutable())
           ..setValue('b', key: 'a');
@@ -302,7 +302,7 @@ void main() {
         final db = await openTestDatabase();
         final collection = await db.defaultCollection;
 
-        final doc = MutableDocument();
+        final doc = MutableDocument({});
         await collection.saveDocument(doc);
         await collection.deleteDocument(doc);
 
@@ -314,7 +314,7 @@ void main() {
       final db = await openTestDatabase();
       final collection = await db.defaultCollection;
 
-      final doc = MutableDocument();
+      final doc = MutableDocument({});
       await collection.saveDocument(doc);
       await collection.deleteDocument((await collection.document(doc.id))!);
 
@@ -325,7 +325,7 @@ void main() {
       final db = await openTestDatabase();
       final collection = await db.defaultCollection;
 
-      final doc = MutableDocument();
+      final doc = MutableDocument({});
       await collection.saveDocument(doc);
       await collection.deleteDocument(
         (await collection.document(doc.id))!.toMutable(),
@@ -338,7 +338,7 @@ void main() {
       final db = await openTestDatabase();
       final collection = await db.defaultCollection;
 
-      final doc = MutableDocument();
+      final doc = MutableDocument({});
       expect(
         () => collection.deleteDocument(doc),
         throwsA(
@@ -355,7 +355,7 @@ void main() {
       final db = await openTestDatabase();
       final collection = await db.defaultCollection;
 
-      final doc = MutableDocument();
+      final doc = MutableDocument({});
       await collection.saveDocument(doc);
       await collection.purgeDocument(doc);
 
@@ -366,7 +366,7 @@ void main() {
       final db = await openTestDatabase();
       final collection = await db.defaultCollection;
 
-      final doc = MutableDocument();
+      final doc = MutableDocument({});
       await collection.saveDocument(doc);
       await collection.purgeDocumentById(doc.id);
 
@@ -378,7 +378,7 @@ void main() {
         final db = await openTestDatabase();
         final collection = await db.defaultCollection;
 
-        final doc = MutableDocument();
+        final doc = MutableDocument({});
         await collection.saveDocument(doc);
 
         expect(await collection.getDocumentExpiration(doc.id), isNull);
@@ -391,7 +391,7 @@ void main() {
           final collection = await db.defaultCollection;
 
           final expiration = DateTime.now().add(const Duration(days: 1));
-          final doc = MutableDocument();
+          final doc = MutableDocument({});
           await collection.saveDocument(doc);
           await collection.setDocumentExpiration(doc.id, expiration);
 
@@ -413,7 +413,7 @@ void main() {
         final collection = await db.defaultCollection;
 
         final expiration = DateTime.now().add(const Duration(days: 1));
-        final doc = MutableDocument();
+        final doc = MutableDocument({});
         await collection.saveDocument(doc);
         await collection.setDocumentExpiration(doc.id, expiration);
 
@@ -430,7 +430,7 @@ void main() {
         final collection = await db.defaultCollection;
 
         final expiration = DateTime.now().add(const Duration(days: 1));
-        final doc = MutableDocument();
+        final doc = MutableDocument({});
         await collection.saveDocument(doc);
         await collection.setDocumentExpiration(doc.id, expiration);
         await collection.setDocumentExpiration(doc.id, null);
@@ -444,7 +444,7 @@ void main() {
         final db = await openTestDatabase();
         final collection = await db.defaultCollection;
 
-        final doc = MutableDocument();
+        final doc = MutableDocument({});
         final listenerWasCalled = Completer<void>();
 
         final token = await collection.addChangeListener(
@@ -463,14 +463,14 @@ void main() {
         await collection.removeChangeListener(token);
 
         // Change the database again, to verify listener is not called anymore.
-        await collection.saveDocument(MutableDocument());
+        await collection.saveDocument(MutableDocument({}));
       });
 
       apiTest('document change listener is notified while listening', () async {
         final db = await openTestDatabase();
         final collection = await db.defaultCollection;
 
-        final doc = MutableDocument();
+        final doc = MutableDocument({});
         final listenerWasCalled = Completer<void>();
 
         final token = await collection.addDocumentChangeListener(
@@ -500,7 +500,7 @@ void main() {
           final db = await openTestDatabase();
           final collection = await db.defaultCollection;
 
-          final doc = MutableDocument();
+          final doc = MutableDocument({});
 
           expect(
             collection.changes(),
@@ -518,7 +518,7 @@ void main() {
         () async {
           final db = await openTestDatabase();
           final collection = await db.defaultCollection;
-          final doc = MutableDocument();
+          final doc = MutableDocument({});
 
           expect(
             collection.documentChanges(doc.id),

@@ -203,7 +203,7 @@ void main() {
         runWithApiValues(() async {
           final db = await getSharedTestDatabase();
           final collection = await db.defaultCollection;
-          final doc = MutableDocument.withId('SelectOneResult', {'a': true});
+          final doc = MutableDocument(id: 'SelectOneResult', {'a': true});
           await collection.saveDocument(doc);
         }),
       );
@@ -408,7 +408,7 @@ void main() {
       apiTest('orderBy', () async {
         final db = await openTestDatabase();
         final collection = await db.defaultCollection;
-        final docs = List.generate(5, (_) => MutableDocument());
+        final docs = List.generate(5, (_) => MutableDocument({}));
 
         await db.saveAllDocuments(docs);
 
@@ -429,7 +429,7 @@ void main() {
       apiTest('limit', () async {
         final db = await openTestDatabase();
         final collection = await db.defaultCollection;
-        final docs = List.generate(5, (_) => MutableDocument());
+        final docs = List.generate(5, (_) => MutableDocument({}));
 
         await db.saveAllDocuments(docs);
 
@@ -760,8 +760,8 @@ void main() {
 
     group('Meta', () {
       final expirationDate = DateTime.now().add(const Duration(days: 1));
-      final doc = apiProvider((_) => MutableDocument());
-      final deletedDoc = apiProvider((_) => MutableDocument());
+      final doc = apiProvider((_) => MutableDocument({}));
+      final deletedDoc = apiProvider((_) => MutableDocument({}));
 
       setUpAll(
         runWithApiValues(() async {
@@ -1153,6 +1153,47 @@ void main() {
     });
 
     group('FullTextFunction', () {
+      apiTest('language enables stemming', () async {
+        final db = await openTestDatabase();
+        final collection = await db.defaultCollection;
+
+        // English stemming: searching for "run" should match "running".
+        await collection.createIndex(
+          'english',
+          IndexBuilder.fullTextIndex([
+            FullTextIndexItem.property('a'),
+          ]).language(FullTextLanguage.english),
+        );
+
+        // French stemming does not know English word roots, so searching
+        // for "run" should not match "running".
+        await collection.createIndex(
+          'french',
+          IndexBuilder.fullTextIndex([
+            FullTextIndexItem.property('a'),
+          ]).language(FullTextLanguage.french),
+        );
+
+        await collection.saveDocument(
+          MutableDocument({'a': 'He is running fast'}),
+        );
+
+        Future<int> matchCount(String indexName, String query) async {
+          final resultSet = await const QueryBuilder()
+              .select(SelectResult.expression(Meta.id))
+              .from(DataSource.collection(collection))
+              .where(FullTextFunction.match(indexName: indexName, query: query))
+              .execute();
+          return (await resultSet.allPlainListResults()).length;
+        }
+
+        // English stemmer reduces "running" to "run", so this matches.
+        expect(await matchCount('english', 'run'), 1);
+
+        // French stemmer does not reduce "running" to "run".
+        expect(await matchCount('french', 'run'), 0);
+      });
+
       apiTest('match and rank', () async {
         final db = await openTestDatabase();
         final collection = await db.defaultCollection;
@@ -1200,7 +1241,7 @@ void setupEvalExprUtils() {
     runWithApiValues(() async {
       final db = await getSharedTestDatabase();
       final collection = await db.defaultCollection;
-      await collection.saveDocument(MutableDocument.withId('EvalExpr'));
+      await collection.saveDocument(MutableDocument(id: 'EvalExpr', {}));
     }),
   );
 }
@@ -1301,10 +1342,10 @@ extension on Database {
 enum JoinType { join, leftJoin, leftOuterJoin, innerJoin, crossJoin }
 
 MutableDocument leftJoinDoc({required String id, String? on}) =>
-    MutableDocument.withId(id, {'side': 'left', 'on': ?on});
+    MutableDocument(id: id, {'side': 'left', 'on': ?on});
 
 MutableDocument rightJoinDoc({required String id, String? on}) =>
-    MutableDocument.withId(id, {'side': 'right', 'on': ?on});
+    MutableDocument(id: id, {'side': 'right', 'on': ?on});
 
 extension on Database {
   Future<Object?> evalJoin({

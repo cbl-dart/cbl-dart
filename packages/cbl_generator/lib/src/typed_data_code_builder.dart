@@ -158,24 +158,18 @@ class ${_classNames.mutableClassName}
     _code.write('): super(');
 
     final documentIdField = object.documentIdField;
+    final isDocument = object.kind == TypedDataObjectKind.document;
     if (documentIdField != null &&
         documentIdField.constructorParameter != null) {
-      if (documentIdField.constructorParameter!.type.isNullable) {
-        _code
-          ..write(documentIdField.name)
-          ..write(' == null ? ')
-          ..write(_mutableInternalType)
-          ..write('() : ');
-      }
       _code
         ..write(_mutableInternalType)
-        ..write('.withId(')
+        ..write('(id: ')
         ..write(documentIdField.name)
-        ..write(')');
+        ..write(', {})');
     } else {
       _code
         ..write(_mutableInternalType)
-        ..write('()');
+        ..write(isDocument ? '({})' : '()');
     }
 
     _code.write(')');

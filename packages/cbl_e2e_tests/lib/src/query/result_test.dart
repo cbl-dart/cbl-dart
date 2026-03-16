@@ -195,7 +195,7 @@ void main() {
       apiTest('access column by name', () async {
         final db = await openTestDatabase();
         final collection = await db.defaultCollection;
-        final doc = MutableDocument.withId('ResultSetColumnByName', {
+        final doc = MutableDocument(id: 'ResultSetColumnByName', {
           'a': {'b': true},
         });
         await collection.saveDocument(doc);
@@ -215,7 +215,7 @@ void main() {
       apiTest('access column by index', () async {
         final db = await openTestDatabase();
         final collection = await db.defaultCollection;
-        final doc = MutableDocument.withId('ResultSetColumnByIndex');
+        final doc = MutableDocument(id: 'ResultSetColumnByIndex', {});
         await collection.saveDocument(doc);
 
         final q = await db.createQuery(

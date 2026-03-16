@@ -28,7 +28,7 @@ extension TestDocumentDatabaseExtension on Database {
   /// Writes [value] in the properties of the test document. If it does not
   /// exist already in this database, it is created.
   Future<Document> writeTestDocument(String value, {String? type}) async {
-    final doc = (await getTestDocumentOrNull()) ?? MutableDocument();
+    final doc = (await getTestDocumentOrNull()) ?? MutableDocument({});
     testDocumentId ??= doc.id;
     doc.setValue(value, key: 'value');
     if (type != null) {

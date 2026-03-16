@@ -51,7 +51,7 @@ abstract final class FullTextIndex implements Index {
   ///
   /// If left unspecified, no language-specific behaviors such as stemming and
   /// stop-word removal occur.
-  FullTextIndex langauge(FullTextLanguage language);
+  FullTextIndex language(FullTextLanguage language);
 }
 
 /// An item in a [FullTextIndexItem].
@@ -122,7 +122,7 @@ final class FullTextIndexImpl implements IndexImplInterface, FullTextIndex {
   );
 
   @override
-  FullTextIndex langauge(FullTextLanguage language) => FullTextIndexImpl(
+  FullTextIndex language(FullTextLanguage language) => FullTextIndexImpl(
     items: _items,
     ignoreAccents: _ignoreAccents,
     language: language,

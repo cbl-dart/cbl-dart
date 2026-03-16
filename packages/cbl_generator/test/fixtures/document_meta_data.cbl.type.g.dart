@@ -55,7 +55,7 @@ class ImmutableDocWithId extends _DocWithIdImplBase {
 class MutableDocWithId extends _DocWithIdImplBase<MutableDocument>
     implements TypedMutableDocumentObject<DocWithId, MutableDocWithId> {
   /// Creates a new mutable [DocWithId].
-  MutableDocWithId(String id) : super(MutableDocument.withId(id));
+  MutableDocWithId(String id) : super(MutableDocument(id: id, {}));
 
   MutableDocWithId.internal(super.internal);
 }
@@ -113,8 +113,7 @@ class MutableDocWithOptionalId
           MutableDocWithOptionalId
         > {
   /// Creates a new mutable [DocWithOptionalId].
-  MutableDocWithOptionalId([String? id])
-    : super(id == null ? MutableDocument() : MutableDocument.withId(id));
+  MutableDocWithOptionalId([String? id]) : super(MutableDocument(id: id, {}));
 
   MutableDocWithOptionalId.internal(super.internal);
 }
@@ -183,7 +182,7 @@ class MutableDocWithIdAndField
         > {
   /// Creates a new mutable [DocWithIdAndField].
   MutableDocWithIdAndField(String id, String value)
-    : super(MutableDocument.withId(id)) {
+    : super(MutableDocument(id: id, {})) {
     this.value = value;
   }
 
@@ -265,7 +264,7 @@ class MutableDocWithOptionalIdAndField
         > {
   /// Creates a new mutable [DocWithOptionalIdAndField].
   MutableDocWithOptionalIdAndField(String value, [String? id])
-    : super(id == null ? MutableDocument() : MutableDocument.withId(id)) {
+    : super(MutableDocument(id: id, {})) {
     this.value = value;
   }
 
@@ -329,7 +328,7 @@ class MutableDocWithIdGetter extends _DocWithIdGetterImplBase<MutableDocument>
     implements
         TypedMutableDocumentObject<DocWithIdGetter, MutableDocWithIdGetter> {
   /// Creates a new mutable [DocWithIdGetter].
-  MutableDocWithIdGetter() : super(MutableDocument());
+  MutableDocWithIdGetter() : super(MutableDocument({}));
 
   MutableDocWithIdGetter.internal(super.internal);
 }
@@ -385,7 +384,7 @@ class MutableDocWithSequenceGetter
           MutableDocWithSequenceGetter
         > {
   /// Creates a new mutable [DocWithSequenceGetter].
-  MutableDocWithSequenceGetter() : super(MutableDocument());
+  MutableDocWithSequenceGetter() : super(MutableDocument({}));
 
   MutableDocWithSequenceGetter.internal(super.internal);
 }
@@ -442,7 +441,7 @@ class MutableDocWithRevisionIdGetter
           MutableDocWithRevisionIdGetter
         > {
   /// Creates a new mutable [DocWithRevisionIdGetter].
-  MutableDocWithRevisionIdGetter() : super(MutableDocument());
+  MutableDocWithRevisionIdGetter() : super(MutableDocument({}));
 
   MutableDocWithRevisionIdGetter.internal(super.internal);
 }
