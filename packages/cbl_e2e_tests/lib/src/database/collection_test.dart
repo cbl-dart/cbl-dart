@@ -123,7 +123,7 @@ void main() {
         ))!.toMutable();
 
         final doc = loadedDoc.toMutable();
-        expect(await collection.saveDocument(doc), isTrue);
+        await collection.saveDocument(doc);
       },
     );
 
@@ -141,14 +141,20 @@ void main() {
 
       await collection.saveDocument(loadedDoc);
 
-      expect(await collection.saveDocument(doc), isTrue);
+      await collection.saveDocument(doc);
 
-      expect(
-        await collection.saveDocument(
+      await expectLater(
+        () => collection.saveDocument(
           loadedDoc,
           ConcurrencyControl.failOnConflict,
         ),
-        isFalse,
+        throwsA(
+          isA<DatabaseException>().having(
+            (e) => e.code,
+            'code',
+            DatabaseErrorCode.conflict,
+          ),
+        ),
       );
     });
 
@@ -166,9 +172,15 @@ void main() {
 
       await collection.saveDocument(loadedDoc);
 
-      expect(
-        await collection.saveDocument(doc, ConcurrencyControl.failOnConflict),
-        isFalse,
+      await expectLater(
+        () => collection.saveDocument(doc, ConcurrencyControl.failOnConflict),
+        throwsA(
+          isA<DatabaseException>().having(
+            (e) => e.code,
+            'code',
+            DatabaseErrorCode.conflict,
+          ),
+        ),
       );
     });
 

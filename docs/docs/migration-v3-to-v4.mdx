@@ -146,6 +146,21 @@ hooks:
 Vector search requires the Enterprise edition and is supported on ARM64 and
 x86-64.
 
+## `FullTextIndex.langauge` renamed to `language`
+
+The `langauge` method on `api|FullTextIndex` was misspelled. It has been renamed
+to `language`:
+
+```dart
+// Before (v3)
+final index = FullTextIndex([FullTextIndexItem.property('text')])
+    .langauge(FullTextLanguage.english);
+
+// After (v4)
+final index = FullTextIndex([FullTextIndexItem.property('text')])
+    .language(FullTextLanguage.english);
+```
+
 ## `pinnedServerCertificate` and `trustedRootCertificates` type changes
 
 The `pinnedServerCertificate` and `trustedRootCertificates` fields on
@@ -246,6 +261,44 @@ conflict resolution error -- the conflict is silently resolved using the default
 strategy. Applications that relied on detecting conflict resolver failures
 should catch exceptions within their `api|ConflictResolver.resolve`
 implementation and handle them explicitly.
+
+## Conflict handling in `saveDocument` and `deleteDocument`
+
+In v3, `api|Collection.saveDocument` and `api|Collection.deleteDocument`
+returned `false` when a conflict occurred with
+`api|enum:ConcurrencyControl.failOnConflict`.
+
+In v4, these methods return `void` and throw a `api|DatabaseException` with
+`api|enum:DatabaseErrorCode.conflict` instead. This aligns with other Couchbase
+Lite SDKs and makes conflicts harder to accidentally ignore.
+
+The same applies to `api|Collection.deleteTypedDocument` and
+`api|SaveTypedDocument.withConcurrencyControl`.
+
+```dart
+// Before (v3)
+final saved = await collection.saveDocument(
+  doc,
+  ConcurrencyControl.failOnConflict,
+);
+if (!saved) {
+  // handle conflict
+}
+
+// After (v4)
+try {
+  await collection.saveDocument(
+    doc,
+    ConcurrencyControl.failOnConflict,
+  );
+} on DatabaseException catch (e) {
+  if (e.code == DatabaseErrorCode.conflict) {
+    // handle conflict
+  } else {
+    rethrow;
+  }
+}
+```
 
 ## Removed deprecated Database APIs
 
@@ -439,30 +492,33 @@ No manual steps are required.
    - Replace `CouchbaseLiteDart.init(...)` with `api|CouchbaseLite.init`.
 7. **Enable vector search** (if needed) via `pubspec.yaml` config and an
    explicit call to `api|Extension.enableVectorSearch`.
-8. **Update certificate fields** on `ReplicatorConfiguration` -- wrap
+8. **Rename `langauge`** to `language` on `FullTextIndex`.
+9. **Update certificate fields** on `ReplicatorConfiguration` -- wrap
    `pinnedServerCertificate` bytes with `DerData` or `PemData`, and
    `trustedRootCertificates` bytes with `PemData`.
-9. **Update `MutableDocument` constructors** -- replace `MutableDocument()` with
-   `MutableDocument({})` and `MutableDocument.withId(id, data)` with
-   `MutableDocument(id: id, data)`.
-10. **Rename `maxRotateCount`** to `maxKeptFiles` in any `LogFileConfiguration`
+10. **Update `MutableDocument` constructors** -- replace `MutableDocument()`
+    with `MutableDocument({})` and `MutableDocument.withId(id, data)` with
+    `MutableDocument(id: id, data)`.
+11. **Rename `maxRotateCount`** to `maxKeptFiles` in any `LogFileConfiguration`
     usage.
-11. **Update query result checks** that compare boolean expressions against `1`
+12. **Update query result checks** that compare boolean expressions against `1`
     or `0` -- they now return `true`/`false`.
-12. **Remove hardcoded revision IDs** -- revision IDs are no longer
+13. **Remove hardcoded revision IDs** -- revision IDs are no longer
     deterministic.
-13. **Migrate Database document/index/listener APIs** to use `defaultCollection`
+14. **Update conflict handling** -- `saveDocument` and `deleteDocument` with
+    `failOnConflict` now throw `DatabaseException` instead of returning `false`.
+15. **Migrate Database document/index/listener APIs** to use `defaultCollection`
     methods instead.
-14. **Migrate ReplicatorConfiguration** -- replace `database` parameter with
+16. **Migrate ReplicatorConfiguration** -- replace `database` parameter with
     `addCollection`, move `channels`/`documentIds`/filters/resolvers into
     `CollectionConfiguration`.
-15. **Migrate Replicator pending document APIs** -- replace
+17. **Migrate Replicator pending document APIs** -- replace
     `pendingDocumentIds`/`isDocumentPending` with
     `pendingDocumentIdsInCollection`/`isDocumentPendingInCollection`.
-16. **Replace `DataSource.database(db)`** with
+18. **Replace `DataSource.database(db)`** with
     `DataSource.collection(collection)`.
-17. **Replace `InvalidJsonException`** with `FleeceException`.
-18. **Remove `TracingDelegate` usage** -- the tracing API has been removed from
+19. **Replace `InvalidJsonException`** with `FleeceException`.
+20. **Remove `TracingDelegate` usage** -- the tracing API has been removed from
     the public API.
-19. **Run your app** -- native libraries will be built automatically on first
+21. **Run your app** -- native libraries will be built automatically on first
     run.
