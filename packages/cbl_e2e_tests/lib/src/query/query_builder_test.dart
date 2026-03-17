@@ -1000,6 +1000,50 @@ void main() {
         expect(await evalExpr(Function_.lower(valExpr('A'))), 'a');
       });
 
+      apiTest('lower with like', () async {
+        // Regression test for #828: Function_.lower doesn't work with like.
+
+        // lower() with exact like match on literal values.
+        expect(
+          await evalExpr(Function_.lower(valExpr('ABC')).like(valExpr('abc'))),
+          true,
+        );
+
+        // lower() with wildcard like match on literal values.
+        expect(
+          await evalExpr(Function_.lower(valExpr('ABC')).like(valExpr('%bc'))),
+          true,
+        );
+
+        // lower() with exact like match on property expression.
+        expect(
+          await evalExpr(
+            Function_.lower(Expression.property('a')).like(valExpr('hello')),
+            doc: MutableDocument({'a': 'Hello'}),
+          ),
+          true,
+        );
+
+        // lower() with wildcard like match on property expression.
+        expect(
+          await evalExpr(
+            Function_.lower(Expression.property('a')).like(valExpr('%ello')),
+            doc: MutableDocument({'a': 'HELLO'}),
+          ),
+          true,
+        );
+
+        // lower() with surrounding wildcard like match on property expression,
+        // matching the exact pattern from the bug report.
+        expect(
+          await evalExpr(
+            Function_.lower(Expression.property('a')).like(valExpr('%ell%')),
+            doc: MutableDocument({'a': 'HELLO'}),
+          ),
+          true,
+        );
+      });
+
       apiTest('ltrim', () async {
         expect(await evalExpr(Function_.ltrim(valExpr(' a '))), 'a ');
       });

@@ -417,3 +417,99 @@ class MutableBoolListListDict
     );
   }
 }
+
+mixin _$EnumListDict implements TypedDictionaryObject<MutableEnumListDict> {
+  List<TestEnum> get value;
+}
+
+abstract class _EnumListDictImplBase<I extends Dictionary>
+    with _$EnumListDict
+    implements EnumListDict {
+  _EnumListDictImplBase(this.internal);
+
+  @override
+  final I internal;
+
+  @override
+  MutableEnumListDict toMutable() =>
+      MutableEnumListDict.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => TypedDataHelpers.renderString(
+    indent: indent,
+    className: 'EnumListDict',
+    fields: {'value': value},
+  );
+}
+
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
+class ImmutableEnumListDict extends _EnumListDictImplBase {
+  ImmutableEnumListDict.internal(super.internal);
+
+  static const _valueConverter = const TypedListConverter(
+    converter: const ScalarConverterAdapter(
+      const EnumNameConverter(TestEnum.values),
+    ),
+    isNullable: false,
+    isCached: false,
+  );
+
+  @override
+  late final value = TypedDataHelpers.readProperty(
+    internal: internal,
+    name: 'value',
+    key: 'value',
+    converter: _valueConverter,
+  );
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is EnumListDict &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
+}
+
+/// Mutable version of [EnumListDict].
+class MutableEnumListDict extends _EnumListDictImplBase<MutableDictionary>
+    implements TypedMutableDictionaryObject<EnumListDict, MutableEnumListDict> {
+  /// Creates a new mutable [EnumListDict].
+  MutableEnumListDict(List<TestEnum> value) : super(MutableDictionary()) {
+    this.value = value;
+  }
+
+  MutableEnumListDict.internal(super.internal);
+
+  static const _valueConverter = const TypedListConverter(
+    converter: const ScalarConverterAdapter(
+      const EnumNameConverter(TestEnum.values),
+    ),
+    isNullable: false,
+    isCached: false,
+  );
+
+  late TypedDataList<TestEnum, TestEnum> _value = TypedDataHelpers.readProperty(
+    internal: internal,
+    name: 'value',
+    key: 'value',
+    converter: _valueConverter,
+  );
+
+  @override
+  TypedDataList<TestEnum, TestEnum> get value => _value;
+
+  set value(List<TestEnum> value) {
+    final promoted = _valueConverter.promote(value);
+    _value = promoted;
+    TypedDataHelpers.writeProperty(
+      internal: internal,
+      key: 'value',
+      value: promoted,
+      converter: _valueConverter,
+    );
+  }
+}
