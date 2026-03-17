@@ -61,11 +61,7 @@ final class TypeDataBaseCodeBuilder {
         _code.write('TypedDocumentMetadata');
     }
 
-    // For document types, the registry type parameter is the document
-    // interface (e.g., UserDocument), not the declaring class (e.g., User).
-    final registryTypeName = object.kind == TypedDataObjectKind.document
-        ? '${object.classNames.declaringClassName}Document'
-        : object.classNames.declaringClassName;
+    final registryTypeName = object.typedInterfaceName;
 
     _code
       ..writeln(

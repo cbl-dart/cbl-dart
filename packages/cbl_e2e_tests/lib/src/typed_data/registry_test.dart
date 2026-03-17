@@ -29,7 +29,7 @@ void main() {
           () => registry.dictionaryFactoryForType<RegistryTestDoc>(),
           throwsA(
             isTypedDataException
-                .havingCode(TypedDataErrorCode.unknownType)
+                .havingCode(TypedDataErrorCode.documentTypeNotAllowed)
                 .having(
                   (e) => e.message,
                   'message',
@@ -54,7 +54,7 @@ void main() {
           () => registry.dictionaryFactoryForType<MutableRegistryTestDoc>(),
           throwsA(
             isTypedDataException
-                .havingCode(TypedDataErrorCode.unknownType)
+                .havingCode(TypedDataErrorCode.documentTypeNotAllowed)
                 .having(
                   (e) => e.message,
                   'message',

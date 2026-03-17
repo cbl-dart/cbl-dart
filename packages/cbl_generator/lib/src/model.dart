@@ -26,6 +26,27 @@ final class TypedDataObjectModel {
 
   bool get isCompanionDictionary => companionParentClassName != null;
 
+  /// For document types, the public abstract class that serves as the typed
+  /// document interface (e.g., 'UserDocument').
+  late final documentInterfaceName = kind == TypedDataObjectKind.document
+      ? '${classNames.declaringClassName}Document'
+      : null;
+
+  /// For document types, the impl base name includes 'Document' to distinguish
+  /// it from the dictionary companion's impl base.
+  late final effectiveImplBaseName = kind == TypedDataObjectKind.document
+      ? '_${classNames.declaringClassName}DocumentImplBase'
+      : classNames.implBaseName;
+
+  /// The type that the impl base implements and that is used as the first type
+  /// parameter in registry metadata.
+  ///
+  /// For documents: the document interface (e.g., 'UserDocument'). For
+  /// dictionaries: the declaring class name (e.g., 'PersonalName' or
+  /// 'UserDictionary').
+  late final typedInterfaceName =
+      documentInterfaceName ?? classNames.declaringClassName;
+
   late final metadataFields = fields
       .whereType<TypedDataMetadataField>()
       .toList();

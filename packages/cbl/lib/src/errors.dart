@@ -318,6 +318,10 @@ enum TypedDataErrorCode {
   /// The type is not a known typed data type.
   unknownType,
 
+  /// A typed document type was used where a typed dictionary type is required,
+  /// such as in query result sets.
+  documentTypeNotAllowed,
+
   /// There is a conflict matching raw data with known typed data types.
   typeMatchingConflict,
 

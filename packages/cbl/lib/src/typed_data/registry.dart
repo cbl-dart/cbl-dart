@@ -274,7 +274,7 @@ Exception _documentTypeInQueryError(Type type) => TypedDataException(
   'results and must always be loaded from the database. '
   'Use the companion dictionary type generated for each @TypedDocument '
   'instead.',
-  TypedDataErrorCode.unknownType,
+  TypedDataErrorCode.documentTypeNotAllowed,
 );
 
 // === TypeMatcherImpl =========================================================

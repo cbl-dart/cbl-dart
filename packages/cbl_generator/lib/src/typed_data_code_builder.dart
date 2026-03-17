@@ -25,34 +25,6 @@ final class TypeDataCodeBuilder {
   bool get _isDocument => object.kind == TypedDataObjectKind.document;
   bool get _isCompanionDictionary => object.isCompanionDictionary;
 
-  /// For document types, the public abstract class name (e.g., 'UserDocument').
-  String get _documentInterfaceName =>
-      '${_classNames.declaringClassName}Document';
-
-  /// For document types, the impl base name (e.g., '\_UserDocumentImplBase').
-  String get _documentImplBaseName =>
-      '_${_classNames.declaringClassName}DocumentImplBase';
-
-  /// The impl base name, taking into account document vs dictionary types.
-  String get _effectiveImplBaseName =>
-      _isDocument ? _documentImplBaseName : _classNames.implBaseName;
-
-  /// The type that the impl base implements. For documents this is the document
-  /// interface (e.g., 'UserDocument'), for companion dictionaries it's the
-  /// declaring class name (e.g., 'UserDictionary'), and for regular
-  /// dictionaries it's the declaring class name (e.g., 'PersonalName').
-  String get _implBaseImplementsType =>
-      _isDocument ? _documentInterfaceName : _classNames.declaringClassName;
-
-  /// The first type parameter for TypedMutableDocumentObject/
-  /// TypedMutableDictionaryObject.
-  String get _mutableObjectFirstTypeParam =>
-      _isDocument ? _documentInterfaceName : _classNames.declaringClassName;
-
-  /// The type used in equality checks.
-  String get _equalityCheckType =>
-      _isDocument ? _documentInterfaceName : _classNames.declaringClassName;
-
   String build() {
     _code.clear();
     _writeInterfaceMixin();
@@ -96,7 +68,7 @@ mixin ${_classNames.interfaceMixinName} implements
 
   void _writeDocumentInterface() {
     _code.writeln('''
-abstract class $_documentInterfaceName
+abstract class ${object.documentInterfaceName!}
     implements ${_classNames.declaringClassName},
         TypedDocumentObject<${_classNames.mutableClassName}> {}
 
@@ -113,8 +85,8 @@ abstract class ${_classNames.declaringClassName}
   }
 
   void _writeImplBase() {
-    final implBaseName = _effectiveImplBaseName;
-    final implementsType = _implBaseImplementsType;
+    final implBaseName = object.effectiveImplBaseName;
+    final implementsType = object.typedInterfaceName;
 
     _code.writeln('''
 abstract class $implBaseName<I extends $_internalType>
@@ -143,7 +115,7 @@ abstract class $implBaseName<I extends $_internalType>
   }
 
   void _writeImmutableClass() {
-    final implBaseName = _effectiveImplBaseName;
+    final implBaseName = object.effectiveImplBaseName;
 
     _code.writeln('''
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -164,8 +136,8 @@ class ${_classNames.immutableClassName} extends $implBaseName {
   }
 
   void _writeMutableClass() {
-    final implBaseName = _effectiveImplBaseName;
-    final mutableFirstTypeParam = _mutableObjectFirstTypeParam;
+    final implBaseName = object.effectiveImplBaseName;
+    final mutableFirstTypeParam = object.typedInterfaceName;
 
     _code.writeln('''
 /// Mutable version of [${_classNames.declaringClassName}].
@@ -421,7 +393,7 @@ String toString({String? indent}) => TypedDataHelpers.renderString(
 @override
 bool operator ==(Object other) =>
     identical(this, other) ||
-    other is $_equalityCheckType &&
+    other is ${object.typedInterfaceName} &&
         runtimeType == other.runtimeType &&
         internal == other.internal;
 
