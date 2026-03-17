@@ -200,6 +200,31 @@ void main() {
     ),
   ];
 
+  // Regression test for https://github.com/cbl-dart/cbl-dart/issues/913
+  // Verify that libcblitedart.so on Android statically links libc++ so that
+  // C++ stdlib symbols like _ZTISt13runtime_error are not left undefined.
+  test(
+    'android arm64 libcblitedart.so has no undefined C++ stdlib symbols',
+    skip: !(Platform.isMacOS || Platform.isLinux || Platform.isWindows)
+        ? 'Cannot build for Android on this host.'
+        : null,
+    timeout: const Timeout(Duration(minutes: 5)),
+    () async {
+      await testCodeBuildHook(
+        mainMethod: hook.main,
+        targetOS: OS.android,
+        targetArchitecture: Architecture.arm64,
+        check: (input, output) {
+          final cblitedartAsset = output.assets.code.singleWhere(
+            (a) => a.id == 'package:cbl/src/bindings/cblitedart.dart',
+          );
+          final soPath = cblitedartAsset.file!.toFilePath();
+          _expectNoCppStdlibUndefinedSymbols(soPath);
+        },
+      );
+    },
+  );
+
   const editions = ['community', 'enterprise'];
 
   for (final target in targets) {
@@ -359,6 +384,82 @@ void _expectCommunityEditionCache(BuildInput input) {
     reason:
         'Did not expect an enterprise cblite cache directory in '
         '$sharedEntries.',
+  );
+}
+
+/// Verifies that the given Android .so has no undefined C++ standard library
+/// symbols, which would indicate that libc++ was not statically linked.
+///
+/// Uses llvm-readelf from the Android NDK to inspect the symbol table.
+void _expectNoCppStdlibUndefinedSymbols(String soPath) {
+  // Find llvm-readelf in the Android NDK.
+  final androidSdk =
+      Platform.environment['ANDROID_HOME'] ??
+      Platform.environment['ANDROID_SDK_ROOT'] ??
+      (Platform.isMacOS
+          ? '${Platform.environment['HOME']}/Library/Android/sdk'
+          : null);
+  if (androidSdk == null) {
+    fail('Cannot find Android SDK. Set ANDROID_HOME or ANDROID_SDK_ROOT.');
+  }
+  final ndkDir = Directory(p.join(androidSdk, 'ndk'));
+  if (!ndkDir.existsSync()) {
+    fail('No NDK found in $androidSdk/ndk.');
+  }
+  // Use the latest installed NDK version.
+  final ndkVersions =
+      ndkDir
+          .listSync()
+          .whereType<Directory>()
+          .map((d) => p.basename(d.path))
+          .toList()
+        ..sort();
+  final readelf = p.join(
+    androidSdk,
+    'ndk',
+    ndkVersions.last,
+    'toolchains',
+    'llvm',
+    'prebuilt',
+    '${Platform.isMacOS ? 'darwin' : 'linux'}-x86_64',
+    'bin',
+    'llvm-readelf',
+  );
+  if (!File(readelf).existsSync()) {
+    fail('llvm-readelf not found at $readelf.');
+  }
+
+  final result = Process.runSync(readelf, ['-s', '--wide', soPath]);
+  if (result.exitCode != 0) {
+    fail('llvm-readelf failed: ${result.stderr}');
+  }
+
+  final output = result.stdout as String;
+
+  // C++ stdlib symbols that must not be undefined. These are typeinfo and
+  // vtable symbols that the dynamic linker cannot resolve when libc++ is
+  // neither statically linked nor listed as a NEEDED dependency.
+  final undefinedCppSymbols = <String>[];
+  for (final line in output.split('\n')) {
+    // Symbol table lines with UND in the Ndx column indicate undefined
+    // symbols that must be resolved at load time.
+    if (!line.contains(' UND ')) {
+      continue;
+    }
+    // Match C++ stdlib symbols (std:: namespace in mangled form).
+    final match = RegExp(r'(_ZTISt|_ZTVSt|_ZNSt)\S+').firstMatch(line);
+    if (match != null) {
+      undefinedCppSymbols.add(match.group(0)!);
+    }
+  }
+
+  expect(
+    undefinedCppSymbols,
+    isEmpty,
+    reason:
+        'libcblitedart.so has undefined C++ stdlib symbols, indicating that '
+        'libc++ was not statically linked:\n'
+        '${undefinedCppSymbols.join('\n')}',
   );
 }
 

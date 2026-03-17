@@ -97,6 +97,15 @@ Future<void> buildHook(BuildInput input, BuildOutputBuilder output) async {
         '-framework',
         'CouchbaseLite',
       ],
+      // Workaround for native_toolchain_c not fully statically linking libc++
+      // on Android: cppLinkStdLib passes `-l c++_static` which links
+      // libc++_static.a but does not pull in libc++abi.a (which provides
+      // typeinfo, vtables, and destructors for C++ exception types). Without
+      // libc++abi, symbols like _ZTISt13runtime_error are left undefined and
+      // dlopen fails at runtime on newer Android versions.
+      // https://github.com/cbl-dart/cbl-dart/issues/913
+      // https://github.com/dart-lang/native/issues/3240
+      if (targetOS == OS.android) '-lc++abi',
     ],
     defines: {if (edition == 'enterprise') 'COUCHBASE_ENTERPRISE': '1'},
     language: Language.cpp,
