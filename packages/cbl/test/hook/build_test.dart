@@ -421,9 +421,14 @@ void _expectNoCppStdlibUndefinedSymbols(String soPath) {
     'toolchains',
     'llvm',
     'prebuilt',
-    '${Platform.isMacOS ? 'darwin' : 'linux'}-x86_64',
+    '${Platform.isMacOS
+            ? 'darwin'
+            : Platform.isWindows
+            ? 'windows'
+            : 'linux'}'
+        '-x86_64',
     'bin',
-    'llvm-readelf',
+    'llvm-readelf${Platform.isWindows ? '.exe' : ''}',
   );
   if (!File(readelf).existsSync()) {
     fail('llvm-readelf not found at $readelf.');
