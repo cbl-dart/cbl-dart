@@ -1,5 +1,6 @@
-// dart format width=80
 // GENERATED CODE - DO NOT MODIFY BY HAND
+// dart format width=80
+
 // ignore_for_file: avoid_positional_boolean_parameters, lines_longer_than_80_chars, invalid_use_of_internal_member, parameter_assignments, unnecessary_const, prefer_relative_imports, avoid_equals_and_hash_code_on_mutable_classes
 
 part of 'document_meta_data.dart';
@@ -8,14 +9,17 @@ part of 'document_meta_data.dart';
 // TypedDocumentGenerator
 // **************************************************************************
 
-mixin _$DocWithId implements TypedDocumentObject<MutableDocWithId> {
+mixin _$DocWithId {
   String get id;
 }
 
-abstract class _DocWithIdImplBase<I extends Document>
+abstract class DocWithIdDocument
+    implements DocWithId, TypedDocumentObject<MutableDocWithId> {}
+
+abstract class _DocWithIdDocumentImplBase<I extends Document>
     with _$DocWithId
-    implements DocWithId {
-  _DocWithIdImplBase(this.internal);
+    implements DocWithIdDocument {
+  _DocWithIdDocumentImplBase(this.internal);
 
   @override
   final I internal;
@@ -37,13 +41,13 @@ abstract class _DocWithIdImplBase<I extends Document>
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
-class ImmutableDocWithId extends _DocWithIdImplBase {
+class ImmutableDocWithId extends _DocWithIdDocumentImplBase {
   ImmutableDocWithId.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is DocWithId &&
+      other is DocWithIdDocument &&
           runtimeType == other.runtimeType &&
           internal == other.internal;
 
@@ -52,23 +56,106 @@ class ImmutableDocWithId extends _DocWithIdImplBase {
 }
 
 /// Mutable version of [DocWithId].
-class MutableDocWithId extends _DocWithIdImplBase<MutableDocument>
-    implements TypedMutableDocumentObject<DocWithId, MutableDocWithId> {
+class MutableDocWithId extends _DocWithIdDocumentImplBase<MutableDocument>
+    implements TypedMutableDocumentObject<DocWithIdDocument, MutableDocWithId> {
   /// Creates a new mutable [DocWithId].
   MutableDocWithId(String id) : super(MutableDocument(id: id, {}));
 
   MutableDocWithId.internal(super.internal);
 }
 
-mixin _$DocWithOptionalId
-    implements TypedDocumentObject<MutableDocWithOptionalId> {
+mixin _$DocWithIdDictionary
+    implements TypedDictionaryObject<MutableDocWithIdDictionary> {
   String get id;
 }
 
-abstract class _DocWithOptionalIdImplBase<I extends Document>
+abstract class DocWithIdDictionary
+    with _$DocWithIdDictionary
+    implements DocWithId {}
+
+abstract class _DocWithIdDictionaryImplBase<I extends Dictionary>
+    with _$DocWithIdDictionary
+    implements DocWithIdDictionary {
+  _DocWithIdDictionaryImplBase(this.internal);
+
+  @override
+  final I internal;
+
+  @override
+  String get id => TypedDataHelpers.readProperty(
+    internal: internal,
+    name: 'id',
+    key: 'id',
+    converter: TypedDataHelpers.stringConverter,
+  );
+
+  @override
+  MutableDocWithIdDictionary toMutable() =>
+      MutableDocWithIdDictionary.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => TypedDataHelpers.renderString(
+    indent: indent,
+    className: 'DocWithIdDictionary',
+    fields: {'id': id},
+  );
+}
+
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
+class ImmutableDocWithIdDictionary extends _DocWithIdDictionaryImplBase {
+  ImmutableDocWithIdDictionary.internal(super.internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is DocWithIdDictionary &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
+}
+
+/// Mutable version of [DocWithIdDictionary].
+class MutableDocWithIdDictionary
+    extends _DocWithIdDictionaryImplBase<MutableDictionary>
+    implements
+        TypedMutableDictionaryObject<
+          DocWithIdDictionary,
+          MutableDocWithIdDictionary
+        > {
+  /// Creates a new mutable [DocWithIdDictionary].
+  MutableDocWithIdDictionary(String id) : super(MutableDictionary()) {
+    this.id = id;
+  }
+
+  MutableDocWithIdDictionary.internal(super.internal);
+
+  set id(String value) {
+    final promoted = TypedDataHelpers.stringConverter.promote(value);
+    TypedDataHelpers.writeProperty(
+      internal: internal,
+      key: 'id',
+      value: promoted,
+      converter: TypedDataHelpers.stringConverter,
+    );
+  }
+}
+
+mixin _$DocWithOptionalId {
+  String get id;
+}
+
+abstract class DocWithOptionalIdDocument
+    implements
+        DocWithOptionalId,
+        TypedDocumentObject<MutableDocWithOptionalId> {}
+
+abstract class _DocWithOptionalIdDocumentImplBase<I extends Document>
     with _$DocWithOptionalId
-    implements DocWithOptionalId {
-  _DocWithOptionalIdImplBase(this.internal);
+    implements DocWithOptionalIdDocument {
+  _DocWithOptionalIdDocumentImplBase(this.internal);
 
   @override
   final I internal;
@@ -90,13 +177,13 @@ abstract class _DocWithOptionalIdImplBase<I extends Document>
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
-class ImmutableDocWithOptionalId extends _DocWithOptionalIdImplBase {
+class ImmutableDocWithOptionalId extends _DocWithOptionalIdDocumentImplBase {
   ImmutableDocWithOptionalId.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is DocWithOptionalId &&
+      other is DocWithOptionalIdDocument &&
           runtimeType == other.runtimeType &&
           internal == other.internal;
 
@@ -106,10 +193,10 @@ class ImmutableDocWithOptionalId extends _DocWithOptionalIdImplBase {
 
 /// Mutable version of [DocWithOptionalId].
 class MutableDocWithOptionalId
-    extends _DocWithOptionalIdImplBase<MutableDocument>
+    extends _DocWithOptionalIdDocumentImplBase<MutableDocument>
     implements
         TypedMutableDocumentObject<
-          DocWithOptionalId,
+          DocWithOptionalIdDocument,
           MutableDocWithOptionalId
         > {
   /// Creates a new mutable [DocWithOptionalId].
@@ -118,17 +205,101 @@ class MutableDocWithOptionalId
   MutableDocWithOptionalId.internal(super.internal);
 }
 
-mixin _$DocWithIdAndField
-    implements TypedDocumentObject<MutableDocWithIdAndField> {
+mixin _$DocWithOptionalIdDictionary
+    implements TypedDictionaryObject<MutableDocWithOptionalIdDictionary> {
+  String get id;
+}
+
+abstract class DocWithOptionalIdDictionary
+    with _$DocWithOptionalIdDictionary
+    implements DocWithOptionalId {}
+
+abstract class _DocWithOptionalIdDictionaryImplBase<I extends Dictionary>
+    with _$DocWithOptionalIdDictionary
+    implements DocWithOptionalIdDictionary {
+  _DocWithOptionalIdDictionaryImplBase(this.internal);
+
+  @override
+  final I internal;
+
+  @override
+  String get id => TypedDataHelpers.readProperty(
+    internal: internal,
+    name: 'id',
+    key: 'id',
+    converter: TypedDataHelpers.stringConverter,
+  );
+
+  @override
+  MutableDocWithOptionalIdDictionary toMutable() =>
+      MutableDocWithOptionalIdDictionary.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => TypedDataHelpers.renderString(
+    indent: indent,
+    className: 'DocWithOptionalIdDictionary',
+    fields: {'id': id},
+  );
+}
+
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
+class ImmutableDocWithOptionalIdDictionary
+    extends _DocWithOptionalIdDictionaryImplBase {
+  ImmutableDocWithOptionalIdDictionary.internal(super.internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is DocWithOptionalIdDictionary &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
+}
+
+/// Mutable version of [DocWithOptionalIdDictionary].
+class MutableDocWithOptionalIdDictionary
+    extends _DocWithOptionalIdDictionaryImplBase<MutableDictionary>
+    implements
+        TypedMutableDictionaryObject<
+          DocWithOptionalIdDictionary,
+          MutableDocWithOptionalIdDictionary
+        > {
+  /// Creates a new mutable [DocWithOptionalIdDictionary].
+  MutableDocWithOptionalIdDictionary(String id) : super(MutableDictionary()) {
+    this.id = id;
+  }
+
+  MutableDocWithOptionalIdDictionary.internal(super.internal);
+
+  set id(String value) {
+    final promoted = TypedDataHelpers.stringConverter.promote(value);
+    TypedDataHelpers.writeProperty(
+      internal: internal,
+      key: 'id',
+      value: promoted,
+      converter: TypedDataHelpers.stringConverter,
+    );
+  }
+}
+
+mixin _$DocWithIdAndField {
   String get id;
 
   String get value;
 }
 
-abstract class _DocWithIdAndFieldImplBase<I extends Document>
+abstract class DocWithIdAndFieldDocument
+    implements
+        DocWithIdAndField,
+        TypedDocumentObject<MutableDocWithIdAndField> {}
+
+abstract class _DocWithIdAndFieldDocumentImplBase<I extends Document>
     with _$DocWithIdAndField
-    implements DocWithIdAndField {
-  _DocWithIdAndFieldImplBase(this.internal);
+    implements DocWithIdAndFieldDocument {
+  _DocWithIdAndFieldDocumentImplBase(this.internal);
 
   @override
   final I internal;
@@ -158,13 +329,13 @@ abstract class _DocWithIdAndFieldImplBase<I extends Document>
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
-class ImmutableDocWithIdAndField extends _DocWithIdAndFieldImplBase {
+class ImmutableDocWithIdAndField extends _DocWithIdAndFieldDocumentImplBase {
   ImmutableDocWithIdAndField.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is DocWithIdAndField &&
+      other is DocWithIdAndFieldDocument &&
           runtimeType == other.runtimeType &&
           internal == other.internal;
 
@@ -174,10 +345,10 @@ class ImmutableDocWithIdAndField extends _DocWithIdAndFieldImplBase {
 
 /// Mutable version of [DocWithIdAndField].
 class MutableDocWithIdAndField
-    extends _DocWithIdAndFieldImplBase<MutableDocument>
+    extends _DocWithIdAndFieldDocumentImplBase<MutableDocument>
     implements
         TypedMutableDocumentObject<
-          DocWithIdAndField,
+          DocWithIdAndFieldDocument,
           MutableDocWithIdAndField
         > {
   /// Creates a new mutable [DocWithIdAndField].
@@ -199,17 +370,123 @@ class MutableDocWithIdAndField
   }
 }
 
-mixin _$DocWithOptionalIdAndField
-    implements TypedDocumentObject<MutableDocWithOptionalIdAndField> {
+mixin _$DocWithIdAndFieldDictionary
+    implements TypedDictionaryObject<MutableDocWithIdAndFieldDictionary> {
+  String get id;
+
+  String get value;
+}
+
+abstract class DocWithIdAndFieldDictionary
+    with _$DocWithIdAndFieldDictionary
+    implements DocWithIdAndField {}
+
+abstract class _DocWithIdAndFieldDictionaryImplBase<I extends Dictionary>
+    with _$DocWithIdAndFieldDictionary
+    implements DocWithIdAndFieldDictionary {
+  _DocWithIdAndFieldDictionaryImplBase(this.internal);
+
+  @override
+  final I internal;
+
+  @override
+  String get id => TypedDataHelpers.readProperty(
+    internal: internal,
+    name: 'id',
+    key: 'id',
+    converter: TypedDataHelpers.stringConverter,
+  );
+
+  @override
+  String get value => TypedDataHelpers.readProperty(
+    internal: internal,
+    name: 'value',
+    key: 'value',
+    converter: TypedDataHelpers.stringConverter,
+  );
+
+  @override
+  MutableDocWithIdAndFieldDictionary toMutable() =>
+      MutableDocWithIdAndFieldDictionary.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => TypedDataHelpers.renderString(
+    indent: indent,
+    className: 'DocWithIdAndFieldDictionary',
+    fields: {'id': id, 'value': value},
+  );
+}
+
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
+class ImmutableDocWithIdAndFieldDictionary
+    extends _DocWithIdAndFieldDictionaryImplBase {
+  ImmutableDocWithIdAndFieldDictionary.internal(super.internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is DocWithIdAndFieldDictionary &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
+}
+
+/// Mutable version of [DocWithIdAndFieldDictionary].
+class MutableDocWithIdAndFieldDictionary
+    extends _DocWithIdAndFieldDictionaryImplBase<MutableDictionary>
+    implements
+        TypedMutableDictionaryObject<
+          DocWithIdAndFieldDictionary,
+          MutableDocWithIdAndFieldDictionary
+        > {
+  /// Creates a new mutable [DocWithIdAndFieldDictionary].
+  MutableDocWithIdAndFieldDictionary(String id, String value)
+    : super(MutableDictionary()) {
+    this.id = id;
+    this.value = value;
+  }
+
+  MutableDocWithIdAndFieldDictionary.internal(super.internal);
+
+  set id(String value) {
+    final promoted = TypedDataHelpers.stringConverter.promote(value);
+    TypedDataHelpers.writeProperty(
+      internal: internal,
+      key: 'id',
+      value: promoted,
+      converter: TypedDataHelpers.stringConverter,
+    );
+  }
+
+  set value(String value) {
+    final promoted = TypedDataHelpers.stringConverter.promote(value);
+    TypedDataHelpers.writeProperty(
+      internal: internal,
+      key: 'value',
+      value: promoted,
+      converter: TypedDataHelpers.stringConverter,
+    );
+  }
+}
+
+mixin _$DocWithOptionalIdAndField {
   String get value;
 
   String get id;
 }
 
-abstract class _DocWithOptionalIdAndFieldImplBase<I extends Document>
+abstract class DocWithOptionalIdAndFieldDocument
+    implements
+        DocWithOptionalIdAndField,
+        TypedDocumentObject<MutableDocWithOptionalIdAndField> {}
+
+abstract class _DocWithOptionalIdAndFieldDocumentImplBase<I extends Document>
     with _$DocWithOptionalIdAndField
-    implements DocWithOptionalIdAndField {
-  _DocWithOptionalIdAndFieldImplBase(this.internal);
+    implements DocWithOptionalIdAndFieldDocument {
+  _DocWithOptionalIdAndFieldDocumentImplBase(this.internal);
 
   @override
   final I internal;
@@ -240,13 +517,13 @@ abstract class _DocWithOptionalIdAndFieldImplBase<I extends Document>
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableDocWithOptionalIdAndField
-    extends _DocWithOptionalIdAndFieldImplBase {
+    extends _DocWithOptionalIdAndFieldDocumentImplBase {
   ImmutableDocWithOptionalIdAndField.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is DocWithOptionalIdAndField &&
+      other is DocWithOptionalIdAndFieldDocument &&
           runtimeType == other.runtimeType &&
           internal == other.internal;
 
@@ -256,10 +533,10 @@ class ImmutableDocWithOptionalIdAndField
 
 /// Mutable version of [DocWithOptionalIdAndField].
 class MutableDocWithOptionalIdAndField
-    extends _DocWithOptionalIdAndFieldImplBase<MutableDocument>
+    extends _DocWithOptionalIdAndFieldDocumentImplBase<MutableDocument>
     implements
         TypedMutableDocumentObject<
-          DocWithOptionalIdAndField,
+          DocWithOptionalIdAndFieldDocument,
           MutableDocWithOptionalIdAndField
         > {
   /// Creates a new mutable [DocWithOptionalIdAndField].
@@ -281,13 +558,120 @@ class MutableDocWithOptionalIdAndField
   }
 }
 
-mixin _$DocWithIdGetter
-    implements TypedDocumentObject<MutableDocWithIdGetter> {}
+mixin _$DocWithOptionalIdAndFieldDictionary
+    implements
+        TypedDictionaryObject<MutableDocWithOptionalIdAndFieldDictionary> {
+  String get value;
 
-abstract class _DocWithIdGetterImplBase<I extends Document>
+  String get id;
+}
+
+abstract class DocWithOptionalIdAndFieldDictionary
+    with _$DocWithOptionalIdAndFieldDictionary
+    implements DocWithOptionalIdAndField {}
+
+abstract class _DocWithOptionalIdAndFieldDictionaryImplBase<
+  I extends Dictionary
+>
+    with _$DocWithOptionalIdAndFieldDictionary
+    implements DocWithOptionalIdAndFieldDictionary {
+  _DocWithOptionalIdAndFieldDictionaryImplBase(this.internal);
+
+  @override
+  final I internal;
+
+  @override
+  String get value => TypedDataHelpers.readProperty(
+    internal: internal,
+    name: 'value',
+    key: 'value',
+    converter: TypedDataHelpers.stringConverter,
+  );
+
+  @override
+  String get id => TypedDataHelpers.readProperty(
+    internal: internal,
+    name: 'id',
+    key: 'id',
+    converter: TypedDataHelpers.stringConverter,
+  );
+
+  @override
+  MutableDocWithOptionalIdAndFieldDictionary toMutable() =>
+      MutableDocWithOptionalIdAndFieldDictionary.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => TypedDataHelpers.renderString(
+    indent: indent,
+    className: 'DocWithOptionalIdAndFieldDictionary',
+    fields: {'value': value, 'id': id},
+  );
+}
+
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
+class ImmutableDocWithOptionalIdAndFieldDictionary
+    extends _DocWithOptionalIdAndFieldDictionaryImplBase {
+  ImmutableDocWithOptionalIdAndFieldDictionary.internal(super.internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is DocWithOptionalIdAndFieldDictionary &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
+}
+
+/// Mutable version of [DocWithOptionalIdAndFieldDictionary].
+class MutableDocWithOptionalIdAndFieldDictionary
+    extends _DocWithOptionalIdAndFieldDictionaryImplBase<MutableDictionary>
+    implements
+        TypedMutableDictionaryObject<
+          DocWithOptionalIdAndFieldDictionary,
+          MutableDocWithOptionalIdAndFieldDictionary
+        > {
+  /// Creates a new mutable [DocWithOptionalIdAndFieldDictionary].
+  MutableDocWithOptionalIdAndFieldDictionary(String value, String id)
+    : super(MutableDictionary()) {
+    this.value = value;
+    this.id = id;
+  }
+
+  MutableDocWithOptionalIdAndFieldDictionary.internal(super.internal);
+
+  set value(String value) {
+    final promoted = TypedDataHelpers.stringConverter.promote(value);
+    TypedDataHelpers.writeProperty(
+      internal: internal,
+      key: 'value',
+      value: promoted,
+      converter: TypedDataHelpers.stringConverter,
+    );
+  }
+
+  set id(String value) {
+    final promoted = TypedDataHelpers.stringConverter.promote(value);
+    TypedDataHelpers.writeProperty(
+      internal: internal,
+      key: 'id',
+      value: promoted,
+      converter: TypedDataHelpers.stringConverter,
+    );
+  }
+}
+
+mixin _$DocWithIdGetter {}
+
+abstract class DocWithIdGetterDocument
+    implements DocWithIdGetter, TypedDocumentObject<MutableDocWithIdGetter> {}
+
+abstract class _DocWithIdGetterDocumentImplBase<I extends Document>
     with _$DocWithIdGetter
-    implements DocWithIdGetter {
-  _DocWithIdGetterImplBase(this.internal);
+    implements DocWithIdGetterDocument {
+  _DocWithIdGetterDocumentImplBase(this.internal);
 
   @override
   final I internal;
@@ -309,13 +693,13 @@ abstract class _DocWithIdGetterImplBase<I extends Document>
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
-class ImmutableDocWithIdGetter extends _DocWithIdGetterImplBase {
+class ImmutableDocWithIdGetter extends _DocWithIdGetterDocumentImplBase {
   ImmutableDocWithIdGetter.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is DocWithIdGetter &&
+      other is DocWithIdGetterDocument &&
           runtimeType == other.runtimeType &&
           internal == other.internal;
 
@@ -324,22 +708,106 @@ class ImmutableDocWithIdGetter extends _DocWithIdGetterImplBase {
 }
 
 /// Mutable version of [DocWithIdGetter].
-class MutableDocWithIdGetter extends _DocWithIdGetterImplBase<MutableDocument>
+class MutableDocWithIdGetter
+    extends _DocWithIdGetterDocumentImplBase<MutableDocument>
     implements
-        TypedMutableDocumentObject<DocWithIdGetter, MutableDocWithIdGetter> {
+        TypedMutableDocumentObject<
+          DocWithIdGetterDocument,
+          MutableDocWithIdGetter
+        > {
   /// Creates a new mutable [DocWithIdGetter].
   MutableDocWithIdGetter() : super(MutableDocument({}));
 
   MutableDocWithIdGetter.internal(super.internal);
 }
 
-mixin _$DocWithSequenceGetter
-    implements TypedDocumentObject<MutableDocWithSequenceGetter> {}
+mixin _$DocWithIdGetterDictionary
+    implements TypedDictionaryObject<MutableDocWithIdGetterDictionary> {}
 
-abstract class _DocWithSequenceGetterImplBase<I extends Document>
+abstract class DocWithIdGetterDictionary
+    with _$DocWithIdGetterDictionary
+    implements DocWithIdGetter {}
+
+abstract class _DocWithIdGetterDictionaryImplBase<I extends Dictionary>
+    with _$DocWithIdGetterDictionary
+    implements DocWithIdGetterDictionary {
+  _DocWithIdGetterDictionaryImplBase(this.internal);
+
+  @override
+  final I internal;
+
+  @override
+  String get id => TypedDataHelpers.readProperty(
+    internal: internal,
+    name: 'id',
+    key: 'id',
+    converter: TypedDataHelpers.stringConverter,
+  );
+
+  @override
+  MutableDocWithIdGetterDictionary toMutable() =>
+      MutableDocWithIdGetterDictionary.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => TypedDataHelpers.renderString(
+    indent: indent,
+    className: 'DocWithIdGetterDictionary',
+    fields: {'id': id},
+  );
+}
+
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
+class ImmutableDocWithIdGetterDictionary
+    extends _DocWithIdGetterDictionaryImplBase {
+  ImmutableDocWithIdGetterDictionary.internal(super.internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is DocWithIdGetterDictionary &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
+}
+
+/// Mutable version of [DocWithIdGetterDictionary].
+class MutableDocWithIdGetterDictionary
+    extends _DocWithIdGetterDictionaryImplBase<MutableDictionary>
+    implements
+        TypedMutableDictionaryObject<
+          DocWithIdGetterDictionary,
+          MutableDocWithIdGetterDictionary
+        > {
+  /// Creates a new mutable [DocWithIdGetterDictionary].
+  MutableDocWithIdGetterDictionary() : super(MutableDictionary());
+
+  MutableDocWithIdGetterDictionary.internal(super.internal);
+
+  set id(String value) {
+    final promoted = TypedDataHelpers.stringConverter.promote(value);
+    TypedDataHelpers.writeProperty(
+      internal: internal,
+      key: 'id',
+      value: promoted,
+      converter: TypedDataHelpers.stringConverter,
+    );
+  }
+}
+
+mixin _$DocWithSequenceGetter {}
+
+abstract class DocWithSequenceGetterDocument
+    implements
+        DocWithSequenceGetter,
+        TypedDocumentObject<MutableDocWithSequenceGetter> {}
+
+abstract class _DocWithSequenceGetterDocumentImplBase<I extends Document>
     with _$DocWithSequenceGetter
-    implements DocWithSequenceGetter {
-  _DocWithSequenceGetterImplBase(this.internal);
+    implements DocWithSequenceGetterDocument {
+  _DocWithSequenceGetterDocumentImplBase(this.internal);
 
   @override
   final I internal;
@@ -361,13 +829,14 @@ abstract class _DocWithSequenceGetterImplBase<I extends Document>
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
-class ImmutableDocWithSequenceGetter extends _DocWithSequenceGetterImplBase {
+class ImmutableDocWithSequenceGetter
+    extends _DocWithSequenceGetterDocumentImplBase {
   ImmutableDocWithSequenceGetter.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is DocWithSequenceGetter &&
+      other is DocWithSequenceGetterDocument &&
           runtimeType == other.runtimeType &&
           internal == other.internal;
 
@@ -377,10 +846,10 @@ class ImmutableDocWithSequenceGetter extends _DocWithSequenceGetterImplBase {
 
 /// Mutable version of [DocWithSequenceGetter].
 class MutableDocWithSequenceGetter
-    extends _DocWithSequenceGetterImplBase<MutableDocument>
+    extends _DocWithSequenceGetterDocumentImplBase<MutableDocument>
     implements
         TypedMutableDocumentObject<
-          DocWithSequenceGetter,
+          DocWithSequenceGetterDocument,
           MutableDocWithSequenceGetter
         > {
   /// Creates a new mutable [DocWithSequenceGetter].
@@ -389,13 +858,93 @@ class MutableDocWithSequenceGetter
   MutableDocWithSequenceGetter.internal(super.internal);
 }
 
-mixin _$DocWithRevisionIdGetter
-    implements TypedDocumentObject<MutableDocWithRevisionIdGetter> {}
+mixin _$DocWithSequenceGetterDictionary
+    implements TypedDictionaryObject<MutableDocWithSequenceGetterDictionary> {}
 
-abstract class _DocWithRevisionIdGetterImplBase<I extends Document>
+abstract class DocWithSequenceGetterDictionary
+    with _$DocWithSequenceGetterDictionary
+    implements DocWithSequenceGetter {}
+
+abstract class _DocWithSequenceGetterDictionaryImplBase<I extends Dictionary>
+    with _$DocWithSequenceGetterDictionary
+    implements DocWithSequenceGetterDictionary {
+  _DocWithSequenceGetterDictionaryImplBase(this.internal);
+
+  @override
+  final I internal;
+
+  @override
+  int get sequence => TypedDataHelpers.readProperty(
+    internal: internal,
+    name: 'sequence',
+    key: 'sequence',
+    converter: TypedDataHelpers.intConverter,
+  );
+
+  @override
+  MutableDocWithSequenceGetterDictionary toMutable() =>
+      MutableDocWithSequenceGetterDictionary.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => TypedDataHelpers.renderString(
+    indent: indent,
+    className: 'DocWithSequenceGetterDictionary',
+    fields: {'sequence': sequence},
+  );
+}
+
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
+class ImmutableDocWithSequenceGetterDictionary
+    extends _DocWithSequenceGetterDictionaryImplBase {
+  ImmutableDocWithSequenceGetterDictionary.internal(super.internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is DocWithSequenceGetterDictionary &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
+}
+
+/// Mutable version of [DocWithSequenceGetterDictionary].
+class MutableDocWithSequenceGetterDictionary
+    extends _DocWithSequenceGetterDictionaryImplBase<MutableDictionary>
+    implements
+        TypedMutableDictionaryObject<
+          DocWithSequenceGetterDictionary,
+          MutableDocWithSequenceGetterDictionary
+        > {
+  /// Creates a new mutable [DocWithSequenceGetterDictionary].
+  MutableDocWithSequenceGetterDictionary() : super(MutableDictionary());
+
+  MutableDocWithSequenceGetterDictionary.internal(super.internal);
+
+  set sequence(int value) {
+    final promoted = TypedDataHelpers.intConverter.promote(value);
+    TypedDataHelpers.writeProperty(
+      internal: internal,
+      key: 'sequence',
+      value: promoted,
+      converter: TypedDataHelpers.intConverter,
+    );
+  }
+}
+
+mixin _$DocWithRevisionIdGetter {}
+
+abstract class DocWithRevisionIdGetterDocument
+    implements
+        DocWithRevisionIdGetter,
+        TypedDocumentObject<MutableDocWithRevisionIdGetter> {}
+
+abstract class _DocWithRevisionIdGetterDocumentImplBase<I extends Document>
     with _$DocWithRevisionIdGetter
-    implements DocWithRevisionIdGetter {
-  _DocWithRevisionIdGetterImplBase(this.internal);
+    implements DocWithRevisionIdGetterDocument {
+  _DocWithRevisionIdGetterDocumentImplBase(this.internal);
 
   @override
   final I internal;
@@ -418,13 +967,13 @@ abstract class _DocWithRevisionIdGetterImplBase<I extends Document>
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableDocWithRevisionIdGetter
-    extends _DocWithRevisionIdGetterImplBase {
+    extends _DocWithRevisionIdGetterDocumentImplBase {
   ImmutableDocWithRevisionIdGetter.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is DocWithRevisionIdGetter &&
+      other is DocWithRevisionIdGetterDocument &&
           runtimeType == other.runtimeType &&
           internal == other.internal;
 
@@ -434,14 +983,93 @@ class ImmutableDocWithRevisionIdGetter
 
 /// Mutable version of [DocWithRevisionIdGetter].
 class MutableDocWithRevisionIdGetter
-    extends _DocWithRevisionIdGetterImplBase<MutableDocument>
+    extends _DocWithRevisionIdGetterDocumentImplBase<MutableDocument>
     implements
         TypedMutableDocumentObject<
-          DocWithRevisionIdGetter,
+          DocWithRevisionIdGetterDocument,
           MutableDocWithRevisionIdGetter
         > {
   /// Creates a new mutable [DocWithRevisionIdGetter].
   MutableDocWithRevisionIdGetter() : super(MutableDocument({}));
 
   MutableDocWithRevisionIdGetter.internal(super.internal);
+}
+
+mixin _$DocWithRevisionIdGetterDictionary
+    implements
+        TypedDictionaryObject<MutableDocWithRevisionIdGetterDictionary> {}
+
+abstract class DocWithRevisionIdGetterDictionary
+    with _$DocWithRevisionIdGetterDictionary
+    implements DocWithRevisionIdGetter {}
+
+abstract class _DocWithRevisionIdGetterDictionaryImplBase<I extends Dictionary>
+    with _$DocWithRevisionIdGetterDictionary
+    implements DocWithRevisionIdGetterDictionary {
+  _DocWithRevisionIdGetterDictionaryImplBase(this.internal);
+
+  @override
+  final I internal;
+
+  @override
+  String? get revisionId => TypedDataHelpers.readNullableProperty(
+    internal: internal,
+    name: 'revisionId',
+    key: 'revisionId',
+    converter: TypedDataHelpers.stringConverter,
+  );
+
+  @override
+  MutableDocWithRevisionIdGetterDictionary toMutable() =>
+      MutableDocWithRevisionIdGetterDictionary.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => TypedDataHelpers.renderString(
+    indent: indent,
+    className: 'DocWithRevisionIdGetterDictionary',
+    fields: {'revisionId': revisionId},
+  );
+}
+
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
+class ImmutableDocWithRevisionIdGetterDictionary
+    extends _DocWithRevisionIdGetterDictionaryImplBase {
+  ImmutableDocWithRevisionIdGetterDictionary.internal(super.internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is DocWithRevisionIdGetterDictionary &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
+}
+
+/// Mutable version of [DocWithRevisionIdGetterDictionary].
+class MutableDocWithRevisionIdGetterDictionary
+    extends _DocWithRevisionIdGetterDictionaryImplBase<MutableDictionary>
+    implements
+        TypedMutableDictionaryObject<
+          DocWithRevisionIdGetterDictionary,
+          MutableDocWithRevisionIdGetterDictionary
+        > {
+  /// Creates a new mutable [DocWithRevisionIdGetterDictionary].
+  MutableDocWithRevisionIdGetterDictionary() : super(MutableDictionary());
+
+  MutableDocWithRevisionIdGetterDictionary.internal(super.internal);
+
+  set revisionId(String? value) {
+    final promoted = value == null
+        ? null
+        : TypedDataHelpers.stringConverter.promote(value);
+    TypedDataHelpers.writeNullableProperty(
+      internal: internal,
+      key: 'revisionId',
+      value: promoted,
+      converter: TypedDataHelpers.stringConverter,
+    );
+  }
 }

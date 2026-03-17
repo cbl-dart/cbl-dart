@@ -22,9 +22,46 @@ final class TypeDataCodeBuilder {
 
   TypedDataObjectClassNames get _classNames => object.classNames;
 
+  bool get _isDocument => object.kind == TypedDataObjectKind.document;
+  bool get _isCompanionDictionary => object.isCompanionDictionary;
+
+  /// For document types, the public abstract class name (e.g., 'UserDocument').
+  String get _documentInterfaceName =>
+      '${_classNames.declaringClassName}Document';
+
+  /// For document types, the impl base name (e.g., '\_UserDocumentImplBase').
+  String get _documentImplBaseName =>
+      '_${_classNames.declaringClassName}DocumentImplBase';
+
+  /// The impl base name, taking into account document vs dictionary types.
+  String get _effectiveImplBaseName =>
+      _isDocument ? _documentImplBaseName : _classNames.implBaseName;
+
+  /// The type that the impl base implements. For documents this is the document
+  /// interface (e.g., 'UserDocument'), for companion dictionaries it's the
+  /// declaring class name (e.g., 'UserDictionary'), and for regular
+  /// dictionaries it's the declaring class name (e.g., 'PersonalName').
+  String get _implBaseImplementsType =>
+      _isDocument ? _documentInterfaceName : _classNames.declaringClassName;
+
+  /// The first type parameter for TypedMutableDocumentObject/
+  /// TypedMutableDictionaryObject.
+  String get _mutableObjectFirstTypeParam =>
+      _isDocument ? _documentInterfaceName : _classNames.declaringClassName;
+
+  /// The type used in equality checks.
+  String get _equalityCheckType =>
+      _isDocument ? _documentInterfaceName : _classNames.declaringClassName;
+
   String build() {
     _code.clear();
     _writeInterfaceMixin();
+    if (_isDocument) {
+      _writeDocumentInterface();
+    }
+    if (_isCompanionDictionary) {
+      _writeCompanionDictionaryInterface();
+    }
     _writeImplBase();
     _writeImmutableClass();
     _writeMutableClass();
@@ -32,11 +69,20 @@ final class TypeDataCodeBuilder {
   }
 
   void _writeInterfaceMixin() {
-    _code.writeln('''
+    if (_isDocument) {
+      // For document types, the mixin does NOT implement TypedDocumentObject.
+      // The document interface class does instead.
+      _code.writeln('''
+mixin ${_classNames.interfaceMixinName} {
+
+''');
+    } else {
+      _code.writeln('''
 mixin ${_classNames.interfaceMixinName} implements
     Typed${_internalType}Object<${_classNames.mutableClassName}> {
 
 ''');
+    }
 
     // Fields are either declared as constructor parameter or as abstract
     // getters. So, we only need to write the getters in the interface mixin
@@ -48,13 +94,34 @@ mixin ${_classNames.interfaceMixinName} implements
     _code.writeln('}');
   }
 
-  void _writeImplBase() {
+  void _writeDocumentInterface() {
     _code.writeln('''
-abstract class ${_classNames.implBaseName}<I extends $_internalType>
-    with ${_classNames.interfaceMixinName}
-    implements ${_classNames.declaringClassName} {
+abstract class $_documentInterfaceName
+    implements ${_classNames.declaringClassName},
+        TypedDocumentObject<${_classNames.mutableClassName}> {}
 
-  ${_classNames.implBaseName}(this.internal);
+''');
+  }
+
+  void _writeCompanionDictionaryInterface() {
+    _code.writeln('''
+abstract class ${_classNames.declaringClassName}
+    with ${_classNames.interfaceMixinName}
+    implements ${object.companionParentClassName!} {}
+
+''');
+  }
+
+  void _writeImplBase() {
+    final implBaseName = _effectiveImplBaseName;
+    final implementsType = _implBaseImplementsType;
+
+    _code.writeln('''
+abstract class $implBaseName<I extends $_internalType>
+    with ${_classNames.interfaceMixinName}
+    implements $implementsType {
+
+  $implBaseName(this.internal);
 
   @override
   final I internal;
@@ -76,10 +143,12 @@ abstract class ${_classNames.implBaseName}<I extends $_internalType>
   }
 
   void _writeImmutableClass() {
+    final implBaseName = _effectiveImplBaseName;
+
     _code.writeln('''
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
-class ${_classNames.immutableClassName} extends ${_classNames.implBaseName} {
+class ${_classNames.immutableClassName} extends $implBaseName {
 
   ${_classNames.immutableClassName}.internal(super.internal);
 
@@ -95,11 +164,14 @@ class ${_classNames.immutableClassName} extends ${_classNames.implBaseName} {
   }
 
   void _writeMutableClass() {
+    final implBaseName = _effectiveImplBaseName;
+    final mutableFirstTypeParam = _mutableObjectFirstTypeParam;
+
     _code.writeln('''
 /// Mutable version of [${_classNames.declaringClassName}].
 class ${_classNames.mutableClassName}
-    extends ${_classNames.implBaseName}<$_mutableInternalType>
-    implements TypedMutable${_internalType}Object<${_classNames.declaringClassName}, ${_classNames.mutableClassName}> {
+    extends $implBaseName<$_mutableInternalType>
+    implements TypedMutable${_internalType}Object<$mutableFirstTypeParam, ${_classNames.mutableClassName}> {
 
   /// Creates a new mutable [${_classNames.declaringClassName}].
   ${_classNames.mutableClassName}(
@@ -158,7 +230,6 @@ class ${_classNames.mutableClassName}
     _code.write('): super(');
 
     final documentIdField = object.documentIdField;
-    final isDocument = object.kind == TypedDataObjectKind.document;
     if (documentIdField != null &&
         documentIdField.constructorParameter != null) {
       _code
@@ -169,19 +240,24 @@ class ${_classNames.mutableClassName}
     } else {
       _code
         ..write(_mutableInternalType)
-        ..write(isDocument ? '({})' : '()');
+        ..write(_isDocument ? '({})' : '()');
     }
 
     _code.write(')');
 
-    // Property initializers
-    if (object.properties.isEmpty) {
+    // Property initializers — only for properties that have constructor
+    // parameters (getter-only metadata fields converted to properties won't
+    // have constructor parameters).
+    final propertiesWithConstructor = object.properties
+        .where((p) => p.constructorParameter != null)
+        .toList();
+    if (propertiesWithConstructor.isEmpty) {
       _code
         ..writeln(';')
         ..writeln();
     } else {
       _code.writeln(' {');
-      for (final field in object.properties) {
+      for (final field in propertiesWithConstructor) {
         if (field.isNullable) {
           _code
             ..write('if (')
@@ -345,7 +421,7 @@ String toString({String? indent}) => TypedDataHelpers.renderString(
 @override
 bool operator ==(Object other) =>
     identical(this, other) ||
-    other is ${_classNames.declaringClassName} &&
+    other is $_equalityCheckType &&
         runtimeType == other.runtimeType &&
         internal == other.internal;
 

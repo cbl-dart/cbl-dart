@@ -272,7 +272,8 @@ Exception _documentTypeInQueryError(Type type) => TypedDataException(
   '$type is a typed document and cannot be used with query result sets. '
   'Documents have internal state that cannot be reconstructed from query '
   'results and must always be loaded from the database. '
-  'Use a @TypedDictionary instead to represent query results.',
+  'Use the companion dictionary type generated for each @TypedDocument '
+  'instead.',
   TypedDataErrorCode.unknownType,
 );
 
