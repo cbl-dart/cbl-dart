@@ -97,6 +97,8 @@ Future<void> buildHook(BuildInput input, BuildOutputBuilder output) async {
         '-framework',
         'CouchbaseLite',
       ],
+      // TODO(gabor): Remove once native_toolchain_c is upgraded past the
+      // version that fixes https://github.com/dart-lang/native/issues/3240.
       // Workaround for native_toolchain_c not fully statically linking libc++
       // on Android: cppLinkStdLib passes `-l c++_static` which links
       // libc++_static.a but does not pull in libc++abi.a (which provides
