@@ -1,3 +1,8 @@
+## 4.0.0-dev.4
+
+ - **FIX**(cbl): upgrade native_toolchain_c to fix Android libc++ linking ([#919](https://github.com/cbl-dart/cbl-dart/issues/919)). ([8c374fc0](https://github.com/cbl-dart/cbl-dart/commit/8c374fc00c9dcebe3f5a169bcd4f634e6fe8ce69))
+ - **FIX**(cbl): add reachability fence for collections in replicator creation ([#915](https://github.com/cbl-dart/cbl-dart/issues/915)). ([bdafb468](https://github.com/cbl-dart/cbl-dart/commit/bdafb46810f1a9958a159f8c0b5cb0d98b52302f))
+
 ## 4.0.0-dev.3
 
 > Note: This release has breaking changes.
