@@ -30,10 +30,7 @@ dependencies:
   hooks: ^1.0.0
   http: ^1.2.2
   meta: ^1.3.0
-  # Pinned because >=0.17.4, <0.17.6 does not fully statically link libc++
-  # on Android, requiring the -lc++abi workaround in hook/build.dart.
-  # See https://github.com/dart-lang/native/issues/3240
-  native_toolchain_c: 0.17.5
+  native_toolchain_c: ^0.17.6
   path: ^1.8.0
   stream_channel: ^2.1.0
   synchronized: ^3.0.0
