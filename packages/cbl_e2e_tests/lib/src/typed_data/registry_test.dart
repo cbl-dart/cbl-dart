@@ -33,7 +33,7 @@ void main() {
                 .having(
                   (e) => e.message,
                   'message',
-                  contains('@TypedDictionary'),
+                  contains('companion dictionary'),
                 ),
           ),
         );
@@ -58,7 +58,7 @@ void main() {
                 .having(
                   (e) => e.message,
                   'message',
-                  contains('@TypedDictionary'),
+                  contains('companion dictionary'),
                 ),
           ),
         );
