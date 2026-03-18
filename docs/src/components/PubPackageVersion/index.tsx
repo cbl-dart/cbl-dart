@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext'
 
 /**
@@ -28,6 +29,6 @@ export default function PubPackageVersion({
   packageName,
 }: {
   packageName: string
-}): JSX.Element {
+}): ReactNode {
   return <>{usePubPackageVersion(packageName)}</>
 }
