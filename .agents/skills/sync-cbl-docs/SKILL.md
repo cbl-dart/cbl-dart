@@ -35,6 +35,13 @@ file corresponds to the user's request. If the user gives you a Dart page name
 (e.g., "databases"), look up the corresponding official file path. If they give
 you an official page name, find the Dart counterpart.
 
+After resolving the mapping, verify that the mapped Dart MDX file actually
+exists in `docs/docs/`. If the mapping is stale, find the current file in the
+repo and update `references/page-mapping.md` as part of the task.
+
+Never derive the official AsciiDoc filename from the Dart page name or title.
+Always use the mapping file for the upstream page name.
+
 ### Step 2: Fetch the official page
 
 Use `curl` (via Bash) to fetch the raw AsciiDoc source from GitHub. Do not use
@@ -47,11 +54,37 @@ curl -sL "https://raw.githubusercontent.com/couchbase/docs-couchbase-lite/releas
 
 The official docs use AsciiDoc with Antora conventions:
 - `= Title` for H1, `== Section` for H2, etc.
-- `include::` directives pull in code snippets from example files (you won't
-  have these, so focus on the prose structure and section organization)
+- `include::` directives pull in code snippets from example files — see below
+  for how to fetch them
 - `xref:swift:page.adoc[Label]` for cross-references
 - Admonitions: `NOTE:`, `TIP:`, `CAUTION:`, `IMPORTANT:`
 - Code blocks: `[source, swift]` followed by `----` delimited blocks
+- Tags in code: `tag::name[]` / `end::name[]` delimit named regions
+
+#### Fetching included code snippets
+
+The AsciiDoc pages use `include::` directives to pull in Swift code examples.
+These are available on GitHub and should be fetched so you can see the actual
+Swift code being shown in the official docs.
+
+Include paths follow the Antora convention `module:example$path`. For example:
+
+```
+include::swift:example$code_snippets/SampleCodeTest.swift[tags="fts-index"]
+```
+
+maps to:
+
+```bash
+curl -sL "https://raw.githubusercontent.com/couchbase/docs-couchbase-lite/release/4.0/modules/swift/examples/code_snippets/SampleCodeTest.swift"
+```
+
+The `[tags="name"]` attribute selects the region between `// tag::name[]` and
+`// end::name[]` markers in the source file. Use `grep` to extract the relevant
+tagged regions after fetching the file.
+
+Seeing the original Swift code helps you write accurate Dart equivalents — you
+can see the exact API calls, parameter names, and patterns used.
 
 ### Step 3: Read the current Dart page and build a section map
 
@@ -67,7 +100,7 @@ or a **full page** with existing content. For stubs, you're writing the page
 from scratch based on the official docs. For full pages, you're doing a
 differential update. Either way, the section map ensures completeness.
 
-### Step 4: Check available Dart APIs
+### Step 4: Check available Dart APIs and behavior
 
 Before writing code examples or referencing APIs, verify they exist in the Dart
 codebase. The public API lives in `packages/cbl/lib/src/`. Key locations:
@@ -83,6 +116,11 @@ Use Grep/Glob to find the actual class names, method signatures, and enum
 values. The Dart API doesn't always have a 1:1 correspondence with Swift — for
 example, Dart has separate `openAsync`/`openSync` methods where Swift has a
 single initializer.
+
+Differences between the Dart SDK behavior should be verified with runtime
+checks while implementing or updating docs. If a Dart-specific behavior could
+reasonably differ from the upstream documentation, verify it with an existing
+test or a focused runtime check before documenting it as fact.
 
 ### Step 5: Rewrite the Dart page
 
@@ -108,6 +146,8 @@ After writing the updated page:
    (the docs use Prettier, not `daco format`)
 2. Verify all `api|` references point to real APIs by spot-checking against the
    codebase
+3. Verify any behavior-sensitive Dart-specific claims you added or changed are
+   backed by runtime checks or existing tests
 
 ## Important guidelines
 
@@ -123,6 +163,9 @@ After writing the updated page:
   into standalone sections that don't exist upstream, or inline content that the
   official docs link to. Dart-specific additions (like async/sync API tabs) are
   fine, but the overall page skeleton should mirror the official page.
+- Distinguish between verified facts and inferences while adapting content. Do
+  not present a Dart-specific inference as a fact unless it has been checked in
+  source or at runtime.
 - **Enterprise features** should use the `<EnterpriseFeatureCallout />`
   component, not raw text.
 - When the official docs reference platform-specific details (iOS Keychain,

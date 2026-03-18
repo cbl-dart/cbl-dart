@@ -1,6 +1,6 @@
 ---
 description:
-  Working with Couchbase Lite's Data Model — Querying the Database Using
+  Working with Couchbase Lite's data model — Querying the database using
   Full-Text Search
 related_content:
   - name: Indexing
@@ -11,7 +11,7 @@ related_content:
     url: /queries/sqlplusplus-mobile
 ---
 
-# Using Full-Text Search
+# Full Text Search
 
 ## Overview
 
@@ -32,10 +32,17 @@ hotel's `overview` text.
 SQL++ provides a configuration object to define full-text search indexes —
 `api|FullTextIndexConfiguration`.
 
+These examples set `language` to `api|enum-value:FullTextLanguage.english` so
+English stop-word removal and stemming are enabled. If you leave `language`
+unset, language-specific behaviors are not applied.
+
 <CodeExample id={1} title="Create FTS Index with SQL++">
 
 ```dart
-final config = FullTextIndexConfiguration(['overview']);
+final config = FullTextIndexConfiguration(
+  ['overview'],
+  language: FullTextLanguage.english,
+);
 await collection.createIndex('overviewFTSIndex', config);
 ```
 
@@ -78,7 +85,9 @@ The following example creates an FTS index on the `overview` property.
 <CodeExample id={3} title="Create FTS Index with QueryBuilder">
 
 ```dart
-final index = FullTextIndex([FullTextIndexItem.property('overview')]);
+final index = FullTextIndex([
+  FullTextIndexItem.property('overview'),
+]).language(FullTextLanguage.english);
 await collection.createIndex('overviewFTSIndex', index);
 ```
 
@@ -115,17 +124,17 @@ final resultSet = await query.execute();
 
 ## Operation
 
-In the examples above, the pattern to match is a word, the full-text search
+In the examples above, the pattern to match is a word. The full-text search
 query matches all documents that contain the word "michigan" in the value of the
 `overview` property.
 
 Search is supported for all languages that use whitespace to separate words.
 
 Stemming, which is the process of fuzzy matching parts of speech, like "fast"
-and "faster", is supported in the following languages (see
-`api|enum:FullTextLanguage`): Danish, Dutch, English, Finnish, French, German,
-Hungarian, Italian, Norwegian, Portuguese, Romanian, Russian, Spanish, Swedish,
-and Turkish.
+and "faster", is supported when the index is configured with one of the
+following `api|enum:FullTextLanguage` values: Danish, Dutch, English, Finnish,
+French, German, Hungarian, Italian, Norwegian, Portuguese, Romanian, Russian,
+Spanish, Swedish, and Turkish.
 
 ## Pattern Matching Formats
 
@@ -163,11 +172,11 @@ in double quotes (`"`). For example, `"linux applications"`.
 ### NEAR Queries
 
 A NEAR query returns documents that contain two or more nominated terms or
-phrases within a specified proximity of each other (by default with 10 or less
-intervening terms). A NEAR query is specified by putting the keyword `NEAR`
-between two phrase, token, or token prefix queries. To specify a proximity other
-than the default, use an operator of the form `NEAR/N`, where N is the maximum
-number of intervening terms allowed.
+phrases within a specified proximity of each other, by default with 10 or fewer
+intervening terms. A NEAR query is specified by putting the keyword `NEAR`
+between two phrases, tokens, or token prefix queries. To specify a proximity
+other than the default, use an operator of the form `NEAR/N`, where N is the
+maximum number of intervening terms allowed.
 
 For example, to search for documents containing "replication" and "database"
 with not more than 2 terms separating the two:
@@ -210,4 +219,5 @@ This can be a very difficult heuristic to define, but Couchbase Lite comes with
 a ranking function you can use.
 
 In SQL++, use `RANK(indexName)` in an `ORDER BY` clause. In QueryBuilder, use
-`api|FullTextFunction.rank` — see [Example 2](#) and [Example 4](#).
+`api|FullTextFunction.rank` to build the same expression, as shown in
+[Example 2](#) and [Example 4](#).

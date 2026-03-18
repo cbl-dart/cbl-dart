@@ -22,8 +22,8 @@ The Dart docs live at `docs/docs/` in the workspace.
 | `queries/query-result-sets.mdx`                  | `query-resultsets.adoc`                            |
 | `queries/live-queries.mdx`                       | `query-live.adoc`                                  |
 | `queries/query-troubleshooting.mdx`              | `query-troubleshooting.adoc`                       |
-| `search/full-text-search.mdx`                    | `fts.adoc`                                         |
-| `search/vector-search.mdx`                       | `vector-search.adoc`                               |
+| `full-text-search.mdx`                           | `fts.adoc`                                         |
+| `vector-search.mdx`                              | `vector-search.adoc`                               |
 | `data-sync/peer-to-peer/websocket.mdx`           | `p2psync-websocket.adoc`                           |
 | `data-sync/peer-to-peer/passive-peer.mdx`        | `p2psync-websocket-using-passive.adoc`             |
 | `data-sync/peer-to-peer/active-peer.mdx`         | `p2psync-websocket-using-active.adoc`              |

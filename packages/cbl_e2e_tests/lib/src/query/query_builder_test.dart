@@ -1238,6 +1238,52 @@ void main() {
         expect(await matchCount('french', 'run'), 0);
       });
 
+      apiTest('default language does not enable stemming', () async {
+        final db = await openTestDatabase();
+        final collection = await db.defaultCollection;
+
+        await collection.createIndex(
+          'default',
+          IndexBuilder.fullTextIndex([FullTextIndexItem.property('a')]),
+        );
+
+        await collection.createIndex(
+          'english',
+          IndexBuilder.fullTextIndex([
+            FullTextIndexItem.property('a'),
+          ]).language(FullTextLanguage.english),
+        );
+
+        await collection.createIndex(
+          'french',
+          IndexBuilder.fullTextIndex([
+            FullTextIndexItem.property('a'),
+          ]).language(FullTextLanguage.french),
+        );
+
+        await collection.saveDocument(
+          MutableDocument({'a': 'He is running fast'}),
+        );
+
+        Future<int> matchCount(String indexName, String query) async {
+          final resultSet = await const QueryBuilder()
+              .select(SelectResult.expression(Meta.id))
+              .from(DataSource.collection(collection))
+              .where(FullTextFunction.match(indexName: indexName, query: query))
+              .execute();
+          return (await resultSet.allPlainListResults()).length;
+        }
+
+        final defaultMatches = await matchCount('default', 'run');
+        final englishMatches = await matchCount('english', 'run');
+        final frenchMatches = await matchCount('french', 'run');
+
+        expect(englishMatches, 1);
+        expect(frenchMatches, 0);
+        expect(defaultMatches, 0);
+        expect(defaultMatches, frenchMatches);
+      });
+
       apiTest('match and rank', () async {
         final db = await openTestDatabase();
         final collection = await db.defaultCollection;
