@@ -192,10 +192,14 @@ platform trust store. For custom deployments you can also:
 
 - accept only self-signed certificates with
   `api|ReplicatorConfiguration.acceptOnlySelfSignedServerCertificate`
+  (Enterprise Edition only)
 - pin a specific server certificate with
   `api|ReplicatorConfiguration.pinnedServerCertificate`
 - trust a custom root chain with
   `api|ReplicatorConfiguration.trustedRootCertificates`
+
+In Community Edition, use certificate pinning or a trusted custom root chain
+instead of self-signed-only mode.
 
 <CodeExample id={7} title="Trust a Custom Root Certificate Chain">
 
@@ -335,7 +339,9 @@ The activity state is one of:
 
 Use `api|Replicator.documentReplications` or
 `api|Replicator.addDocumentReplicationListener` if you need per-document
-replication events.
+replication events. Attach the listener before calling `api|Replicator.start`.
+If you add it after the replicator has started, stop and start the replicator
+again before expecting document-level events.
 
 <CodeExample id={14} title="Monitor Replicated Documents">
 

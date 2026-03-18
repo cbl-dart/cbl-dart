@@ -248,12 +248,16 @@ await for (final change in replicator.changes()) {
     case ReplicatorActivityLevel.connecting:
     case ReplicatorActivityLevel.busy:
       print('Replicating: ${status.progress}');
+      break;
     case ReplicatorActivityLevel.idle:
       print('Connected and idle');
+      break;
     case ReplicatorActivityLevel.offline:
       print('Temporarily offline: ${status.error}');
+      break;
     case ReplicatorActivityLevel.stopped:
       print('Stopped: ${status.error}');
+      break;
   }
 }
 ```

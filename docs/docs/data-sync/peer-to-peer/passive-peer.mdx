@@ -45,7 +45,6 @@ listener.
 final config = UrlEndpointListenerConfiguration(
   collections: [collection],
   port: 55990,
-  networkInterface: '0.0.0.0',
   enableDeltaSync: true,
   authenticator: ListenerPasswordAuthenticator((username, password) {
     return username == 'cbl-user-01' && password == 'secret';
@@ -57,6 +56,11 @@ await listener.start();
 ```
 
 </CodeExample>
+
+This example leaves `api|UrlEndpointListenerConfiguration.networkInterface`
+unset so the listener accepts connections on all available interfaces. After the
+listener starts, use `api|UrlEndpointListener.urls` to discover the reachable
+URLs to advertise to active peers.
 
 ## Device Discovery
 
