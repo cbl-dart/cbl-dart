@@ -7,26 +7,27 @@ The Dart docs live at `docs/docs/` in the workspace.
 
 ## Mapping
 
-| Dart MDX file                                    | Official AsciiDoc file (Swift module)             |
-| ------------------------------------------------ | ------------------------------------------------- |
-| `databases.mdx`                                  | `database.adoc`                                   |
-| `documents.mdx`                                  | `document.adoc`                                   |
-| `blobs.mdx`                                      | `blob.adoc`                                       |
-| `indexing.mdx`                                   | `indexing.adoc`                                    |
-| `scopes-and-collections.mdx`                     | `scopes-collections-manage.adoc`                  |
-| `prebuilt-database.mdx`                          | `prebuilt-database.adoc`                           |
-| `queries/query-builder.mdx`                      | `querybuilder.adoc`                                |
-| `queries/sqlplusplus-mobile.mdx`                 | `query-n1ql-mobile.adoc`                           |
-| `queries/sqlplusplus-server-diff.mdx`            | `query-n1ql-mobile-server-diffs.adoc`              |
-| `queries/sqlplusplus-query-builder-diff.mdx`     | `query-n1ql-mobile-querybuilder-diffs.adoc`        |
-| `queries/query-result-sets.mdx`                  | `query-resultsets.adoc`                            |
-| `queries/live-queries.mdx`                       | `query-live.adoc`                                  |
-| `queries/query-troubleshooting.mdx`              | `query-troubleshooting.adoc`                       |
-| `full-text-search.mdx`                           | `fts.adoc`                                         |
-| `vector-search.mdx`                              | `vector-search.adoc`                               |
-| `data-sync/peer-to-peer/websocket.mdx`           | `p2psync-websocket.adoc`                           |
-| `data-sync/peer-to-peer/passive-peer.mdx`        | `p2psync-websocket-using-passive.adoc`             |
-| `data-sync/peer-to-peer/active-peer.mdx`         | `p2psync-websocket-using-active.adoc`              |
+| Dart MDX file                                | Official AsciiDoc file (Swift module)       |
+| -------------------------------------------- | ------------------------------------------- |
+| `databases.mdx`                              | `database.adoc`                             |
+| `documents.mdx`                              | `document.adoc`                             |
+| `blobs.mdx`                                  | `blob.adoc`                                 |
+| `indexing.mdx`                               | `indexing.adoc`                             |
+| `scopes-and-collections.mdx`                 | `scopes-collections-manage.adoc`            |
+| `prebuilt-database.mdx`                      | `prebuilt-database.adoc`                    |
+| `queries/query-builder.mdx`                  | `querybuilder.adoc`                         |
+| `queries/sqlplusplus-mobile.mdx`             | `query-n1ql-mobile.adoc`                    |
+| `queries/sqlplusplus-server-diff.mdx`        | `query-n1ql-mobile-server-diffs.adoc`       |
+| `queries/sqlplusplus-query-builder-diff.mdx` | `query-n1ql-mobile-querybuilder-diffs.adoc` |
+| `queries/query-result-sets.mdx`              | `query-resultsets.adoc`                     |
+| `queries/live-queries.mdx`                   | `query-live.adoc`                           |
+| `queries/query-troubleshooting.mdx`          | `query-troubleshooting.adoc`                |
+| `search/full-text-search.mdx`                | `fts.adoc`                                  |
+| `search/vector-search.mdx`                   | `vector-search.adoc`                        |
+| `search/working-with-vector-search.mdx`      | `working-with-vector-search.adoc`           |
+| `data-sync/peer-to-peer/websocket.mdx`       | `p2psync-websocket.adoc`                    |
+| `data-sync/peer-to-peer/passive-peer.mdx`    | `p2psync-websocket-using-passive.adoc`      |
+| `data-sync/peer-to-peer/active-peer.mdx`     | `p2psync-websocket-using-active.adoc`       |
 
 ## Pages without an official counterpart
 

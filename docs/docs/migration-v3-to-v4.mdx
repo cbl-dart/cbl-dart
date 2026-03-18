@@ -4,7 +4,7 @@ related_content:
   - name: Install
     url: /install
   - name: Vector Search
-    url: /vector-search
+    url: /search/vector-search
 ---
 
 # Migration: v3 to v4
@@ -129,7 +129,8 @@ if (status != VectorSearchStatus.enabled) {
 
 `api|Extension.enableVectorSearch` now returns a `api|enum:VectorSearchStatus`
 enum instead of throwing an exception when vector search is unavailable. See
-[Vector Search](./vector-search.mdx) for details on the status values.
+[Working with Vector Search](./search/working-with-vector-search.mdx) for
+details on the status values.
 
 ## Vector search configuration
 
