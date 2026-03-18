@@ -15,7 +15,7 @@ Version 4 replaces the multi-package architecture with a single `cbl` package
 powered by
 [Dart native assets](https://dart.dev/interop/c-interop#native-assets). Native
 libraries are now downloaded and compiled automatically by the Dart build system
--- no manual setup or separate platform packages are needed.
+— no manual setup or separate platform packages are needed.
 
 ## Package changes
 
@@ -32,7 +32,7 @@ libraries are now downloaded and compiled automatically by the Dart build system
 
 ## Dependency changes
 
-### Before (v3) -- Flutter
+### Before (v3) — Flutter
 
 ```yaml
 dependencies:
@@ -41,7 +41,7 @@ dependencies:
   cbl_flutter_ce: ... # or cbl_flutter_ee
 ```
 
-### Before (v3) -- Standalone Dart
+### Before (v3) — Standalone Dart
 
 ```yaml
 dependencies:
@@ -49,7 +49,7 @@ dependencies:
   cbl_dart: ...
 ```
 
-### After (v4) -- Both Flutter and Standalone Dart
+### After (v4) — Both Flutter and Standalone Dart
 
 ```yaml
 dependencies:
@@ -80,7 +80,7 @@ If no edition is specified, the Community edition is used by default.
 
 ## Initialization changes
 
-### Before (v3) -- Flutter
+### Before (v3) — Flutter
 
 ```dart
 import 'package:cbl_flutter/cbl_flutter.dart';
@@ -88,7 +88,7 @@ import 'package:cbl_flutter/cbl_flutter.dart';
 await CouchbaseLiteFlutter.init();
 ```
 
-### Before (v3) -- Standalone Dart
+### Before (v3) — Standalone Dart
 
 ```dart
 import 'package:cbl_dart/cbl_dart.dart';
@@ -258,7 +258,7 @@ In v4, when a `api|ConflictResolver` throws:
    the document, the deletion wins.
 
 This means a throwing conflict resolver no longer causes cblite to report a
-conflict resolution error -- the conflict is silently resolved using the default
+conflict resolution error — the conflict is silently resolved using the default
 strategy. Applications that relied on detecting conflict resolver failures
 should catch exceptions within their `api|ConflictResolver.resolve`
 implementation and handle them explicitly.
@@ -494,32 +494,32 @@ No manual steps are required.
 7. **Enable vector search** (if needed) via `pubspec.yaml` config and an
    explicit call to `api|Extension.enableVectorSearch`.
 8. **Rename `langauge`** to `language` on `FullTextIndex`.
-9. **Update certificate fields** on `ReplicatorConfiguration` -- wrap
+9. **Update certificate fields** on `ReplicatorConfiguration` — wrap
    `pinnedServerCertificate` bytes with `DerData` or `PemData`, and
    `trustedRootCertificates` bytes with `PemData`.
-10. **Update `MutableDocument` constructors** -- replace `MutableDocument()`
-    with `MutableDocument({})` and `MutableDocument.withId(id, data)` with
+10. **Update `MutableDocument` constructors** — replace `MutableDocument()` with
+    `MutableDocument({})` and `MutableDocument.withId(id, data)` with
     `MutableDocument(id: id, data)`.
 11. **Rename `maxRotateCount`** to `maxKeptFiles` in any `LogFileConfiguration`
     usage.
 12. **Update query result checks** that compare boolean expressions against `1`
-    or `0` -- they now return `true`/`false`.
-13. **Remove hardcoded revision IDs** -- revision IDs are no longer
+    or `0` — they now return `true`/`false`.
+13. **Remove hardcoded revision IDs** — revision IDs are no longer
     deterministic.
-14. **Update conflict handling** -- `saveDocument` and `deleteDocument` with
+14. **Update conflict handling** — `saveDocument` and `deleteDocument` with
     `failOnConflict` now throw `DatabaseException` instead of returning `false`.
 15. **Migrate Database document/index/listener APIs** to use `defaultCollection`
     methods instead.
-16. **Migrate ReplicatorConfiguration** -- replace `database` parameter with
+16. **Migrate ReplicatorConfiguration** — replace `database` parameter with
     `addCollection`, move `channels`/`documentIds`/filters/resolvers into
     `CollectionConfiguration`.
-17. **Migrate Replicator pending document APIs** -- replace
+17. **Migrate Replicator pending document APIs** — replace
     `pendingDocumentIds`/`isDocumentPending` with
     `pendingDocumentIdsInCollection`/`isDocumentPendingInCollection`.
 18. **Replace `DataSource.database(db)`** with
     `DataSource.collection(collection)`.
 19. **Replace `InvalidJsonException`** with `FleeceException`.
-20. **Remove `TracingDelegate` usage** -- the tracing API has been removed from
+20. **Remove `TracingDelegate` usage** — the tracing API has been removed from
     the public API.
-21. **Run your app** -- native libraries will be built automatically on first
+21. **Run your app** — native libraries will be built automatically on first
     run.
