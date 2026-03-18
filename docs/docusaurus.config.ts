@@ -61,6 +61,14 @@ export default {
   ],
 
   themeConfig: {
+    announcementBar: {
+      id: 'v4_release',
+      content:
+        '🎉 <b>Couchbase Lite for Dart v4 is here!</b> If you\'re upgrading from v3, check out the <a href="/migration-v3-to-v4/">migration guide</a>.',
+      backgroundColor: '#e6f2ff',
+      textColor: '#003d75',
+      isCloseable: true,
+    },
     colorMode: {
       respectPrefersColorScheme: true,
     },
