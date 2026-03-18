@@ -50,13 +50,12 @@ dependencies:
 ```
 
 import { usePubPackageVersion } from '@site/src/components/PubPackageVersion'
+import CodeBlock from '@theme/CodeBlock'
 
 export const CblDependencySnippet = () => {
   const version = usePubPackageVersion('cbl')
   return (
-    <pre>
-      <code className="language-yaml">{`dependencies:\n  cbl: ^${version}`}</code>
-    </pre>
+    <CodeBlock language="yaml">{`dependencies:\n  cbl: ^${version}`}</CodeBlock>
   )
 }
 

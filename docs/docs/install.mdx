@@ -24,14 +24,11 @@ Couchbase Lite for Dart requires Dart SDK `^3.10.0`.
 :::
 
 import { usePubPackageVersion } from '@site/src/components/PubPackageVersion'
+import CodeBlock from '@theme/CodeBlock'
 
 export const CblInstallCommand = () => {
   const version = usePubPackageVersion('cbl')
-  return (
-    <pre>
-      <code className="language-bash">{`dart pub add cbl:${version}`}</code>
-    </pre>
-  )
+  return <CodeBlock language="bash">{`dart pub add cbl:${version}`}</CodeBlock>
 }
 
 ## Add dependency

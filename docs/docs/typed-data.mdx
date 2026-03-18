@@ -29,13 +29,12 @@ be used with specialized APIs of `api|Database`, `api|Query` and
 1. Make sure your [app is setup](install.mdx) for using Couchbase Lite.
 
 import { usePubPackageVersion } from '@site/src/components/PubPackageVersion'
+import CodeBlock from '@theme/CodeBlock'
 
 export const CblGeneratorInstallCommand = () => {
   const version = usePubPackageVersion('cbl_generator')
   return (
-    <pre>
-      <code className="language-bash">{`flutter pub add --dev cbl_generator:${version} build_runner`}</code>
-    </pre>
+    <CodeBlock language="bash">{`flutter pub add --dev cbl_generator:${version} build_runner`}</CodeBlock>
   )
 }
 
