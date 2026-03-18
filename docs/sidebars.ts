@@ -85,16 +85,19 @@ export default {
       items: [
         {
           type: 'doc',
-          id: 'full-text-search',
+          id: 'search/full-text-search',
           label: 'Full Text Search',
         },
         {
           type: 'doc',
-          id: 'vector-search',
+          id: 'search/vector-search',
+        },
+        {
+          type: 'doc',
+          id: 'search/working-with-vector-search',
         },
       ],
     },
-
     {
       type: 'doc',
       id: 'indexing',

@@ -28,4 +28,8 @@ fi
 echo "Bootstrapping packages..."
 melos bootstrap
 
+echo "Installing docs dependencies..."
+npm install --prefix "$projectDir/docs"
+
+
 echo "Worktree is ready for development"

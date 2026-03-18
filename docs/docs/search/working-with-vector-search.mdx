@@ -1,0 +1,446 @@
+---
+description: Use Vector Search with Full Text Search and Query.
+related_content:
+  - name: Vector Search
+    url: /search/vector-search
+  - name: Full Text Search
+    url: /search/full-text-search
+  - name: SQL++ for Mobile
+    url: /queries/sqlplusplus-mobile
+  - name: Install
+    url: /install
+---
+
+# Working with Vector Search
+
+<EnterpriseFeatureCallout />
+
+## Use Vector Search
+
+To use vector search in Dart, bundle the extension library as part of your build
+and enable it before opening a database that uses vector indexes.
+
+Configure your package `pubspec.yaml` like this:
+
+```yaml
+hooks:
+  user_defines:
+    cbl:
+      edition: enterprise
+      vector_search: true
+```
+
+:::note
+
+If you are using a Dart pub workspace, `hooks.user_defines` are read from the
+workspace root `pubspec.yaml`, so put this configuration there instead.
+
+:::
+
+Then initialize Couchbase Lite and enable vector search:
+
+<CodeExample id={1} title="Enable Vector Search">
+
+```dart
+await CouchbaseLite.init();
+
+final status = Extension.enableVectorSearch();
+if (status != VectorSearchStatus.enabled) {
+  throw StateError('Vector search is not available: $status');
+}
+```
+
+</CodeExample>
+
+You can also inspect the current status without enabling the extension by
+reading `api|Extension.vectorSearchStatus`.
+
+If the vector search library is bundled but its path cannot be resolved, both
+`api|Extension.vectorSearchStatus` and `api|Extension.enableVectorSearch()`
+throw a `api|DatabaseException`.
+
+### `api|enum:VectorSearchStatus` values
+
+| Value                 | Meaning                                                                                                                               |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `available`           | The library is bundled and the current system supports it. Call `Extension.enableVectorSearch()` to enable it.                        |
+| `enabled`             | Vector search has already been enabled in this process.                                                                               |
+| `libraryNotAvailable` | The library was not bundled. Set `vector_search: true` under `hooks.user_defines.cbl` in `pubspec.yaml`.                              |
+| `systemNotSupported`  | The current system cannot use vector search. Couchbase Lite supports ARM64 and x86-64, and x86-64 additionally requires AVX2 support. |
+
+## Create a Vector Index
+
+Create a vector index with `api|VectorIndexConfiguration` and then pass it to
+`api|Collection.createIndex`.
+
+<CodeExample id={2} title="Create a Vector Index">
+
+```dart
+final collection = await database.createCollection('colors');
+
+final config = VectorIndexConfiguration(
+  'vector',
+  dimensions: 3,
+  centroids: 100,
+  encoding: VectorEncoding.none(),
+  metric: DistanceMetric.cosine,
+  numProbes: 8,
+  minTrainingSize: 2500,
+  maxTrainingSize: 5000,
+);
+
+await collection.createIndex('colors_index', config);
+```
+
+</CodeExample>
+
+This example creates an index over the `vector` property with:
+
+- `dimensions` set to `3`
+- `centroids` set to `100`
+- no vector compression
+- cosine distance
+- explicit probe and training-size settings
+
+:::note
+
+Increasing dimensions, training size, and other vector-index parameters can
+raise CPU and memory requirements because training vectors must be resident in
+memory while the index is trained.
+
+:::
+
+### Vector Index Configuration
+
+The table below summarizes the `api|VectorIndexConfiguration` options.
+
+| Configuration Name   | Is Required | Default Configuration                                          | Further Information                                                                                                                   |
+| -------------------- | ----------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Expression           | Yes         | No default                                                     | A SQL++ expression that returns the vector source. This can be a document property with embedded vectors or a `PREDICTION()` call.    |
+| Number of Dimensions | Yes         | No default                                                     | Supported range: `2` to `4096`.                                                                                                       |
+| Number of Centroids  | Yes         | No default                                                     | Supported range: `1` to `64000`. A common starting point is roughly the square root of the number of documents.                       |
+| Distance Metric      | No          | `DistanceMetric.euclideanSquared`                              | Alternatives are `DistanceMetric.cosine`, `DistanceMetric.euclidean`, and `DistanceMetric.dot`.                                       |
+| Encoding             | No          | `VectorEncoding.scalarQuantizer(ScalarQuantizerType.eightBit)` | Use `VectorEncoding.none()`, scalar quantization, or product quantization depending on the quality/size tradeoff you need.            |
+| Training Size        | No          | Determined from the number of centroids and the encoding       | Use `minTrainingSize` and `maxTrainingSize` to override the defaults when you have measured a better configuration for your data set. |
+| NumProbes            | No          | Determined from the number of centroids                        | A common guideline for a custom value is at least `8` or around `0.5%` of the number of centroids.                                    |
+| Lazy                 | No          | `false`                                                        | Set `lazy: true` to disable automatic updates and manage vector computation yourself.                                                 |
+
+:::caution
+
+Changing the default training sizes can hurt both index quality and query
+performance. Treat custom values as an optimization you measure, not a setting
+you tune blindly.
+
+:::
+
+## Generating Vectors
+
+There are three common ways to generate vectors in Couchbase Lite:
+
+1. Store embeddings directly in your documents and index the document property.
+2. Use the SQL++ `PREDICTION()` function so vectors are generated while the
+   index is built.
+3. Use lazy vector indexes to generate vectors asynchronously, which is useful
+   when the model is remote or temporarily unavailable.
+
+### Create a Vector Index with Embeddings
+
+If your documents already contain vectors, create the index directly over that
+property.
+
+<CodeExample id={3} title="Create a Vector Index with Embeddings">
+
+```dart
+final config = VectorIndexConfiguration(
+  'vector',
+  dimensions: 3,
+  centroids: 100,
+);
+
+await collection.createIndex('colors_index', config);
+```
+
+</CodeExample>
+
+### Create Vector Index Embeddings from a Predictive Model
+
+You can also generate vectors at index time with a registered predictive model.
+
+<CodeExample
+  id={4}
+  title="Create Vector Index Embeddings from a Predictive Model"
+>
+
+```dart
+class ColorModel implements PredictiveModel {
+  @override
+  Dictionary? predict(Dictionary input) {
+    final color = input.string('colorInput');
+    if (color == null) {
+      return null;
+    }
+
+    final vector = colorVectorSync(color);
+    return MutableDictionary({'vector': vector});
+  }
+}
+
+Database.prediction.registerModel('ColorModel', ColorModel());
+
+final expression =
+    'PREDICTION(ColorModel, {"colorInput": color}, "vector")';
+final config = VectorIndexConfiguration(
+  expression,
+  dimensions: 3,
+  centroids: 100,
+);
+
+await collection.createIndex('colors_index', config);
+```
+
+</CodeExample>
+
+This approach can use less document storage because the embeddings only live in
+the index. The tradeoff is that indexing takes longer, because the model runs
+while the index is being built or updated.
+
+## Create a Lazy Vector Index
+
+Lazy vector indexes are useful when vectors cannot be generated synchronously as
+part of normal document writes.
+
+<CodeExample id={5} title="Create a Lazy Vector Index">
+
+```dart
+final config = VectorIndexConfiguration(
+  'color',
+  dimensions: 3,
+  centroids: 100,
+  lazy: true,
+);
+
+await collection.createIndex('colors_index', config);
+```
+
+</CodeExample>
+
+With `lazy: true`, the `expression` does not have to return the final vector.
+Instead, it returns the value your application will use later to compute the
+vector.
+
+:::note
+
+Lazy vector indexing is opt-in. The default is `lazy: false`.
+
+:::
+
+### Updating the Lazy Index
+
+To update a lazy index, fetch the index and repeatedly call
+`api|QueryIndex.beginUpdate` until there are no more pending rows.
+
+<CodeExample id={6} title="Update a Lazy Vector Index">
+
+```dart
+final index = await collection.index('colors_index');
+if (index == null) {
+  throw StateError('colors_index not found');
+}
+
+while (true) {
+  final updater = await index.beginUpdate(limit: 50);
+  if (updater == null) {
+    break;
+  }
+
+  for (var i = 0; i < updater.length; i++) {
+    final color = await updater.value<String>(i);
+    if (color == null) {
+      await updater.skipVector(i);
+      continue;
+    }
+
+    try {
+      final vector = await colorVector(color);
+      await updater.setVector(i, vector);
+    } catch (_) {
+      await updater.skipVector(i);
+    }
+  }
+
+  await updater.finish();
+}
+```
+
+</CodeExample>
+
+The update flow is:
+
+1. Start a batch with `beginUpdate(limit: ...)`.
+2. Read the pending source value for each row with `value<T>(index)`.
+3. Call `setVector` with the computed vector, `setVector(..., null)` to remove
+   an existing vector, or `skipVector` to retry that row later.
+4. Call `finish()` to commit the batch.
+
+`finish()` throws if any row in the updater was neither set nor skipped.
+
+## Vector Search SQL++ Support
+
+Couchbase Lite SQL++ supports hybrid vector search and the
+`APPROX_VECTOR_DISTANCE()` function.
+
+:::important
+
+Like the full-text `MATCH()` function, vector-search predicates cannot be
+combined with other predicates in the same `WHERE` clause using `OR`.
+
+:::
+
+## Use Hybrid Vector Search
+
+Hybrid vector search combines vector similarity with regular SQL++ filters. The
+`WHERE` clause narrows the candidate documents first, and vector distance is
+then evaluated only for the remaining matches.
+
+:::note
+
+For non-hybrid vector search, use a `LIMIT` clause to avoid an exhaustive scan
+of every possible match. Hybrid vector search does not require a `LIMIT`, but
+you will usually still want one to cap result size.
+
+:::
+
+### Hybrid Vector Search with Full Text Match
+
+The following example combines a full-text match with vector similarity.
+
+<CodeExample id={7} title="Hybrid Vector Search with Full Text Match">
+
+```dart
+final query = await database.createQuery(r'''
+  SELECT META().id, color
+  FROM colors
+  WHERE MATCH(color_desc_index, $text)
+  ORDER BY APPROX_VECTOR_DISTANCE(vector, $vector)
+  LIMIT 8
+''');
+
+query.parameters = Parameters({
+  'text': 'vibrant',
+  'vector': await colorVector('FF00AA'),
+});
+
+final resultSet = await query.execute();
+```
+
+</CodeExample>
+
+### Prediction with Hybrid Vector Search
+
+You can also compute vectors on the fly with `PREDICTION()` inside the query.
+
+<CodeExample id={8} title="Prediction with Hybrid Vector Search">
+
+```dart
+final query = await database.createQuery(r'''
+  SELECT META().id, color
+  FROM colors
+  WHERE saturation > 0.5
+  ORDER BY APPROX_VECTOR_DISTANCE(
+    PREDICTION(ColorModel, {"colorInput": color}, "vector"),
+    $vector
+  )
+  LIMIT 8
+''');
+
+query.parameters = Parameters({
+  'vector': await colorVector('FF00AA'),
+});
+
+final resultSet = await query.execute();
+```
+
+</CodeExample>
+
+## `APPROX_VECTOR_DISTANCE(vector-expr, target-vector, [metric], [nprobes], [accurate])`
+
+`APPROX_VECTOR_DISTANCE()` calculates the approximate distance between a query
+vector and the vectors returned by `vector-expr`.
+
+:::warning
+
+If you pass a `metric` argument, it must match the metric configured for the
+index. Otherwise query compilation fails.
+
+:::
+
+| Parameter       | Is Required | Description                                                                                                                        |
+| --------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `vector-expr`   | Yes         | The expression that returns the indexed vector. It must match the vector-index expression exactly.                                 |
+| `target-vector` | Yes         | The query vector to compare against.                                                                                               |
+| `metric`        | No          | One of `"EUCLIDEAN_SQUARED"`, `"L2_SQUARED"`, `"EUCLIDEAN"`, `"L2"`, `"COSINE"`, or `"DOT"`. If omitted, the index metric is used. |
+| `nprobes`       | No          | Overrides the configured probe count for this query.                                                                               |
+| `accurate`      | No          | If omitted, `false` is used. This means the encoded vectors in the index are used for distance calculations.                       |
+
+:::important
+
+Only `accurate = false` is supported.
+
+:::
+
+### Use `APPROX_VECTOR_DISTANCE()`
+
+The following example filters by approximate distance.
+
+<CodeExample id={9} title="Use APPROX_VECTOR_DISTANCE()">
+
+```dart
+final query = await database.createQuery(r'''
+  SELECT META().id, color
+  FROM colors
+  WHERE APPROX_VECTOR_DISTANCE(vector, $vector) < 0.5
+  LIMIT 8
+''');
+
+query.parameters = Parameters({
+  'vector': await colorVector('FF00AA'),
+});
+
+final resultSet = await query.execute();
+```
+
+</CodeExample>
+
+Smaller distance values indicate more similar vectors.
+
+### Prediction with `APPROX_VECTOR_DISTANCE()`
+
+You can also use `PREDICTION()` together with `APPROX_VECTOR_DISTANCE()`.
+
+<CodeExample id={10} title="Prediction with APPROX_VECTOR_DISTANCE()">
+
+```dart
+final query = await database.createQuery(r'''
+  SELECT META().id, color
+  FROM colors
+  ORDER BY APPROX_VECTOR_DISTANCE(
+    PREDICTION(ColorModel, {"colorInput": color}, "vector"),
+    $vector
+  )
+  LIMIT 8
+''');
+
+query.parameters = Parameters({
+  'vector': await colorVector('FF00AA'),
+});
+
+final resultSet = await query.execute();
+```
+
+</CodeExample>
+
+## See Also
+
+- [Install](../install.mdx)
+- [Vector Search](./vector-search.mdx)
+- [Full Text Search](./full-text-search.mdx)

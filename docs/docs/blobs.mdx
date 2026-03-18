@@ -21,12 +21,12 @@ content-addressable store indexed from the document and retrieved only
 on-demand.
 
 When a document is synchronized, the Couchbase Lite replicator adds an
-`_attachments` dictionary to the document's properties if it contains a blob
-— see [Figure 1](#).
+`_attachments` dictionary to the document's properties if it contains a blob —
+see [Figure 1](#).
 
 ## Blob Objects
 
-The blob as an object appears in a document as dictionary property — see, for
+The blob as an object appears in a document as dictionary property — see, for
 example _avatar_ in [Figure 1](#).
 
 Other properties include `length` (the length in bytes), and optionally
@@ -34,12 +34,12 @@ Other properties include `length` (the length in bytes), and optionally
 
 The blob's data (an image, audio or video content) is not stored in the
 document, but in a separate content-addressable store, indexed by the `digest`
-property — see [Using Blobs](#using-blobs).
+property — see [Using Blobs](#using-blobs).
 
 ### Constraints
 
 - Couchbase Lite <br /> Blobs can be arbitrarily large. They are only read on
-  demand, not when you load a the document.
+  demand, not when you load the document.
 
 - Capella App Services/Sync Gateway <br /> The maximum content size is 20 MB per
   blob. If a document's blob is over 20 MB, the document will be replicated but
@@ -52,19 +52,27 @@ The `api|Blob` API lets you access the blob's data content as in-memory data
 `api|dart:typed_data|Uint8List`s.
 
 The code in [Example 1](#) shows how you might add a blob to a document and save
-it to the database. Here we use avatar as the property key and a jpeg file as
+it to the database. Here we use `avatar` as the property key and a jpeg file as
 the blob data.
 
 <CodeExample id={1} title="Working with Blobs">
 
 ```dart
 final data = getAsset('avatar.jpg');
-if (data == null) { return; }
+if (data == null) {
+  return;
+}
 
+// Create the blob with a MIME type and the image data.
 final blob = Blob.fromData('image/jpeg', data);
+
+// Add the blob to the document using 'avatar' as the property key.
+// Saving the document generates a digest (a SHA-1 hash of the content)
+// stored in the blob's metadata — see Figure 1.
 doc.setBlob(blob, key: 'avatar');
 await collection.saveDocument(doc);
 
+// Later, retrieve the blob from the document by key.
 final image = doc.blob('avatar');
 ```
 
@@ -105,3 +113,20 @@ dictionary, including the digest.
 ```
 
 </Figure>
+
+## Blob Deletion and Cleanup
+
+When you delete a document that references a blob, the blob file itself is not
+immediately removed from the database. The blob file is kept in the database
+until you compact it.
+
+To remove orphaned blob files, perform database maintenance using the compact
+option — see [Example 2](#).
+
+<CodeExample id={2} title="Compact Database to Remove Orphaned Blobs">
+
+```dart
+await database.performMaintenance(MaintenanceType.compact);
+```
+
+</CodeExample>

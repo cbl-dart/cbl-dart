@@ -1,0 +1,223 @@
+---
+description:
+  Working with Couchbase Lite's data model — Querying the database using
+  Full-Text Search
+related_content:
+  - name: Indexing
+    url: /indexing
+  - name: QueryBuilder
+    url: /queries/query-builder
+  - name: SQL++ for Mobile
+    url: /queries/sqlplusplus-mobile
+---
+
+# Full Text Search
+
+## Overview
+
+To run a full-text search (FTS) query, you must create a full-text index on the
+expression being matched. Unlike regular queries, the index is not optional.
+
+You can choose to use SQL++ or QueryBuilder syntaxes to create and use FTS
+indexes.
+
+The following examples use the data model introduced in
+[Indexing](../indexing.mdx). They create and use an FTS index built from the
+hotel's `overview` text.
+
+## SQL++
+
+### Create Index
+
+SQL++ provides a configuration object to define full-text search indexes —
+`api|FullTextIndexConfiguration`.
+
+These examples set `language` to `api|enum-value:FullTextLanguage.english` so
+English stop-word removal and stemming are enabled. If you leave `language`
+unset, language-specific behaviors are not applied.
+
+<CodeExample id={1} title="Create FTS Index with SQL++">
+
+```dart
+final config = FullTextIndexConfiguration(
+  ['overview'],
+  language: FullTextLanguage.english,
+);
+await collection.createIndex('overviewFTSIndex', config);
+```
+
+</CodeExample>
+
+### Use Index
+
+Full-text search is enabled using the SQL++ `MATCH()` function.
+
+With the index created, you can construct and run a full-text search (FTS) query
+using the indexed properties.
+
+The index will omit a set of common words, to avoid words like "I", "the", "an"
+from overly influencing your queries. See the
+[full list of stopwords](https://github.com/couchbasedeps/sqlite3-unicodesn/blob/HEAD/stopwords_en.h).
+
+The following example finds all hotels mentioning _Michigan_ in their _overview_
+text.
+
+<CodeExample id={2} title="FTS Query with SQL++">
+
+```dart
+final query = await Query.fromN1ql(
+  database,
+  r"SELECT _.name, _.overview FROM _ "
+  r"WHERE MATCH(overviewFTSIndex, 'michigan') "
+  r"ORDER BY RANK(overviewFTSIndex)",
+);
+final resultSet = await query.execute();
+```
+
+</CodeExample>
+
+## QueryBuilder
+
+### Create Index
+
+The following example creates an FTS index on the `overview` property.
+
+<CodeExample id={3} title="Create FTS Index with QueryBuilder">
+
+```dart
+final index = FullTextIndex([
+  FullTextIndexItem.property('overview'),
+]).language(FullTextLanguage.english);
+await collection.createIndex('overviewFTSIndex', index);
+```
+
+</CodeExample>
+
+### Use Index
+
+With the index created, you can construct and run a full-text search (FTS) query
+using the indexed properties.
+
+The following example finds all hotels mentioning _Michigan_ in their _overview_
+text.
+
+<CodeExample id={4} title="FTS Query with QueryBuilder">
+
+```dart
+final query = QueryBuilder.createAsync()
+    .select(
+      SelectResult.property('name'),
+      SelectResult.property('overview'),
+    )
+    .from(DataSource.collection(collection))
+    .where(FullTextFunction.match(
+      indexName: 'overviewFTSIndex',
+      query: 'michigan',
+    ))
+    .orderBy(Ordering.expression(
+      FullTextFunction.rank('overviewFTSIndex'),
+    ));
+final resultSet = await query.execute();
+```
+
+</CodeExample>
+
+## Operation
+
+In the examples above, the pattern to match is a word. The full-text search
+query matches all documents that contain the word "michigan" in the value of the
+`overview` property.
+
+Search is supported for all languages that use whitespace to separate words.
+
+Stemming, which is the process of fuzzy matching parts of speech, like "fast"
+and "faster", is supported when the index is configured with one of the
+following `api|enum:FullTextLanguage` values: Danish, Dutch, English, Finnish,
+French, German, Hungarian, Italian, Norwegian, Portuguese, Romanian, Russian,
+Spanish, Swedish, and Turkish.
+
+## Pattern Matching Formats
+
+As well as providing specific words or strings to match against, you can provide
+the pattern to match in these formats.
+
+### Prefix Queries
+
+The query expression used to search for a term prefix is the prefix itself with
+a `*` character appended to it. For example, `"lin*"` matches "linux", "linear",
+"linker", "linguistic", and so on.
+
+### Overriding the Property Name
+
+Normally, a token or token prefix query is matched against the document property
+specified as the left-hand side of the `match` operator. This may be overridden
+by specifying a property name followed by a `:` character before a basic term
+query. There may be space between the `:` and the term to query for, but not
+between the property name and the `:` character.
+
+For example, to find documents where "linux" appears in the `title` property and
+"problems" appears in either the `title` or `body`:
+
+```
+'title:linux problems'
+```
+
+### Phrase Queries
+
+A phrase query retrieves all documents containing a nominated set of terms or
+term prefixes in a specified order with no intervening tokens. Phrase queries
+are specified by enclosing a space separated sequence of terms or term prefixes
+in double quotes (`"`). For example, `"linux applications"`.
+
+### NEAR Queries
+
+A NEAR query returns documents that contain two or more nominated terms or
+phrases within a specified proximity of each other, by default with 10 or fewer
+intervening terms. A NEAR query is specified by putting the keyword `NEAR`
+between two phrases, tokens, or token prefix queries. To specify a proximity
+other than the default, use an operator of the form `NEAR/N`, where N is the
+maximum number of intervening terms allowed.
+
+For example, to search for documents containing "replication" and "database"
+with not more than 2 terms separating the two:
+
+```
+"database NEAR/2 replication"
+```
+
+### AND, OR & NOT Query Operators
+
+The enhanced query syntax supports the `AND`, `OR`, and `NOT` binary set
+operators. Each of the two operands to an operator may be a basic FTS query, or
+the result of another AND, OR, or NOT set operation. Operators must be entered
+using capital letters. Otherwise, they are interpreted as basic term queries
+instead of set operators.
+
+For example, to return the set of documents that contain the term "couchbase"
+and the term "database":
+
+```
+"couchbase AND database"
+```
+
+### Operator Precedence
+
+When using the enhanced query syntax, parentheses may be used to specify the
+precedence of the various operators.
+
+For example, to query for the set of documents that contains the term "linux"
+and at least one of the phrases "couchbase database" and "sqlite library":
+
+```
+'("couchbase database" OR "sqlite library") AND "linux"'
+```
+
+## Ordering Results
+
+It's very common to sort full-text results in descending order of relevance.
+This can be a very difficult heuristic to define, but Couchbase Lite comes with
+a ranking function you can use.
+
+In SQL++, use `RANK(indexName)` in an `ORDER BY` clause. In QueryBuilder, use
+`api|FullTextFunction.rank` to build the same expression, as shown in
+[Example 2](#) and [Example 4](#).
