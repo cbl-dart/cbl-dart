@@ -49,12 +49,20 @@ dependencies:
   cbl_dart: ...
 ```
 
+import { usePubPackageVersion } from '@site/src/components/PubPackageVersion'
+
+export const CblDependencySnippet = () => {
+  const version = usePubPackageVersion('cbl')
+  return (
+    <pre>
+      <code className="language-yaml">{`dependencies:\n  cbl: ^${version}`}</code>
+    </pre>
+  )
+}
+
 ### After (v4) — Both Flutter and Standalone Dart
 
-```yaml
-dependencies:
-  cbl: ...
-```
+<CblDependencySnippet />
 
 A single dependency is all that is needed for both Flutter and standalone Dart
 apps.
