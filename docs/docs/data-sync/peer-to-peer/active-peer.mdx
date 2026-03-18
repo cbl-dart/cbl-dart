@@ -1,17 +1,332 @@
 ---
 description:
-  Couchbase Lite's Peer-to-Peer Synchronization enables edge devices to
-  synchronize securely without consuming centralized cloud-server resources
+  Configure an active peer to connect to a passive peer and replicate changes
+  over WebSockets.
 related_content:
+  - name: Data Sync Peer-to-Peer
+    url: /data-sync/peer-to-peer/websocket
   - name: Passive Peer
     url: /data-sync/peer-to-peer/passive-peer
+  - name: Data Sync using Sync Gateway
+    url: /data-sync/replication
 ---
 
 # Active Peer
 
-Peer-to-peer sync is available, but the Dart specific documentation for the
-active peer is not available yet.
+<EnterpriseFeatureCallout />
 
-Since the Dart API is very similar to the Swift API, you can refer to the
-[Swift documentation](https://docs.couchbase.com/couchbase-lite/current/swift/p2psync-websocket-using-active.html)
-in the meantime.
+## Introduction
+
+An active peer is the side of a peer-to-peer replication that initiates the
+connection to a passive peer. In Couchbase Lite for Dart, you implement the
+active peer with `api|Replicator` and point it at a passive peer's
+`api|UrlEndpointListener`.
+
+This page focuses on the replicator-specific setup. For the broader peer-to-peer
+model, listener behavior, and transport-level constraints, see
+[Data Sync Peer-to-Peer](./websocket.mdx).
+
+## Configuration Summary
+
+Create a `api|ReplicatorConfiguration` for the remote listener, add the
+collection you want to sync, configure authentication and TLS validation as
+needed, create the replicator, and start it.
+
+<CodeExample id={1} title="Replication Configuration and Initialization">
+
+```dart
+final config = ReplicatorConfiguration(
+  target: UrlEndpoint(
+    Uri.parse('wss://listener.example.com:55990/travel-sample'),
+  ),
+  acceptOnlySelfSignedServerCertificate: true,
+  authenticator: BasicAuthenticator(
+    username: 'cbl-user-01',
+    password: 'secret',
+  ),
+)
+  ..replicatorType = ReplicatorType.pushAndPull
+  ..continuous = true
+  ..addCollection(collection);
+
+final replicator = await Replicator.create(config);
+await replicator.start();
+```
+
+</CodeExample>
+
+## Device Discovery
+
+Before the active peer can connect, it needs the passive peer's WebSocket URL.
+That can come from:
+
+- A well-known hostname or IP address.
+- A discovery phase such as Bonjour or another zero-config protocol.
+- An out-of-band exchange in your application.
+
+However the URL is obtained, pass it to `api|UrlEndpoint`.
+
+## Configure Replicator
+
+### Configure Target
+
+Use `api|ReplicatorConfiguration` with a `api|UrlEndpoint` target. The URL must
+use `ws://` or `wss://`, and the path must identify the remote database name
+that the passive peer exposes.
+
+<CodeExample id={2} title="Configure the Target Endpoint">
+
+```dart
+final target = UrlEndpoint(
+  Uri.parse('wss://listener.example.com:55990/travel-sample'),
+);
+
+final config = ReplicatorConfiguration(target: target)..addCollection(
+  collection,
+);
+```
+
+</CodeExample>
+
+Use `wss://` when TLS is enabled on the listener, which is the default.
+
+### Sync Mode
+
+Set `api|ReplicatorConfiguration.replicatorType` to choose the replication
+direction:
+
+- `api|enum-value:ReplicatorType.pushAndPull` for bidirectional sync.
+- `api|enum-value:ReplicatorType.push` for push-only replication.
+- `api|enum-value:ReplicatorType.pull` for pull-only replication.
+
+Set `api|ReplicatorConfiguration.continuous` to `true` for long-lived
+replication, or leave it `false` for a one-shot replication.
+
+<CodeExample id={3} title="Configure Replication Direction and Mode">
+
+```dart
+final config = ReplicatorConfiguration(target: target)
+  ..replicatorType = ReplicatorType.pushAndPull
+  ..continuous = true
+  ..addCollection(collection);
+```
+
+</CodeExample>
+
+:::tip
+
+Unless you have a specific reason not to, prefer a single
+`api|enum-value:ReplicatorType.pushAndPull` replicator over separate push and
+pull replicators.
+
+:::
+
+### Retry Configuration
+
+The active peer automatically retries transient failures with exponential
+backoff. You can tune the behavior with:
+
+- `api|ReplicatorConfiguration.heartbeat`
+- `api|ReplicatorConfiguration.maxAttempts`
+- `api|ReplicatorConfiguration.maxAttemptWaitTime`
+
+<CodeExample id={4} title="Configure Retry Behavior">
+
+```dart
+final config = ReplicatorConfiguration(target: target)
+  ..heartbeat = const Duration(seconds: 120)
+  ..maxAttempts = 6
+  ..maxAttemptWaitTime = const Duration(minutes: 2)
+  ..addCollection(collection);
+```
+
+</CodeExample>
+
+If you leave these values unset, Couchbase Lite uses its default retry logic.
+
+### Authenticating the Listener
+
+By default, the active peer accepts listener certificates that validate against
+the platform trust store. For peer-to-peer development setups, it is common to
+use self-signed certificates and set
+`api|ReplicatorConfiguration.acceptOnlySelfSignedServerCertificate` to `true`.
+
+For stricter validation, configure one of these instead:
+
+- `api|ReplicatorConfiguration.pinnedServerCertificate` to pin a specific server
+  certificate.
+- `api|ReplicatorConfiguration.trustedRootCertificates` to trust a custom root
+  certificate chain.
+
+<CodeExample id={5} title="Pin the Listener Certificate">
+
+```dart
+final config = ReplicatorConfiguration(
+  target: target,
+  pinnedServerCertificate: DerData(listenerCertificateBytes),
+)..addCollection(collection);
+```
+
+</CodeExample>
+
+### Client Authentication
+
+The passive peer can require the active peer to authenticate itself. Couchbase
+Lite for Dart supports two client-side options for peer-to-peer sync:
+
+- `api|BasicAuthenticator`
+- `api|ClientCertificateAuthenticator`
+
+Use `api|BasicAuthenticator` when the listener uses
+`api|ListenerPasswordAuthenticator`:
+
+<CodeExample id={6} title="Use Basic Authentication">
+
+```dart
+final config = ReplicatorConfiguration(
+  target: target,
+  acceptOnlySelfSignedServerCertificate: true,
+  authenticator: BasicAuthenticator(
+    username: 'cbl-user-01',
+    password: 'secret',
+  ),
+)..addCollection(collection);
+```
+
+</CodeExample>
+
+Use `api|ClientCertificateAuthenticator` when the listener authenticates client
+certificates:
+
+<CodeExample id={7} title="Use Client Certificate Authentication">
+
+```dart
+final clientIdentity = await TlsIdentity.createIdentity(
+  keyUsages: {KeyUsage.clientAuth},
+  attributes: const CertificateAttributes(commonName: 'Client A'),
+  expiration: DateTime.utc(2100),
+);
+
+final config = ReplicatorConfiguration(
+  target: target,
+  acceptOnlySelfSignedServerCertificate: true,
+  authenticator: ClientCertificateAuthenticator(clientIdentity),
+)..addCollection(collection);
+```
+
+</CodeExample>
+
+## Initialize Replicator
+
+Use `api|Replicator.create` to construct a replicator from the configuration.
+The replicator runs asynchronously after you call `api|Replicator.start`.
+
+<CodeExample id={8} title="Create and Start a Replicator">
+
+```dart
+final replicator = await Replicator.create(config);
+await replicator.start();
+```
+
+</CodeExample>
+
+## Monitor Sync
+
+Use `api|Replicator.changes` or `api|Replicator.addChangeListener` to observe
+status changes. The replicator reports activity through
+`api|ReplicatorStatus.activity`, progress through
+`api|ReplicatorStatus.progress`, and any terminal or transient error through
+`api|ReplicatorStatus.error`.
+
+<CodeExample id={9} title="Monitor Replication State">
+
+```dart
+await for (final change in replicator.changes()) {
+  final status = change.status;
+
+  switch (status.activity) {
+    case ReplicatorActivityLevel.connecting:
+    case ReplicatorActivityLevel.busy:
+      print('Replicating: ${status.progress}');
+    case ReplicatorActivityLevel.idle:
+      print('Connected and idle');
+    case ReplicatorActivityLevel.offline:
+      print('Temporarily offline: ${status.error}');
+    case ReplicatorActivityLevel.stopped:
+      print('Stopped: ${status.error}');
+  }
+}
+```
+
+</CodeExample>
+
+The possible activity states are:
+
+- `api|enum-value:ReplicatorActivityLevel.stopped`
+- `api|enum-value:ReplicatorActivityLevel.offline`
+- `api|enum-value:ReplicatorActivityLevel.connecting`
+- `api|enum-value:ReplicatorActivityLevel.idle`
+- `api|enum-value:ReplicatorActivityLevel.busy`
+
+### Documents Pending Push
+
+Use `api|Replicator.pendingDocumentIdsInCollection` or
+`api|Replicator.isDocumentPendingInCollection` to inspect whether local changes
+still need to be pushed.
+
+<CodeExample id={10} title="Check Pending Documents">
+
+```dart
+final pendingIds = await replicator.pendingDocumentIdsInCollection(collection);
+final isPending = await replicator.isDocumentPendingInCollection(
+  'hotel-123',
+  collection,
+);
+```
+
+</CodeExample>
+
+## Stop Sync
+
+Call `api|Replicator.stop` to stop the active peer. Stopping is asynchronous, so
+continue to monitor the status until the activity reaches
+`api|enum-value:ReplicatorActivityLevel.stopped`.
+
+<CodeExample id={11} title="Stop a Replicator">
+
+```dart
+await replicator.stop();
+```
+
+</CodeExample>
+
+## Conflict Resolution
+
+Conflict resolution is configured per collection with
+`api|CollectionConfiguration`. If you do not provide a custom resolver,
+Couchbase Lite uses `api|DefaultConflictResolver`.
+
+<CodeExample id={12} title="Configure a Conflict Resolver">
+
+```dart
+final config = ReplicatorConfiguration(target: target)
+  ..addCollection(
+    collection,
+    CollectionConfiguration(
+      conflictResolver: ConflictResolver.from((conflict) {
+        return conflict.localDocument ?? conflict.remoteDocument;
+      }),
+    ),
+  );
+```
+
+</CodeExample>
+
+## Delta Sync
+
+Delta sync can reduce bandwidth usage by sending only the changed parts of a
+document. For peer-to-peer replication, the passive peer must allow delta sync
+by setting `api|UrlEndpointListenerConfiguration.enableDeltaSync` to `true`.
+
+The active peer does not need extra configuration beyond using a normal
+replicator against that listener.

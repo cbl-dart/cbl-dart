@@ -1,17 +1,290 @@
 ---
 description:
-  Couchbase Lite's Peer-to-Peer Synchronization enables edge devices to
-  synchronize securely without consuming centralized cloud-server resources
+  Configure a passive peer to accept active peer connections and synchronize
+  changes over WebSockets.
 related_content:
+  - name: Data Sync Peer-to-Peer
+    url: /data-sync/peer-to-peer/websocket
   - name: Active Peer
     url: /data-sync/peer-to-peer/active-peer
+  - name: Data Sync using Sync Gateway
+    url: /data-sync/replication
 ---
 
 # Passive Peer
 
-Peer-to-peer sync is available, but the Dart specific documentation for the
-passive peer is not available yet.
+<EnterpriseFeatureCallout />
 
-Since the Dart API is very similar to the Swift API, you can refer to the
-[Swift documentation](https://docs.couchbase.com/couchbase-lite/current/swift/p2psync-websocket-using-passive.html)
-in the meantime.
+:::caution
+
+On iOS 14 and later, applications that access the local network must declare an
+`NSLocalNetworkUsageDescription` in their app bundle metadata so the system can
+prompt the user for permission.
+
+:::
+
+## Introduction
+
+A passive peer accepts incoming connections from an active peer and exposes one
+or more local collections for replication. In Couchbase Lite for Dart, passive
+peer behavior is provided by `api|UrlEndpointListener` and
+`api|UrlEndpointListenerConfiguration`.
+
+This page focuses on listener setup. For the overall peer-to-peer model and
+shared transport concepts, see [Data Sync Peer-to-Peer](./websocket.mdx).
+
+## Configuration Summary
+
+Create a listener configuration with the local collections to expose, adjust
+network, TLS, and authentication settings as needed, then create and start the
+listener.
+
+<CodeExample id={1} title="Listener Configuration and Initialization">
+
+```dart
+final config = UrlEndpointListenerConfiguration(
+  collections: [collection],
+  port: 55990,
+  networkInterface: '0.0.0.0',
+  enableDeltaSync: true,
+  authenticator: ListenerPasswordAuthenticator((username, password) {
+    return username == 'cbl-user-01' && password == 'secret';
+  }),
+);
+
+final listener = await UrlEndpointListener.create(config);
+await listener.start();
+```
+
+</CodeExample>
+
+## Device Discovery
+
+If the listener is reachable at a known host name or IP address, active peers
+can connect directly. Otherwise, advertise the listener through your own
+discovery mechanism, such as Bonjour, mDNS, or another application-level
+discovery channel.
+
+After the listener starts, use `api|UrlEndpointListener.urls` to discover the
+actual URLs clients can use.
+
+## Initialize the Listener Configuration
+
+Start by choosing the local collections that should be available for
+replication. The `collections` list must not be empty, and all collections must
+belong to the same database.
+
+<CodeExample id={2} title="Specify the Local Collections">
+
+```dart
+final config = UrlEndpointListenerConfiguration(
+  collections: [collection],
+);
+```
+
+</CodeExample>
+
+## Set Port and Network Interface
+
+### Port Number
+
+If you do not specify `api|UrlEndpointListenerConfiguration.port`, Couchbase
+Lite assigns an available port when the listener starts. Specify a port when
+other peers need to know it in advance.
+
+<CodeExample id={3} title="Specify a Listener Port">
+
+```dart
+final config = UrlEndpointListenerConfiguration(
+  collections: [collection],
+  port: 55990,
+);
+```
+
+</CodeExample>
+
+### Network Interface
+
+Use `api|UrlEndpointListenerConfiguration.networkInterface` to bind the listener
+to a specific IP address or interface name. If you leave it unset, the listener
+accepts connections on all available interfaces.
+
+<CodeExample id={4} title="Specify a Network Interface">
+
+```dart
+final config = UrlEndpointListenerConfiguration(
+  collections: [collection],
+  networkInterface: 'en0',
+);
+```
+
+</CodeExample>
+
+## Delta Sync
+
+Set `api|UrlEndpointListenerConfiguration.enableDeltaSync` to `true` to allow
+delta sync with compatible active peers. Delta sync is disabled by default.
+
+<CodeExample id={5} title="Enable Delta Sync">
+
+```dart
+final config = UrlEndpointListenerConfiguration(
+  collections: [collection],
+  enableDeltaSync: true,
+);
+```
+
+</CodeExample>
+
+## TLS Security
+
+### Enable or Disable TLS
+
+TLS is enabled by default. If you keep TLS enabled, active peers connect using
+`wss://` URLs. If you set `api|UrlEndpointListenerConfiguration.disableTls` to
+`true`, the listener uses clear-text `ws://` URLs instead.
+
+Disabling TLS is useful for isolated development environments, but it is not
+recommended for production deployments.
+
+### Configure TLS Identity for Listener
+
+If you do not specify `api|UrlEndpointListenerConfiguration.tlsIdentity`,
+Couchbase Lite generates an anonymous self-signed identity when the listener
+starts. That gives you encryption, but not a certificate chain that a client can
+validate as a trusted server identity.
+
+To provide a stable server identity, create a `api|TlsIdentity` explicitly:
+
+<CodeExample id={6} title="Create and Use a TLS Identity">
+
+```dart
+final tlsIdentity = await TlsIdentity.createIdentity(
+  keyUsages: {KeyUsage.serverAuth},
+  attributes: const CertificateAttributes(
+    commonName: 'travel-sample-listener',
+  ),
+  expiration: DateTime.utc(2100),
+);
+
+final config = UrlEndpointListenerConfiguration(
+  collections: [collection],
+  tlsIdentity: tlsIdentity,
+);
+```
+
+</CodeExample>
+
+:::note
+
+Persisted TLS identities created with a `label` are not supported on Android or
+Linux. They are supported on Apple platforms and Windows.
+
+:::
+
+## Authenticating the Client
+
+Client authentication is optional. If you do not configure an authenticator, any
+active peer that can reach the listener and satisfy the TLS requirements may
+connect.
+
+### Use Basic Authentication
+
+Use `api|ListenerPasswordAuthenticator` when the active peer should present a
+username and password through `api|BasicAuthenticator`.
+
+<CodeExample id={7} title="Require Username and Password">
+
+```dart
+final config = UrlEndpointListenerConfiguration(
+  collections: [collection],
+  authenticator: ListenerPasswordAuthenticator((username, password) {
+    return username == 'cbl-user-01' && password == 'secret';
+  }),
+);
+```
+
+</CodeExample>
+
+### Use Client Certificate Authentication
+
+Use `api|ListenerCertificateAuthenticator` when active peers should present a
+client certificate. You can either verify certificates in a handler or trust
+certificates issued by a specific root chain.
+
+<CodeExample id={8} title="Trust a Specific Client Certificate Chain">
+
+```dart
+final clientIdentity = await TlsIdentity.createIdentity(
+  keyUsages: {KeyUsage.clientAuth},
+  attributes: const CertificateAttributes(commonName: 'Client A'),
+  expiration: DateTime.utc(2100),
+);
+
+final config = UrlEndpointListenerConfiguration(
+  collections: [collection],
+  authenticator: ListenerCertificateAuthenticator.fromRoots(
+    clientIdentity.certificates,
+  ),
+);
+```
+
+</CodeExample>
+
+### The Impact of TLS Settings
+
+TLS and authentication settings interact in a few important ways:
+
+- If `api|UrlEndpointListenerConfiguration.disableTls` is `true`, client
+  certificate authentication is not available.
+- If TLS is enabled and no `api|TlsIdentity` is configured, the listener creates
+  an anonymous self-signed identity automatically.
+- Set `api|UrlEndpointListenerConfiguration.readOnly` to `true` if the passive
+  peer should only allow pull replication from clients.
+
+## Start Listener
+
+Create the listener with `api|UrlEndpointListener.create`, then call
+`api|UrlEndpointListener.start`. The resolved port, URLs, and TLS identity are
+only available after the listener has started.
+
+<CodeExample id={9} title="Create and Start a Listener">
+
+```dart
+final listener = await UrlEndpointListener.create(config);
+await listener.start();
+
+print(listener.port);
+print(listener.urls);
+```
+
+</CodeExample>
+
+## Monitor Listener
+
+Use `api|UrlEndpointListener.connectionStatus` to inspect how many peers are
+currently connected and how many are actively replicating.
+
+<CodeExample id={10} title="Inspect Listener Status">
+
+```dart
+final status = listener.connectionStatus;
+
+print('Connected peers: ${status.connectionCount}');
+print('Active replications: ${status.activeConnectionCount}');
+```
+
+</CodeExample>
+
+## Stop Listener
+
+Call `api|UrlEndpointListener.stop` to stop accepting new connections and close
+existing peer-to-peer sessions.
+
+<CodeExample id={11} title="Stop a Listener">
+
+```dart
+await listener.stop();
+```
+
+</CodeExample>

@@ -25,6 +25,7 @@ The Dart docs live at `docs/docs/` in the workspace.
 | `search/full-text-search.mdx`                | `fts.adoc`                                  |
 | `search/vector-search.mdx`                   | `vector-search.adoc`                        |
 | `search/working-with-vector-search.mdx`      | `working-with-vector-search.adoc`           |
+| `data-sync/replication.mdx`                  | `replication.adoc`                          |
 | `data-sync/peer-to-peer/websocket.mdx`       | `p2psync-websocket.adoc`                    |
 | `data-sync/peer-to-peer/passive-peer.mdx`    | `p2psync-websocket-using-passive.adoc`      |
 | `data-sync/peer-to-peer/active-peer.mdx`     | `p2psync-websocket-using-active.adoc`       |
@@ -49,5 +50,3 @@ These Dart doc pages don't have a direct mapping to the official docs:
 - Some official pages don't have Dart equivalents (e.g., `gs-build.adoc`,
   `gs-install.adoc`, `quickstart.adoc`) because those are covered differently
   in the Dart docs.
-- The official `replication.adoc` covers Sync Gateway replication, which the
-  Dart docs don't have a dedicated page for yet.

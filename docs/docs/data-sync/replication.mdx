@@ -1,0 +1,412 @@
+---
+description:
+  Synchronize local Couchbase Lite data with Sync Gateway using the replicator
+  API.
+related_content:
+  - name: Scopes and Collections
+    url: /scopes-and-collections
+  - name: Data Sync Peer-to-Peer
+    url: /data-sync/peer-to-peer/websocket
+  - name: Documents
+    url: /documents
+---
+
+# Data Sync using Sync Gateway
+
+## Introduction
+
+Couchbase Lite for Dart synchronizes local data with Sync Gateway through
+`api|Replicator`. A replicator connects a local database or collection set to a
+remote Sync Gateway database and transfers document changes in one or both
+directions.
+
+This page covers the main Sync Gateway replication concepts and the Dart API
+used to configure, start, monitor, and stop replication.
+
+## Replication Concepts
+
+Replication can be configured at the collection level. Each configured
+collection can also have its own `api|CollectionConfiguration`, which is where
+you attach filters, channels, document IDs, and conflict resolution rules.
+
+Use Sync Gateway replication when your application needs to sync local data with
+a central server deployment instead of directly with another edge device.
+
+## Replication Protocol
+
+Couchbase Lite uses a WebSocket-based replication protocol. The remote URL must
+therefore use `ws://` or `wss://`.
+
+:::note
+
+The replication protocol is not compatible with CouchDB-style endpoints.
+
+:::
+
+The protocol is optimized for throughput, so document delivery order is not
+guaranteed. Avoid application logic that depends on a particular arrival order
+in replication callbacks.
+
+## Scopes and Collections
+
+The local collections configured in the replicator must also exist in Sync
+Gateway with the same scope and collection names. If the server-side
+configuration changes and removes a collection that is currently being synced,
+the replicator eventually stops with an error.
+
+If you only add the default collection to the replicator, Couchbase Lite syncs
+the default collection on both sides.
+
+## Configuration Summary
+
+Create a `api|ReplicatorConfiguration`, add the collections to replicate,
+configure authentication and transport settings, then create and start the
+replicator.
+
+<CodeExample id={1} title="Replication Configuration and Initialization">
+
+```dart
+final config = ReplicatorConfiguration(
+  target: UrlEndpoint(
+    Uri.parse('wss://example.com:4984/travel-sample'),
+  ),
+  authenticator: BasicAuthenticator(
+    username: 'cbl-user-01',
+    password: 'secret',
+  ),
+)
+  ..replicatorType = ReplicatorType.pushAndPull
+  ..continuous = true
+  ..addCollection(collection);
+
+final replicator = await Replicator.create(config);
+await replicator.start();
+```
+
+</CodeExample>
+
+## Configure
+
+### Configure Target
+
+Use `api|UrlEndpoint` to specify the remote Sync Gateway database:
+
+<CodeExample id={2} title="Configure the Sync Gateway Target">
+
+```dart
+final target = UrlEndpoint(
+  Uri.parse('wss://example.com:4984/travel-sample'),
+);
+
+final config = ReplicatorConfiguration(target: target)..addCollection(
+  collection,
+);
+```
+
+</CodeExample>
+
+### Sync Mode
+
+Use `api|ReplicatorConfiguration.replicatorType` to choose push, pull, or
+bidirectional replication. Use `api|ReplicatorConfiguration.continuous` to keep
+the replicator running and reconnecting as needed.
+
+<CodeExample id={3} title="Configure Direction and Continuous Mode">
+
+```dart
+final config = ReplicatorConfiguration(target: target)
+  ..replicatorType = ReplicatorType.pushAndPull
+  ..continuous = true
+  ..addCollection(collection);
+```
+
+</CodeExample>
+
+### Retry Configuration
+
+The replicator automatically retries transient connectivity issues. You can
+adjust the retry behavior with:
+
+- `api|ReplicatorConfiguration.heartbeat`
+- `api|ReplicatorConfiguration.maxAttempts`
+- `api|ReplicatorConfiguration.maxAttemptWaitTime`
+
+<CodeExample id={4} title="Tune Retry Behavior">
+
+```dart
+final config = ReplicatorConfiguration(target: target)
+  ..heartbeat = const Duration(seconds: 120)
+  ..maxAttempts = 6
+  ..maxAttemptWaitTime = const Duration(minutes: 2)
+  ..addCollection(collection);
+```
+
+</CodeExample>
+
+### User Authorization
+
+Use `api|ReplicatorConfiguration.authenticator` to configure the credentials the
+client presents to Sync Gateway.
+
+#### Basic Authentication
+
+Use `api|BasicAuthenticator` when Sync Gateway expects username/password
+credentials:
+
+<CodeExample id={5} title="Use Basic Authentication">
+
+```dart
+final config = ReplicatorConfiguration(
+  target: target,
+  authenticator: BasicAuthenticator(
+    username: 'cbl-user-01',
+    password: 'secret',
+  ),
+)..addCollection(collection);
+```
+
+</CodeExample>
+
+#### Session Authentication
+
+Use `api|SessionAuthenticator` if your application already has a Sync Gateway
+session token:
+
+<CodeExample id={6} title="Use Session Authentication">
+
+```dart
+final config = ReplicatorConfiguration(
+  target: target,
+  authenticator: SessionAuthenticator(
+    sessionId: sessionId,
+  ),
+)..addCollection(collection);
+```
+
+</CodeExample>
+
+### Server Authentication
+
+By default, the client validates the Sync Gateway certificate against the
+platform trust store. For custom deployments you can also:
+
+- accept only self-signed certificates with
+  `api|ReplicatorConfiguration.acceptOnlySelfSignedServerCertificate`
+- pin a specific server certificate with
+  `api|ReplicatorConfiguration.pinnedServerCertificate`
+- trust a custom root chain with
+  `api|ReplicatorConfiguration.trustedRootCertificates`
+
+<CodeExample id={7} title="Trust a Custom Root Certificate Chain">
+
+```dart
+final config = ReplicatorConfiguration(
+  target: target,
+  trustedRootCertificates: PemData(rootCertificatePem),
+)..addCollection(collection);
+```
+
+</CodeExample>
+
+### Custom Headers
+
+Use `api|ReplicatorConfiguration.headers` when Sync Gateway or an intermediate
+proxy requires extra HTTP headers.
+
+<CodeExample id={8} title="Add Custom Headers">
+
+```dart
+final config = ReplicatorConfiguration(
+  target: target,
+  headers: {'X-Correlation-ID': 'sync-42'},
+)..addCollection(collection);
+```
+
+</CodeExample>
+
+### Replication Filters
+
+Attach a `api|CollectionConfiguration` when adding a collection if you need
+document ID filters, channel filters, or push/pull filters.
+
+<CodeExample id={9} title="Filter Replication Per Collection">
+
+```dart
+final collectionConfig = CollectionConfiguration(
+  channels: ['customer-a'],
+  documentIds: ['hotel-123', 'hotel-456'],
+  pushFilter: (document, flags) {
+    return document.string('type') == 'hotel';
+  },
+  pullFilter: (document, flags) {
+    return !flags.contains(DocumentFlag.deleted);
+  },
+);
+
+final config = ReplicatorConfiguration(target: target)
+  ..addCollection(collection, collectionConfig);
+```
+
+</CodeExample>
+
+### Auto-purge on Channel Access Revocation
+
+`api|ReplicatorConfiguration.enableAutoPurge` defaults to `true`. When enabled,
+documents are automatically removed from the local database if the user loses
+access to them on the server.
+
+Set it to `false` if your application needs to keep those documents locally and
+handle revocation explicitly.
+
+<CodeExample id={10} title="Disable Auto-purge">
+
+```dart
+final config = ReplicatorConfiguration(
+  target: target,
+  enableAutoPurge: false,
+)..addCollection(collection);
+```
+
+</CodeExample>
+
+### Delta Sync
+
+Delta sync is negotiated with Sync Gateway when the server side allows it. No
+extra client-side switch is needed beyond using a normal replicator against a
+compatible Sync Gateway deployment.
+
+## Initialize
+
+### Start Replicator
+
+Use `api|Replicator.create` followed by `api|Replicator.start`.
+
+<CodeExample id={11} title="Create and Start the Replicator">
+
+```dart
+final replicator = await Replicator.create(config);
+await replicator.start();
+```
+
+</CodeExample>
+
+### Checkpoint Starts
+
+If you need to ignore the existing local checkpoint and rescan from the
+beginning, start the replicator with `reset: true`.
+
+<CodeExample id={12} title="Reset the Local Checkpoint">
+
+```dart
+await replicator.start(reset: true);
+```
+
+</CodeExample>
+
+## Monitor
+
+### Change Listeners and Status
+
+Observe the replicator with `api|Replicator.changes` or
+`api|Replicator.addChangeListener`.
+
+<CodeExample id={13} title="Monitor Replication Status">
+
+```dart
+await for (final change in replicator.changes()) {
+  final status = change.status;
+  print(status.activity);
+  print(status.progress);
+  print(status.error);
+}
+```
+
+</CodeExample>
+
+The activity state is one of:
+
+- `api|enum-value:ReplicatorActivityLevel.stopped`
+- `api|enum-value:ReplicatorActivityLevel.offline`
+- `api|enum-value:ReplicatorActivityLevel.connecting`
+- `api|enum-value:ReplicatorActivityLevel.idle`
+- `api|enum-value:ReplicatorActivityLevel.busy`
+
+### Monitor Document Changes
+
+Use `api|Replicator.documentReplications` or
+`api|Replicator.addDocumentReplicationListener` if you need per-document
+replication events.
+
+<CodeExample id={14} title="Monitor Replicated Documents">
+
+```dart
+await for (final replication in replicator.documentReplications()) {
+  for (final document in replication.documents) {
+    print('${document.scope}.${document.collection}/${document.id}');
+    print(document.error);
+  }
+}
+```
+
+</CodeExample>
+
+### Documents Pending Push
+
+Use `api|Replicator.pendingDocumentIdsInCollection` and
+`api|Replicator.isDocumentPendingInCollection` to inspect local changes that
+have not yet been pushed.
+
+<CodeExample id={15} title="Inspect Pending Documents">
+
+```dart
+final pendingIds = await replicator.pendingDocumentIdsInCollection(collection);
+final isPending = await replicator.isDocumentPendingInCollection(
+  'hotel-123',
+  collection,
+);
+```
+
+</CodeExample>
+
+## Stop
+
+Call `api|Replicator.stop` to stop the replication. The stop is asynchronous;
+watch the status until it reaches
+`api|enum-value:ReplicatorActivityLevel.stopped`.
+
+<CodeExample id={16} title="Stop the Replicator">
+
+```dart
+await replicator.stop();
+```
+
+</CodeExample>
+
+## Error Handling
+
+Transient connectivity issues typically surface as `offline` or `connecting`
+states before the replicator reconnects. Fatal errors are exposed through
+`api|ReplicatorStatus.error`.
+
+Authentication failures and TLS failures usually appear as network or HTTP
+errors in the replicator status. Handle them explicitly in your replication
+observer so your application can distinguish misconfiguration from temporary
+network loss.
+
+## Certificate Pinning
+
+Certificate pinning is available through
+`api|ReplicatorConfiguration.pinnedServerCertificate`. Use it when the server
+certificate is known ahead of time and you want to reject any other certificate
+chain, even if the platform would otherwise trust it.
+
+## Troubleshooting
+
+When replication does not behave as expected:
+
+- Inspect `api|ReplicatorStatus.error`.
+- Verify that the Sync Gateway URL uses `ws://` or `wss://`.
+- Confirm that every replicated local collection exists remotely with the same
+  scope and collection name.
+- Check your TLS settings, server certificate trust, and user credentials.
+- Enable Couchbase Lite logging if you need lower-level diagnostics.
