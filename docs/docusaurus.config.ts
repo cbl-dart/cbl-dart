@@ -1,35 +1,38 @@
 import type * as Preset from '@docusaurus/preset-classic'
 import type { Config } from '@docusaurus/types'
+import { execSync } from 'node:child_process'
 import { themes as prismThemes } from 'prism-react-renderer'
 import { codeLinks } from './src/remark/code-links'
 import { figureLinks } from './src/remark/figure-links'
 import { metaHeader } from './src/remark/meta-header'
 
 /**
- * Packages for which to fetch the latest version (including pre-releases)
- * from pub.dev at build time. The versions are made available via
- * `siteConfig.customFields.pubPackageVersions`.
+ * Packages for which to resolve the latest version from git tags at build
+ * time. Tags must follow the `<package>-v<version>` convention. The versions
+ * are made available via `siteConfig.customFields.pubPackageVersions`.
  */
 const pubPackages = ['cbl', 'cbl_generator']
 
-async function fetchLatestPubVersions(
+function getLatestVersionFromGitTags(
   packages: string[],
-): Promise<Record<string, string>> {
+): Record<string, string> {
   const versions: Record<string, string> = {}
-  await Promise.all(
-    packages.map(async (pkg) => {
-      const res = await fetch(`https://pub.dev/api/packages/${pkg}`)
-      const data = await res.json()
-      // data.versions is ordered chronologically — last entry is the newest.
-      const allVersions: { version: string }[] = data.versions
-      versions[pkg] = allVersions[allVersions.length - 1].version
-    }),
-  )
+  for (const pkg of packages) {
+    const tag = execSync(
+      `git tag --list '${pkg}-v*' --sort=-version:refname | head -1`,
+      { encoding: 'utf-8' },
+    ).trim()
+    if (!tag) {
+      throw new Error(`No git tag found for package "${pkg}".`)
+    }
+    // Strip the `<package>-v` prefix to get the version.
+    versions[pkg] = tag.slice(pkg.length + 2)
+  }
   return versions
 }
 
-export default async function createConfigAsync(): Promise<Config> {
-  const pubPackageVersions = await fetchLatestPubVersions(pubPackages)
+export default function createConfig(): Config {
+  const pubPackageVersions = getLatestVersionFromGitTags(pubPackages)
 
   return {
     title: 'Couchbase Lite for Dart & Flutter',
