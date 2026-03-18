@@ -79,6 +79,9 @@ configuration in [Basic Setup](#basic-setup).
 
 - Supports Wi-Fi and other IP-based network transports over WebSockets.
 
+For the step-by-step listener and replicator setup for this transport mode, see
+[Passive Peer](./passive-peer.mdx) and [Active Peer](./active-peer.mdx).
+
 ## Features
 
 Couchbase Lite for Dart's Peer-to-Peer synchronization solution provides support
@@ -395,24 +398,24 @@ to store keys and certificates.
 
 #### Android
 
-| Field                   | Value               |
-| ----------------------- | ------------------- | --------------------------------------------------- | ------------------------------------------------------------ |
-| **Key Storage**         | Application-defined |
-| **Certificate Storage** | Application-defined |
-| **Notes**               | Persisted `api      | TlsIdentity`s are not currently supported. Use `api | KeyPair.fromExternal` if you need custom secure key storage. |
+| Field                   | Value                                                                                                                   |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| **Key Storage**         | Application-defined                                                                                                     |
+| **Certificate Storage** | Application-defined                                                                                                     |
+| **Notes**               | Persisted `TlsIdentity`s are not currently supported. Use `KeyPair.fromExternal` if you need custom secure key storage. |
 
 #### Linux
 
-| Field                   | Value               |
-| ----------------------- | ------------------- | --------------------------------------------------- | ------------------------------------------------------------ |
-| **Key Storage**         | Application-defined |
-| **Certificate Storage** | Application-defined |
-| **Notes**               | Persisted `api      | TlsIdentity`s are not currently supported. Use `api | KeyPair.fromExternal` if you need custom secure key storage. |
+| Field                   | Value                                                                                                                   |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| **Key Storage**         | Application-defined                                                                                                     |
+| **Certificate Storage** | Application-defined                                                                                                     |
+| **Notes**               | Persisted `TlsIdentity`s are not currently supported. Use `KeyPair.fromExternal` if you need custom secure key storage. |
 
 #### Windows
 
-| Field                   | Value                                                                               |
-| ----------------------- | ----------------------------------------------------------------------------------- |
-| **Key Storage**         | Windows CNG Key Storage Provider                                                    |
-| **Certificate Storage** | Windows Certificate Store                                                           |
-| **Reference**           | [CNG Key Storage](https://docs.microsoft.com/en-us/windows/win32/seccng/cng-portal) |
+| Field                   | Value                                                                                |
+| ----------------------- | ------------------------------------------------------------------------------------ |
+| **Key Storage**         | Windows CNG Key Storage Provider                                                     |
+| **Certificate Storage** | Windows Certificate Store                                                            |
+| **Reference**           | [CNG Key Storage](https://learn.microsoft.com/en-us/windows/win32/seccng/cng-portal) |
