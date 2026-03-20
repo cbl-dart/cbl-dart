@@ -107,6 +107,10 @@ export default {
       label: 'Data Sync',
       items: [
         {
+          type: 'doc',
+          id: 'data-sync/replication',
+        },
+        {
           type: 'category',
           label: 'Peer-to-Peer',
           link: { type: 'doc', id: 'data-sync/peer-to-peer/websocket' },
