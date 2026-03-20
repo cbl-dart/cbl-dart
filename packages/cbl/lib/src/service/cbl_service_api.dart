@@ -440,9 +440,9 @@ final class IndexUpdaterFinish extends Request<Null> {
 }
 
 final class ServiceDatabaseEndpoint implements Endpoint {
-  ServiceDatabaseEndpoint(this.databaseId);
+  ServiceDatabaseEndpoint(this.databasePointer);
 
-  final int databaseId;
+  final Pointer<cblite.CBLDatabase> databasePointer;
 }
 
 final class CreateReplicator extends Request<int> implements SendAware {
@@ -502,6 +502,10 @@ final class CreateReplicator extends Request<int> implements SendAware {
         _certificateAuthenticatorIdentityPointer!.cast(),
       );
       _authenticator = null;
+    }
+
+    if (target case final ServiceDatabaseEndpoint endpoint) {
+      BaseBindings.retainRefCounted(endpoint.databasePointer.cast());
     }
 
     _pinnedServerCertificate?.willSend();
@@ -736,11 +740,17 @@ final class SendableValue implements SendAware {
 }
 
 final class DatabaseState {
-  DatabaseState({required this.id, required this.name, required this.path});
+  DatabaseState({
+    required this.id,
+    required this.name,
+    required this.path,
+    required this.pointer,
+  });
 
   final int id;
   final String name;
   final String? path;
+  final Pointer<cblite.CBLDatabase> pointer;
 }
 
 final class ScopeState {

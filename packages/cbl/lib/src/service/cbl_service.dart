@@ -693,13 +693,8 @@ final class CblService {
       .finish();
 
   Future<int> _createReplicator(CreateReplicator request) async {
-    var target = request.target;
-    if (target is ServiceDatabaseEndpoint) {
-      target = DatabaseEndpoint(_getDatabaseById(target.databaseId));
-    }
-
     final config = ReplicatorConfiguration(
-      target: target,
+      target: request.target,
       replicatorType: request.replicatorType,
       continuous: request.continuous,
       authenticator: request.authenticator,
@@ -814,6 +809,7 @@ final class CblService {
     id: _objectRegistry.getObjectId(database)!,
     name: database.name,
     path: database.path,
+    pointer: (database as FfiDatabase).pointer,
   );
 
   T? _getDocumentForUpdate<T extends DelegateDocument>(
