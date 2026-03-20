@@ -1,11 +1,7 @@
+import 'dart:convert';
 import 'dart:ffi';
 
 import 'package:ffi/ffi.dart';
-
-import 'cblite.dart' as cblite;
-import 'global.dart';
-import 'native_utf8_string.dart';
-import 'slice.dart';
 
 // === Lang ====================================================================
 
@@ -16,69 +12,25 @@ extension AnyExt<T> on T {
 @pragma('vm:never-inline')
 Object? cblReachabilityFence(Object? object) => object;
 
-// === Conversion ==============================================================
+// === String encoding =========================================================
 
-extension StringFLStringExt on String? {
-  cblite.FLString toFLString() {
-    final self = this;
-    if (self == null) {
-      return nullFLString.ref;
-    }
-
-    return nativeUtf8StringEncoder.encode(self, globalArena).toFLString().ref;
-  }
-
-  cblite.FLString makeGlobalFLString() {
-    final self = this;
-    if (self == null) {
-      globalFLString.ref
-        ..size = 0
-        ..buf = nullptr;
-
-      return globalFLString.ref;
-    }
-
-    return nativeUtf8StringEncoder
-        .encode(self, globalArena)
-        .makeGlobalFLString();
-  }
-}
-
-extension NativeUtf8StringFLStringExt on NativeUtf8String {
-  cblite.FLString makeGlobalFLString() => globalFLString.ref
-    ..buf = buffer.cast()
-    ..size = size;
-
-  Pointer<cblite.FLString> toFLString() {
-    final flString = globalArena<cblite.FLString>();
-
-    flString.ref
-      ..buf = buffer.cast()
-      ..size = size;
-
-    return flString;
-  }
-}
-
-T runWithSingleFLString<T>(
-  String? string,
-  T Function(cblite.FLString flString) fn,
+/// Encodes [string] as UTF-8 into a native memory buffer allocated by
+/// [allocator], returning the buffer pointer and size.
+///
+/// This is needed when the encoded data must be stored in struct fields or
+/// otherwise outlive a single leaf-function call. For direct leaf-function
+/// calls, prefer using `utf8.encode` with `Uint8List.address`.
+({Pointer<Void> buf, int size}) encodeStringToArena(
+  String string,
+  Allocator allocator,
 ) {
-  if (string == null) {
-    return fn(nullFLString.ref);
-  }
-
-  final nativeString = nativeUtf8StringEncoder.encode(
-    string,
-    cachedSliceResultAllocator,
-  );
-
-  try {
-    return fn(nativeString.makeGlobalFLString());
-  } finally {
-    nativeString.free();
-  }
+  final encoded = utf8.encode(string);
+  final buf = allocator<Uint8>(encoded.length);
+  buf.asTypedList(encoded.length).setAll(0, encoded);
+  return (buf: buf.cast(), size: encoded.length);
 }
+
+// === Conversion ==============================================================
 
 extension Utf8PointerExt on Pointer<Utf8> {
   String toDartStringAndFree() {

@@ -491,7 +491,8 @@ static CBLEncryptionKey CBLEncryptionKey_FromCBLDart(
 static CBLDatabaseConfiguration CBLDatabaseConfiguration_FromCBLDart(
     CBLDart_CBLDatabaseConfiguration config) {
   auto result = CBLDatabaseConfiguration{};
-  result.directory = config.directory;
+  result.directory =
+      FLSLICE_FROM_ARGS(config.directoryBuf, config.directorySize);
 #ifdef COUCHBASE_ENTERPRISE
   result.encryptionKey = CBLEncryptionKey_FromCBLDart(config.encryptionKey);
 #endif
@@ -502,21 +503,25 @@ static CBLDatabaseConfiguration CBLDatabaseConfiguration_FromCBLDart(
 CBLDart_CBLDatabaseConfiguration CBLDart_CBLDatabaseConfiguration_Default() {
   auto config = CBLDatabaseConfiguration_Default();
   auto result = CBLDart_CBLDatabaseConfiguration{};
-  result.directory = config.directory;
+  result.directoryBuf = config.directory.buf;
+  result.directorySize = config.directory.size;
   result.fullSync = config.fullSync;
   return result;
 }
 
-bool CBLDart_CBL_CopyDatabase(FLString fromPath, FLString toName,
+bool CBLDart_CBL_CopyDatabase(const void* fromPathBuf, size_t fromPathSize,
+                              const void* toNameBuf, size_t toNameSize,
                               const CBLDart_CBLDatabaseConfiguration* config,
                               CBLError* outError) {
   auto config_ = config ? CBLDatabaseConfiguration_FromCBLDart(*config)
                         : CBLDatabaseConfiguration_Default();
 
-  return CBL_CopyDatabase(fromPath, toName, &config_, outError);
+  return CBL_CopyDatabase(FLSLICE_FROM_ARGS(fromPathBuf, fromPathSize),
+                          FLSLICE_FROM_ARGS(toNameBuf, toNameSize), &config_,
+                          outError);
 }
 
-CBLDatabase* CBLDart_CBLDatabase_Open(FLString name,
+CBLDatabase* CBLDart_CBLDatabase_Open(const void* nameBuf, size_t nameSize,
                                       CBLDart_CBLDatabaseConfiguration* config,
                                       CBLError* errorOut) {
   CBLDart_CheckFileLogging();
@@ -524,7 +529,8 @@ CBLDatabase* CBLDart_CBLDatabase_Open(FLString name,
   auto config_ = config ? CBLDatabaseConfiguration_FromCBLDart(*config)
                         : CBLDatabaseConfiguration_Default();
 
-  auto database = CBLDatabase_Open(name, &config_, errorOut);
+  auto database = CBLDatabase_Open(FLSLICE_FROM_ARGS(nameBuf, nameSize),
+                                   &config_, errorOut);
 
   if (database) {
     CBLDart_RegisterOpenDatabase(database);
@@ -533,6 +539,66 @@ CBLDatabase* CBLDart_CBLDatabase_Open(FLString name,
 
   return database;
 }
+
+bool CBLDart_CBL_DeleteDatabase(const void* nameBuf, size_t nameSize,
+                                const void* inDirBuf, size_t inDirSize,
+                                CBLError* errorOut) {
+  return CBL_DeleteDatabase(FLSLICE_FROM_ARGS(nameBuf, nameSize),
+                            FLSLICE_FROM_ARGS(inDirBuf, inDirSize), errorOut);
+}
+
+bool CBLDart_CBL_DatabaseExists(const void* nameBuf, size_t nameSize,
+                                const void* inDirBuf, size_t inDirSize) {
+  return CBL_DatabaseExists(FLSLICE_FROM_ARGS(nameBuf, nameSize),
+                            FLSLICE_FROM_ARGS(inDirBuf, inDirSize));
+}
+
+#ifdef COUCHBASE_ENTERPRISE
+bool CBLDart_CBLEncryptionKey_FromPassword(CBLEncryptionKey* key,
+                                           const void* pwBuf, size_t pwSize) {
+  return CBLEncryptionKey_FromPassword(key, FLSLICE_FROM_ARGS(pwBuf, pwSize));
+}
+#endif
+
+CBLScope* CBLDart_CBLDatabase_Scope(CBLDatabase* db, const void* nameBuf,
+                                    size_t nameSize, CBLError* errorOut) {
+  return CBLDatabase_Scope(db, FLSLICE_FROM_ARGS(nameBuf, nameSize), errorOut);
+}
+
+CBLCollection* CBLDart_CBLScope_Collection(CBLScope* scope, const void* nameBuf,
+                                           size_t nameSize,
+                                           CBLError* errorOut) {
+  return CBLScope_Collection(scope, FLSLICE_FROM_ARGS(nameBuf, nameSize),
+                             errorOut);
+}
+
+CBLCollection* CBLDart_CBLDatabase_CreateCollection(
+    CBLDatabase* db, const void* colNameBuf, size_t colNameSize,
+    const void* scopeNameBuf, size_t scopeNameSize, CBLError* errorOut) {
+  return CBLDatabase_CreateCollection(
+      db, FLSLICE_FROM_ARGS(colNameBuf, colNameSize),
+      FLSLICE_FROM_ARGS(scopeNameBuf, scopeNameSize), errorOut);
+}
+
+bool CBLDart_CBLDatabase_DeleteCollection(
+    CBLDatabase* db, const void* colNameBuf, size_t colNameSize,
+    const void* scopeNameBuf, size_t scopeNameSize, CBLError* errorOut) {
+  return CBLDatabase_DeleteCollection(
+      db, FLSLICE_FROM_ARGS(colNameBuf, colNameSize),
+      FLSLICE_FROM_ARGS(scopeNameBuf, scopeNameSize), errorOut);
+}
+
+void CBLDart_CBL_LogMessage(CBLLogDomain domain, CBLLogLevel level,
+                            const void* msgBuf, size_t msgSize) {
+  CBL_LogMessage(domain, level, FLSLICE_FROM_ARGS(msgBuf, msgSize));
+}
+
+#ifdef COUCHBASE_ENTERPRISE
+bool CBLDart_CBL_EnableVectorSearch(const void* dirBuf, size_t dirSize,
+                                    CBLError* errorOut) {
+  return CBL_EnableVectorSearch(FLSLICE_FROM_ARGS(dirBuf, dirSize), errorOut);
+}
+#endif
 
 void CBLDart_CBLDatabase_Release(CBLDatabase* database) {
   CBLError error;
@@ -559,12 +625,44 @@ static void CBLDart_CollectionDocumentChangeListenerWrapper(
   CBLDart::AsyncCallbackCall(*callback).execute(args);
 }
 
+CBLDocument* CBLDart_CBLCollection_GetDocument(CBLCollection* collection,
+                                               const void* docIDBuf,
+                                               size_t docIDSize,
+                                               CBLError* errorOut) {
+  return const_cast<CBLDocument*>(CBLCollection_GetDocument(
+      collection, FLSLICE_FROM_ARGS(docIDBuf, docIDSize), errorOut));
+}
+
+bool CBLDart_CBLCollection_PurgeDocumentByID(CBLCollection* collection,
+                                             const void* docIDBuf,
+                                             size_t docIDSize,
+                                             CBLError* errorOut) {
+  return CBLCollection_PurgeDocumentByID(
+      collection, FLSLICE_FROM_ARGS(docIDBuf, docIDSize), errorOut);
+}
+
+CBLTimestamp CBLDart_CBLCollection_GetDocumentExpiration(
+    CBLCollection* collection, const void* docIDBuf, size_t docIDSize,
+    CBLError* errorOut) {
+  return CBLCollection_GetDocumentExpiration(
+      collection, FLSLICE_FROM_ARGS(docIDBuf, docIDSize), errorOut);
+}
+
+bool CBLDart_CBLCollection_SetDocumentExpiration(CBLCollection* collection,
+                                                 const void* docIDBuf,
+                                                 size_t docIDSize,
+                                                 CBLTimestamp expiration,
+                                                 CBLError* errorOut) {
+  return CBLCollection_SetDocumentExpiration(
+      collection, FLSLICE_FROM_ARGS(docIDBuf, docIDSize), expiration, errorOut);
+}
+
 void CBLDart_CBLCollection_AddDocumentChangeListener(
     const CBLDatabase* db, const CBLCollection* collection,
-    const FLString docID, CBLDart_AsyncCallback listener) {
+    const void* docIDBuf, size_t docIDSize, CBLDart_AsyncCallback listener) {
   auto listenerToken = CBLCollection_AddDocumentChangeListener(
-      collection, docID, CBLDart_CollectionDocumentChangeListenerWrapper,
-      listener);
+      collection, FLSLICE_FROM_ARGS(docIDBuf, docIDSize),
+      CBLDart_CollectionDocumentChangeListenerWrapper, listener);
 
   CBLDart_CloneDatabaseLock(db, listenerToken);
 
@@ -606,23 +704,37 @@ void CBLDart_CBLCollection_AddChangeListener(const CBLDatabase* db,
                                                 CBLDart_CBLListenerFinalizer);
 }
 
-bool CBLDart_CBLCollection_CreateIndex(CBLCollection* collection, FLString name,
+CBLQueryIndex* CBLDart_CBLCollection_GetIndex(CBLCollection* collection,
+                                              const void* nameBuf,
+                                              size_t nameSize,
+                                              CBLError* errorOut) {
+  return CBLCollection_GetIndex(collection,
+                                FLSLICE_FROM_ARGS(nameBuf, nameSize), errorOut);
+}
+
+bool CBLDart_CBLCollection_CreateIndex(CBLCollection* collection,
+                                       const void* nameBuf, size_t nameSize,
                                        CBLDart_CBLIndexSpec indexSpec,
                                        CBLError* errorOut) {
+  auto name = FLSLICE_FROM_ARGS(nameBuf, nameSize);
+  auto expressions =
+      FLSLICE_FROM_ARGS(indexSpec.expressionsBuf, indexSpec.expressionsSize);
+
   switch (indexSpec.type) {
     case kCBLDart_IndexTypeValue: {
       CBLValueIndexConfiguration config{};
       config.expressionLanguage = indexSpec.expressionLanguage;
-      config.expressions = indexSpec.expressions;
+      config.expressions = expressions;
 
       return CBLCollection_CreateValueIndex(collection, name, config, errorOut);
     }
     case kCBLDart_IndexTypeFullText: {
       CBLFullTextIndexConfiguration config{};
       config.expressionLanguage = indexSpec.expressionLanguage;
-      config.expressions = indexSpec.expressions;
+      config.expressions = expressions;
       config.ignoreAccents = static_cast<bool>(indexSpec.ignoreAccents);
-      config.language = indexSpec.language;
+      config.language =
+          FLSLICE_FROM_ARGS(indexSpec.languageBuf, indexSpec.languageSize);
 
       return CBLCollection_CreateFullTextIndex(collection, name, config,
                                                errorOut);
@@ -631,7 +743,7 @@ bool CBLDart_CBLCollection_CreateIndex(CBLCollection* collection, FLString name,
 #ifdef COUCHBASE_ENTERPRISE
       CBLVectorIndexConfiguration config{};
       config.expressionLanguage = indexSpec.expressionLanguage;
-      config.expression = indexSpec.expressions;
+      config.expression = expressions;
       config.dimensions = indexSpec.dimensions;
       config.centroids = indexSpec.centroids;
       config.isLazy = indexSpec.isLazy;
@@ -650,6 +762,26 @@ bool CBLDart_CBLCollection_CreateIndex(CBLCollection* collection, FLString name,
   return 0;
 }
 
+bool CBLDart_CBLCollection_DeleteIndex(CBLCollection* collection,
+                                       const void* nameBuf, size_t nameSize,
+                                       CBLError* errorOut) {
+  return CBLCollection_DeleteIndex(
+      collection, FLSLICE_FROM_ARGS(nameBuf, nameSize), errorOut);
+}
+
+// === Document
+
+CBLDocument* CBLDart_CBLDocument_CreateWithID(const void* docIDBuf,
+                                              size_t docIDSize) {
+  return CBLDocument_CreateWithID(FLSLICE_FROM_ARGS(docIDBuf, docIDSize));
+}
+
+bool CBLDart_CBLDocument_SetJSON(CBLDocument* doc, const void* jsonBuf,
+                                 size_t jsonSize, CBLError* errorOut) {
+  return CBLDocument_SetJSON(doc, FLSLICE_FROM_ARGS(jsonBuf, jsonSize),
+                             errorOut);
+}
+
 // === Query
 
 static void CBLDart_QueryChangeListenerWrapper(void* context, CBLQuery* query,
@@ -660,6 +792,21 @@ static void CBLDart_QueryChangeListenerWrapper(void* context, CBLQuery* query,
   CBLDart_CObject_SetEmptyArray(&args);
 
   CBLDart::AsyncCallbackCall(*callback).execute(args);
+}
+
+CBLQuery* CBLDart_CBLDatabase_CreateQuery(CBLDatabase* db,
+                                          CBLQueryLanguage language,
+                                          const void* queryBuf,
+                                          size_t querySize, int* errorPos,
+                                          CBLError* errorOut) {
+  return CBLDatabase_CreateQuery(
+      db, language, FLSLICE_FROM_ARGS(queryBuf, querySize), errorPos, errorOut);
+}
+
+FLValue CBLDart_CBLResultSet_ValueForKey(CBLResultSet* resultSet,
+                                         const void* keyBuf, size_t keySize) {
+  return CBLResultSet_ValueForKey(resultSet,
+                                  FLSLICE_FROM_ARGS(keyBuf, keySize));
 }
 
 CBLListenerToken* CBLDart_CBLQuery_AddChangeListener(
@@ -683,7 +830,8 @@ namespace CBLDart {
 
 struct PredictiveModel {
  public:
-  PredictiveModel(FLString name, CBLDart_IsolateId isolateId,
+  PredictiveModel(const void* nameBuf, size_t nameSize,
+                  CBLDart_IsolateId isolateId,
                   CBLDart_PredictiveModel_PredictionSync predictionSync,
                   CBLDart_PredictiveModel_PredictionAsync predictionAsync,
                   CBLDart_PredictiveModel_Unregistered unregistered);
@@ -713,11 +861,11 @@ struct PredictiveModel {
 namespace CBLDart {
 
 PredictiveModel::PredictiveModel(
-    FLString name, CBLDart_IsolateId isolateId,
+    const void* nameBuf, size_t nameSize, CBLDart_IsolateId isolateId,
     CBLDart_PredictiveModel_PredictionSync predictionSync,
     CBLDart_PredictiveModel_PredictionAsync predictionAsync,
     CBLDart_PredictiveModel_Unregistered unregistered)
-    : name(FLSlice_Copy(name)),
+    : name(FLSlice_Copy(FLSLICE_FROM_ARGS(nameBuf, nameSize))),
       isolateId(isolateId),
       predictionSync(predictionSync),
       predictionAsync(predictionAsync),
@@ -730,7 +878,7 @@ PredictiveModel::PredictiveModel(
   model.unregistered = [](void* context) {
     PREDICTIVE_MODEL_FROM_C(context)->unregistered();
   };
-  CBL_RegisterPredictiveModel((FLString)name, model);
+  CBL_RegisterPredictiveModel((FLString)this->name, model);
 }
 
 PredictiveModel::~PredictiveModel() {
@@ -780,13 +928,14 @@ void PredictiveModel::unregistered() {
 #endif
 
 CBLDart_PredictiveModel CBLDart_PredictiveModel_New(
-    FLString name, CBLDart_IsolateId isolateId,
+    const void* nameBuf, size_t nameSize, CBLDart_IsolateId isolateId,
     CBLDart_PredictiveModel_PredictionSync predictionSync,
     CBLDart_PredictiveModel_PredictionAsync predictionAsync,
     CBLDart_PredictiveModel_Unregistered unregistered) {
 #ifdef COUCHBASE_ENTERPRISE
-  return PREDICTIVE_MODEL_TO_C(new CBLDart::PredictiveModel(
-      name, isolateId, predictionSync, predictionAsync, unregistered));
+  return PREDICTIVE_MODEL_TO_C(
+      new CBLDart::PredictiveModel(nameBuf, nameSize, isolateId, predictionSync,
+                                   predictionAsync, unregistered));
 #else
   throw std::runtime_error("This code should be unreachable.");
 #endif
@@ -799,6 +948,13 @@ void CBLDart_PredictiveModel_Delete(CBLDart_PredictiveModel model) {
   throw std::runtime_error("This code should be unreachable.");
 #endif
 }
+
+#ifdef COUCHBASE_ENTERPRISE
+void CBLDart_CBL_UnregisterPredictiveModel(const void* nameBuf,
+                                           size_t nameSize) {
+  CBL_UnregisterPredictiveModel(FLSLICE_FROM_ARGS(nameBuf, nameSize));
+}
+#endif
 
 // === Blob
 
@@ -822,7 +978,55 @@ FLSliceResult CBLDart_CBLBlobReader_Read(CBLBlobReadStream* stream,
   return buffer;
 }
 
+CBLBlob* CBLDart_CBLBlob_CreateWithData(const void* contentTypeBuf,
+                                        size_t contentTypeSize,
+                                        const void* contentBuf,
+                                        size_t contentSize) {
+  return CBLBlob_CreateWithData(
+      FLSLICE_FROM_ARGS(contentTypeBuf, contentTypeSize),
+      FLSLICE_FROM_ARGS(contentBuf, contentSize));
+}
+
+CBLBlob* CBLDart_CBLBlob_CreateWithStream(const void* contentTypeBuf,
+                                          size_t contentTypeSize,
+                                          CBLBlobWriteStream* stream) {
+  return CBLBlob_CreateWithStream(
+      FLSLICE_FROM_ARGS(contentTypeBuf, contentTypeSize), stream);
+}
+
 // === Replicator
+
+CBLEndpoint* CBLDart_CBLEndpoint_CreateWithURL(const void* urlBuf,
+                                               size_t urlSize,
+                                               CBLError* errorOut) {
+  return CBLEndpoint_CreateWithURL(FLSLICE_FROM_ARGS(urlBuf, urlSize),
+                                   errorOut);
+}
+
+CBLAuthenticator* CBLDart_CBLAuth_CreatePassword(const void* userBuf,
+                                                 size_t userSize,
+                                                 const void* pwBuf,
+                                                 size_t pwSize) {
+  return CBLAuth_CreatePassword(FLSLICE_FROM_ARGS(userBuf, userSize),
+                                FLSLICE_FROM_ARGS(pwBuf, pwSize));
+}
+
+CBLAuthenticator* CBLDart_CBLAuth_CreateSession(const void* sidBuf,
+                                                size_t sidSize,
+                                                const void* cnBuf,
+                                                size_t cnSize) {
+  return CBLAuth_CreateSession(FLSLICE_FROM_ARGS(sidBuf, sidSize),
+                               FLSLICE_FROM_ARGS(cnBuf, cnSize));
+}
+
+bool CBLDart_CBLReplicator_IsDocumentPending(CBLReplicator* replicator,
+                                             const void* docIDBuf,
+                                             size_t docIDSize,
+                                             CBLCollection* collection,
+                                             CBLError* errorOut) {
+  return CBLReplicator_IsDocumentPending2(
+      replicator, FLSLICE_FROM_ARGS(docIDBuf, docIDSize), collection, errorOut);
+}
 
 typedef std::map<const CBLCollection*, CBLDart::AsyncCallback*>
     ReplicatorCollectionCallbackMap;
@@ -972,6 +1176,19 @@ static const CBLDocument* CBLDart_ReplicatorConflictResolverWrapper(
 
 CBLReplicator* CBLDart_CBLReplicator_Create(
     CBLDart_ReplicatorConfiguration* config, CBLError* errorOut) {
+  // Convert proxy settings if present.
+  CBLProxySettings proxySettings{};
+  if (config->proxy) {
+    proxySettings.type = config->proxy->type;
+    proxySettings.hostname = FLSLICE_FROM_ARGS(config->proxy->hostnameBuf,
+                                               config->proxy->hostnameSize);
+    proxySettings.port = config->proxy->port;
+    proxySettings.username = FLSLICE_FROM_ARGS(config->proxy->usernameBuf,
+                                               config->proxy->usernameSize);
+    proxySettings.password = FLSLICE_FROM_ARGS(config->proxy->passwordBuf,
+                                               config->proxy->passwordSize);
+  }
+
   CBLReplicatorConfiguration config_{};
   config_.endpoint = config->endpoint;
   config_.replicatorType =
@@ -982,7 +1199,7 @@ CBLReplicator* CBLDart_CBLReplicator_Create(
   config_.maxAttemptWaitTime = config->maxAttemptWaitTime;
   config_.heartbeat = config->heartbeat;
   config_.authenticator = config->authenticator;
-  config_.proxy = config->proxy;
+  config_.proxy = config->proxy ? &proxySettings : nullptr;
   config_.headers = config->headers;
 #ifdef COUCHBASE_ENTERPRISE
   config_.acceptOnlySelfSignedServerCertificate =
@@ -1291,7 +1508,102 @@ void CBLDart_CBLReplicator_AddDocumentReplicationListener(
                                                 CBLDart_CBLListenerFinalizer);
 }
 
+// === FileLogSink
+
+void CBLDart_CBLLog_SetFileSinkV2(CBLLogLevel level, const void* dirBuf,
+                                  size_t dirSize, unsigned maxKeptFiles,
+                                  size_t maxSize, bool usePlaintext) {
+  CBLFileLogSink sink{};
+  sink.level = level;
+  sink.directory = FLSLICE_FROM_ARGS(dirBuf, dirSize);
+  sink.maxKeptFiles = maxKeptFiles;
+  sink.maxSize = maxSize;
+  sink.usePlaintext = usePlaintext;
+
+  CBLDart_CBLLog_SetFileSink(&sink);
+}
+
 // === UrlEndpointListener
+
+#ifdef COUCHBASE_ENTERPRISE
+CBLURLEndpointListener* CBLDart_CBLURLEndpointListener_Create(
+    CBLCollection** collections, size_t collectionCount, uint16_t port,
+    const void* networkInterfaceBuf, size_t networkInterfaceSize,
+    bool disableTLS, CBLTLSIdentity* tlsIdentity,
+    CBLListenerAuthenticator* authenticator, bool enableDeltaSync,
+    bool readOnly, CBLError* errorOut) {
+  CBLURLEndpointListenerConfiguration config{};
+  config.collections = collections;
+  config.collectionCount = collectionCount;
+  config.port = port;
+  config.networkInterface =
+      FLSLICE_FROM_ARGS(networkInterfaceBuf, networkInterfaceSize);
+  config.disableTLS = disableTLS;
+  config.tlsIdentity = tlsIdentity;
+  config.authenticator = authenticator;
+  config.enableDeltaSync = enableDeltaSync;
+  config.readOnly = readOnly;
+  return CBLURLEndpointListener_Create(&config, errorOut);
+}
+#endif
+
+// === TLS Identity
+
+#ifdef COUCHBASE_ENTERPRISE
+
+FLSliceResult CBLDart_CBLCert_SubjectNameComponent(CBLCert* cert,
+                                                   const void* keyBuf,
+                                                   size_t keySize) {
+  return CBLCert_SubjectNameComponent(cert, FLSLICE_FROM_ARGS(keyBuf, keySize));
+}
+
+CBLKeyPair* CBLDart_CBLKeyPair_CreateWithPrivateKeyData(const void* pkBuf,
+                                                        size_t pkSize,
+                                                        const void* pwBuf,
+                                                        size_t pwSize,
+                                                        CBLError* errorOut) {
+  return CBLKeyPair_CreateWithPrivateKeyData(FLSLICE_FROM_ARGS(pkBuf, pkSize),
+                                             FLSLICE_FROM_ARGS(pwBuf, pwSize),
+                                             errorOut);
+}
+
+CBLTLSIdentity* CBLDart_CBLTLSIdentity_CreateIdentity(
+    int keyUsages, FLDict attrs, int64_t validityMs, const void* labelBuf,
+    size_t labelSize, CBLError* errorOut) {
+  return CBLTLSIdentity_CreateIdentity(keyUsages, attrs, validityMs,
+                                       FLSLICE_FROM_ARGS(labelBuf, labelSize),
+                                       errorOut);
+}
+
+#if defined(__APPLE__) || defined(_WIN32)
+CBLTLSIdentity* CBLDart_CBLTLSIdentity_IdentityWithLabel(const void* labelBuf,
+                                                         size_t labelSize,
+                                                         CBLError* errorOut) {
+  return CBLTLSIdentity_IdentityWithLabel(
+      FLSLICE_FROM_ARGS(labelBuf, labelSize), errorOut);
+}
+
+bool CBLDart_CBLTLSIdentity_DeleteIdentityWithLabel(const void* labelBuf,
+                                                    size_t labelSize,
+                                                    CBLError* errorOut) {
+  return CBLTLSIdentity_DeleteIdentityWithLabel(
+      FLSLICE_FROM_ARGS(labelBuf, labelSize), errorOut);
+}
+#else
+CBLTLSIdentity* CBLDart_CBLTLSIdentity_IdentityWithLabel(const void* labelBuf,
+                                                         size_t labelSize,
+                                                         CBLError* errorOut) {
+  return nullptr;
+}
+
+bool CBLDart_CBLTLSIdentity_DeleteIdentityWithLabel(const void* labelBuf,
+                                                    size_t labelSize,
+                                                    CBLError* errorOut) {
+  return false;
+}
+#endif
+
+#endif  // COUCHBASE_ENTERPRISE
 
 #ifdef COUCHBASE_ENTERPRISE
 

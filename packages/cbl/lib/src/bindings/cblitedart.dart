@@ -15,6 +15,113 @@ external void CBLDart_FLSliceResult_RetainByBuf(ffi.Pointer<ffi.Void> buf);
 @ffi.Native<NativeCBLDart_FLSliceResult_ReleaseByBuf>(isLeaf: true)
 external void CBLDart_FLSliceResult_ReleaseByBuf(ffi.Pointer<ffi.Void> buf);
 
+@ffi.Native<NativeCBLDart_FLSlice_Equal>(isLeaf: true)
+external bool CBLDart_FLSlice_Equal(
+  ffi.Pointer<ffi.Void> aBuf,
+  int aSize,
+  ffi.Pointer<ffi.Void> bBuf,
+  int bSize,
+);
+
+@ffi.Native<NativeCBLDart_FLSlice_Compare>(isLeaf: true)
+external int CBLDart_FLSlice_Compare(
+  ffi.Pointer<ffi.Void> aBuf,
+  int aSize,
+  ffi.Pointer<ffi.Void> bBuf,
+  int bSize,
+);
+
+@ffi.Native<NativeCBLDart_FLSlice_Copy>(isLeaf: true)
+external FLSliceResult CBLDart_FLSlice_Copy(
+  ffi.Pointer<ffi.Void> buf,
+  int size,
+);
+
+@ffi.Native<NativeCBLDart_FLData_Dump>(isLeaf: true)
+external imp$1.FLStringResult CBLDart_FLData_Dump(
+  ffi.Pointer<ffi.Void> dataBuf,
+  int dataSize,
+);
+
+@ffi.Native<NativeCBLDart_FLValue_FromData>(isLeaf: true)
+external imp$1.FLValue CBLDart_FLValue_FromData(
+  ffi.Pointer<ffi.Void> buf,
+  int size,
+  int trust,
+);
+
+@ffi.Native<NativeCBLDart_FLDoc_FromResultData>(isLeaf: true)
+external imp$1.FLDoc CBLDart_FLDoc_FromResultData(
+  ffi.Pointer<ffi.Void> dataBuf,
+  int dataSize,
+  int trust,
+  imp$1.FLSharedKeys sharedKeys,
+  ffi.Pointer<ffi.Void> externBuf,
+  int externSize,
+);
+
+@ffi.Native<NativeCBLDart_FLDoc_FromJSON>(isLeaf: true)
+external imp$1.FLDoc CBLDart_FLDoc_FromJSON(
+  ffi.Pointer<ffi.Void> jsonBuf,
+  int jsonSize,
+  ffi.Pointer<ffi.UnsignedInt> outError,
+);
+
+@ffi.Native<NativeCBLDart_FLDict_Get>(isLeaf: true)
+external imp$1.FLValue CBLDart_FLDict_Get(
+  imp$1.FLDict dict,
+  ffi.Pointer<ffi.Void> keyBuf,
+  int keySize,
+);
+
+@ffi.Native<NativeCBLDart_FLDictKey_Init>(isLeaf: true)
+external FLDictKey CBLDart_FLDictKey_Init(
+  ffi.Pointer<ffi.Void> keyBuf,
+  int keySize,
+);
+
+@ffi.Native<NativeCBLDart_FLMutableDict_Set>(isLeaf: true)
+external imp$1.FLSlot CBLDart_FLMutableDict_Set(
+  imp$1.FLMutableDict dict,
+  ffi.Pointer<ffi.Void> keyBuf,
+  int keySize,
+);
+
+@ffi.Native<NativeCBLDart_FLMutableDict_Remove>(isLeaf: true)
+external void CBLDart_FLMutableDict_Remove(
+  imp$1.FLMutableDict dict,
+  ffi.Pointer<ffi.Void> keyBuf,
+  int keySize,
+);
+
+@ffi.Native<NativeCBLDart_FLMutableDict_GetMutableArray>(isLeaf: true)
+external imp$1.FLMutableArray CBLDart_FLMutableDict_GetMutableArray(
+  imp$1.FLMutableDict dict,
+  ffi.Pointer<ffi.Void> keyBuf,
+  int keySize,
+);
+
+@ffi.Native<NativeCBLDart_FLMutableDict_GetMutableDict>(isLeaf: true)
+external imp$1.FLMutableDict CBLDart_FLMutableDict_GetMutableDict(
+  imp$1.FLMutableDict dict,
+  ffi.Pointer<ffi.Void> keyBuf,
+  int keySize,
+);
+
+@ffi.Native<NativeCBLDart_FLSlot_SetString>(isLeaf: true)
+external void CBLDart_FLSlot_SetString(
+  imp$1.FLSlot slot,
+  ffi.Pointer<ffi.Void> valueBuf,
+  int valueSize,
+);
+
+@ffi.Native<NativeCBLDart_FLSlot_SetData>(isLeaf: true)
+external void CBLDart_FLSlot_SetData(
+  imp$1.FLSlot slot,
+  ffi.Pointer<ffi.Void> dataBuf,
+  int dataSize,
+);
+
 @ffi.Native<NativeCBLDart_KnownSharedKeys_New>(isLeaf: true)
 external ffi.Pointer<KnownSharedKeys> CBLDart_KnownSharedKeys_New();
 
@@ -37,7 +144,8 @@ external void CBLDart_FLArray_GetLoadedFLValue(
 @ffi.Native<NativeCBLDart_FLDict_GetLoadedFLValue>(isLeaf: true)
 external void CBLDart_FLDict_GetLoadedFLValue(
   imp$1.FLDict dict,
-  imp$1.FLString key,
+  ffi.Pointer<ffi.Void> keyBuf,
+  int keySize,
   ffi.Pointer<CBLDart_LoadedFLValue> out,
 );
 
@@ -83,6 +191,34 @@ external bool CBLDart_FLEncoder_WriteArrayValue(
   imp$1.FLEncoder encoder,
   imp$1.FLArray array,
   int index,
+);
+
+@ffi.Native<NativeCBLDart_FLEncoder_WriteString>(isLeaf: true)
+external bool CBLDart_FLEncoder_WriteString(
+  imp$1.FLEncoder encoder,
+  ffi.Pointer<ffi.Void> strBuf,
+  int strSize,
+);
+
+@ffi.Native<NativeCBLDart_FLEncoder_WriteKey>(isLeaf: true)
+external bool CBLDart_FLEncoder_WriteKey(
+  imp$1.FLEncoder encoder,
+  ffi.Pointer<ffi.Void> keyBuf,
+  int keySize,
+);
+
+@ffi.Native<NativeCBLDart_FLEncoder_WriteData>(isLeaf: true)
+external bool CBLDart_FLEncoder_WriteData(
+  imp$1.FLEncoder encoder,
+  ffi.Pointer<ffi.Void> dataBuf,
+  int dataSize,
+);
+
+@ffi.Native<NativeCBLDart_FLEncoder_ConvertJSON>(isLeaf: true)
+external bool CBLDart_FLEncoder_ConvertJSON(
+  imp$1.FLEncoder encoder,
+  ffi.Pointer<ffi.Void> jsonBuf,
+  int jsonSize,
 );
 
 @ffi.Native<NativeCBLDart_CpuSupportsAVX2>(isLeaf: true)
@@ -147,21 +283,39 @@ external ffi.Pointer<CBLFileLogSink> CBLDart_CBLLog_GetFileSink();
 @ffi.Native<NativeCBLDart_CBLLog_SetSentryBreadcrumbs>(isLeaf: true)
 external bool CBLDart_CBLLog_SetSentryBreadcrumbs(bool enabled);
 
+@ffi.Native<NativeCBLDart_CBL_LogMessage>(isLeaf: true)
+external void CBLDart_CBL_LogMessage(
+  imp$1.DartCBLLogDomain domain,
+  imp$1.DartCBLLogLevel level,
+  ffi.Pointer<ffi.Void> msgBuf,
+  int msgSize,
+);
+
+@ffi.Native<NativeCBLDart_CBL_EnableVectorSearch>(isLeaf: true)
+external bool CBLDart_CBL_EnableVectorSearch(
+  ffi.Pointer<ffi.Void> dirBuf,
+  int dirSize,
+  ffi.Pointer<CBLError> errorOut,
+);
+
 @ffi.Native<NativeCBLDart_CBLDatabaseConfiguration_Default>(isLeaf: true)
 external CBLDart_CBLDatabaseConfiguration
 CBLDart_CBLDatabaseConfiguration_Default();
 
 @ffi.Native<NativeCBLDart_CBL_CopyDatabase>(isLeaf: true)
 external bool CBLDart_CBL_CopyDatabase(
-  imp$1.FLString fromPath,
-  imp$1.FLString toName,
+  ffi.Pointer<ffi.Void> fromPathBuf,
+  int fromPathSize,
+  ffi.Pointer<ffi.Void> toNameBuf,
+  int toNameSize,
   ffi.Pointer<CBLDart_CBLDatabaseConfiguration> config,
   ffi.Pointer<CBLError> outError,
 );
 
 @ffi.Native<NativeCBLDart_CBLDatabase_Open>(isLeaf: true)
 external ffi.Pointer<CBLDatabase> CBLDart_CBLDatabase_Open(
-  imp$1.FLString name,
+  ffi.Pointer<ffi.Void> nameBuf,
+  int nameSize,
   ffi.Pointer<CBLDart_CBLDatabaseConfiguration> config,
   ffi.Pointer<CBLError> errorOut,
 );
@@ -176,11 +330,105 @@ external bool CBLDart_CBLDatabase_Close(
   ffi.Pointer<CBLError> errorOut,
 );
 
+@ffi.Native<NativeCBLDart_CBL_DeleteDatabase>(isLeaf: true)
+external bool CBLDart_CBL_DeleteDatabase(
+  ffi.Pointer<ffi.Void> nameBuf,
+  int nameSize,
+  ffi.Pointer<ffi.Void> inDirBuf,
+  int inDirSize,
+  ffi.Pointer<CBLError> errorOut,
+);
+
+@ffi.Native<NativeCBLDart_CBL_DatabaseExists>(isLeaf: true)
+external bool CBLDart_CBL_DatabaseExists(
+  ffi.Pointer<ffi.Void> nameBuf,
+  int nameSize,
+  ffi.Pointer<ffi.Void> inDirBuf,
+  int inDirSize,
+);
+
+@ffi.Native<NativeCBLDart_CBLEncryptionKey_FromPassword>(isLeaf: true)
+external bool CBLDart_CBLEncryptionKey_FromPassword(
+  ffi.Pointer<CBLEncryptionKey> key,
+  ffi.Pointer<ffi.Void> pwBuf,
+  int pwSize,
+);
+
+@ffi.Native<NativeCBLDart_CBLDatabase_Scope>(isLeaf: true)
+external ffi.Pointer<CBLScope> CBLDart_CBLDatabase_Scope(
+  ffi.Pointer<CBLDatabase> db,
+  ffi.Pointer<ffi.Void> nameBuf,
+  int nameSize,
+  ffi.Pointer<CBLError> errorOut,
+);
+
+@ffi.Native<NativeCBLDart_CBLScope_Collection>(isLeaf: true)
+external ffi.Pointer<CBLCollection> CBLDart_CBLScope_Collection(
+  ffi.Pointer<CBLScope> scope,
+  ffi.Pointer<ffi.Void> nameBuf,
+  int nameSize,
+  ffi.Pointer<CBLError> errorOut,
+);
+
+@ffi.Native<NativeCBLDart_CBLDatabase_CreateCollection>(isLeaf: true)
+external ffi.Pointer<CBLCollection> CBLDart_CBLDatabase_CreateCollection(
+  ffi.Pointer<CBLDatabase> db,
+  ffi.Pointer<ffi.Void> colNameBuf,
+  int colNameSize,
+  ffi.Pointer<ffi.Void> scopeNameBuf,
+  int scopeNameSize,
+  ffi.Pointer<CBLError> errorOut,
+);
+
+@ffi.Native<NativeCBLDart_CBLDatabase_DeleteCollection>(isLeaf: true)
+external bool CBLDart_CBLDatabase_DeleteCollection(
+  ffi.Pointer<CBLDatabase> db,
+  ffi.Pointer<ffi.Void> colNameBuf,
+  int colNameSize,
+  ffi.Pointer<ffi.Void> scopeNameBuf,
+  int scopeNameSize,
+  ffi.Pointer<CBLError> errorOut,
+);
+
+@ffi.Native<NativeCBLDart_CBLCollection_GetDocument>(isLeaf: true)
+external ffi.Pointer<CBLDocument> CBLDart_CBLCollection_GetDocument(
+  ffi.Pointer<CBLCollection> collection,
+  ffi.Pointer<ffi.Void> docIDBuf,
+  int docIDSize,
+  ffi.Pointer<CBLError> errorOut,
+);
+
+@ffi.Native<NativeCBLDart_CBLCollection_PurgeDocumentByID>(isLeaf: true)
+external bool CBLDart_CBLCollection_PurgeDocumentByID(
+  ffi.Pointer<CBLCollection> collection,
+  ffi.Pointer<ffi.Void> docIDBuf,
+  int docIDSize,
+  ffi.Pointer<CBLError> errorOut,
+);
+
+@ffi.Native<NativeCBLDart_CBLCollection_GetDocumentExpiration>(isLeaf: true)
+external imp$1.DartCBLTimestamp CBLDart_CBLCollection_GetDocumentExpiration(
+  ffi.Pointer<CBLCollection> collection,
+  ffi.Pointer<ffi.Void> docIDBuf,
+  int docIDSize,
+  ffi.Pointer<CBLError> errorOut,
+);
+
+@ffi.Native<NativeCBLDart_CBLCollection_SetDocumentExpiration>(isLeaf: true)
+external bool CBLDart_CBLCollection_SetDocumentExpiration(
+  ffi.Pointer<CBLCollection> collection,
+  ffi.Pointer<ffi.Void> docIDBuf,
+  int docIDSize,
+  imp$1.DartCBLTimestamp expiration,
+  ffi.Pointer<CBLError> errorOut,
+);
+
 @ffi.Native<NativeCBLDart_CBLCollection_AddDocumentChangeListener>(isLeaf: true)
 external void CBLDart_CBLCollection_AddDocumentChangeListener(
   ffi.Pointer<CBLDatabase> db,
   ffi.Pointer<CBLCollection> collection,
-  imp$1.FLString docID,
+  ffi.Pointer<ffi.Void> docIDBuf,
+  int docIDSize,
   CBLDart_AsyncCallback listener,
 );
 
@@ -191,11 +439,52 @@ external void CBLDart_CBLCollection_AddChangeListener(
   CBLDart_AsyncCallback listener,
 );
 
+@ffi.Native<NativeCBLDart_CBLCollection_GetIndex>(isLeaf: true)
+external ffi.Pointer<CBLQueryIndex> CBLDart_CBLCollection_GetIndex(
+  ffi.Pointer<CBLCollection> collection,
+  ffi.Pointer<ffi.Void> nameBuf,
+  int nameSize,
+  ffi.Pointer<CBLError> errorOut,
+);
+
 @ffi.Native<NativeCBLDart_CBLCollection_CreateIndex>(isLeaf: true)
 external bool CBLDart_CBLCollection_CreateIndex(
   ffi.Pointer<CBLCollection> collection,
-  imp$1.FLString name,
+  ffi.Pointer<ffi.Void> nameBuf,
+  int nameSize,
   CBLDart_CBLIndexSpec indexSpec,
+  ffi.Pointer<CBLError> errorOut,
+);
+
+@ffi.Native<NativeCBLDart_CBLCollection_DeleteIndex>(isLeaf: true)
+external bool CBLDart_CBLCollection_DeleteIndex(
+  ffi.Pointer<CBLCollection> collection,
+  ffi.Pointer<ffi.Void> nameBuf,
+  int nameSize,
+  ffi.Pointer<CBLError> errorOut,
+);
+
+@ffi.Native<NativeCBLDart_CBLDocument_CreateWithID>(isLeaf: true)
+external ffi.Pointer<CBLDocument> CBLDart_CBLDocument_CreateWithID(
+  ffi.Pointer<ffi.Void> docIDBuf,
+  int docIDSize,
+);
+
+@ffi.Native<NativeCBLDart_CBLDocument_SetJSON>(isLeaf: true)
+external bool CBLDart_CBLDocument_SetJSON(
+  ffi.Pointer<CBLDocument> doc,
+  ffi.Pointer<ffi.Void> jsonBuf,
+  int jsonSize,
+  ffi.Pointer<CBLError> errorOut,
+);
+
+@ffi.Native<NativeCBLDart_CBLDatabase_CreateQuery>(isLeaf: true)
+external ffi.Pointer<CBLQuery> CBLDart_CBLDatabase_CreateQuery(
+  ffi.Pointer<CBLDatabase> db,
+  imp$1.DartCBLQueryLanguage language,
+  ffi.Pointer<ffi.Void> queryBuf,
+  int querySize,
+  ffi.Pointer<ffi.Int> errorPos,
   ffi.Pointer<CBLError> errorOut,
 );
 
@@ -206,9 +495,17 @@ external ffi.Pointer<CBLListenerToken> CBLDart_CBLQuery_AddChangeListener(
   CBLDart_AsyncCallback listener,
 );
 
+@ffi.Native<NativeCBLDart_CBLResultSet_ValueForKey>(isLeaf: true)
+external imp$1.FLValue CBLDart_CBLResultSet_ValueForKey(
+  ffi.Pointer<CBLResultSet> resultSet,
+  ffi.Pointer<ffi.Void> keyBuf,
+  int keySize,
+);
+
 @ffi.Native<NativeCBLDart_PredictiveModel_New>(isLeaf: true)
 external CBLDart_PredictiveModel CBLDart_PredictiveModel_New(
-  imp$1.FLString name,
+  ffi.Pointer<ffi.Void> nameBuf,
+  int nameSize,
   int isolateId,
   CBLDart_PredictiveModel_PredictionSync predictionSync,
   CBLDart_PredictiveModel_PredictionAsync predictionAsync,
@@ -218,11 +515,64 @@ external CBLDart_PredictiveModel CBLDart_PredictiveModel_New(
 @ffi.Native<NativeCBLDart_PredictiveModel_Delete>()
 external void CBLDart_PredictiveModel_Delete(CBLDart_PredictiveModel model);
 
+@ffi.Native<NativeCBLDart_CBL_UnregisterPredictiveModel>()
+external void CBLDart_CBL_UnregisterPredictiveModel(
+  ffi.Pointer<ffi.Void> nameBuf,
+  int nameSize,
+);
+
 @ffi.Native<NativeCBLDart_CBLBlobReader_Read>(isLeaf: true)
 external FLSliceResult CBLDart_CBLBlobReader_Read(
   ffi.Pointer<CBLBlobReadStream> stream,
   int bufferSize,
   ffi.Pointer<CBLError> outError,
+);
+
+@ffi.Native<NativeCBLDart_CBLBlob_CreateWithData>(isLeaf: true)
+external ffi.Pointer<CBLBlob> CBLDart_CBLBlob_CreateWithData(
+  ffi.Pointer<ffi.Void> contentTypeBuf,
+  int contentTypeSize,
+  ffi.Pointer<ffi.Void> contentBuf,
+  int contentSize,
+);
+
+@ffi.Native<NativeCBLDart_CBLBlob_CreateWithStream>(isLeaf: true)
+external ffi.Pointer<CBLBlob> CBLDart_CBLBlob_CreateWithStream(
+  ffi.Pointer<ffi.Void> contentTypeBuf,
+  int contentTypeSize,
+  ffi.Pointer<CBLBlobWriteStream> stream,
+);
+
+@ffi.Native<NativeCBLDart_CBLEndpoint_CreateWithURL>(isLeaf: true)
+external ffi.Pointer<CBLEndpoint> CBLDart_CBLEndpoint_CreateWithURL(
+  ffi.Pointer<ffi.Void> urlBuf,
+  int urlSize,
+  ffi.Pointer<CBLError> errorOut,
+);
+
+@ffi.Native<NativeCBLDart_CBLAuth_CreatePassword>(isLeaf: true)
+external ffi.Pointer<CBLAuthenticator> CBLDart_CBLAuth_CreatePassword(
+  ffi.Pointer<ffi.Void> userBuf,
+  int userSize,
+  ffi.Pointer<ffi.Void> pwBuf,
+  int pwSize,
+);
+
+@ffi.Native<NativeCBLDart_CBLAuth_CreateSession>(isLeaf: true)
+external ffi.Pointer<CBLAuthenticator> CBLDart_CBLAuth_CreateSession(
+  ffi.Pointer<ffi.Void> sidBuf,
+  int sidSize,
+  ffi.Pointer<ffi.Void> cnBuf,
+  int cnSize,
+);
+
+@ffi.Native<NativeCBLDart_CBLReplicator_IsDocumentPending>(isLeaf: true)
+external bool CBLDart_CBLReplicator_IsDocumentPending(
+  ffi.Pointer<CBLReplicator> replicator,
+  ffi.Pointer<ffi.Void> docIDBuf,
+  int docIDSize,
+  ffi.Pointer<CBLCollection> collection,
+  ffi.Pointer<CBLError> errorOut,
 );
 
 @ffi.Native<NativeCBLDart_CBLReplicator_Create>(isLeaf: true)
@@ -250,6 +600,72 @@ external void CBLDart_CBLReplicator_AddDocumentReplicationListener(
   ffi.Pointer<CBLDatabase> db,
   ffi.Pointer<CBLReplicator> replicator,
   CBLDart_AsyncCallback listenerId,
+);
+
+@ffi.Native<NativeCBLDart_CBLURLEndpointListener_Create>()
+external ffi.Pointer<CBLURLEndpointListener>
+CBLDart_CBLURLEndpointListener_Create(
+  ffi.Pointer<ffi.Pointer<CBLCollection>> collections,
+  int collectionCount,
+  int port,
+  ffi.Pointer<ffi.Void> networkInterfaceBuf,
+  int networkInterfaceSize,
+  bool disableTLS,
+  ffi.Pointer<CBLTLSIdentity> tlsIdentity,
+  ffi.Pointer<CBLListenerAuthenticator> authenticator,
+  bool enableDeltaSync,
+  bool readOnly,
+  ffi.Pointer<CBLError> errorOut,
+);
+
+@ffi.Native<NativeCBLDart_CBLLog_SetFileSinkV2>(isLeaf: true)
+external void CBLDart_CBLLog_SetFileSinkV2(
+  imp$1.DartCBLLogLevel level,
+  ffi.Pointer<ffi.Void> dirBuf,
+  int dirSize,
+  int maxKeptFiles,
+  int maxSize,
+  bool usePlaintext,
+);
+
+@ffi.Native<NativeCBLDart_CBLCert_SubjectNameComponent>(isLeaf: true)
+external FLSliceResult CBLDart_CBLCert_SubjectNameComponent(
+  ffi.Pointer<CBLCert> cert,
+  ffi.Pointer<ffi.Void> keyBuf,
+  int keySize,
+);
+
+@ffi.Native<NativeCBLDart_CBLKeyPair_CreateWithPrivateKeyData>(isLeaf: true)
+external ffi.Pointer<CBLKeyPair> CBLDart_CBLKeyPair_CreateWithPrivateKeyData(
+  ffi.Pointer<ffi.Void> pkBuf,
+  int pkSize,
+  ffi.Pointer<ffi.Void> pwBuf,
+  int pwSize,
+  ffi.Pointer<CBLError> errorOut,
+);
+
+@ffi.Native<NativeCBLDart_CBLTLSIdentity_CreateIdentity>(isLeaf: true)
+external ffi.Pointer<CBLTLSIdentity> CBLDart_CBLTLSIdentity_CreateIdentity(
+  int keyUsages,
+  imp$1.FLDict attrs,
+  int validityMs,
+  ffi.Pointer<ffi.Void> labelBuf,
+  int labelSize,
+  ffi.Pointer<CBLError> errorOut,
+);
+
+@ffi.Native<NativeCBLDart_CBLTLSIdentity_IdentityWithLabel>(isLeaf: true)
+external ffi.Pointer<CBLTLSIdentity> CBLDart_CBLTLSIdentity_IdentityWithLabel(
+  ffi.Pointer<ffi.Void> labelBuf,
+  int labelSize,
+  ffi.Pointer<CBLError> errorOut,
+);
+
+@ffi.Native<NativeCBLDart_CBLTLSIdentity_DeleteIdentityWithLabel>(isLeaf: true)
+external bool CBLDart_CBLTLSIdentity_DeleteIdentityWithLabel(
+  ffi.Pointer<ffi.Void> labelBuf,
+  int labelSize,
+  ffi.Pointer<CBLError> errorOut,
 );
 
 @ffi.Native<NativeCBLDartKeyPair_CreateWithExternalKey>()
@@ -323,6 +739,189 @@ typedef NativeCBLDart_FLSliceResult_ReleaseByBuf =
     ffi.Void Function(ffi.Pointer<ffi.Void> buf);
 typedef DartCBLDart_FLSliceResult_ReleaseByBuf =
     void Function(ffi.Pointer<ffi.Void> buf);
+typedef NativeCBLDart_FLSlice_Equal =
+    ffi.Bool Function(
+      ffi.Pointer<ffi.Void> aBuf,
+      ffi.Size aSize,
+      ffi.Pointer<ffi.Void> bBuf,
+      ffi.Size bSize,
+    );
+typedef DartCBLDart_FLSlice_Equal =
+    bool Function(
+      ffi.Pointer<ffi.Void> aBuf,
+      int aSize,
+      ffi.Pointer<ffi.Void> bBuf,
+      int bSize,
+    );
+typedef NativeCBLDart_FLSlice_Compare =
+    ffi.Int Function(
+      ffi.Pointer<ffi.Void> aBuf,
+      ffi.Size aSize,
+      ffi.Pointer<ffi.Void> bBuf,
+      ffi.Size bSize,
+    );
+typedef DartCBLDart_FLSlice_Compare =
+    int Function(
+      ffi.Pointer<ffi.Void> aBuf,
+      int aSize,
+      ffi.Pointer<ffi.Void> bBuf,
+      int bSize,
+    );
+typedef FLSliceResult = imp$1.FLSliceResult;
+typedef NativeCBLDart_FLSlice_Copy =
+    FLSliceResult Function(ffi.Pointer<ffi.Void> buf, ffi.Size size);
+typedef DartCBLDart_FLSlice_Copy =
+    FLSliceResult Function(ffi.Pointer<ffi.Void> buf, int size);
+typedef NativeCBLDart_FLData_Dump =
+    imp$1.FLStringResult Function(
+      ffi.Pointer<ffi.Void> dataBuf,
+      ffi.Size dataSize,
+    );
+typedef DartCBLDart_FLData_Dump =
+    imp$1.FLStringResult Function(ffi.Pointer<ffi.Void> dataBuf, int dataSize);
+typedef NativeCBLDart_FLValue_FromData =
+    imp$1.FLValue Function(
+      ffi.Pointer<ffi.Void> buf,
+      ffi.Size size,
+      ffi.Int trust,
+    );
+typedef DartCBLDart_FLValue_FromData =
+    imp$1.FLValue Function(ffi.Pointer<ffi.Void> buf, int size, int trust);
+typedef NativeCBLDart_FLDoc_FromResultData =
+    imp$1.FLDoc Function(
+      ffi.Pointer<ffi.Void> dataBuf,
+      ffi.Size dataSize,
+      ffi.Int trust,
+      imp$1.FLSharedKeys sharedKeys,
+      ffi.Pointer<ffi.Void> externBuf,
+      ffi.Size externSize,
+    );
+typedef DartCBLDart_FLDoc_FromResultData =
+    imp$1.FLDoc Function(
+      ffi.Pointer<ffi.Void> dataBuf,
+      int dataSize,
+      int trust,
+      imp$1.FLSharedKeys sharedKeys,
+      ffi.Pointer<ffi.Void> externBuf,
+      int externSize,
+    );
+
+sealed class FLError {
+  static const kFLNoError = 0;
+  static const kFLMemoryError = 1;
+  static const kFLOutOfRange = 2;
+  static const kFLInvalidData = 3;
+  static const kFLEncodeError = 4;
+  static const kFLJSONError = 5;
+  static const kFLUnknownValue = 6;
+  static const kFLInternalError = 7;
+  static const kFLNotFound = 8;
+  static const kFLSharedKeysStateError = 9;
+  static const kFLPOSIXError = 10;
+  static const kFLUnsupported = 11;
+}
+
+typedef NativeCBLDart_FLDoc_FromJSON =
+    imp$1.FLDoc Function(
+      ffi.Pointer<ffi.Void> jsonBuf,
+      ffi.Size jsonSize,
+      ffi.Pointer<ffi.UnsignedInt> outError,
+    );
+typedef DartCBLDart_FLDoc_FromJSON =
+    imp$1.FLDoc Function(
+      ffi.Pointer<ffi.Void> jsonBuf,
+      int jsonSize,
+      ffi.Pointer<ffi.UnsignedInt> outError,
+    );
+typedef NativeCBLDart_FLDict_Get =
+    imp$1.FLValue Function(
+      imp$1.FLDict dict,
+      ffi.Pointer<ffi.Void> keyBuf,
+      ffi.Size keySize,
+    );
+typedef DartCBLDart_FLDict_Get =
+    imp$1.FLValue Function(
+      imp$1.FLDict dict,
+      ffi.Pointer<ffi.Void> keyBuf,
+      int keySize,
+    );
+typedef FLDictKey = imp$1.FLDictKey;
+typedef NativeCBLDart_FLDictKey_Init =
+    FLDictKey Function(ffi.Pointer<ffi.Void> keyBuf, ffi.Size keySize);
+typedef DartCBLDart_FLDictKey_Init =
+    FLDictKey Function(ffi.Pointer<ffi.Void> keyBuf, int keySize);
+typedef NativeCBLDart_FLMutableDict_Set =
+    imp$1.FLSlot Function(
+      imp$1.FLMutableDict dict,
+      ffi.Pointer<ffi.Void> keyBuf,
+      ffi.Size keySize,
+    );
+typedef DartCBLDart_FLMutableDict_Set =
+    imp$1.FLSlot Function(
+      imp$1.FLMutableDict dict,
+      ffi.Pointer<ffi.Void> keyBuf,
+      int keySize,
+    );
+typedef NativeCBLDart_FLMutableDict_Remove =
+    ffi.Void Function(
+      imp$1.FLMutableDict dict,
+      ffi.Pointer<ffi.Void> keyBuf,
+      ffi.Size keySize,
+    );
+typedef DartCBLDart_FLMutableDict_Remove =
+    void Function(
+      imp$1.FLMutableDict dict,
+      ffi.Pointer<ffi.Void> keyBuf,
+      int keySize,
+    );
+typedef NativeCBLDart_FLMutableDict_GetMutableArray =
+    imp$1.FLMutableArray Function(
+      imp$1.FLMutableDict dict,
+      ffi.Pointer<ffi.Void> keyBuf,
+      ffi.Size keySize,
+    );
+typedef DartCBLDart_FLMutableDict_GetMutableArray =
+    imp$1.FLMutableArray Function(
+      imp$1.FLMutableDict dict,
+      ffi.Pointer<ffi.Void> keyBuf,
+      int keySize,
+    );
+typedef NativeCBLDart_FLMutableDict_GetMutableDict =
+    imp$1.FLMutableDict Function(
+      imp$1.FLMutableDict dict,
+      ffi.Pointer<ffi.Void> keyBuf,
+      ffi.Size keySize,
+    );
+typedef DartCBLDart_FLMutableDict_GetMutableDict =
+    imp$1.FLMutableDict Function(
+      imp$1.FLMutableDict dict,
+      ffi.Pointer<ffi.Void> keyBuf,
+      int keySize,
+    );
+typedef NativeCBLDart_FLSlot_SetString =
+    ffi.Void Function(
+      imp$1.FLSlot slot,
+      ffi.Pointer<ffi.Void> valueBuf,
+      ffi.Size valueSize,
+    );
+typedef DartCBLDart_FLSlot_SetString =
+    void Function(
+      imp$1.FLSlot slot,
+      ffi.Pointer<ffi.Void> valueBuf,
+      int valueSize,
+    );
+typedef NativeCBLDart_FLSlot_SetData =
+    ffi.Void Function(
+      imp$1.FLSlot slot,
+      ffi.Pointer<ffi.Void> dataBuf,
+      ffi.Size dataSize,
+    );
+typedef DartCBLDart_FLSlot_SetData =
+    void Function(
+      imp$1.FLSlot slot,
+      ffi.Pointer<ffi.Void> dataBuf,
+      int dataSize,
+    );
 
 final class KnownSharedKeys extends ffi.Opaque {}
 
@@ -406,13 +1005,15 @@ typedef DartCBLDart_FLArray_GetLoadedFLValue =
 typedef NativeCBLDart_FLDict_GetLoadedFLValue =
     ffi.Void Function(
       imp$1.FLDict dict,
-      imp$1.FLString key,
+      ffi.Pointer<ffi.Void> keyBuf,
+      ffi.Size keySize,
       ffi.Pointer<CBLDart_LoadedFLValue> out,
     );
 typedef DartCBLDart_FLDict_GetLoadedFLValue =
     void Function(
       imp$1.FLDict dict,
-      imp$1.FLString key,
+      ffi.Pointer<ffi.Void> keyBuf,
+      int keySize,
       ffi.Pointer<CBLDart_LoadedFLValue> out,
     );
 
@@ -475,6 +1076,54 @@ typedef NativeCBLDart_FLEncoder_WriteArrayValue =
     );
 typedef DartCBLDart_FLEncoder_WriteArrayValue =
     bool Function(imp$1.FLEncoder encoder, imp$1.FLArray array, int index);
+typedef NativeCBLDart_FLEncoder_WriteString =
+    ffi.Bool Function(
+      imp$1.FLEncoder encoder,
+      ffi.Pointer<ffi.Void> strBuf,
+      ffi.Size strSize,
+    );
+typedef DartCBLDart_FLEncoder_WriteString =
+    bool Function(
+      imp$1.FLEncoder encoder,
+      ffi.Pointer<ffi.Void> strBuf,
+      int strSize,
+    );
+typedef NativeCBLDart_FLEncoder_WriteKey =
+    ffi.Bool Function(
+      imp$1.FLEncoder encoder,
+      ffi.Pointer<ffi.Void> keyBuf,
+      ffi.Size keySize,
+    );
+typedef DartCBLDart_FLEncoder_WriteKey =
+    bool Function(
+      imp$1.FLEncoder encoder,
+      ffi.Pointer<ffi.Void> keyBuf,
+      int keySize,
+    );
+typedef NativeCBLDart_FLEncoder_WriteData =
+    ffi.Bool Function(
+      imp$1.FLEncoder encoder,
+      ffi.Pointer<ffi.Void> dataBuf,
+      ffi.Size dataSize,
+    );
+typedef DartCBLDart_FLEncoder_WriteData =
+    bool Function(
+      imp$1.FLEncoder encoder,
+      ffi.Pointer<ffi.Void> dataBuf,
+      int dataSize,
+    );
+typedef NativeCBLDart_FLEncoder_ConvertJSON =
+    ffi.Bool Function(
+      imp$1.FLEncoder encoder,
+      ffi.Pointer<ffi.Void> jsonBuf,
+      ffi.Size jsonSize,
+    );
+typedef DartCBLDart_FLEncoder_ConvertJSON =
+    bool Function(
+      imp$1.FLEncoder encoder,
+      ffi.Pointer<ffi.Void> jsonBuf,
+      int jsonSize,
+    );
 typedef NativeCBLDart_CpuSupportsAVX2 = ffi.Bool Function();
 typedef DartCBLDart_CpuSupportsAVX2 = bool Function();
 typedef NativeCBLDart_IsEnterprise = ffi.Bool Function();
@@ -561,6 +1210,32 @@ typedef DartCBLDart_CBLLog_GetFileSink = ffi.Pointer<CBLFileLogSink> Function();
 typedef NativeCBLDart_CBLLog_SetSentryBreadcrumbs =
     ffi.Bool Function(ffi.Bool enabled);
 typedef DartCBLDart_CBLLog_SetSentryBreadcrumbs = bool Function(bool enabled);
+typedef NativeCBLDart_CBL_LogMessage =
+    ffi.Void Function(
+      imp$1.CBLLogDomain domain,
+      imp$1.CBLLogLevel level,
+      ffi.Pointer<ffi.Void> msgBuf,
+      ffi.Size msgSize,
+    );
+typedef DartCBLDart_CBL_LogMessage =
+    void Function(
+      imp$1.DartCBLLogDomain domain,
+      imp$1.DartCBLLogLevel level,
+      ffi.Pointer<ffi.Void> msgBuf,
+      int msgSize,
+    );
+typedef NativeCBLDart_CBL_EnableVectorSearch =
+    ffi.Bool Function(
+      ffi.Pointer<ffi.Void> dirBuf,
+      ffi.Size dirSize,
+      ffi.Pointer<CBLError> errorOut,
+    );
+typedef DartCBLDart_CBL_EnableVectorSearch =
+    bool Function(
+      ffi.Pointer<ffi.Void> dirBuf,
+      int dirSize,
+      ffi.Pointer<CBLError> errorOut,
+    );
 
 final class CBLDart_CBLEncryptionKey extends ffi.Struct {
   @ffi.Uint32()
@@ -571,7 +1246,10 @@ final class CBLDart_CBLEncryptionKey extends ffi.Struct {
 }
 
 final class CBLDart_CBLDatabaseConfiguration extends ffi.Struct {
-  external imp$1.FLString directory;
+  external ffi.Pointer<ffi.Void> directoryBuf;
+
+  @ffi.Size()
+  external int directorySize;
 
   external CBLDart_CBLEncryptionKey encryptionKey;
 
@@ -585,28 +1263,34 @@ typedef DartCBLDart_CBLDatabaseConfiguration_Default =
     CBLDart_CBLDatabaseConfiguration Function();
 typedef NativeCBLDart_CBL_CopyDatabase =
     ffi.Bool Function(
-      imp$1.FLString fromPath,
-      imp$1.FLString toName,
+      ffi.Pointer<ffi.Void> fromPathBuf,
+      ffi.Size fromPathSize,
+      ffi.Pointer<ffi.Void> toNameBuf,
+      ffi.Size toNameSize,
       ffi.Pointer<CBLDart_CBLDatabaseConfiguration> config,
       ffi.Pointer<CBLError> outError,
     );
 typedef DartCBLDart_CBL_CopyDatabase =
     bool Function(
-      imp$1.FLString fromPath,
-      imp$1.FLString toName,
+      ffi.Pointer<ffi.Void> fromPathBuf,
+      int fromPathSize,
+      ffi.Pointer<ffi.Void> toNameBuf,
+      int toNameSize,
       ffi.Pointer<CBLDart_CBLDatabaseConfiguration> config,
       ffi.Pointer<CBLError> outError,
     );
 typedef CBLDatabase = imp$1.CBLDatabase;
 typedef NativeCBLDart_CBLDatabase_Open =
     ffi.Pointer<CBLDatabase> Function(
-      imp$1.FLString name,
+      ffi.Pointer<ffi.Void> nameBuf,
+      ffi.Size nameSize,
       ffi.Pointer<CBLDart_CBLDatabaseConfiguration> config,
       ffi.Pointer<CBLError> errorOut,
     );
 typedef DartCBLDart_CBLDatabase_Open =
     ffi.Pointer<CBLDatabase> Function(
-      imp$1.FLString name,
+      ffi.Pointer<ffi.Void> nameBuf,
+      int nameSize,
       ffi.Pointer<CBLDart_CBLDatabaseConfiguration> config,
       ffi.Pointer<CBLError> errorOut,
     );
@@ -626,19 +1310,188 @@ typedef DartCBLDart_CBLDatabase_Close =
       bool andDelete,
       ffi.Pointer<CBLError> errorOut,
     );
+typedef NativeCBLDart_CBL_DeleteDatabase =
+    ffi.Bool Function(
+      ffi.Pointer<ffi.Void> nameBuf,
+      ffi.Size nameSize,
+      ffi.Pointer<ffi.Void> inDirBuf,
+      ffi.Size inDirSize,
+      ffi.Pointer<CBLError> errorOut,
+    );
+typedef DartCBLDart_CBL_DeleteDatabase =
+    bool Function(
+      ffi.Pointer<ffi.Void> nameBuf,
+      int nameSize,
+      ffi.Pointer<ffi.Void> inDirBuf,
+      int inDirSize,
+      ffi.Pointer<CBLError> errorOut,
+    );
+typedef NativeCBLDart_CBL_DatabaseExists =
+    ffi.Bool Function(
+      ffi.Pointer<ffi.Void> nameBuf,
+      ffi.Size nameSize,
+      ffi.Pointer<ffi.Void> inDirBuf,
+      ffi.Size inDirSize,
+    );
+typedef DartCBLDart_CBL_DatabaseExists =
+    bool Function(
+      ffi.Pointer<ffi.Void> nameBuf,
+      int nameSize,
+      ffi.Pointer<ffi.Void> inDirBuf,
+      int inDirSize,
+    );
+typedef CBLEncryptionKey = imp$1.CBLEncryptionKey;
+typedef NativeCBLDart_CBLEncryptionKey_FromPassword =
+    ffi.Bool Function(
+      ffi.Pointer<CBLEncryptionKey> key,
+      ffi.Pointer<ffi.Void> pwBuf,
+      ffi.Size pwSize,
+    );
+typedef DartCBLDart_CBLEncryptionKey_FromPassword =
+    bool Function(
+      ffi.Pointer<CBLEncryptionKey> key,
+      ffi.Pointer<ffi.Void> pwBuf,
+      int pwSize,
+    );
+typedef CBLScope = imp$1.CBLScope;
+typedef NativeCBLDart_CBLDatabase_Scope =
+    ffi.Pointer<CBLScope> Function(
+      ffi.Pointer<CBLDatabase> db,
+      ffi.Pointer<ffi.Void> nameBuf,
+      ffi.Size nameSize,
+      ffi.Pointer<CBLError> errorOut,
+    );
+typedef DartCBLDart_CBLDatabase_Scope =
+    ffi.Pointer<CBLScope> Function(
+      ffi.Pointer<CBLDatabase> db,
+      ffi.Pointer<ffi.Void> nameBuf,
+      int nameSize,
+      ffi.Pointer<CBLError> errorOut,
+    );
 typedef CBLCollection = imp$1.CBLCollection;
+typedef NativeCBLDart_CBLScope_Collection =
+    ffi.Pointer<CBLCollection> Function(
+      ffi.Pointer<CBLScope> scope,
+      ffi.Pointer<ffi.Void> nameBuf,
+      ffi.Size nameSize,
+      ffi.Pointer<CBLError> errorOut,
+    );
+typedef DartCBLDart_CBLScope_Collection =
+    ffi.Pointer<CBLCollection> Function(
+      ffi.Pointer<CBLScope> scope,
+      ffi.Pointer<ffi.Void> nameBuf,
+      int nameSize,
+      ffi.Pointer<CBLError> errorOut,
+    );
+typedef NativeCBLDart_CBLDatabase_CreateCollection =
+    ffi.Pointer<CBLCollection> Function(
+      ffi.Pointer<CBLDatabase> db,
+      ffi.Pointer<ffi.Void> colNameBuf,
+      ffi.Size colNameSize,
+      ffi.Pointer<ffi.Void> scopeNameBuf,
+      ffi.Size scopeNameSize,
+      ffi.Pointer<CBLError> errorOut,
+    );
+typedef DartCBLDart_CBLDatabase_CreateCollection =
+    ffi.Pointer<CBLCollection> Function(
+      ffi.Pointer<CBLDatabase> db,
+      ffi.Pointer<ffi.Void> colNameBuf,
+      int colNameSize,
+      ffi.Pointer<ffi.Void> scopeNameBuf,
+      int scopeNameSize,
+      ffi.Pointer<CBLError> errorOut,
+    );
+typedef NativeCBLDart_CBLDatabase_DeleteCollection =
+    ffi.Bool Function(
+      ffi.Pointer<CBLDatabase> db,
+      ffi.Pointer<ffi.Void> colNameBuf,
+      ffi.Size colNameSize,
+      ffi.Pointer<ffi.Void> scopeNameBuf,
+      ffi.Size scopeNameSize,
+      ffi.Pointer<CBLError> errorOut,
+    );
+typedef DartCBLDart_CBLDatabase_DeleteCollection =
+    bool Function(
+      ffi.Pointer<CBLDatabase> db,
+      ffi.Pointer<ffi.Void> colNameBuf,
+      int colNameSize,
+      ffi.Pointer<ffi.Void> scopeNameBuf,
+      int scopeNameSize,
+      ffi.Pointer<CBLError> errorOut,
+    );
+typedef CBLDocument = imp$1.CBLDocument;
+typedef NativeCBLDart_CBLCollection_GetDocument =
+    ffi.Pointer<CBLDocument> Function(
+      ffi.Pointer<CBLCollection> collection,
+      ffi.Pointer<ffi.Void> docIDBuf,
+      ffi.Size docIDSize,
+      ffi.Pointer<CBLError> errorOut,
+    );
+typedef DartCBLDart_CBLCollection_GetDocument =
+    ffi.Pointer<CBLDocument> Function(
+      ffi.Pointer<CBLCollection> collection,
+      ffi.Pointer<ffi.Void> docIDBuf,
+      int docIDSize,
+      ffi.Pointer<CBLError> errorOut,
+    );
+typedef NativeCBLDart_CBLCollection_PurgeDocumentByID =
+    ffi.Bool Function(
+      ffi.Pointer<CBLCollection> collection,
+      ffi.Pointer<ffi.Void> docIDBuf,
+      ffi.Size docIDSize,
+      ffi.Pointer<CBLError> errorOut,
+    );
+typedef DartCBLDart_CBLCollection_PurgeDocumentByID =
+    bool Function(
+      ffi.Pointer<CBLCollection> collection,
+      ffi.Pointer<ffi.Void> docIDBuf,
+      int docIDSize,
+      ffi.Pointer<CBLError> errorOut,
+    );
+typedef NativeCBLDart_CBLCollection_GetDocumentExpiration =
+    imp$1.CBLTimestamp Function(
+      ffi.Pointer<CBLCollection> collection,
+      ffi.Pointer<ffi.Void> docIDBuf,
+      ffi.Size docIDSize,
+      ffi.Pointer<CBLError> errorOut,
+    );
+typedef DartCBLDart_CBLCollection_GetDocumentExpiration =
+    imp$1.DartCBLTimestamp Function(
+      ffi.Pointer<CBLCollection> collection,
+      ffi.Pointer<ffi.Void> docIDBuf,
+      int docIDSize,
+      ffi.Pointer<CBLError> errorOut,
+    );
+typedef NativeCBLDart_CBLCollection_SetDocumentExpiration =
+    ffi.Bool Function(
+      ffi.Pointer<CBLCollection> collection,
+      ffi.Pointer<ffi.Void> docIDBuf,
+      ffi.Size docIDSize,
+      imp$1.CBLTimestamp expiration,
+      ffi.Pointer<CBLError> errorOut,
+    );
+typedef DartCBLDart_CBLCollection_SetDocumentExpiration =
+    bool Function(
+      ffi.Pointer<CBLCollection> collection,
+      ffi.Pointer<ffi.Void> docIDBuf,
+      int docIDSize,
+      imp$1.DartCBLTimestamp expiration,
+      ffi.Pointer<CBLError> errorOut,
+    );
 typedef NativeCBLDart_CBLCollection_AddDocumentChangeListener =
     ffi.Void Function(
       ffi.Pointer<CBLDatabase> db,
       ffi.Pointer<CBLCollection> collection,
-      imp$1.FLString docID,
+      ffi.Pointer<ffi.Void> docIDBuf,
+      ffi.Size docIDSize,
       CBLDart_AsyncCallback listener,
     );
 typedef DartCBLDart_CBLCollection_AddDocumentChangeListener =
     void Function(
       ffi.Pointer<CBLDatabase> db,
       ffi.Pointer<CBLCollection> collection,
-      imp$1.FLString docID,
+      ffi.Pointer<ffi.Void> docIDBuf,
+      int docIDSize,
       CBLDart_AsyncCallback listener,
     );
 typedef NativeCBLDart_CBLCollection_AddChangeListener =
@@ -652,6 +1505,21 @@ typedef DartCBLDart_CBLCollection_AddChangeListener =
       ffi.Pointer<CBLDatabase> db,
       ffi.Pointer<CBLCollection> collection,
       CBLDart_AsyncCallback listener,
+    );
+typedef CBLQueryIndex = imp$1.CBLQueryIndex;
+typedef NativeCBLDart_CBLCollection_GetIndex =
+    ffi.Pointer<CBLQueryIndex> Function(
+      ffi.Pointer<CBLCollection> collection,
+      ffi.Pointer<ffi.Void> nameBuf,
+      ffi.Size nameSize,
+      ffi.Pointer<CBLError> errorOut,
+    );
+typedef DartCBLDart_CBLCollection_GetIndex =
+    ffi.Pointer<CBLQueryIndex> Function(
+      ffi.Pointer<CBLCollection> collection,
+      ffi.Pointer<ffi.Void> nameBuf,
+      int nameSize,
+      ffi.Pointer<CBLError> errorOut,
     );
 
 sealed class CBLDart_IndexType {
@@ -667,12 +1535,18 @@ final class CBLDart_CBLIndexSpec extends ffi.Struct {
   @imp$1.CBLQueryLanguage()
   external imp$1.DartCBLQueryLanguage expressionLanguage;
 
-  external imp$1.FLString expressions;
+  external ffi.Pointer<ffi.Void> expressionsBuf;
+
+  @ffi.Size()
+  external int expressionsSize;
 
   @ffi.Bool()
   external bool ignoreAccents;
 
-  external imp$1.FLString language;
+  external ffi.Pointer<ffi.Void> languageBuf;
+
+  @ffi.Size()
+  external int languageSize;
 
   @ffi.UnsignedInt()
   external int dimensions;
@@ -701,19 +1575,77 @@ final class CBLDart_CBLIndexSpec extends ffi.Struct {
 typedef NativeCBLDart_CBLCollection_CreateIndex =
     ffi.Bool Function(
       ffi.Pointer<CBLCollection> collection,
-      imp$1.FLString name,
+      ffi.Pointer<ffi.Void> nameBuf,
+      ffi.Size nameSize,
       CBLDart_CBLIndexSpec indexSpec,
       ffi.Pointer<CBLError> errorOut,
     );
 typedef DartCBLDart_CBLCollection_CreateIndex =
     bool Function(
       ffi.Pointer<CBLCollection> collection,
-      imp$1.FLString name,
+      ffi.Pointer<ffi.Void> nameBuf,
+      int nameSize,
       CBLDart_CBLIndexSpec indexSpec,
       ffi.Pointer<CBLError> errorOut,
     );
-typedef CBLListenerToken = imp$1.CBLListenerToken;
+typedef NativeCBLDart_CBLCollection_DeleteIndex =
+    ffi.Bool Function(
+      ffi.Pointer<CBLCollection> collection,
+      ffi.Pointer<ffi.Void> nameBuf,
+      ffi.Size nameSize,
+      ffi.Pointer<CBLError> errorOut,
+    );
+typedef DartCBLDart_CBLCollection_DeleteIndex =
+    bool Function(
+      ffi.Pointer<CBLCollection> collection,
+      ffi.Pointer<ffi.Void> nameBuf,
+      int nameSize,
+      ffi.Pointer<CBLError> errorOut,
+    );
+typedef NativeCBLDart_CBLDocument_CreateWithID =
+    ffi.Pointer<CBLDocument> Function(
+      ffi.Pointer<ffi.Void> docIDBuf,
+      ffi.Size docIDSize,
+    );
+typedef DartCBLDart_CBLDocument_CreateWithID =
+    ffi.Pointer<CBLDocument> Function(
+      ffi.Pointer<ffi.Void> docIDBuf,
+      int docIDSize,
+    );
+typedef NativeCBLDart_CBLDocument_SetJSON =
+    ffi.Bool Function(
+      ffi.Pointer<CBLDocument> doc,
+      ffi.Pointer<ffi.Void> jsonBuf,
+      ffi.Size jsonSize,
+      ffi.Pointer<CBLError> errorOut,
+    );
+typedef DartCBLDart_CBLDocument_SetJSON =
+    bool Function(
+      ffi.Pointer<CBLDocument> doc,
+      ffi.Pointer<ffi.Void> jsonBuf,
+      int jsonSize,
+      ffi.Pointer<CBLError> errorOut,
+    );
 typedef CBLQuery = imp$1.CBLQuery;
+typedef NativeCBLDart_CBLDatabase_CreateQuery =
+    ffi.Pointer<CBLQuery> Function(
+      ffi.Pointer<CBLDatabase> db,
+      imp$1.CBLQueryLanguage language,
+      ffi.Pointer<ffi.Void> queryBuf,
+      ffi.Size querySize,
+      ffi.Pointer<ffi.Int> errorPos,
+      ffi.Pointer<CBLError> errorOut,
+    );
+typedef DartCBLDart_CBLDatabase_CreateQuery =
+    ffi.Pointer<CBLQuery> Function(
+      ffi.Pointer<CBLDatabase> db,
+      imp$1.DartCBLQueryLanguage language,
+      ffi.Pointer<ffi.Void> queryBuf,
+      int querySize,
+      ffi.Pointer<ffi.Int> errorPos,
+      ffi.Pointer<CBLError> errorOut,
+    );
+typedef CBLListenerToken = imp$1.CBLListenerToken;
 typedef NativeCBLDart_CBLQuery_AddChangeListener =
     ffi.Pointer<CBLListenerToken> Function(
       ffi.Pointer<CBLDatabase> db,
@@ -725,6 +1657,19 @@ typedef DartCBLDart_CBLQuery_AddChangeListener =
       ffi.Pointer<CBLDatabase> db,
       ffi.Pointer<CBLQuery> query,
       CBLDart_AsyncCallback listener,
+    );
+typedef CBLResultSet = imp$1.CBLResultSet;
+typedef NativeCBLDart_CBLResultSet_ValueForKey =
+    imp$1.FLValue Function(
+      ffi.Pointer<CBLResultSet> resultSet,
+      ffi.Pointer<ffi.Void> keyBuf,
+      ffi.Size keySize,
+    );
+typedef DartCBLDart_CBLResultSet_ValueForKey =
+    imp$1.FLValue Function(
+      ffi.Pointer<CBLResultSet> resultSet,
+      ffi.Pointer<ffi.Void> keyBuf,
+      int keySize,
     );
 typedef CBLDart_PredictiveModel_PredictionSyncFunction =
     imp$1.FLMutableDict Function(imp$1.FLDict input);
@@ -752,7 +1697,8 @@ final class _CBLDart_PredictiveModel extends ffi.Opaque {}
 typedef CBLDart_PredictiveModel = ffi.Pointer<_CBLDart_PredictiveModel>;
 typedef NativeCBLDart_PredictiveModel_New =
     CBLDart_PredictiveModel Function(
-      imp$1.FLString name,
+      ffi.Pointer<ffi.Void> nameBuf,
+      ffi.Size nameSize,
       CBLDart_IsolateId isolateId,
       CBLDart_PredictiveModel_PredictionSync predictionSync,
       CBLDart_PredictiveModel_PredictionAsync predictionAsync,
@@ -760,7 +1706,8 @@ typedef NativeCBLDart_PredictiveModel_New =
     );
 typedef DartCBLDart_PredictiveModel_New =
     CBLDart_PredictiveModel Function(
-      imp$1.FLString name,
+      ffi.Pointer<ffi.Void> nameBuf,
+      int nameSize,
       int isolateId,
       CBLDart_PredictiveModel_PredictionSync predictionSync,
       CBLDart_PredictiveModel_PredictionAsync predictionAsync,
@@ -770,7 +1717,10 @@ typedef NativeCBLDart_PredictiveModel_Delete =
     ffi.Void Function(CBLDart_PredictiveModel model);
 typedef DartCBLDart_PredictiveModel_Delete =
     void Function(CBLDart_PredictiveModel model);
-typedef FLSliceResult = imp$1.FLSliceResult;
+typedef NativeCBLDart_CBL_UnregisterPredictiveModel =
+    ffi.Void Function(ffi.Pointer<ffi.Void> nameBuf, ffi.Size nameSize);
+typedef DartCBLDart_CBL_UnregisterPredictiveModel =
+    void Function(ffi.Pointer<ffi.Void> nameBuf, int nameSize);
 typedef CBLBlobReadStream = imp$1.CBLBlobReadStream;
 typedef NativeCBLDart_CBLBlobReader_Read =
     FLSliceResult Function(
@@ -784,6 +1734,116 @@ typedef DartCBLDart_CBLBlobReader_Read =
       int bufferSize,
       ffi.Pointer<CBLError> outError,
     );
+typedef CBLBlob = imp$1.CBLBlob;
+typedef NativeCBLDart_CBLBlob_CreateWithData =
+    ffi.Pointer<CBLBlob> Function(
+      ffi.Pointer<ffi.Void> contentTypeBuf,
+      ffi.Size contentTypeSize,
+      ffi.Pointer<ffi.Void> contentBuf,
+      ffi.Size contentSize,
+    );
+typedef DartCBLDart_CBLBlob_CreateWithData =
+    ffi.Pointer<CBLBlob> Function(
+      ffi.Pointer<ffi.Void> contentTypeBuf,
+      int contentTypeSize,
+      ffi.Pointer<ffi.Void> contentBuf,
+      int contentSize,
+    );
+typedef CBLBlobWriteStream = imp$1.CBLBlobWriteStream;
+typedef NativeCBLDart_CBLBlob_CreateWithStream =
+    ffi.Pointer<CBLBlob> Function(
+      ffi.Pointer<ffi.Void> contentTypeBuf,
+      ffi.Size contentTypeSize,
+      ffi.Pointer<CBLBlobWriteStream> stream,
+    );
+typedef DartCBLDart_CBLBlob_CreateWithStream =
+    ffi.Pointer<CBLBlob> Function(
+      ffi.Pointer<ffi.Void> contentTypeBuf,
+      int contentTypeSize,
+      ffi.Pointer<CBLBlobWriteStream> stream,
+    );
+typedef CBLEndpoint = imp$1.CBLEndpoint;
+typedef NativeCBLDart_CBLEndpoint_CreateWithURL =
+    ffi.Pointer<CBLEndpoint> Function(
+      ffi.Pointer<ffi.Void> urlBuf,
+      ffi.Size urlSize,
+      ffi.Pointer<CBLError> errorOut,
+    );
+typedef DartCBLDart_CBLEndpoint_CreateWithURL =
+    ffi.Pointer<CBLEndpoint> Function(
+      ffi.Pointer<ffi.Void> urlBuf,
+      int urlSize,
+      ffi.Pointer<CBLError> errorOut,
+    );
+typedef CBLAuthenticator = imp$1.CBLAuthenticator;
+typedef NativeCBLDart_CBLAuth_CreatePassword =
+    ffi.Pointer<CBLAuthenticator> Function(
+      ffi.Pointer<ffi.Void> userBuf,
+      ffi.Size userSize,
+      ffi.Pointer<ffi.Void> pwBuf,
+      ffi.Size pwSize,
+    );
+typedef DartCBLDart_CBLAuth_CreatePassword =
+    ffi.Pointer<CBLAuthenticator> Function(
+      ffi.Pointer<ffi.Void> userBuf,
+      int userSize,
+      ffi.Pointer<ffi.Void> pwBuf,
+      int pwSize,
+    );
+typedef NativeCBLDart_CBLAuth_CreateSession =
+    ffi.Pointer<CBLAuthenticator> Function(
+      ffi.Pointer<ffi.Void> sidBuf,
+      ffi.Size sidSize,
+      ffi.Pointer<ffi.Void> cnBuf,
+      ffi.Size cnSize,
+    );
+typedef DartCBLDart_CBLAuth_CreateSession =
+    ffi.Pointer<CBLAuthenticator> Function(
+      ffi.Pointer<ffi.Void> sidBuf,
+      int sidSize,
+      ffi.Pointer<ffi.Void> cnBuf,
+      int cnSize,
+    );
+typedef CBLReplicator = imp$1.CBLReplicator;
+typedef NativeCBLDart_CBLReplicator_IsDocumentPending =
+    ffi.Bool Function(
+      ffi.Pointer<CBLReplicator> replicator,
+      ffi.Pointer<ffi.Void> docIDBuf,
+      ffi.Size docIDSize,
+      ffi.Pointer<CBLCollection> collection,
+      ffi.Pointer<CBLError> errorOut,
+    );
+typedef DartCBLDart_CBLReplicator_IsDocumentPending =
+    bool Function(
+      ffi.Pointer<CBLReplicator> replicator,
+      ffi.Pointer<ffi.Void> docIDBuf,
+      int docIDSize,
+      ffi.Pointer<CBLCollection> collection,
+      ffi.Pointer<CBLError> errorOut,
+    );
+
+final class CBLDart_ProxySettings extends ffi.Struct {
+  @imp$1.CBLProxyType()
+  external imp$1.DartCBLProxyType type;
+
+  external ffi.Pointer<ffi.Void> hostnameBuf;
+
+  @ffi.Size()
+  external int hostnameSize;
+
+  @ffi.Uint16()
+  external int port;
+
+  external ffi.Pointer<ffi.Void> usernameBuf;
+
+  @ffi.Size()
+  external int usernameSize;
+
+  external ffi.Pointer<ffi.Void> passwordBuf;
+
+  @ffi.Size()
+  external int passwordSize;
+}
 
 final class CBLDart_ReplicationCollection extends ffi.Struct {
   external ffi.Pointer<CBLCollection> collection;
@@ -798,10 +1858,6 @@ final class CBLDart_ReplicationCollection extends ffi.Struct {
 
   external CBLDart_AsyncCallback conflictResolver;
 }
-
-typedef CBLEndpoint = imp$1.CBLEndpoint;
-typedef CBLAuthenticator = imp$1.CBLAuthenticator;
-typedef CBLProxySettings = imp$1.CBLProxySettings;
 
 final class CBLDart_ReplicatorConfiguration extends ffi.Struct {
   external ffi.Pointer<CBLDatabase> database;
@@ -828,7 +1884,7 @@ final class CBLDart_ReplicatorConfiguration extends ffi.Struct {
 
   external ffi.Pointer<CBLAuthenticator> authenticator;
 
-  external ffi.Pointer<CBLProxySettings> proxy;
+  external ffi.Pointer<CBLDart_ProxySettings> proxy;
 
   external imp$1.FLDict headers;
 
@@ -848,7 +1904,6 @@ final class CBLDart_ReplicatorConfiguration extends ffi.Struct {
   external bool acceptParentDomainCookies;
 }
 
-typedef CBLReplicator = imp$1.CBLReplicator;
 typedef NativeCBLDart_CBLReplicator_Create =
     ffi.Pointer<CBLReplicator> Function(
       ffi.Pointer<CBLDart_ReplicatorConfiguration> config,
@@ -886,6 +1941,127 @@ typedef DartCBLDart_CBLReplicator_AddDocumentReplicationListener =
       ffi.Pointer<CBLDatabase> db,
       ffi.Pointer<CBLReplicator> replicator,
       CBLDart_AsyncCallback listenerId,
+    );
+typedef CBLURLEndpointListener = imp$1.CBLURLEndpointListener;
+typedef CBLTLSIdentity = imp$1.CBLTLSIdentity;
+typedef CBLListenerAuthenticator = imp$1.CBLListenerAuthenticator;
+typedef NativeCBLDart_CBLURLEndpointListener_Create =
+    ffi.Pointer<CBLURLEndpointListener> Function(
+      ffi.Pointer<ffi.Pointer<CBLCollection>> collections,
+      ffi.Size collectionCount,
+      ffi.Uint16 port,
+      ffi.Pointer<ffi.Void> networkInterfaceBuf,
+      ffi.Size networkInterfaceSize,
+      ffi.Bool disableTLS,
+      ffi.Pointer<CBLTLSIdentity> tlsIdentity,
+      ffi.Pointer<CBLListenerAuthenticator> authenticator,
+      ffi.Bool enableDeltaSync,
+      ffi.Bool readOnly,
+      ffi.Pointer<CBLError> errorOut,
+    );
+typedef DartCBLDart_CBLURLEndpointListener_Create =
+    ffi.Pointer<CBLURLEndpointListener> Function(
+      ffi.Pointer<ffi.Pointer<CBLCollection>> collections,
+      int collectionCount,
+      int port,
+      ffi.Pointer<ffi.Void> networkInterfaceBuf,
+      int networkInterfaceSize,
+      bool disableTLS,
+      ffi.Pointer<CBLTLSIdentity> tlsIdentity,
+      ffi.Pointer<CBLListenerAuthenticator> authenticator,
+      bool enableDeltaSync,
+      bool readOnly,
+      ffi.Pointer<CBLError> errorOut,
+    );
+typedef NativeCBLDart_CBLLog_SetFileSinkV2 =
+    ffi.Void Function(
+      imp$1.CBLLogLevel level,
+      ffi.Pointer<ffi.Void> dirBuf,
+      ffi.Size dirSize,
+      ffi.UnsignedInt maxKeptFiles,
+      ffi.Size maxSize,
+      ffi.Bool usePlaintext,
+    );
+typedef DartCBLDart_CBLLog_SetFileSinkV2 =
+    void Function(
+      imp$1.DartCBLLogLevel level,
+      ffi.Pointer<ffi.Void> dirBuf,
+      int dirSize,
+      int maxKeptFiles,
+      int maxSize,
+      bool usePlaintext,
+    );
+typedef CBLCert = imp$1.CBLCert;
+typedef NativeCBLDart_CBLCert_SubjectNameComponent =
+    FLSliceResult Function(
+      ffi.Pointer<CBLCert> cert,
+      ffi.Pointer<ffi.Void> keyBuf,
+      ffi.Size keySize,
+    );
+typedef DartCBLDart_CBLCert_SubjectNameComponent =
+    FLSliceResult Function(
+      ffi.Pointer<CBLCert> cert,
+      ffi.Pointer<ffi.Void> keyBuf,
+      int keySize,
+    );
+typedef CBLKeyPair = imp$1.CBLKeyPair;
+typedef NativeCBLDart_CBLKeyPair_CreateWithPrivateKeyData =
+    ffi.Pointer<CBLKeyPair> Function(
+      ffi.Pointer<ffi.Void> pkBuf,
+      ffi.Size pkSize,
+      ffi.Pointer<ffi.Void> pwBuf,
+      ffi.Size pwSize,
+      ffi.Pointer<CBLError> errorOut,
+    );
+typedef DartCBLDart_CBLKeyPair_CreateWithPrivateKeyData =
+    ffi.Pointer<CBLKeyPair> Function(
+      ffi.Pointer<ffi.Void> pkBuf,
+      int pkSize,
+      ffi.Pointer<ffi.Void> pwBuf,
+      int pwSize,
+      ffi.Pointer<CBLError> errorOut,
+    );
+typedef NativeCBLDart_CBLTLSIdentity_CreateIdentity =
+    ffi.Pointer<CBLTLSIdentity> Function(
+      ffi.Int keyUsages,
+      imp$1.FLDict attrs,
+      ffi.Int64 validityMs,
+      ffi.Pointer<ffi.Void> labelBuf,
+      ffi.Size labelSize,
+      ffi.Pointer<CBLError> errorOut,
+    );
+typedef DartCBLDart_CBLTLSIdentity_CreateIdentity =
+    ffi.Pointer<CBLTLSIdentity> Function(
+      int keyUsages,
+      imp$1.FLDict attrs,
+      int validityMs,
+      ffi.Pointer<ffi.Void> labelBuf,
+      int labelSize,
+      ffi.Pointer<CBLError> errorOut,
+    );
+typedef NativeCBLDart_CBLTLSIdentity_IdentityWithLabel =
+    ffi.Pointer<CBLTLSIdentity> Function(
+      ffi.Pointer<ffi.Void> labelBuf,
+      ffi.Size labelSize,
+      ffi.Pointer<CBLError> errorOut,
+    );
+typedef DartCBLDart_CBLTLSIdentity_IdentityWithLabel =
+    ffi.Pointer<CBLTLSIdentity> Function(
+      ffi.Pointer<ffi.Void> labelBuf,
+      int labelSize,
+      ffi.Pointer<CBLError> errorOut,
+    );
+typedef NativeCBLDart_CBLTLSIdentity_DeleteIdentityWithLabel =
+    ffi.Bool Function(
+      ffi.Pointer<ffi.Void> labelBuf,
+      ffi.Size labelSize,
+      ffi.Pointer<CBLError> errorOut,
+    );
+typedef DartCBLDart_CBLTLSIdentity_DeleteIdentityWithLabel =
+    bool Function(
+      ffi.Pointer<ffi.Void> labelBuf,
+      int labelSize,
+      ffi.Pointer<CBLError> errorOut,
     );
 typedef CBLDartExternalKeyPublicKeyDataFunction =
     ffi.Void Function(
@@ -937,7 +2113,6 @@ typedef DartCBLDartExternalKeySignFunction =
     );
 typedef CBLDartExternalKeySign =
     ffi.Pointer<ffi.NativeFunction<CBLDartExternalKeySignFunction>>;
-typedef CBLKeyPair = imp$1.CBLKeyPair;
 typedef NativeCBLDartKeyPair_CreateWithExternalKey =
     ffi.Pointer<CBLKeyPair> Function(
       ffi.Size keySizeInBits,
@@ -984,7 +2159,6 @@ typedef DartCBLDart_ListenerPasswordAuthCallbackTrampoline =
       imp$1.FLString username,
       imp$1.FLString password,
     );
-typedef CBLCert = imp$1.CBLCert;
 typedef CBLDartListenerCertAuthCallbackFunction =
     ffi.Void Function(CBLDart_Completer completer, ffi.Pointer<CBLCert> cert);
 typedef DartCBLDartListenerCertAuthCallbackFunction =

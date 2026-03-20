@@ -7,7 +7,6 @@ import 'package:meta/meta.dart';
 import 'cblite.dart' as cblite;
 import 'cblitedart.dart' as cblitedart;
 import 'fleece.dart';
-import 'global.dart';
 import 'utils.dart';
 
 enum CBLLogDomain {
@@ -136,10 +135,12 @@ final class LoggingBindings {
     CBLLogLevel level,
     String message,
   ) {
-    runWithSingleFLString(
-      message,
-      (flMessage) =>
-          cblite.CBL_LogMessage(domain.value, level.value, flMessage),
+    final encoded = utf8.encode(message);
+    cblitedart.CBLDart_CBL_LogMessage(
+      domain.value,
+      level.value,
+      encoded.address.cast(),
+      encoded.length,
     );
   }
 
@@ -159,9 +160,20 @@ final class LoggingBindings {
       cblitedart.CBLDart_CBLLog_SetCallback(callback);
 
   static void setFileLogConfiguration(CBLLogFileConfiguration? config) {
-    withGlobalArena(() {
-      cblitedart.CBLDart_CBLLog_SetFileSink(_logFileSink(config));
-    });
+    if (config == null) {
+      cblitedart.CBLDart_CBLLog_SetFileSink(nullptr);
+      return;
+    }
+
+    final encoded = utf8.encode(config.directory);
+    cblitedart.CBLDart_CBLLog_SetFileSinkV2(
+      config.level.value,
+      encoded.address.cast(),
+      encoded.length,
+      config.maxKeptFiles,
+      config.maxSize,
+      config.usePlainText,
+    );
   }
 
   static CBLLogFileConfiguration? getLogFileConfiguration() =>
@@ -172,23 +184,4 @@ final class LoggingBindings {
 
   static bool setSentryBreadcrumbs({required bool enabled}) =>
       cblitedart.CBLDart_CBLLog_SetSentryBreadcrumbs(enabled);
-
-  static Pointer<cblite.CBLFileLogSink> _logFileSink(
-    CBLLogFileConfiguration? config,
-  ) {
-    if (config == null) {
-      return nullptr;
-    }
-
-    final result = globalArena<cblite.CBLFileLogSink>();
-
-    result.ref
-      ..level = config.level.value
-      ..directory = config.directory.toFLString()
-      ..maxKeptFiles = config.maxKeptFiles
-      ..maxSize = config.maxSize
-      ..usePlaintext = config.usePlainText;
-
-    return result;
-  }
 }
