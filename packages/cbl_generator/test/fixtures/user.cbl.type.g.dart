@@ -1,5 +1,6 @@
-// dart format width=80
 // GENERATED CODE - DO NOT MODIFY BY HAND
+// dart format width=80
+
 // ignore_for_file: avoid_positional_boolean_parameters, lines_longer_than_80_chars, invalid_use_of_internal_member, parameter_assignments, unnecessary_const, prefer_relative_imports, avoid_equals_and_hash_code_on_mutable_classes
 
 part of 'user.dart';
@@ -8,7 +9,7 @@ part of 'user.dart';
 // TypedDocumentGenerator
 // **************************************************************************
 
-mixin _$User implements TypedDocumentObject<MutableUser> {
+mixin _$User {
   String get id;
 
   PersonalName get name;
@@ -20,8 +21,12 @@ mixin _$User implements TypedDocumentObject<MutableUser> {
   DateTime get createdAt;
 }
 
-abstract class _UserImplBase<I extends Document> with _$User implements User {
-  _UserImplBase(this.internal);
+abstract class UserDocument implements User, TypedDocumentObject<MutableUser> {}
+
+abstract class _UserDocumentImplBase<I extends Document>
+    with _$User
+    implements UserDocument {
+  _UserDocumentImplBase(this.internal);
 
   @override
   final I internal;
@@ -72,7 +77,7 @@ abstract class _UserImplBase<I extends Document> with _$User implements User {
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
-class ImmutableUser extends _UserImplBase {
+class ImmutableUser extends _UserDocumentImplBase {
   ImmutableUser.internal(super.internal);
 
   static const _nameConverter =
@@ -93,7 +98,7 @@ class ImmutableUser extends _UserImplBase {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is User &&
+      other is UserDocument &&
           runtimeType == other.runtimeType &&
           internal == other.internal;
 
@@ -102,8 +107,8 @@ class ImmutableUser extends _UserImplBase {
 }
 
 /// Mutable version of [User].
-class MutableUser extends _UserImplBase<MutableDocument>
-    implements TypedMutableDocumentObject<User, MutableUser> {
+class MutableUser extends _UserDocumentImplBase<MutableDocument>
+    implements TypedMutableDocumentObject<UserDocument, MutableUser> {
   /// Creates a new mutable [User].
   MutableUser({
     String? id,
@@ -128,6 +133,203 @@ class MutableUser extends _UserImplBase<MutableDocument>
         MutablePersonalName,
         PersonalName
       >(MutablePersonalName.internal);
+
+  late MutablePersonalName _name = TypedDataHelpers.readProperty(
+    internal: internal,
+    name: 'name',
+    key: 'name',
+    converter: _nameConverter,
+  );
+
+  @override
+  MutablePersonalName get name => _name;
+
+  set name(PersonalName value) {
+    final promoted = _nameConverter.promote(value);
+    _name = promoted;
+    TypedDataHelpers.writeProperty(
+      internal: internal,
+      key: 'name',
+      value: promoted,
+      converter: _nameConverter,
+    );
+  }
+
+  set email(String? value) {
+    final promoted = value == null
+        ? null
+        : TypedDataHelpers.stringConverter.promote(value);
+    TypedDataHelpers.writeNullableProperty(
+      internal: internal,
+      key: 'email',
+      value: promoted,
+      converter: TypedDataHelpers.stringConverter,
+    );
+  }
+
+  set username(String value) {
+    final promoted = TypedDataHelpers.stringConverter.promote(value);
+    TypedDataHelpers.writeProperty(
+      internal: internal,
+      key: 'username',
+      value: promoted,
+      converter: TypedDataHelpers.stringConverter,
+    );
+  }
+
+  set createdAt(DateTime value) {
+    final promoted = TypedDataHelpers.dateTimeConverter.promote(value);
+    TypedDataHelpers.writeProperty(
+      internal: internal,
+      key: 'createdAt',
+      value: promoted,
+      converter: TypedDataHelpers.dateTimeConverter,
+    );
+  }
+}
+
+mixin _$UserDictionary implements TypedDictionaryObject<MutableUserDictionary> {
+  String get id;
+
+  PersonalName get name;
+
+  String? get email;
+
+  String get username;
+
+  DateTime get createdAt;
+}
+
+abstract class UserDictionary with _$UserDictionary implements User {}
+
+abstract class _UserDictionaryImplBase<I extends Dictionary>
+    with _$UserDictionary
+    implements UserDictionary {
+  _UserDictionaryImplBase(this.internal);
+
+  @override
+  final I internal;
+
+  @override
+  String get id => TypedDataHelpers.readProperty(
+    internal: internal,
+    name: 'id',
+    key: 'id',
+    converter: TypedDataHelpers.stringConverter,
+  );
+
+  @override
+  String? get email => TypedDataHelpers.readNullableProperty(
+    internal: internal,
+    name: 'email',
+    key: 'email',
+    converter: TypedDataHelpers.stringConverter,
+  );
+
+  @override
+  String get username => TypedDataHelpers.readProperty(
+    internal: internal,
+    name: 'username',
+    key: 'username',
+    converter: TypedDataHelpers.stringConverter,
+  );
+
+  @override
+  DateTime get createdAt => TypedDataHelpers.readProperty(
+    internal: internal,
+    name: 'createdAt',
+    key: 'createdAt',
+    converter: TypedDataHelpers.dateTimeConverter,
+  );
+
+  @override
+  MutableUserDictionary toMutable() =>
+      MutableUserDictionary.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => TypedDataHelpers.renderString(
+    indent: indent,
+    className: 'UserDictionary',
+    fields: {
+      'id': id,
+      'name': name,
+      'email': email,
+      'username': username,
+      'createdAt': createdAt,
+    },
+  );
+}
+
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
+class ImmutableUserDictionary extends _UserDictionaryImplBase {
+  ImmutableUserDictionary.internal(super.internal);
+
+  static const _nameConverter =
+      const TypedDictionaryConverter<
+        Dictionary,
+        PersonalName,
+        TypedDictionaryObject<PersonalName>
+      >(ImmutablePersonalName.internal);
+
+  @override
+  late final name = TypedDataHelpers.readProperty(
+    internal: internal,
+    name: 'name',
+    key: 'name',
+    converter: _nameConverter,
+  );
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UserDictionary &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
+}
+
+/// Mutable version of [UserDictionary].
+class MutableUserDictionary extends _UserDictionaryImplBase<MutableDictionary>
+    implements
+        TypedMutableDictionaryObject<UserDictionary, MutableUserDictionary> {
+  /// Creates a new mutable [UserDictionary].
+  MutableUserDictionary({
+    required String id,
+    required PersonalName name,
+    String? email,
+    required String username,
+    required DateTime createdAt,
+  }) : super(MutableDictionary()) {
+    this.id = id;
+    this.name = name;
+    if (email != null) {
+      this.email = email;
+    }
+    this.username = username;
+    this.createdAt = createdAt;
+  }
+
+  MutableUserDictionary.internal(super.internal);
+
+  static const _nameConverter =
+      const TypedDictionaryConverter<
+        MutableDictionary,
+        MutablePersonalName,
+        PersonalName
+      >(MutablePersonalName.internal);
+
+  set id(String value) {
+    final promoted = TypedDataHelpers.stringConverter.promote(value);
+    TypedDataHelpers.writeProperty(
+      internal: internal,
+      key: 'id',
+      value: promoted,
+      converter: TypedDataHelpers.stringConverter,
+    );
+  }
 
   late MutablePersonalName _name = TypedDataHelpers.readProperty(
     internal: internal,

@@ -37,7 +37,12 @@ final class TypeDataBaseCodeBuilder {
 
     _code.writeln('types: [');
 
-    model.types.forEach(_writeTypedDataMetadata);
+    for (final type in model.types) {
+      _writeTypedDataMetadata(type);
+      if (type.kind == TypedDataObjectKind.document) {
+        _writeTypedDataMetadata(type.toCompanionDictionary());
+      }
+    }
 
     _code.writeln('],');
 
@@ -56,12 +61,14 @@ final class TypeDataBaseCodeBuilder {
         _code.write('TypedDocumentMetadata');
     }
 
+    final registryTypeName = object.typedInterfaceName;
+
     _code
       ..writeln(
-        '<${object.classNames.declaringClassName},'
+        '<$registryTypeName,'
         ' ${object.classNames.mutableClassName}>(',
       )
-      ..writeln("dartName: '${object.classNames.declaringClassName}',")
+      ..writeln("dartName: '$registryTypeName',")
       ..writeln('factory: ${object.classNames.immutableClassName}.internal,')
       ..writeln(
         'mutableFactory: ${object.classNames.mutableClassName}.internal,',

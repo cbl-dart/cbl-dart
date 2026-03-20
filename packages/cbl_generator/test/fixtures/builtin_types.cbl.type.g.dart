@@ -1,5 +1,6 @@
-// dart format width=80
 // GENERATED CODE - DO NOT MODIFY BY HAND
+// dart format width=80
+
 // ignore_for_file: avoid_positional_boolean_parameters, lines_longer_than_80_chars, invalid_use_of_internal_member, parameter_assignments, unnecessary_const, prefer_relative_imports, avoid_equals_and_hash_code_on_mutable_classes
 
 part of 'builtin_types.dart';
@@ -8,14 +9,17 @@ part of 'builtin_types.dart';
 // TypedDocumentGenerator
 // **************************************************************************
 
-mixin _$StringDoc implements TypedDocumentObject<MutableStringDoc> {
+mixin _$StringDoc {
   String get value;
 }
 
-abstract class _StringDocImplBase<I extends Document>
+abstract class StringDocDocument
+    implements StringDoc, TypedDocumentObject<MutableStringDoc> {}
+
+abstract class _StringDocDocumentImplBase<I extends Document>
     with _$StringDoc
-    implements StringDoc {
-  _StringDocImplBase(this.internal);
+    implements StringDocDocument {
+  _StringDocDocumentImplBase(this.internal);
 
   @override
   final I internal;
@@ -42,13 +46,13 @@ abstract class _StringDocImplBase<I extends Document>
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
-class ImmutableStringDoc extends _StringDocImplBase {
+class ImmutableStringDoc extends _StringDocDocumentImplBase {
   ImmutableStringDoc.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is StringDoc &&
+      other is StringDocDocument &&
           runtimeType == other.runtimeType &&
           internal == other.internal;
 
@@ -57,8 +61,8 @@ class ImmutableStringDoc extends _StringDocImplBase {
 }
 
 /// Mutable version of [StringDoc].
-class MutableStringDoc extends _StringDocImplBase<MutableDocument>
-    implements TypedMutableDocumentObject<StringDoc, MutableStringDoc> {
+class MutableStringDoc extends _StringDocDocumentImplBase<MutableDocument>
+    implements TypedMutableDocumentObject<StringDocDocument, MutableStringDoc> {
   /// Creates a new mutable [StringDoc].
   MutableStringDoc(String value) : super(MutableDocument({})) {
     this.value = value;
@@ -77,14 +81,96 @@ class MutableStringDoc extends _StringDocImplBase<MutableDocument>
   }
 }
 
-mixin _$IntDoc implements TypedDocumentObject<MutableIntDoc> {
+mixin _$StringDocDictionary
+    implements TypedDictionaryObject<MutableStringDocDictionary> {
+  String get value;
+}
+
+abstract class StringDocDictionary
+    with _$StringDocDictionary
+    implements StringDoc {}
+
+abstract class _StringDocDictionaryImplBase<I extends Dictionary>
+    with _$StringDocDictionary
+    implements StringDocDictionary {
+  _StringDocDictionaryImplBase(this.internal);
+
+  @override
+  final I internal;
+
+  @override
+  String get value => TypedDataHelpers.readProperty(
+    internal: internal,
+    name: 'value',
+    key: 'value',
+    converter: TypedDataHelpers.stringConverter,
+  );
+
+  @override
+  MutableStringDocDictionary toMutable() =>
+      MutableStringDocDictionary.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => TypedDataHelpers.renderString(
+    indent: indent,
+    className: 'StringDocDictionary',
+    fields: {'value': value},
+  );
+}
+
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
+class ImmutableStringDocDictionary extends _StringDocDictionaryImplBase {
+  ImmutableStringDocDictionary.internal(super.internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is StringDocDictionary &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
+}
+
+/// Mutable version of [StringDocDictionary].
+class MutableStringDocDictionary
+    extends _StringDocDictionaryImplBase<MutableDictionary>
+    implements
+        TypedMutableDictionaryObject<
+          StringDocDictionary,
+          MutableStringDocDictionary
+        > {
+  /// Creates a new mutable [StringDocDictionary].
+  MutableStringDocDictionary(String value) : super(MutableDictionary()) {
+    this.value = value;
+  }
+
+  MutableStringDocDictionary.internal(super.internal);
+
+  set value(String value) {
+    final promoted = TypedDataHelpers.stringConverter.promote(value);
+    TypedDataHelpers.writeProperty(
+      internal: internal,
+      key: 'value',
+      value: promoted,
+      converter: TypedDataHelpers.stringConverter,
+    );
+  }
+}
+
+mixin _$IntDoc {
   int get value;
 }
 
-abstract class _IntDocImplBase<I extends Document>
+abstract class IntDocDocument
+    implements IntDoc, TypedDocumentObject<MutableIntDoc> {}
+
+abstract class _IntDocDocumentImplBase<I extends Document>
     with _$IntDoc
-    implements IntDoc {
-  _IntDocImplBase(this.internal);
+    implements IntDocDocument {
+  _IntDocDocumentImplBase(this.internal);
 
   @override
   final I internal;
@@ -110,13 +196,13 @@ abstract class _IntDocImplBase<I extends Document>
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
-class ImmutableIntDoc extends _IntDocImplBase {
+class ImmutableIntDoc extends _IntDocDocumentImplBase {
   ImmutableIntDoc.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is IntDoc &&
+      other is IntDocDocument &&
           runtimeType == other.runtimeType &&
           internal == other.internal;
 
@@ -125,8 +211,8 @@ class ImmutableIntDoc extends _IntDocImplBase {
 }
 
 /// Mutable version of [IntDoc].
-class MutableIntDoc extends _IntDocImplBase<MutableDocument>
-    implements TypedMutableDocumentObject<IntDoc, MutableIntDoc> {
+class MutableIntDoc extends _IntDocDocumentImplBase<MutableDocument>
+    implements TypedMutableDocumentObject<IntDocDocument, MutableIntDoc> {
   /// Creates a new mutable [IntDoc].
   MutableIntDoc(int value) : super(MutableDocument({})) {
     this.value = value;
@@ -145,14 +231,94 @@ class MutableIntDoc extends _IntDocImplBase<MutableDocument>
   }
 }
 
-mixin _$DoubleDoc implements TypedDocumentObject<MutableDoubleDoc> {
+mixin _$IntDocDictionary
+    implements TypedDictionaryObject<MutableIntDocDictionary> {
+  int get value;
+}
+
+abstract class IntDocDictionary with _$IntDocDictionary implements IntDoc {}
+
+abstract class _IntDocDictionaryImplBase<I extends Dictionary>
+    with _$IntDocDictionary
+    implements IntDocDictionary {
+  _IntDocDictionaryImplBase(this.internal);
+
+  @override
+  final I internal;
+
+  @override
+  int get value => TypedDataHelpers.readProperty(
+    internal: internal,
+    name: 'value',
+    key: 'value',
+    converter: TypedDataHelpers.intConverter,
+  );
+
+  @override
+  MutableIntDocDictionary toMutable() =>
+      MutableIntDocDictionary.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => TypedDataHelpers.renderString(
+    indent: indent,
+    className: 'IntDocDictionary',
+    fields: {'value': value},
+  );
+}
+
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
+class ImmutableIntDocDictionary extends _IntDocDictionaryImplBase {
+  ImmutableIntDocDictionary.internal(super.internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is IntDocDictionary &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
+}
+
+/// Mutable version of [IntDocDictionary].
+class MutableIntDocDictionary
+    extends _IntDocDictionaryImplBase<MutableDictionary>
+    implements
+        TypedMutableDictionaryObject<
+          IntDocDictionary,
+          MutableIntDocDictionary
+        > {
+  /// Creates a new mutable [IntDocDictionary].
+  MutableIntDocDictionary(int value) : super(MutableDictionary()) {
+    this.value = value;
+  }
+
+  MutableIntDocDictionary.internal(super.internal);
+
+  set value(int value) {
+    final promoted = TypedDataHelpers.intConverter.promote(value);
+    TypedDataHelpers.writeProperty(
+      internal: internal,
+      key: 'value',
+      value: promoted,
+      converter: TypedDataHelpers.intConverter,
+    );
+  }
+}
+
+mixin _$DoubleDoc {
   double get value;
 }
 
-abstract class _DoubleDocImplBase<I extends Document>
+abstract class DoubleDocDocument
+    implements DoubleDoc, TypedDocumentObject<MutableDoubleDoc> {}
+
+abstract class _DoubleDocDocumentImplBase<I extends Document>
     with _$DoubleDoc
-    implements DoubleDoc {
-  _DoubleDocImplBase(this.internal);
+    implements DoubleDocDocument {
+  _DoubleDocDocumentImplBase(this.internal);
 
   @override
   final I internal;
@@ -179,13 +345,13 @@ abstract class _DoubleDocImplBase<I extends Document>
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
-class ImmutableDoubleDoc extends _DoubleDocImplBase {
+class ImmutableDoubleDoc extends _DoubleDocDocumentImplBase {
   ImmutableDoubleDoc.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is DoubleDoc &&
+      other is DoubleDocDocument &&
           runtimeType == other.runtimeType &&
           internal == other.internal;
 
@@ -194,8 +360,8 @@ class ImmutableDoubleDoc extends _DoubleDocImplBase {
 }
 
 /// Mutable version of [DoubleDoc].
-class MutableDoubleDoc extends _DoubleDocImplBase<MutableDocument>
-    implements TypedMutableDocumentObject<DoubleDoc, MutableDoubleDoc> {
+class MutableDoubleDoc extends _DoubleDocDocumentImplBase<MutableDocument>
+    implements TypedMutableDocumentObject<DoubleDocDocument, MutableDoubleDoc> {
   /// Creates a new mutable [DoubleDoc].
   MutableDoubleDoc(double value) : super(MutableDocument({})) {
     this.value = value;
@@ -214,14 +380,96 @@ class MutableDoubleDoc extends _DoubleDocImplBase<MutableDocument>
   }
 }
 
-mixin _$NumDoc implements TypedDocumentObject<MutableNumDoc> {
+mixin _$DoubleDocDictionary
+    implements TypedDictionaryObject<MutableDoubleDocDictionary> {
+  double get value;
+}
+
+abstract class DoubleDocDictionary
+    with _$DoubleDocDictionary
+    implements DoubleDoc {}
+
+abstract class _DoubleDocDictionaryImplBase<I extends Dictionary>
+    with _$DoubleDocDictionary
+    implements DoubleDocDictionary {
+  _DoubleDocDictionaryImplBase(this.internal);
+
+  @override
+  final I internal;
+
+  @override
+  double get value => TypedDataHelpers.readProperty(
+    internal: internal,
+    name: 'value',
+    key: 'value',
+    converter: TypedDataHelpers.doubleConverter,
+  );
+
+  @override
+  MutableDoubleDocDictionary toMutable() =>
+      MutableDoubleDocDictionary.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => TypedDataHelpers.renderString(
+    indent: indent,
+    className: 'DoubleDocDictionary',
+    fields: {'value': value},
+  );
+}
+
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
+class ImmutableDoubleDocDictionary extends _DoubleDocDictionaryImplBase {
+  ImmutableDoubleDocDictionary.internal(super.internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is DoubleDocDictionary &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
+}
+
+/// Mutable version of [DoubleDocDictionary].
+class MutableDoubleDocDictionary
+    extends _DoubleDocDictionaryImplBase<MutableDictionary>
+    implements
+        TypedMutableDictionaryObject<
+          DoubleDocDictionary,
+          MutableDoubleDocDictionary
+        > {
+  /// Creates a new mutable [DoubleDocDictionary].
+  MutableDoubleDocDictionary(double value) : super(MutableDictionary()) {
+    this.value = value;
+  }
+
+  MutableDoubleDocDictionary.internal(super.internal);
+
+  set value(double value) {
+    final promoted = TypedDataHelpers.doubleConverter.promote(value);
+    TypedDataHelpers.writeProperty(
+      internal: internal,
+      key: 'value',
+      value: promoted,
+      converter: TypedDataHelpers.doubleConverter,
+    );
+  }
+}
+
+mixin _$NumDoc {
   num get value;
 }
 
-abstract class _NumDocImplBase<I extends Document>
+abstract class NumDocDocument
+    implements NumDoc, TypedDocumentObject<MutableNumDoc> {}
+
+abstract class _NumDocDocumentImplBase<I extends Document>
     with _$NumDoc
-    implements NumDoc {
-  _NumDocImplBase(this.internal);
+    implements NumDocDocument {
+  _NumDocDocumentImplBase(this.internal);
 
   @override
   final I internal;
@@ -247,13 +495,13 @@ abstract class _NumDocImplBase<I extends Document>
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
-class ImmutableNumDoc extends _NumDocImplBase {
+class ImmutableNumDoc extends _NumDocDocumentImplBase {
   ImmutableNumDoc.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is NumDoc &&
+      other is NumDocDocument &&
           runtimeType == other.runtimeType &&
           internal == other.internal;
 
@@ -262,8 +510,8 @@ class ImmutableNumDoc extends _NumDocImplBase {
 }
 
 /// Mutable version of [NumDoc].
-class MutableNumDoc extends _NumDocImplBase<MutableDocument>
-    implements TypedMutableDocumentObject<NumDoc, MutableNumDoc> {
+class MutableNumDoc extends _NumDocDocumentImplBase<MutableDocument>
+    implements TypedMutableDocumentObject<NumDocDocument, MutableNumDoc> {
   /// Creates a new mutable [NumDoc].
   MutableNumDoc(num value) : super(MutableDocument({})) {
     this.value = value;
@@ -282,14 +530,94 @@ class MutableNumDoc extends _NumDocImplBase<MutableDocument>
   }
 }
 
-mixin _$BoolDoc implements TypedDocumentObject<MutableBoolDoc> {
+mixin _$NumDocDictionary
+    implements TypedDictionaryObject<MutableNumDocDictionary> {
+  num get value;
+}
+
+abstract class NumDocDictionary with _$NumDocDictionary implements NumDoc {}
+
+abstract class _NumDocDictionaryImplBase<I extends Dictionary>
+    with _$NumDocDictionary
+    implements NumDocDictionary {
+  _NumDocDictionaryImplBase(this.internal);
+
+  @override
+  final I internal;
+
+  @override
+  num get value => TypedDataHelpers.readProperty(
+    internal: internal,
+    name: 'value',
+    key: 'value',
+    converter: TypedDataHelpers.numConverter,
+  );
+
+  @override
+  MutableNumDocDictionary toMutable() =>
+      MutableNumDocDictionary.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => TypedDataHelpers.renderString(
+    indent: indent,
+    className: 'NumDocDictionary',
+    fields: {'value': value},
+  );
+}
+
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
+class ImmutableNumDocDictionary extends _NumDocDictionaryImplBase {
+  ImmutableNumDocDictionary.internal(super.internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is NumDocDictionary &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
+}
+
+/// Mutable version of [NumDocDictionary].
+class MutableNumDocDictionary
+    extends _NumDocDictionaryImplBase<MutableDictionary>
+    implements
+        TypedMutableDictionaryObject<
+          NumDocDictionary,
+          MutableNumDocDictionary
+        > {
+  /// Creates a new mutable [NumDocDictionary].
+  MutableNumDocDictionary(num value) : super(MutableDictionary()) {
+    this.value = value;
+  }
+
+  MutableNumDocDictionary.internal(super.internal);
+
+  set value(num value) {
+    final promoted = TypedDataHelpers.numConverter.promote(value);
+    TypedDataHelpers.writeProperty(
+      internal: internal,
+      key: 'value',
+      value: promoted,
+      converter: TypedDataHelpers.numConverter,
+    );
+  }
+}
+
+mixin _$BoolDoc {
   bool get value;
 }
 
-abstract class _BoolDocImplBase<I extends Document>
+abstract class BoolDocDocument
+    implements BoolDoc, TypedDocumentObject<MutableBoolDoc> {}
+
+abstract class _BoolDocDocumentImplBase<I extends Document>
     with _$BoolDoc
-    implements BoolDoc {
-  _BoolDocImplBase(this.internal);
+    implements BoolDocDocument {
+  _BoolDocDocumentImplBase(this.internal);
 
   @override
   final I internal;
@@ -315,13 +643,13 @@ abstract class _BoolDocImplBase<I extends Document>
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
-class ImmutableBoolDoc extends _BoolDocImplBase {
+class ImmutableBoolDoc extends _BoolDocDocumentImplBase {
   ImmutableBoolDoc.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is BoolDoc &&
+      other is BoolDocDocument &&
           runtimeType == other.runtimeType &&
           internal == other.internal;
 
@@ -330,8 +658,8 @@ class ImmutableBoolDoc extends _BoolDocImplBase {
 }
 
 /// Mutable version of [BoolDoc].
-class MutableBoolDoc extends _BoolDocImplBase<MutableDocument>
-    implements TypedMutableDocumentObject<BoolDoc, MutableBoolDoc> {
+class MutableBoolDoc extends _BoolDocDocumentImplBase<MutableDocument>
+    implements TypedMutableDocumentObject<BoolDocDocument, MutableBoolDoc> {
   /// Creates a new mutable [BoolDoc].
   MutableBoolDoc(bool value) : super(MutableDocument({})) {
     this.value = value;
@@ -350,14 +678,94 @@ class MutableBoolDoc extends _BoolDocImplBase<MutableDocument>
   }
 }
 
-mixin _$DateTimeDoc implements TypedDocumentObject<MutableDateTimeDoc> {
+mixin _$BoolDocDictionary
+    implements TypedDictionaryObject<MutableBoolDocDictionary> {
+  bool get value;
+}
+
+abstract class BoolDocDictionary with _$BoolDocDictionary implements BoolDoc {}
+
+abstract class _BoolDocDictionaryImplBase<I extends Dictionary>
+    with _$BoolDocDictionary
+    implements BoolDocDictionary {
+  _BoolDocDictionaryImplBase(this.internal);
+
+  @override
+  final I internal;
+
+  @override
+  bool get value => TypedDataHelpers.readProperty(
+    internal: internal,
+    name: 'value',
+    key: 'value',
+    converter: TypedDataHelpers.boolConverter,
+  );
+
+  @override
+  MutableBoolDocDictionary toMutable() =>
+      MutableBoolDocDictionary.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => TypedDataHelpers.renderString(
+    indent: indent,
+    className: 'BoolDocDictionary',
+    fields: {'value': value},
+  );
+}
+
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
+class ImmutableBoolDocDictionary extends _BoolDocDictionaryImplBase {
+  ImmutableBoolDocDictionary.internal(super.internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is BoolDocDictionary &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
+}
+
+/// Mutable version of [BoolDocDictionary].
+class MutableBoolDocDictionary
+    extends _BoolDocDictionaryImplBase<MutableDictionary>
+    implements
+        TypedMutableDictionaryObject<
+          BoolDocDictionary,
+          MutableBoolDocDictionary
+        > {
+  /// Creates a new mutable [BoolDocDictionary].
+  MutableBoolDocDictionary(bool value) : super(MutableDictionary()) {
+    this.value = value;
+  }
+
+  MutableBoolDocDictionary.internal(super.internal);
+
+  set value(bool value) {
+    final promoted = TypedDataHelpers.boolConverter.promote(value);
+    TypedDataHelpers.writeProperty(
+      internal: internal,
+      key: 'value',
+      value: promoted,
+      converter: TypedDataHelpers.boolConverter,
+    );
+  }
+}
+
+mixin _$DateTimeDoc {
   DateTime get value;
 }
 
-abstract class _DateTimeDocImplBase<I extends Document>
+abstract class DateTimeDocDocument
+    implements DateTimeDoc, TypedDocumentObject<MutableDateTimeDoc> {}
+
+abstract class _DateTimeDocDocumentImplBase<I extends Document>
     with _$DateTimeDoc
-    implements DateTimeDoc {
-  _DateTimeDocImplBase(this.internal);
+    implements DateTimeDocDocument {
+  _DateTimeDocDocumentImplBase(this.internal);
 
   @override
   final I internal;
@@ -384,13 +792,13 @@ abstract class _DateTimeDocImplBase<I extends Document>
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
-class ImmutableDateTimeDoc extends _DateTimeDocImplBase {
+class ImmutableDateTimeDoc extends _DateTimeDocDocumentImplBase {
   ImmutableDateTimeDoc.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is DateTimeDoc &&
+      other is DateTimeDocDocument &&
           runtimeType == other.runtimeType &&
           internal == other.internal;
 
@@ -399,8 +807,9 @@ class ImmutableDateTimeDoc extends _DateTimeDocImplBase {
 }
 
 /// Mutable version of [DateTimeDoc].
-class MutableDateTimeDoc extends _DateTimeDocImplBase<MutableDocument>
-    implements TypedMutableDocumentObject<DateTimeDoc, MutableDateTimeDoc> {
+class MutableDateTimeDoc extends _DateTimeDocDocumentImplBase<MutableDocument>
+    implements
+        TypedMutableDocumentObject<DateTimeDocDocument, MutableDateTimeDoc> {
   /// Creates a new mutable [DateTimeDoc].
   MutableDateTimeDoc(DateTime value) : super(MutableDocument({})) {
     this.value = value;
@@ -419,14 +828,96 @@ class MutableDateTimeDoc extends _DateTimeDocImplBase<MutableDocument>
   }
 }
 
-mixin _$BlobDoc implements TypedDocumentObject<MutableBlobDoc> {
+mixin _$DateTimeDocDictionary
+    implements TypedDictionaryObject<MutableDateTimeDocDictionary> {
+  DateTime get value;
+}
+
+abstract class DateTimeDocDictionary
+    with _$DateTimeDocDictionary
+    implements DateTimeDoc {}
+
+abstract class _DateTimeDocDictionaryImplBase<I extends Dictionary>
+    with _$DateTimeDocDictionary
+    implements DateTimeDocDictionary {
+  _DateTimeDocDictionaryImplBase(this.internal);
+
+  @override
+  final I internal;
+
+  @override
+  DateTime get value => TypedDataHelpers.readProperty(
+    internal: internal,
+    name: 'value',
+    key: 'value',
+    converter: TypedDataHelpers.dateTimeConverter,
+  );
+
+  @override
+  MutableDateTimeDocDictionary toMutable() =>
+      MutableDateTimeDocDictionary.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => TypedDataHelpers.renderString(
+    indent: indent,
+    className: 'DateTimeDocDictionary',
+    fields: {'value': value},
+  );
+}
+
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
+class ImmutableDateTimeDocDictionary extends _DateTimeDocDictionaryImplBase {
+  ImmutableDateTimeDocDictionary.internal(super.internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is DateTimeDocDictionary &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
+}
+
+/// Mutable version of [DateTimeDocDictionary].
+class MutableDateTimeDocDictionary
+    extends _DateTimeDocDictionaryImplBase<MutableDictionary>
+    implements
+        TypedMutableDictionaryObject<
+          DateTimeDocDictionary,
+          MutableDateTimeDocDictionary
+        > {
+  /// Creates a new mutable [DateTimeDocDictionary].
+  MutableDateTimeDocDictionary(DateTime value) : super(MutableDictionary()) {
+    this.value = value;
+  }
+
+  MutableDateTimeDocDictionary.internal(super.internal);
+
+  set value(DateTime value) {
+    final promoted = TypedDataHelpers.dateTimeConverter.promote(value);
+    TypedDataHelpers.writeProperty(
+      internal: internal,
+      key: 'value',
+      value: promoted,
+      converter: TypedDataHelpers.dateTimeConverter,
+    );
+  }
+}
+
+mixin _$BlobDoc {
   Blob get value;
 }
 
-abstract class _BlobDocImplBase<I extends Document>
+abstract class BlobDocDocument
+    implements BlobDoc, TypedDocumentObject<MutableBlobDoc> {}
+
+abstract class _BlobDocDocumentImplBase<I extends Document>
     with _$BlobDoc
-    implements BlobDoc {
-  _BlobDocImplBase(this.internal);
+    implements BlobDocDocument {
+  _BlobDocDocumentImplBase(this.internal);
 
   @override
   final I internal;
@@ -452,13 +943,13 @@ abstract class _BlobDocImplBase<I extends Document>
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
-class ImmutableBlobDoc extends _BlobDocImplBase {
+class ImmutableBlobDoc extends _BlobDocDocumentImplBase {
   ImmutableBlobDoc.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is BlobDoc &&
+      other is BlobDocDocument &&
           runtimeType == other.runtimeType &&
           internal == other.internal;
 
@@ -467,8 +958,8 @@ class ImmutableBlobDoc extends _BlobDocImplBase {
 }
 
 /// Mutable version of [BlobDoc].
-class MutableBlobDoc extends _BlobDocImplBase<MutableDocument>
-    implements TypedMutableDocumentObject<BlobDoc, MutableBlobDoc> {
+class MutableBlobDoc extends _BlobDocDocumentImplBase<MutableDocument>
+    implements TypedMutableDocumentObject<BlobDocDocument, MutableBlobDoc> {
   /// Creates a new mutable [BlobDoc].
   MutableBlobDoc(Blob value) : super(MutableDocument({})) {
     this.value = value;
@@ -487,14 +978,94 @@ class MutableBlobDoc extends _BlobDocImplBase<MutableDocument>
   }
 }
 
-mixin _$EnumDoc implements TypedDocumentObject<MutableEnumDoc> {
+mixin _$BlobDocDictionary
+    implements TypedDictionaryObject<MutableBlobDocDictionary> {
+  Blob get value;
+}
+
+abstract class BlobDocDictionary with _$BlobDocDictionary implements BlobDoc {}
+
+abstract class _BlobDocDictionaryImplBase<I extends Dictionary>
+    with _$BlobDocDictionary
+    implements BlobDocDictionary {
+  _BlobDocDictionaryImplBase(this.internal);
+
+  @override
+  final I internal;
+
+  @override
+  Blob get value => TypedDataHelpers.readProperty(
+    internal: internal,
+    name: 'value',
+    key: 'value',
+    converter: TypedDataHelpers.blobConverter,
+  );
+
+  @override
+  MutableBlobDocDictionary toMutable() =>
+      MutableBlobDocDictionary.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => TypedDataHelpers.renderString(
+    indent: indent,
+    className: 'BlobDocDictionary',
+    fields: {'value': value},
+  );
+}
+
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
+class ImmutableBlobDocDictionary extends _BlobDocDictionaryImplBase {
+  ImmutableBlobDocDictionary.internal(super.internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is BlobDocDictionary &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
+}
+
+/// Mutable version of [BlobDocDictionary].
+class MutableBlobDocDictionary
+    extends _BlobDocDictionaryImplBase<MutableDictionary>
+    implements
+        TypedMutableDictionaryObject<
+          BlobDocDictionary,
+          MutableBlobDocDictionary
+        > {
+  /// Creates a new mutable [BlobDocDictionary].
+  MutableBlobDocDictionary(Blob value) : super(MutableDictionary()) {
+    this.value = value;
+  }
+
+  MutableBlobDocDictionary.internal(super.internal);
+
+  set value(Blob value) {
+    final promoted = TypedDataHelpers.blobConverter.promote(value);
+    TypedDataHelpers.writeProperty(
+      internal: internal,
+      key: 'value',
+      value: promoted,
+      converter: TypedDataHelpers.blobConverter,
+    );
+  }
+}
+
+mixin _$EnumDoc {
   TestEnum get value;
 }
 
-abstract class _EnumDocImplBase<I extends Document>
+abstract class EnumDocDocument
+    implements EnumDoc, TypedDocumentObject<MutableEnumDoc> {}
+
+abstract class _EnumDocDocumentImplBase<I extends Document>
     with _$EnumDoc
-    implements EnumDoc {
-  _EnumDocImplBase(this.internal);
+    implements EnumDocDocument {
+  _EnumDocDocumentImplBase(this.internal);
 
   @override
   final I internal;
@@ -522,13 +1093,13 @@ abstract class _EnumDocImplBase<I extends Document>
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
-class ImmutableEnumDoc extends _EnumDocImplBase {
+class ImmutableEnumDoc extends _EnumDocDocumentImplBase {
   ImmutableEnumDoc.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is EnumDoc &&
+      other is EnumDocDocument &&
           runtimeType == other.runtimeType &&
           internal == other.internal;
 
@@ -537,14 +1108,97 @@ class ImmutableEnumDoc extends _EnumDocImplBase {
 }
 
 /// Mutable version of [EnumDoc].
-class MutableEnumDoc extends _EnumDocImplBase<MutableDocument>
-    implements TypedMutableDocumentObject<EnumDoc, MutableEnumDoc> {
+class MutableEnumDoc extends _EnumDocDocumentImplBase<MutableDocument>
+    implements TypedMutableDocumentObject<EnumDocDocument, MutableEnumDoc> {
   /// Creates a new mutable [EnumDoc].
   MutableEnumDoc(TestEnum value) : super(MutableDocument({})) {
     this.value = value;
   }
 
   MutableEnumDoc.internal(super.internal);
+
+  set value(TestEnum value) {
+    final promoted = const ScalarConverterAdapter(
+      const EnumNameConverter(TestEnum.values),
+    ).promote(value);
+    TypedDataHelpers.writeProperty(
+      internal: internal,
+      key: 'value',
+      value: promoted,
+      converter: const ScalarConverterAdapter(
+        const EnumNameConverter(TestEnum.values),
+      ),
+    );
+  }
+}
+
+mixin _$EnumDocDictionary
+    implements TypedDictionaryObject<MutableEnumDocDictionary> {
+  TestEnum get value;
+}
+
+abstract class EnumDocDictionary with _$EnumDocDictionary implements EnumDoc {}
+
+abstract class _EnumDocDictionaryImplBase<I extends Dictionary>
+    with _$EnumDocDictionary
+    implements EnumDocDictionary {
+  _EnumDocDictionaryImplBase(this.internal);
+
+  @override
+  final I internal;
+
+  @override
+  TestEnum get value => TypedDataHelpers.readProperty(
+    internal: internal,
+    name: 'value',
+    key: 'value',
+    converter: const ScalarConverterAdapter(
+      const EnumNameConverter(TestEnum.values),
+    ),
+  );
+
+  @override
+  MutableEnumDocDictionary toMutable() =>
+      MutableEnumDocDictionary.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => TypedDataHelpers.renderString(
+    indent: indent,
+    className: 'EnumDocDictionary',
+    fields: {'value': value},
+  );
+}
+
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
+class ImmutableEnumDocDictionary extends _EnumDocDictionaryImplBase {
+  ImmutableEnumDocDictionary.internal(super.internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is EnumDocDictionary &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
+}
+
+/// Mutable version of [EnumDocDictionary].
+class MutableEnumDocDictionary
+    extends _EnumDocDictionaryImplBase<MutableDictionary>
+    implements
+        TypedMutableDictionaryObject<
+          EnumDocDictionary,
+          MutableEnumDocDictionary
+        > {
+  /// Creates a new mutable [EnumDocDictionary].
+  MutableEnumDocDictionary(TestEnum value) : super(MutableDictionary()) {
+    this.value = value;
+  }
+
+  MutableEnumDocDictionary.internal(super.internal);
 
   set value(TestEnum value) {
     final promoted = const ScalarConverterAdapter(

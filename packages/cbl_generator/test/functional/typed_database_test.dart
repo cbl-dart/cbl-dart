@@ -15,8 +15,8 @@ void main() {
     addTearDown(db.delete);
     final doc = MutableDocWithId('a');
     collection.saveTypedDocument(doc).withConcurrencyControl();
-    expect(collection.typedDocument<DocWithId>('b'), isNull);
-    expect(collection.typedDocument<DocWithId>('a'), isNotNull);
+    expect(collection.typedDocument<DocWithIdDocument>('b'), isNull);
+    expect(collection.typedDocument<DocWithIdDocument>('a'), isNotNull);
     expect(collection.typedDocument<MutableDocWithId>('a'), isNotNull);
   });
 

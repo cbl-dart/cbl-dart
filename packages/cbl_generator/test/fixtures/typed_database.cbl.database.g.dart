@@ -1,5 +1,6 @@
-// dart format width=80
 // GENERATED CODE - DO NOT MODIFY BY HAND
+// dart format width=80
+
 // ignore_for_file: avoid_classes_with_only_static_members, lines_longer_than_80_chars, directives_ordering, avoid_redundant_argument_values
 
 // **************************************************************************
@@ -41,10 +42,16 @@ class DocWithIdDatabase extends $DocWithIdDatabase {
 
   static final _adapter = TypedDataRegistry(
     types: [
-      TypedDocumentMetadata<DocWithId, MutableDocWithId>(
-        dartName: 'DocWithId',
+      TypedDocumentMetadata<DocWithIdDocument, MutableDocWithId>(
+        dartName: 'DocWithIdDocument',
         factory: ImmutableDocWithId.internal,
         mutableFactory: MutableDocWithId.internal,
+        typeMatcher: const ValueTypeMatcher(path: ['type']),
+      ),
+      TypedDictionaryMetadata<DocWithIdDictionary, MutableDocWithIdDictionary>(
+        dartName: 'DocWithIdDictionary',
+        factory: ImmutableDocWithIdDictionary.internal,
+        mutableFactory: MutableDocWithIdDictionary.internal,
         typeMatcher: const ValueTypeMatcher(path: ['type']),
       ),
     ],
@@ -89,12 +96,24 @@ class CustomValueTypeMatcherDatabase extends $CustomValueTypeMatcherDatabase {
   static final _adapter = TypedDataRegistry(
     types: [
       TypedDocumentMetadata<
-        CustomValueTypeMatcherDoc,
+        CustomValueTypeMatcherDocDocument,
         MutableCustomValueTypeMatcherDoc
       >(
-        dartName: 'CustomValueTypeMatcherDoc',
+        dartName: 'CustomValueTypeMatcherDocDocument',
         factory: ImmutableCustomValueTypeMatcherDoc.internal,
         mutableFactory: MutableCustomValueTypeMatcherDoc.internal,
+        typeMatcher: const ValueTypeMatcher(
+          path: ['meta', 0, 'id'],
+          value: 'Custom',
+        ),
+      ),
+      TypedDictionaryMetadata<
+        CustomValueTypeMatcherDocDictionary,
+        MutableCustomValueTypeMatcherDocDictionary
+      >(
+        dartName: 'CustomValueTypeMatcherDocDictionary',
+        factory: ImmutableCustomValueTypeMatcherDocDictionary.internal,
+        mutableFactory: MutableCustomValueTypeMatcherDocDictionary.internal,
         typeMatcher: const ValueTypeMatcher(
           path: ['meta', 0, 'id'],
           value: 'Custom',

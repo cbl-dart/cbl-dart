@@ -12,6 +12,60 @@ import '../utils/matchers.dart';
 void main() {
   setupTestBinding();
 
+  group('TypedDataRegistry', () {
+    group('dictionaryFactoryForType', () {
+      test('throws with guidance when document type is used', () {
+        final registry = TypedDataRegistry(
+          types: [
+            TypedDocumentMetadata<RegistryTestDoc, MutableRegistryTestDoc>(
+              dartName: 'TestDoc',
+              factory: RegistryTestDoc.new,
+              mutableFactory: MutableRegistryTestDoc.new,
+            ),
+          ],
+        );
+
+        expect(
+          () => registry.dictionaryFactoryForType<RegistryTestDoc>(),
+          throwsA(
+            isTypedDataException
+                .havingCode(TypedDataErrorCode.documentTypeNotAllowed)
+                .having(
+                  (e) => e.message,
+                  'message',
+                  contains('companion dictionary'),
+                ),
+          ),
+        );
+      });
+
+      test('throws with guidance when mutable document type is used', () {
+        final registry = TypedDataRegistry(
+          types: [
+            TypedDocumentMetadata<RegistryTestDoc, MutableRegistryTestDoc>(
+              dartName: 'TestDoc',
+              factory: RegistryTestDoc.new,
+              mutableFactory: MutableRegistryTestDoc.new,
+            ),
+          ],
+        );
+
+        expect(
+          () => registry.dictionaryFactoryForType<MutableRegistryTestDoc>(),
+          throwsA(
+            isTypedDataException
+                .havingCode(TypedDataErrorCode.documentTypeNotAllowed)
+                .having(
+                  (e) => e.message,
+                  'message',
+                  contains('companion dictionary'),
+                ),
+          ),
+        );
+      });
+    });
+  });
+
   group('ValueTypeMatcherImpl', () {
     group('isMatch', () {
       test('root dictionary', () {
@@ -346,4 +400,28 @@ void expectMakesMatch(
       reason: 'makeMatch should throw for $value',
     );
   }
+}
+
+// Test typed document classes for dictionaryFactoryForType tests.
+
+class RegistryTestDoc<I extends Document>
+    implements TypedDocumentObject<MutableRegistryTestDoc> {
+  RegistryTestDoc(this.internal);
+
+  @override
+  final I internal;
+
+  @override
+  MutableRegistryTestDoc toMutable() =>
+      MutableRegistryTestDoc(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => 'RegistryTestDoc()';
+}
+
+class MutableRegistryTestDoc extends RegistryTestDoc<MutableDocument>
+    implements
+        TypedMutableDocumentObject<RegistryTestDoc, MutableRegistryTestDoc> {
+  MutableRegistryTestDoc([MutableDocument? internal])
+    : super(internal ?? MutableDocument({}));
 }
