@@ -25,7 +25,7 @@ directory like this:
 ```dart
 final db = await Database.openAsync(
   'my-database',
-  DatabaseConfiguration(directory: 'my-directory')
+  DatabaseConfiguration(directory: 'my-directory'),
 );
 ```
 
@@ -45,7 +45,10 @@ Existing collections can be accessed through `api|Database.collection`:
 
 ```dart
 final collectionInDefaultScope = await database.collection('my-collection');
-final collectionInCustomScope = await database.collection('my-collection', 'my-scope');
+final collectionInCustomScope = await database.collection(
+  'my-collection',
+  'my-scope',
+);
 ```
 
 The default collection is always available and can be accessed through
@@ -60,8 +63,13 @@ final defaultCollection = await database.defaultCollection;
 To create a collection, call `api|Database.createCollection`:
 
 ```dart
-final collectionInDefaultScope = await database.createCollection('my-collection');
-final collectionInCustomScope = await database.createCollection('my-collection', 'my-scope');
+final collectionInDefaultScope = await database.createCollection(
+  'my-collection',
+);
+final collectionInCustomScope = await database.createCollection(
+  'my-collection',
+  'my-scope',
+);
 ```
 
 If the collection already exists, it will be returned. Otherwise a new
@@ -73,10 +81,7 @@ The default constructor of `api|MutableDocument` creates a document with a
 randomly generated id and optionally initializes it with some properties:
 
 ```dart
-final doc = MutableDocument({
-  'name': 'Alice',
-  'age': 29,
-});
+final doc = MutableDocument({'name': 'Alice', 'age': 29});
 
 await collection.saveDocument(doc);
 ```
@@ -84,10 +89,7 @@ await collection.saveDocument(doc);
 It's also possible to create a document with a specific id:
 
 ```dart
-final doc = MutableDocument(id: 'ali', {
-  'name': 'Alice',
-  'age': 29,
-});
+final doc = MutableDocument(id: 'ali', {'name': 'Alice', 'age': 29});
 
 await collection.saveDocument(doc);
 ```
@@ -130,7 +132,6 @@ mutableDoc.setValue(['Dart'], key: 'languages');
 // Again, there is an alternative subscript syntax available.
 mutableDoc['languages'].value = ['Dart'];
 
-
 await collection.saveDocument(mutableDoc);
 ```
 
@@ -160,21 +161,21 @@ The query below returns the average age of people with the same name:
 
 ```dart
 final query = const QueryBuilder()
-  .select(
-    SelectResult.property('name'),
-    SelectResult.expression(
-      Function_.avg(Expression.property('age'))
-    ).as('avgAge'),
-  )
-  .from(DataSource.collection(collection))
-  .groupBy(Expression.property('name'));
+    .select(
+      SelectResult.property('name'),
+      SelectResult.expression(
+        Function_.avg(Expression.property('age')),
+      ).as('avgAge'),
+    )
+    .from(DataSource.collection(collection))
+    .groupBy(Expression.property('name'));
 
 final resultSet = await query.execute();
 final results = await resultSet
-  .asStream()
-  // Converts each result into a `Map`, consisting only of plain Dart values.
-  .map((result) => result.toPlainMap())
-  .toList();
+    .asStream()
+    // Converts each result into a `Map`, consisting only of plain Dart values.
+    .map((result) => result.toPlainMap())
+    .toList();
 
 print(results);
 ```
@@ -182,20 +183,20 @@ print(results);
 Given these documents:
 
 ```dart
-[
+const data = [
   {'name': 'Alice', 'age': 29},
   {'name': 'Bob', 'age': 45},
   {'name': 'Alice', 'age': 16},
-]
+];
 ```
 
 `results` will be:
 
 ```dart
-[
+const results = [
   {'name': 'Alice', 'avgAge': 22.5},
   {'name': 'Bob', 'avgAge': 45},
-]
+];
 ```
 
 ## Build a `Query` With SQL++
@@ -206,13 +207,11 @@ The query below is equivalent to query from the `api|QueryBuilder` example
 above:
 
 ```dart
-final query = await db.createQuery(
-  '''
-  SELECT name, avg(age) AS avgAge
-  FROM users
-  GROUP BY name
-  ''',
-);
+final query = await db.createQuery('''
+SELECT name, avg(age) AS avgAge
+FROM users
+GROUP BY name
+''');
 ```
 
 ## Data Sync With `Replicator` To Sync Gateway
@@ -235,8 +234,9 @@ start/stop the replicator. The current status of the replicator is available in
 `api|ReplicatorStatus.activity`.
 
 ```dart
-final config = ReplicatorConfiguration(target: UrlEndpoint('http://localhost:4984/my-database'))
-  ..addCollection(collection);
+final config = ReplicatorConfiguration(
+  target: UrlEndpoint('http://localhost:4984/my-database'),
+)..addCollection(collection);
 final replicator = await Replicator.create(config);
 
 await replicator.addChangeListener((change) {

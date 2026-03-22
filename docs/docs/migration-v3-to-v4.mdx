@@ -92,6 +92,7 @@ If no edition is specified, the Community edition is used by default.
 ```dart
 import 'package:cbl_flutter/cbl_flutter.dart';
 
+
 await CouchbaseLiteFlutter.init();
 ```
 
@@ -100,6 +101,7 @@ await CouchbaseLiteFlutter.init();
 ```dart
 import 'package:cbl_dart/cbl_dart.dart';
 
+
 await CouchbaseLiteDart.init(edition: Edition.enterprise);
 ```
 
@@ -107,6 +109,7 @@ await CouchbaseLiteDart.init(edition: Edition.enterprise);
 
 ```dart
 import 'package:cbl/cbl.dart';
+
 
 await CouchbaseLite.init();
 ```
@@ -161,12 +164,14 @@ to `language`:
 
 ```dart
 // Before (v3)
-final index = FullTextIndex([FullTextIndexItem.property('text')])
-    .langauge(FullTextLanguage.english);
+final index = FullTextIndex([
+  FullTextIndexItem.property('text'),
+]).langauge(FullTextLanguage.english);
 
 // After (v4)
-final index = FullTextIndex([FullTextIndexItem.property('text')])
-    .language(FullTextLanguage.english);
+final index = FullTextIndex([
+  FullTextIndexItem.property('text'),
+]).language(FullTextLanguage.english);
 ```
 
 ## `pinnedServerCertificate` and `trustedRootCertificates` type changes
@@ -221,16 +226,10 @@ The `maxRotateCount` property on `api|LogFileConfiguration` has been renamed to
 
 ```dart
 // Before (v3)
-final config = LogFileConfiguration(
-  directory: logDir,
-  maxRotateCount: 5,
-);
+final config = LogFileConfiguration(directory: logDir, maxRotateCount: 5);
 
 // After (v4)
-final config = LogFileConfiguration(
-  directory: logDir,
-  maxKeptFiles: 5,
-);
+final config = LogFileConfiguration(directory: logDir, maxKeptFiles: 5);
 ```
 
 ## Query boolean expressions return booleans instead of integers
@@ -295,10 +294,7 @@ if (!saved) {
 
 // After (v4)
 try {
-  await collection.saveDocument(
-    doc,
-    ConcurrencyControl.failOnConflict,
-  );
+  await collection.saveDocument(doc, ConcurrencyControl.failOnConflict);
 } on DatabaseException catch (e) {
   if (e.code == DatabaseErrorCode.conflict) {
     // handle conflict
@@ -349,15 +345,23 @@ The following `api|Database` methods have been removed:
 
 ```dart
 // Before (v3)
-db.addChangeListener((change) { /* DatabaseChange */ });
-db.addDocumentChangeListener('doc-id', (change) { ... });
+db.addChangeListener((change) {
+  /* DatabaseChange */
+});
+db.addDocumentChangeListener('doc-id', (change) {
+  /* ... */
+});
 db.changes(); // Stream<DatabaseChange>
 db.documentChanges('doc-id');
 
 // After (v4)
 final collection = await db.defaultCollection;
-collection.addChangeListener((change) { /* CollectionChange */ });
-collection.addDocumentChangeListener('doc-id', (change) { ... });
+collection.addChangeListener((change) {
+  /* CollectionChange */
+});
+collection.addDocumentChangeListener('doc-id', (change) {
+  /* ... */
+});
 collection.changes(); // Stream<CollectionChange>
 collection.documentChanges('doc-id');
 ```
@@ -402,11 +406,14 @@ final config = ReplicatorConfiguration(
 // After (v4)
 final collection = await db.defaultCollection;
 final config = ReplicatorConfiguration(target: urlEndpoint);
-config.addCollection(collection, CollectionConfiguration(
-  channels: ['channel1'],
-  pushFilter: myPushFilter,
-  conflictResolver: myResolver,
-));
+config.addCollection(
+  collection,
+  CollectionConfiguration(
+    channels: ['channel1'],
+    pushFilter: myPushFilter,
+    conflictResolver: myResolver,
+  ),
+);
 ```
 
 The following `api|ReplicatorConfiguration` properties have been removed:
@@ -425,7 +432,10 @@ final isPending = await replicator.isDocumentPending('doc-id');
 
 // After (v4)
 final ids = await replicator.pendingDocumentIdsInCollection(collection);
-final isPending = await replicator.isDocumentPendingInCollection('doc-id', collection);
+final isPending = await replicator.isDocumentPendingInCollection(
+  'doc-id',
+  collection,
+);
 ```
 
 ## Removed `DataSource.database`

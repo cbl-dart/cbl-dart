@@ -35,19 +35,20 @@ needed, create the replicator, and start it.
 <CodeExample id={1} title="Replication Configuration and Initialization">
 
 ```dart
-final config = ReplicatorConfiguration(
-  target: UrlEndpoint(
-    Uri.parse('wss://listener.example.com:55990/travel-sample'),
-  ),
-  acceptOnlySelfSignedServerCertificate: true,
-  authenticator: BasicAuthenticator(
-    username: 'cbl-user-01',
-    password: 'secret',
-  ),
-)
-  ..replicatorType = ReplicatorType.pushAndPull
-  ..continuous = true
-  ..addCollection(collection);
+final config =
+    ReplicatorConfiguration(
+        target: UrlEndpoint(
+          Uri.parse('wss://listener.example.com:55990/travel-sample'),
+        ),
+        acceptOnlySelfSignedServerCertificate: true,
+        authenticator: BasicAuthenticator(
+          username: 'cbl-user-01',
+          password: 'secret',
+        ),
+      )
+      ..replicatorType = ReplicatorType.pushAndPull
+      ..continuous = true
+      ..addCollection(collection);
 
 final replicator = await Replicator.create(config);
 await replicator.start();
@@ -81,9 +82,8 @@ final target = UrlEndpoint(
   Uri.parse('wss://listener.example.com:55990/travel-sample'),
 );
 
-final config = ReplicatorConfiguration(target: target)..addCollection(
-  collection,
-);
+final config = ReplicatorConfiguration(target: target)
+  ..addCollection(collection);
 ```
 
 </CodeExample>
@@ -240,7 +240,7 @@ status changes. The replicator reports activity through
 
 <CodeExample id={9} title="Monitor Replication State">
 
-```dart
+```dart main
 await for (final change in replicator.changes()) {
   final status = change.status;
 

@@ -66,18 +66,17 @@ replicator.
 <CodeExample id={1} title="Replication Configuration and Initialization">
 
 ```dart
-final config = ReplicatorConfiguration(
-  target: UrlEndpoint(
-    Uri.parse('wss://example.com:4984/travel-sample'),
-  ),
-  authenticator: BasicAuthenticator(
-    username: 'cbl-user-01',
-    password: 'secret',
-  ),
-)
-  ..replicatorType = ReplicatorType.pushAndPull
-  ..continuous = true
-  ..addCollection(collection);
+final config =
+    ReplicatorConfiguration(
+        target: UrlEndpoint(Uri.parse('wss://example.com:4984/travel-sample')),
+        authenticator: BasicAuthenticator(
+          username: 'cbl-user-01',
+          password: 'secret',
+        ),
+      )
+      ..replicatorType = ReplicatorType.pushAndPull
+      ..continuous = true
+      ..addCollection(collection);
 
 final replicator = await Replicator.create(config);
 await replicator.start();
@@ -94,13 +93,10 @@ Use `api|UrlEndpoint` to specify the remote Sync Gateway database:
 <CodeExample id={2} title="Configure the Sync Gateway Target">
 
 ```dart
-final target = UrlEndpoint(
-  Uri.parse('wss://example.com:4984/travel-sample'),
-);
+final target = UrlEndpoint(Uri.parse('wss://example.com:4984/travel-sample'));
 
-final config = ReplicatorConfiguration(target: target)..addCollection(
-  collection,
-);
+final config = ReplicatorConfiguration(target: target)
+  ..addCollection(collection);
 ```
 
 </CodeExample>
@@ -177,9 +173,7 @@ session token:
 ```dart
 final config = ReplicatorConfiguration(
   target: target,
-  authenticator: SessionAuthenticator(
-    sessionId: sessionId,
-  ),
+  authenticator: SessionAuthenticator(sessionId: sessionId),
 )..addCollection(collection);
 ```
 
@@ -265,10 +259,8 @@ handle revocation explicitly.
 <CodeExample id={10} title="Disable Auto-purge">
 
 ```dart
-final config = ReplicatorConfiguration(
-  target: target,
-  enableAutoPurge: false,
-)..addCollection(collection);
+final config = ReplicatorConfiguration(target: target, enableAutoPurge: false)
+  ..addCollection(collection);
 ```
 
 </CodeExample>
@@ -316,7 +308,7 @@ Observe the replicator with `api|Replicator.changes` or
 
 <CodeExample id={13} title="Monitor Replication Status">
 
-```dart
+```dart main
 await for (final change in replicator.changes()) {
   final status = change.status;
   print(status.activity);
@@ -345,7 +337,7 @@ again before expecting document-level events.
 
 <CodeExample id={14} title="Monitor Replicated Documents">
 
-```dart
+```dart main
 await for (final replication in replicator.documentReplications()) {
   for (final document in replication.documents) {
     print('${document.scope}.${document.collection}/${document.id}');

@@ -168,11 +168,11 @@ via its own key.
 // Create and populate mutable dictionary.
 // Create a new mutable dictionary and populate some keys/values.
 final address = MutableDictionary()
-  ..setString('1 Main Street', key:'street')
-  ..setString('San Francisco', key:'city')
-  ..setString('CA.', key:'state')
-  ..setString('USA', key:'country')
-  ..setString('90210', key:'code');
+  ..setString('1 Main Street', key: 'street')
+  ..setString('San Francisco', key: 'city')
+  ..setString('CA.', key: 'state')
+  ..setString('USA', key: 'country')
+  ..setString('90210', key: 'code');
 ```
 
 For more on using **Dictionaries** see:
@@ -204,16 +204,12 @@ is stored as a key-value pair.
 mutableDoc
   // <1> Add document type to document properties.
   ..setString('hotel', key: 'type')
-
   // <2> Add hotel name string to document properties.
   ..setString('Hotel Dart Mo', key: 'name')
-
   // <3> Add float to document properties.
   ..setFloat(121.75, key: 'room_rate')
-
   // <4> Add dictionary to document's properties.
   ..setDictionary(address, key: 'address')
-
   // <5> Add array to document's properties.
   ..setString(phones, key: 'phones');
 ```
@@ -300,10 +296,10 @@ final date = doc.date('createdAt');
 final document = await collection.document('hotel::1');
 
 // Get a dictionary from the document's properties.
-final dictionary = document?.dictionary('address')
+final dictionary = document?.dictionary('address');
 
 // Access a value with a key from the dictionary.
-final street = dictionary?.string("street")
+final street = dictionary?.string("street");
 
 // Iterate the dictionary.
 for (final key in dictionary!) {
@@ -355,7 +351,7 @@ final phone = array?.string(1);
 
 // Iterate the array.
 for (final element in array!) {
-	print('Element $element');
+  print('Element $element');
 }
 
 // Create a mutable copy of the array.
@@ -471,7 +467,7 @@ await database.inBatch(() async {
   for (final i in Iterable.generate(10)) {
     final document = MutableDocument({})
       ..setValue('user', key: 'type')
-      ..setValue('user $i' key: 'name')
+      ..setValue('user $i', key: 'name')
       ..setBoolean(false, key: 'admin');
 
     await collection.saveDocument(document);
@@ -499,7 +495,7 @@ property when a change is detected.
 ```dart
 final token = collection.addDocumentChangeListener('user.john', (change) async {
   final document = await collection.document(change.documentId);
-  if (document != null){
+  if (document != null) {
     print('Status: ${document.string('verified_account')}');
   }
 });
@@ -529,7 +525,7 @@ more information.
 final stream = collection.changes();
 
 stream.listen((change) {
-  print('Ids of changed documents: ${change.documentIds}'):
+  print('Ids of changed documents: ${change.documentIds}');
 });
 ```
 
@@ -574,9 +570,9 @@ await collection.setDocumentExpiration('hotel::1', null);
 // Query documents that will be expired in less than five minutes.
 final fiveMinutesFromNow = DateTime.now().add(const Duration(minutes: 5));
 final query = const QueryBuilder()
-  .select(SelectResult.expression(Meta.id))
-  .from(DataSource.collection(collection))
-  .where(Meta.expiration.lessThan(Expression.date(fiveMinutesFromNow)));
+    .select(SelectResult.expression(Meta.id))
+    .from(DataSource.collection(collection))
+    .where(Meta.expiration.lessThan(Expression.date(fiveMinutesFromNow)));
 ```
 
 </CodeExample>
@@ -715,9 +711,9 @@ Convert a `api|Result` to JSON using its `toJson` method — see [Example 18](#)
 ```dart
 final result = await query.execute();
 final results = await result.allResults();
-for (final result in results){
-	final json = result.toJson();
-	print(json);
+for (final result in results) {
+  final json = result.toJson();
+  print(json);
 }
 ```
 

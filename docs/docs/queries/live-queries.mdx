@@ -44,9 +44,9 @@ With the asynchronous API, changes are only guaranteed to be delivered once the
 // Await the future returned from the registration call.
 await query.addChangeListener((change) async {
   final results = await change.results.allResults();
-	for (final result in results) {
-		// Do something with the result...
-	}
+  for (final result in results) {
+    // Do something with the result...
+  }
 });
 ```
 
@@ -60,7 +60,9 @@ notifications immediately:
 <CodeExample id={2} title="Stopping a Live Query - Change Listener">
 
 ```dart
-final token = await query.addChangeListener((change) async { ... });
+final token = await query.addChangeListener((change) async {
+  // ...
+});
 
 // Some time goes by...
 
@@ -88,10 +90,10 @@ the stream is fully listening:
 final stream = query.changes();
 
 stream.listen((change) async {
-	final results = await change.results.allResults();
-	for (final result in results) {
-		// Do something with the result...
-	}
+  final results = await change.results.allResults();
+  for (final result in results) {
+    // Do something with the result...
+  }
 });
 
 // Await the Future exposed by the stream.

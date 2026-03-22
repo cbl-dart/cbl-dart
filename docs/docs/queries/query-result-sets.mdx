@@ -55,8 +55,8 @@ final database = await Database.openAsync('travel-sample');
 final collection = await database.defaultCollection;
 
 final query = const QueryBuilder()
-  .select(SelectResult.all())
-  .from(DataSource.collection(collection));
+    .select(SelectResult.all())
+    .from(DataSource.collection(collection));
 ```
 
 </CodeExample>
@@ -137,13 +137,13 @@ final database = await Database.openAsync('hotels');
 final collection = await database.defaultCollection;
 
 final query = const QueryBuilder()
-  .select(
-    SelectResult.expression(Meta.id).as('docId'),
-    SelectResult.expression(Expression.property('id')),
-    SelectResult.expression(Expression.property('type')),
-    SelectResult.expression(Expression.property('name')),
-  )
-  .from(DataSource.collection(collection));
+    .select(
+      SelectResult.expression(Meta.id).as('docId'),
+      SelectResult.expression(Expression.property('id')),
+      SelectResult.expression(Expression.property('type')),
+      SelectResult.expression(Expression.property('name')),
+    )
+    .from(DataSource.collection(collection));
 ```
 
 </CodeExample>
@@ -194,7 +194,7 @@ await for (final result in await resultSet.asStream()) {
   final hotel = Hotel(id);
   hotel.type = result.string('type')!;
   hotel.name = result.string('name')!;
-  Do something with the hotel...
+  // Do something with the hotel.
 }
 ```
 
@@ -215,8 +215,8 @@ final database = await Database.openAsync('hotels');
 final collection = await database.defaultCollection;
 
 final query = QueryBuilder.createAsync()
-  .select(SelectResult.expression(Meta.id))
-  .from(DataSource.collection(collection));
+    .select(SelectResult.expression(Meta.id))
+    .from(DataSource.collection(collection));
 ```
 
 </CodeExample>
@@ -261,7 +261,7 @@ await for (final result in resultSet.asStream()) {
   final name = doc.string('name');
   final city = doc.string('city');
   final type = doc.string('type');
-  Do something with the variables...
+  // Do something with the variables.
 }
 ```
 
@@ -278,9 +278,11 @@ final database = await Database.openAsync('hotels');
 final collection = await database.defaultCollection;
 
 final query = const QueryBuilder()
-  .select(SelectResult.expression(Function_.count(Expression.all())).as('count'))
-  .from(DataSource.collection(collection))
-  .groupBy(Expression.property('type'));
+    .select(
+      SelectResult.expression(Function_.count(Expression.all())).as('count'),
+    )
+    .from(DataSource.collection(collection))
+    .groupBy(Expression.property('type'));
 ```
 
 </CodeExample>
@@ -336,12 +338,9 @@ final database = await Database.openAsync('hotels');
 final collection = await database.defaultCollection;
 
 final query = const QueryBuilder()
- .select(SelectResult.all())
- .from(DataSource.collection(collection))
- .limit(
-    Expression.integer(limit),
-    offset: Expression.integer(offset),
-  );
+    .select(SelectResult.all())
+    .from(DataSource.collection(collection))
+    .limit(Expression.integer(limit), offset: Expression.integer(offset));
 ```
 
 </CodeExample>
@@ -398,12 +397,12 @@ class Hotel {
 
 @JsonSerializable(explicitToJson: true)
 class HotelDao {
- const HotelDao(this.hotel);
+  const HotelDao(this.hotel);
 
- final Hotel hotel;
+  final Hotel hotel;
 
- factory HotelDao.fromJson(Map<String, Object?> json) =>
-     _$HotelDaoFromJson(json);
+  factory HotelDao.fromJson(Map<String, Object?> json) =>
+      _$HotelDaoFromJson(json);
 
   Map<String, Object?> toJson() => _$HotelDaoToJson(this);
 }
@@ -414,8 +413,8 @@ final database = await Database.openAsync('hotels');
 final collection = await database.defaultCollection;
 
 final query = const QueryBuilder()
- .select(SelectResult.all().as('hotel'))
- .from(DataSource.collection(collection));
+    .select(SelectResult.all().as('hotel'))
+    .from(DataSource.collection(collection));
 
 final resultSet = await query.execute();
 

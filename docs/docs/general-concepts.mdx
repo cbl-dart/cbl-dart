@@ -28,6 +28,8 @@ asynchronous.
 Take for example this simplified version of the `api|Query` API:
 
 ```dart
+import 'dart:async';
+
 abstract class Query {
   // The common base class leaves open whether the results are returned
   // synchronously or asynchronously.
@@ -52,11 +54,11 @@ asynchronous API:
 ```dart
 /// Runs a query that returns a result set with one row and one column and
 /// returns its value.
-Future<int> runCountQuery(Query query) {
+Future<int> runCountQuery(Query query) async {
   final resultSet = await query.execute();
   final results = await resultSet.allResults();
   // Returns the first column of the first row.
-  return result[0].integer(0);
+  return results[0].integer(0);
 }
 ```
 
@@ -69,10 +71,10 @@ registered.
 With asynchronous APIs, changes are only guaranteed to be delivered once the
 `api|dart:async|Future` returned from the registration call is completed:
 
-```dart
+```dart main
 // Await the future returned from the registration call.
 await collection.addChangeListener((change) {
-  print('Ids of changed documents: ${change.documentIds}'):
+  print('Ids of changed documents: ${change.documentIds}');
 });
 
 // The listener is guaranteed to be notified of this change.
@@ -84,8 +86,8 @@ was returned from the registration call. Regardless of the whether the API is
 synchronous or asynchronous, listeners will stop receiving notifications
 immediately:
 
-```dart
-final token = await collection.addChangeListener((change) { });
+```dart main
+final token = await collection.addChangeListener((change) {});
 
 // Some time goes by...
 
@@ -106,11 +108,11 @@ which the the stream will observe events. Instead, asynchronous APIs return
 `api|AsyncListenStream.listening` that completes when the stream is fully
 listening:
 
-```dart
+```dart main
 final stream = collection.changes();
 
 stream.listen((change) {
-  print('Ids of changed documents: ${change.documentIds}'):
+  print('Ids of changed documents: ${change.documentIds}');
 });
 
 // Await the Future exposed by the stream.

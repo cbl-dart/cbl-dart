@@ -70,10 +70,8 @@ export const CblGeneratorInstallCommand = () => {
 
    @TypedDictionary()
    abstract class PersonalName with _$PersonalName {
-     factory PersonalName({
-       required String first,
-       required String last,
-     }) = MutablePersonalName;
+     factory PersonalName({required String first, required String last}) =
+         MutablePersonalName;
    }
    ```
 
@@ -88,10 +86,7 @@ export const CblGeneratorInstallCommand = () => {
 
    @TypedDatabase(
      // List all the typed data classes that will be used in the database.
-     types: {
-       User,
-       PersonalName,
-     },
+     types: {User, PersonalName},
    )
    abstract class $AppDatabase {}
    ```
@@ -110,7 +105,7 @@ export const CblGeneratorInstallCommand = () => {
    import 'app_database.cbl.database.g.dart';
    import 'user.dart';
 
-   Future<void> useTypedDatabase() {
+   Future<void> useTypedDatabase() async {
      // Use a static method on the generated typed database class to open an instance.
      final db = await AppDatabase.openAsync('app');
 
@@ -129,11 +124,11 @@ export const CblGeneratorInstallCommand = () => {
      // save plain documents. `saveTypedDocument` returns an object that has methods
      // for saving the document with conflict resolution through concurrency control or
      // a custom conflict handler.
-     await database.saveTypedDocument(user).withConcurrencyControl();
+     await db.saveTypedDocument(user).withConcurrencyControl();
 
      // To retrieve a typed document, use the `typedDocument` method and pass it the
      // type of the requested document through the type parameter.
-     final savedUser = await database.typedDocument<User>(user.id);
+     final savedUser = await db.typedDocument<User>(user.id);
    }
    ```
 

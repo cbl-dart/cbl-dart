@@ -1,0 +1,6 @@
+extends: ../analysis_options.yaml
+
+analyzer:
+  errors:
+    unused_local_variable: ignore
+    unused_element: ignore
