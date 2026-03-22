@@ -65,8 +65,7 @@ text.
 <CodeExample id={2} title="FTS Query with SQL++">
 
 ```dart
-final query = await Query.fromN1ql(
-  database,
+final query = await database.createQuery(
   r"SELECT _.name, _.overview FROM _ "
   r"WHERE MATCH(overviewFTSIndex, 'michigan') "
   r"ORDER BY RANK(overviewFTSIndex)",

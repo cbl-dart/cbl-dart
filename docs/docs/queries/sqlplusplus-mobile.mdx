@@ -1519,8 +1519,8 @@ final query = await db.createQuery(
   WHERE country = $country
   ''',
 );
-query.parameters = Parameters({'country': 'France'});
-final resultSet = query.execute();
+await query.setParameters(Parameters({'country': 'France'}));
+final resultSet = await query.execute();
 ```
 
 1. Define a parameter placeholder `$country`.

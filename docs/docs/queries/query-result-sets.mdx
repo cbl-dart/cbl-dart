@@ -191,10 +191,10 @@ await for (final result in await resultSet.asStream()) {
   print('processing doc: $docId');
 
   final id = result.string('id')!;
-  final hotel = Hotel(id);
-  hotel.type = result.string('type')!;
-  hotel.name = result.string('name')!;
-  // Do something with the hotel.
+  final type = result.string('type')!;
+  final name = result.string('name')!;
+  // Do something with the hotel properties.
+  print('hotel $id ($type): $name');
 }
 ```
 
@@ -413,7 +413,7 @@ final database = await Database.openAsync('hotels');
 final collection = await database.defaultCollection;
 
 final query = const QueryBuilder()
-    .select(SelectResult.all().as('hotel'))
+    .select(SelectResult.all().from('hotel'))
     .from(DataSource.collection(collection));
 
 final resultSet = await query.execute();

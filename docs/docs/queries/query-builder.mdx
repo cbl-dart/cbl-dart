@@ -685,8 +685,8 @@ handling NULL and MISSING values.
           Expression.property('preferredName'),
           Expression.property('name'),
           Expression.string('Unknown'),
-        ).as('displayName'),
-      ),
+        ),
+      ).as('displayName'),
     )
     .from(DataSource.collection(collection))
     .where(Expression.property('type').equalTo(Expression.string('user')));
