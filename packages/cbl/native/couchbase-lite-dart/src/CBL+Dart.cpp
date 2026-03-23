@@ -319,9 +319,6 @@ static void CBLDart_LogCallbackFinalizer(void* context) {
 void CBLDart_CBLLog_SetCallback(CBLDart_AsyncCallback callback) {
   std::unique_lock lock(loggingMutex);
   auto callback_ = ASYNC_CALLBACK_FROM_C(callback);
-  if (callback_ == nullptr) {
-    return;
-  }
   logCallbacks.push_back({callback_, kCBLLogInfo});
   callback_->setFinalizer(callback_, CBLDart_LogCallbackFinalizer);
   CBLDart_UpdateEffectiveCustomLogSink();
