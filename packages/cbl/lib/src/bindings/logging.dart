@@ -158,7 +158,7 @@ final class LoggingBindings {
     cblitedart.CBLDart_CBLLog_SetCallbackLevel(callback, logLevel.value);
   }
 
-  static void setCallback(cblitedart.CBLDart_AsyncCallback callback) {
+  static void addCallback(cblitedart.CBLDart_AsyncCallback callback) {
     cblitedart.CBLDart_CBLLog_SetCallback(callback);
   }
 

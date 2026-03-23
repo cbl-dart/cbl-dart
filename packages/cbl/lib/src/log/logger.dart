@@ -166,7 +166,7 @@ void _setupCallback() {
     debugName: 'Logger.log',
   );
 
-  LoggingBindings.setCallback(_callback!.pointer);
+  LoggingBindings.addCallback(_callback!.pointer);
 }
 
 void _cleanUpCallback() {
