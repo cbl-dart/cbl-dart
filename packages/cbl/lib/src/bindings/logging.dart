@@ -151,12 +151,19 @@ final class LoggingBindings {
     cblite.CBLLogSinks_SetConsole(sink);
   }
 
-  static void setCallbackLevel(CBLLogLevel logLevel) {
-    cblitedart.CBLDart_CBLLog_SetCallbackLevel(logLevel.value);
+  static void setCallbackLevel(
+    cblitedart.CBLDart_AsyncCallback callback,
+    CBLLogLevel logLevel,
+  ) {
+    cblitedart.CBLDart_CBLLog_SetCallbackLevel(callback, logLevel.value);
   }
 
-  static bool setCallback(cblitedart.CBLDart_AsyncCallback callback) =>
-      cblitedart.CBLDart_CBLLog_SetCallback(callback);
+  static void addCallback(
+    cblitedart.CBLDart_AsyncCallback callback,
+    CBLLogLevel logLevel,
+  ) {
+    cblitedart.CBLDart_CBLLog_AddCallback(callback, logLevel.value);
+  }
 
   static void setFileLogConfiguration(CBLLogFileConfiguration? config) {
     withGlobalArena(() {

@@ -1,9 +1,11 @@
+#include <algorithm>
 #include <future>
 #include <map>
 #include <mutex>
 #include <shared_mutex>
 #include <stdexcept>
 #include <thread>
+#include <vector>
 
 #include "AsyncCallback.h"
 #include "CBL+Dart.h"
@@ -238,34 +240,49 @@ static void CBLDart_CBLListenerFinalizer(void* context) {
 // === Log
 
 static std::shared_mutex loggingMutex;
-static CBLDart::AsyncCallback* logCallback = nullptr;
-static CBLLogLevel logCallbackLevel = CBLLogSinks_CustomSink().level;
+
+struct LogCallbackEntry {
+  CBLDart::AsyncCallback* callback;
+  CBLLogLevel level;
+};
+static std::vector<LogCallbackEntry> logCallbacks;
+
 static CBLFileLogSink* logFileSink = nullptr;
-// Forward declaration for the logging function.
-static void CBLDart_CallDartLogCallback(CBLLogDomain domain, CBLLogLevel level,
+
+static void CBLDart_UpdateEffectiveCustomLogSink();
+static void CBLDart_CallDartLogCallback(CBLDart::AsyncCallback* callback,
+                                        CBLLogDomain domain, CBLLogLevel level,
                                         FLString message);
 
 static void CBLDart_LogCallback(CBLLogDomain domain, CBLLogLevel level,
                                 FLString message) {
   std::shared_lock lock(loggingMutex);
 
-  if (logCallback && level >= logCallbackLevel) {
-    CBLDart_CallDartLogCallback(domain, level, message);
+  for (const auto& entry : logCallbacks) {
+    if (level >= entry.level) {
+      CBLDart_CallDartLogCallback(entry.callback, domain, level, message);
+    }
   }
 }
 
 static void CBLDart_UpdateEffectiveCustomLogSink() {
   CBLCustomLogSink sink{};
-  if (logCallback) {
+  if (!logCallbacks.empty()) {
     sink.callback = CBLDart_LogCallback;
-    sink.level = logCallbackLevel;
+    auto minIt = std::min_element(
+        logCallbacks.begin(), logCallbacks.end(),
+        [](const LogCallbackEntry& a, const LogCallbackEntry& b) {
+          return a.level < b.level;
+        });
+    sink.level = minIt->level;
   } else {
     sink.level = kCBLLogNone;
   }
   CBLLogSinks_SetCustom(sink);
 }
 
-static void CBLDart_CallDartLogCallback(CBLLogDomain domain, CBLLogLevel level,
+static void CBLDart_CallDartLogCallback(CBLDart::AsyncCallback* callback,
+                                        CBLLogDomain domain, CBLLogLevel level,
                                         FLString message) {
   Dart_CObject domain_{};
   domain_.type = Dart_CObject_kInt32;
@@ -285,39 +302,39 @@ static void CBLDart_CallDartLogCallback(CBLLogDomain domain, CBLLogLevel level,
   args.value.as_array.length = 3;
   args.value.as_array.values = argsValues;
 
-  CBLDart::AsyncCallbackCall(*logCallback).execute(args);
+  CBLDart::AsyncCallbackCall(*callback).execute(args);
 }
 
 static void CBLDart_LogCallbackFinalizer(void* context) {
   std::unique_lock lock(loggingMutex);
-  logCallback = nullptr;
+  auto callback = reinterpret_cast<CBLDart::AsyncCallback*>(context);
+  logCallbacks.erase(std::remove_if(logCallbacks.begin(), logCallbacks.end(),
+                                    [callback](const LogCallbackEntry& e) {
+                                      return e.callback == callback;
+                                    }),
+                     logCallbacks.end());
   CBLDart_UpdateEffectiveCustomLogSink();
 }
 
-bool CBLDart_CBLLog_SetCallback(CBLDart_AsyncCallback callback) {
+void CBLDart_CBLLog_AddCallback(CBLDart_AsyncCallback callback,
+                                CBLLogLevel level) {
   std::unique_lock lock(loggingMutex);
   auto callback_ = ASYNC_CALLBACK_FROM_C(callback);
-
-  // Don't set the new callback if one has already been set. Another isolate,
-  // different from the one currently calling, has already set its callback.
-  if (callback_ != nullptr && logCallback != nullptr) {
-    return false;
-  }
-
-  if (callback_ == nullptr) {
-    logCallback = nullptr;
-  } else {
-    logCallback = callback_;
-    callback_->setFinalizer(nullptr, CBLDart_LogCallbackFinalizer);
-  }
+  logCallbacks.push_back({callback_, level});
+  callback_->setFinalizer(callback_, CBLDart_LogCallbackFinalizer);
   CBLDart_UpdateEffectiveCustomLogSink();
-
-  return true;
 }
 
-void CBLDart_CBLLog_SetCallbackLevel(CBLLogLevel level) {
+void CBLDart_CBLLog_SetCallbackLevel(CBLDart_AsyncCallback callback,
+                                     CBLLogLevel level) {
   std::unique_lock lock(loggingMutex);
-  logCallbackLevel = level;
+  auto callback_ = ASYNC_CALLBACK_FROM_C(callback);
+  for (auto& entry : logCallbacks) {
+    if (entry.callback == callback_) {
+      entry.level = level;
+      break;
+    }
+  }
   CBLDart_UpdateEffectiveCustomLogSink();
 }
 
