@@ -11,7 +11,13 @@
 #endif
 
 // Helper to construct FLSlice from (buf, size) pair.
-#define FLSLICE_FROM_ARGS(buf, size) ((FLSlice){(buf), (size)})
+// Uses an inline function instead of a C99 compound literal to support MSVC.
+inline FLSlice FLSLICE_FROM_ARGS(const void* buf, size_t size) {
+  FLSlice s;
+  s.buf = buf;
+  s.size = size;
+  return s;
+}
 
 // === Slice ==================================================================
 
