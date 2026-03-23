@@ -159,7 +159,7 @@ final class LoggingBindings {
   }
 
   static void addCallback(cblitedart.CBLDart_AsyncCallback callback) {
-    cblitedart.CBLDart_CBLLog_SetCallback(callback);
+    cblitedart.CBLDart_CBLLog_AddCallback(callback);
   }
 
   static void setFileLogConfiguration(CBLLogFileConfiguration? config) {

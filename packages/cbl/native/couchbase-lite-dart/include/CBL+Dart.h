@@ -94,7 +94,7 @@ CBLDart_IsolateId CBLDart_GetCurrentIsolateId();
 // === Log
 
 CBLDART_EXPORT
-void CBLDart_CBLLog_SetCallback(CBLDart_AsyncCallback callback);
+void CBLDart_CBLLog_AddCallback(CBLDart_AsyncCallback callback);
 
 CBLDART_EXPORT
 void CBLDart_CBLLog_SetCallbackLevel(CBLDart_AsyncCallback callback,
