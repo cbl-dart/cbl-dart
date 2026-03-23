@@ -133,7 +133,10 @@ external void CBLDart_SetCurrentIsolateId(int isolateId);
 external int CBLDart_GetCurrentIsolateId();
 
 @ffi.Native<NativeCBLDart_CBLLog_AddCallback>(isLeaf: true)
-external void CBLDart_CBLLog_AddCallback(CBLDart_AsyncCallback callback);
+external void CBLDart_CBLLog_AddCallback(
+  CBLDart_AsyncCallback callback,
+  imp$1.DartCBLLogLevel level,
+);
 
 @ffi.Native<NativeCBLDart_CBLLog_SetCallbackLevel>(isLeaf: true)
 external void CBLDart_CBLLog_SetCallbackLevel(
@@ -543,9 +546,9 @@ typedef DartCBLDart_SetCurrentIsolateId = void Function(int isolateId);
 typedef NativeCBLDart_GetCurrentIsolateId = CBLDart_IsolateId Function();
 typedef DartCBLDart_GetCurrentIsolateId = int Function();
 typedef NativeCBLDart_CBLLog_AddCallback =
-    ffi.Void Function(CBLDart_AsyncCallback callback);
+    ffi.Void Function(CBLDart_AsyncCallback callback, imp$1.CBLLogLevel level);
 typedef DartCBLDart_CBLLog_AddCallback =
-    void Function(CBLDart_AsyncCallback callback);
+    void Function(CBLDart_AsyncCallback callback, imp$1.DartCBLLogLevel level);
 typedef NativeCBLDart_CBLLog_SetCallbackLevel =
     ffi.Void Function(CBLDart_AsyncCallback callback, imp$1.CBLLogLevel level);
 typedef DartCBLDart_CBLLog_SetCallbackLevel =

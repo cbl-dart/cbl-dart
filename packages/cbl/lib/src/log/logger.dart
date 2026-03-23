@@ -116,16 +116,14 @@ void setupCustomLogger(Logger? logger) {
     return;
   }
 
-  // Remove older logger
+  // Remove older logger.
   _cleanUpLogger();
 
-  // Update callback
   if (logger == null) {
     _cleanUpCallback();
   } else {
-    _setupCallback();
-    // Install new logger only after the callback has been successfully setup.
     _setupLogger(logger);
+    _setupCallback();
   }
 }
 
@@ -142,7 +140,6 @@ void _setupLogger(Logger logger) {
     );
   });
   _logger!._levelChanged = _updateLogLevel;
-  _updateLogLevel();
 }
 
 void _cleanUpLogger() {
@@ -166,7 +163,10 @@ void _setupCallback() {
     debugName: 'Logger.log',
   );
 
-  LoggingBindings.addCallback(_callback!.pointer);
+  LoggingBindings.addCallback(
+    _callback!.pointer,
+    _logger!._level.toCBLLogLevel(),
+  );
 }
 
 void _cleanUpCallback() {
