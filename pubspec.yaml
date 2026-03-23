@@ -31,6 +31,8 @@ dev_dependencies:
 
 dependency_overrides:
   meta: ^1.18.0
+  daco:
+    path: /Users/terwesten/.codex/worktrees/70df/daco/packages/daco
 
 melos:
   repository: https://github.com/cbl-dart/cbl-dart

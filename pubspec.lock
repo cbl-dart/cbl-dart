@@ -260,10 +260,9 @@ packages:
   daco:
     dependency: "direct dev"
     description:
-      name: daco
-      sha256: "9e53560b7514508b01c6f700c37b45c97066b0a7221fabb295f83120d9885fae"
-      url: "https://pub.dev"
-    source: hosted
+      path: "/Users/terwesten/.codex/worktrees/70df/daco/packages/daco"
+      relative: false
+    source: path
     version: "0.5.1"
   dart_style:
     dependency: transitive
