@@ -70,15 +70,13 @@ final class FfiReplicator
       useEnterpriseFeature(EnterpriseFeature.localDbReplication);
 
       final targetDatabase = target.database;
-      if (targetDatabase is FfiDatabase) {
-        // Target is a SyncDatabase — use its pointer directly.
-      } else if (targetDatabase is ProxyDatabase) {
+      if (targetDatabase is ProxyDatabase) {
         // Target is an AsyncDatabase — fetch native pointer from its worker.
         final sendable = await targetDatabase.channel.call(
           GetNativeDatabaseEndpoint(targetDatabase.objectId),
         );
         target = sendable.endpoint;
-      } else {
+      } else if (targetDatabase is! FfiDatabase) {
         throw ArgumentError(
           'The target database must be an instance of AsyncDatabase or '
           'SyncDatabase.',
