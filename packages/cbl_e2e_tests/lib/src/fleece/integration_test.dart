@@ -14,8 +14,8 @@ void main() {
 
   group('Fleece Integration', () {
     // The previous delegate needs to be restored because
-    // `CouchbaseLite.init called once for all tests, which is
-    // where the MDelegate implementation for CouchbaseList is set up.
+    // `MDelegate.instance` is statically initialized with `CblMDelegate`,
+    // which is needed by other tests.
     late MDelegate previousDelegate;
 
     setUpAll(() {

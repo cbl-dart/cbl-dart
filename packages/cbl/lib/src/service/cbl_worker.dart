@@ -4,7 +4,6 @@ import 'dart:isolate';
 import 'package:stream_channel/isolate_channel.dart';
 
 import '../errors.dart';
-import '../support/isolate.dart';
 import '../support/tracing.dart';
 import 'cbl_service.dart';
 import 'cbl_service_api.dart';
@@ -57,10 +56,7 @@ final class CblWorker {
 
     _worker = IsolateWorker(
       debugName: 'CblWorker($debugName)',
-      delegate: _ServiceWorkerDelegate(
-        context: IsolateContext.instance.forSecondaryIsolate(),
-        channel: receivePort.sendPort,
-      ),
+      delegate: _ServiceWorkerDelegate(channel: receivePort.sendPort),
     );
     unawaited(
       _worker.onError.onError<Object>((error, stackTrace) {
@@ -97,16 +93,15 @@ final class CblWorker {
 enum _WorkerStatus { initial, starting, running, stopping, stopped, crashed }
 
 final class _ServiceWorkerDelegate extends IsolateWorkerDelegate {
-  _ServiceWorkerDelegate({required this.context, required this.channel});
+  _ServiceWorkerDelegate({required this.channel});
 
-  final IsolateContext context;
   final SendPort channel;
 
   late final Channel _serviceChannel;
   late final CblService _service;
 
   @override
-  FutureOr<void> initialize() async {
+  FutureOr<void> initialize() {
     _serviceChannel = Channel(
       transport: IsolateChannel.connectSend(channel),
       restoreMessageContext: (context, restore) =>
@@ -116,8 +111,6 @@ final class _ServiceWorkerDelegate extends IsolateWorkerDelegate {
     _service = CblService(channel: _serviceChannel);
 
     onTraceData = (data) => _service.channel.call(TraceDataRequest(data));
-
-    await initSecondaryIsolate(context);
   }
 
   @override

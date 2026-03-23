@@ -18,6 +18,7 @@ import '../query/index/ffi_query_index.dart';
 import '../query/index/index.dart';
 import '../support/async_callback.dart';
 import '../support/edition.dart';
+import '../support/isolate.dart';
 import '../support/listener_token.dart';
 import '../support/resource.dart';
 import '../support/streams.dart';
@@ -68,10 +69,16 @@ final class FfiDatabase
   }
 
   static void remove(String name, {String? directory}) =>
-      DatabaseBindings.deleteDatabase(name, directory);
+      DatabaseBindings.deleteDatabase(
+        name,
+        directory ?? defaultDatabaseDirectory,
+      );
 
   static bool exists(String name, {String? directory}) =>
-      DatabaseBindings.databaseExists(name, directory);
+      DatabaseBindings.databaseExists(
+        name,
+        directory ?? defaultDatabaseDirectory,
+      );
 
   static void copy({
     required String from,
@@ -80,7 +87,7 @@ final class FfiDatabase
   }) => DatabaseBindings.copyDatabase(
     _formatCopyFromPath(from),
     name,
-    config?.toCBLDatabaseConfiguration(),
+    (config ?? DatabaseConfiguration()).toCBLDatabaseConfiguration(),
   );
 
   /// Ensures that the path ends with a separator to signal that it is a

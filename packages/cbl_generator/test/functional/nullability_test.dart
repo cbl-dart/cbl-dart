@@ -4,7 +4,7 @@ import '../fixtures/builtin_types.dart';
 import '../test_utils.dart';
 
 void main() {
-  setUpAll(initCouchbaseLiteForTest);
+  setUpAll(configureCouchbaseLiteForTest);
 
   test('fields of primitive types return null when set to null', () {
     expect(NullableIntDict(null).value, isNull);

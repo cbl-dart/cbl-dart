@@ -146,7 +146,7 @@ abstract class CblDatabaseBenchmark extends DatabaseBenchmarkBase {
   Future<void> setup() async {
     await super.setup();
 
-    await initCouchbaseLite();
+    await configureCouchbaseLite();
 
     _tempDirectory = await Directory.systemTemp.createTemp();
   }

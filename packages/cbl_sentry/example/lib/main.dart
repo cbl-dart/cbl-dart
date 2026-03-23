@@ -29,7 +29,6 @@ Future<void> runApp() async {
 }
 
 Future<void> initApp() => runAppTransaction('initApp', () async {
-  await CouchbaseLite.init();
   await Database.remove('example');
   db = await Database.openAsync('example');
   users = await db.createCollection('users');

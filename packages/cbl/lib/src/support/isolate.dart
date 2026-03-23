@@ -1,107 +1,89 @@
-import 'dart:async';
-import 'dart:isolate';
+import 'dart:io';
 
-import '../bindings.dart';
+import '../bindings/base.dart';
 import '../bindings/tracing.dart' show onTracedCall;
-import 'errors.dart';
+import 'app_directory.dart';
 import 'tracing.dart';
 
-class InitContext {
-  InitContext({required this.filesDir, required this.tempDir});
+var _isInitialized = false;
+String? _defaultDatabaseDirectoryOverride;
+String? _resolvedDefaultDatabaseDirectoryCache;
+CBLInitContext? _initContext;
 
-  final String filesDir;
-  final String tempDir;
-
-  CBLInitContext toCbl() =>
-      CBLInitContext(filesDir: filesDir, tempDir: tempDir);
-}
-
-class IsolateContext {
-  IsolateContext({this.initContext});
-
-  static IsolateContext? _instance;
-
-  static bool get isInitialized => _instance != null;
-
-  static set instance(IsolateContext value) {
-    if (_instance != null) {
-      throwAlreadyInitializedError();
-    }
-    _instance = value;
+/// Lazily bootstraps Couchbase Lite for the current isolate.
+///
+/// Call this at the start of a standalone API or binding implementation when
+/// that API can be the first entry point in the current isolate that touches
+/// native Couchbase Lite state.
+///
+/// Do not call this from inside allocation-management helpers such as
+/// `withGlobalArena` or `runWithSingleFLString`. Bootstrap the isolate before
+/// entering those helpers so initialization does not happen while temporary
+/// allocation lifetimes are already active, and so entry points follow one
+/// consistent structure.
+///
+/// Implementations that are only reachable after another entry point has
+/// already bootstrapped the isolate do not need to call this again unless they
+/// are also public entry points that can be invoked independently.
+void ensureInitializedForCurrentIsolate() {
+  if (_isInitialized) {
+    return;
   }
 
-  static IsolateContext get instance {
-    final config = _instance;
-    if (config == null) {
-      throwNotInitializedError();
-    }
-    return config;
-  }
+  final initContext = _ensureInitContextDirectories();
 
-  final InitContext? initContext;
-
-  /// Returns a copy of this context that is safe to send to another isolate.
-  IsolateContext forSecondaryIsolate() =>
-      IsolateContext(initContext: initContext);
-}
-
-/// Initializes this isolate for use of Couchbase Lite, and initializes the
-/// native libraries.
-Future<void> initPrimaryIsolate(IsolateContext context) async {
-  _initIsolate(context);
-  BaseBindings.initializeNativeLibraries(context.initContext?.toCbl());
-  await _runPostIsolateInitTasks();
-}
-
-/// Initializes this isolate for use of Couchbase Lite, after another primary
-/// isolate has been initialized.
-Future<void> initSecondaryIsolate(IsolateContext context) async {
-  _initIsolate(context);
-  await _runPostIsolateInitTasks();
-}
-
-void _initIsolate(IsolateContext context) {
-  IsolateContext.instance = context;
   onTracedCall = tracingDelegateTracedNativeCallHandler;
+  BaseBindings.initializeNativeLibraries(initContext);
+
+  _isInitialized = true;
 }
 
-typedef PostIsolateInitTask = FutureOr<void> Function();
+String get defaultDatabaseDirectory =>
+    _defaultDatabaseDirectoryOverride ??
+    (_resolvedDefaultDatabaseDirectoryCache ??=
+        _resolvedDefaultDatabaseDirectory());
 
-final _postIsolateInitTasks = <PostIsolateInitTask>[];
-Future? _currentPostIsolateInitTask;
+set defaultDatabaseDirectory(String value) {
+  _defaultDatabaseDirectoryOverride = value;
+}
 
-Future<void> addPostIsolateInitTask(PostIsolateInitTask task) async {
-  if (IsolateContext.isInitialized) {
-    await task();
-  } else {
-    _postIsolateInitTasks.add(task);
+void resetDefaultDatabaseDirectory() {
+  _defaultDatabaseDirectoryOverride = null;
+}
+
+CBLInitContext? _ensureInitContextDirectories() {
+  final initContext = _resolvedInitContext();
+  if (initContext == null) {
+    return null;
   }
+
+  Directory(initContext.filesDir).createSync(recursive: true);
+  Directory(initContext.tempDir).createSync(recursive: true);
+
+  return initContext;
 }
 
-Future<void> removePostIsolateInitTask(PostIsolateInitTask task) async {
-  if (_postIsolateInitTasks.isNotEmpty) {
-    if (_currentPostIsolateInitTask != null &&
-        _postIsolateInitTasks[0] == task) {
-      await _currentPostIsolateInitTask;
-    } else {
-      _postIsolateInitTasks.remove(task);
-    }
+CBLInitContext? _resolvedInitContext() => _initContext ??= () {
+  final resolvedFilesDir = resolveAppFilesDirectory();
+  if (resolvedFilesDir == null) {
+    return null;
   }
-}
 
-Future<void> _runPostIsolateInitTasks() async {
-  while (_postIsolateInitTasks.isNotEmpty) {
-    final task = _postIsolateInitTasks[0];
-    await (_currentPostIsolateInitTask = Future<void>.sync(task));
-    _currentPostIsolateInitTask = null;
-    _postIsolateInitTasks.removeAt(0);
+  final databaseDir = '$resolvedFilesDir${Platform.pathSeparator}CouchbaseLite';
+
+  return CBLInitContext(
+    filesDir: databaseDir,
+    tempDir: Platform.isAndroid
+        ? resolveAndroidCacheDirectory()
+        : resolvedFilesDir,
+  );
+}();
+
+String _resolvedDefaultDatabaseDirectory() {
+  final filesDir = _resolvedInitContext()?.filesDir;
+  if (filesDir != null) {
+    return filesDir;
   }
-}
 
-Future<T> runInSecondaryIsolate<T>(FutureOr<T> Function() fn) {
-  final context = IsolateContext.instance.forSecondaryIsolate();
-  return Isolate.run(() async {
-    await initSecondaryIsolate(context);
-    return fn();
-  });
+  return Directory.current.path;
 }

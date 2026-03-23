@@ -37,13 +37,11 @@ workspace root `pubspec.yaml`, so put this configuration there instead.
 
 :::
 
-Then initialize Couchbase Lite and enable vector search:
+Then enable vector search before opening a database that uses it:
 
 <CodeExample id={1} title="Enable Vector Search">
 
 ```dart
-await CouchbaseLite.init();
-
 final status = Extension.enableVectorSearch();
 if (status != VectorSearchStatus.enabled) {
   throw StateError('Vector search is not available: $status');

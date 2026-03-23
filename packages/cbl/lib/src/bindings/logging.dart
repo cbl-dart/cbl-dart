@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 
+import '../support/isolate.dart';
 import 'cblite.dart' as cblite;
 import 'cblitedart.dart' as cblitedart;
 import 'fleece.dart';
@@ -136,6 +137,7 @@ final class LoggingBindings {
     CBLLogLevel level,
     String message,
   ) {
+    ensureInitializedForCurrentIsolate();
     runWithSingleFLString(
       message,
       (flMessage) =>
@@ -143,10 +145,13 @@ final class LoggingBindings {
     );
   }
 
-  static CBLLogLevel consoleLevel() =>
-      CBLLogLevel.fromValue(cblite.CBLLogSinks_Console().level);
+  static CBLLogLevel consoleLevel() {
+    ensureInitializedForCurrentIsolate();
+    return CBLLogLevel.fromValue(cblite.CBLLogSinks_Console().level);
+  }
 
   static void setConsoleLevel(CBLLogLevel logLevel) {
+    ensureInitializedForCurrentIsolate();
     final sink = cblite.CBLLogSinks_Console()..level = logLevel.value;
     cblite.CBLLogSinks_SetConsole(sink);
   }
@@ -155,6 +160,7 @@ final class LoggingBindings {
     cblitedart.CBLDart_AsyncCallback callback,
     CBLLogLevel logLevel,
   ) {
+    ensureInitializedForCurrentIsolate();
     cblitedart.CBLDart_CBLLog_SetCallbackLevel(callback, logLevel.value);
   }
 
@@ -162,20 +168,24 @@ final class LoggingBindings {
     cblitedart.CBLDart_AsyncCallback callback,
     CBLLogLevel logLevel,
   ) {
+    ensureInitializedForCurrentIsolate();
     cblitedart.CBLDart_CBLLog_AddCallback(callback, logLevel.value);
   }
 
   static void setFileLogConfiguration(CBLLogFileConfiguration? config) {
+    ensureInitializedForCurrentIsolate();
     withGlobalArena(() {
       cblitedart.CBLDart_CBLLog_SetFileSink(_logFileSink(config));
     });
   }
 
-  static CBLLogFileConfiguration? getLogFileConfiguration() =>
-      cblitedart.CBLDart_CBLLog_GetFileSink()
-          .toNullable()
-          ?.ref
-          .toCBLLogFileConfiguration();
+  static CBLLogFileConfiguration? getLogFileConfiguration() {
+    ensureInitializedForCurrentIsolate();
+    return cblitedart.CBLDart_CBLLog_GetFileSink()
+        .toNullable()
+        ?.ref
+        .toCBLLogFileConfiguration();
+  }
 
   static Pointer<cblite.CBLFileLogSink> _logFileSink(
     CBLLogFileConfiguration? config,

@@ -6,7 +6,7 @@ import '../fixtures/typed_data_list.dart';
 import '../test_utils.dart';
 
 void main() {
-  setUpAll(initCouchbaseLiteForTest);
+  setUpAll(configureCouchbaseLiteForTest);
 
   test('get list', () {
     expect(

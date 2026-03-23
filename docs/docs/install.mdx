@@ -67,21 +67,18 @@ more about the differences between the Community and Enterprise editions, see
 
 :::
 
-## Initialize Couchbase Lite
-
-Initialize Couchbase Lite before using it:
+## Use Couchbase Lite
 
 ```dart
 import 'package:cbl/cbl.dart';
 
 Future<void> main() async {
-  await CouchbaseLite.init();
   // Start using Couchbase Lite ...
 }
 ```
 
 If you enabled vector search in `pubspec.yaml`, enable it explicitly after
-initialization and before opening a database that uses it:
+startup and before opening a database that uses it:
 
 ```dart
 final status = Extension.enableVectorSearch();
@@ -102,14 +99,12 @@ platforms you want to support.
 ## Verify Installation
 
 To verify that Couchbase Lite is installed correctly, add the following code to
-your app and call it after initializing Couchbase Lite:
+your app and call it during startup:
 
 ```dart
 import 'package:cbl/cbl.dart';
 
 Future<void> run() async {
-  await CouchbaseLite.init();
-
   // Open the database (creating it if it doesn't exist).
   final database = await Database.openAsync('database');
 

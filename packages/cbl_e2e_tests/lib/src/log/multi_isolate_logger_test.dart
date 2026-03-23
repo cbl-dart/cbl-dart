@@ -3,7 +3,6 @@ import 'dart:isolate';
 
 import 'package:cbl/cbl.dart';
 import 'package:cbl/src/log/logger.dart';
-import 'package:cbl/src/support/isolate.dart';
 
 import '../../test_binding_impl.dart';
 import '../test_binding.dart';
@@ -30,7 +29,6 @@ void main() {
 
       // Spawn a secondary isolate that registers its own logger and waits for
       // a log message.
-      final context = IsolateContext.instance.forSecondaryIsolate();
       final secondaryResult = ReceivePort();
       final secondaryReady = Completer<void>();
       final readyPort = ReceivePort()
@@ -43,7 +41,6 @@ void main() {
       await Isolate.spawn(
         _secondaryIsolateMain,
         _SecondaryIsolateConfig(
-          context: context,
           resultPort: secondaryResult.sendPort,
           readyPort: readyPort.sendPort,
         ),
@@ -90,14 +87,10 @@ void main() {
         });
 
         // Register and immediately remove a logger in a secondary isolate.
-        final context = IsolateContext.instance.forSecondaryIsolate();
         final donePort = ReceivePort();
         await Isolate.spawn(
           _registerAndRemoveLoggerIsolateMain,
-          _RegisterAndRemoveConfig(
-            context: context,
-            donePort: donePort.sendPort,
-          ),
+          donePort.sendPort,
         );
         await donePort.first;
 
@@ -113,20 +106,13 @@ void main() {
 }
 
 final class _SecondaryIsolateConfig {
-  _SecondaryIsolateConfig({
-    required this.context,
-    required this.resultPort,
-    required this.readyPort,
-  });
+  _SecondaryIsolateConfig({required this.resultPort, required this.readyPort});
 
-  final IsolateContext context;
   final SendPort resultPort;
   final SendPort readyPort;
 }
 
 Future<void> _secondaryIsolateMain(_SecondaryIsolateConfig config) async {
-  await initSecondaryIsolate(config.context);
-
   final messages = <List<dynamic>>[];
   final receivedMessage = Completer<void>();
 
@@ -149,20 +135,10 @@ Future<void> _secondaryIsolateMain(_SecondaryIsolateConfig config) async {
   config.resultPort.send(messages);
 }
 
-final class _RegisterAndRemoveConfig {
-  _RegisterAndRemoveConfig({required this.context, required this.donePort});
-
-  final IsolateContext context;
-  final SendPort donePort;
-}
-
-Future<void> _registerAndRemoveLoggerIsolateMain(
-  _RegisterAndRemoveConfig config,
-) async {
-  await initSecondaryIsolate(config.context);
+Future<void> _registerAndRemoveLoggerIsolateMain(SendPort donePort) async {
   Database.log.custom = TestLogger((_, _, _) {});
   Database.log.custom = null;
-  config.donePort.send(null);
+  donePort.send(null);
 }
 
 final class TestLogger extends Logger {

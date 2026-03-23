@@ -1,5 +1,6 @@
 import 'dart:ffi';
 
+import '../support/isolate.dart';
 import 'base.dart';
 import 'cblite.dart' as cblite;
 import 'fleece.dart';
@@ -29,8 +30,10 @@ final class DocumentBindings {
 }
 
 final class MutableDocumentBindings {
-  static Pointer<cblite.CBLDocument> createWithID([String? id]) =>
-      runWithSingleFLString(id, cblite.CBLDocument_CreateWithID);
+  static Pointer<cblite.CBLDocument> createWithID([String? id]) {
+    ensureInitializedForCurrentIsolate();
+    return runWithSingleFLString(id, cblite.CBLDocument_CreateWithID);
+  }
 
   static Pointer<cblite.CBLDocument> mutableCopy(
     Pointer<cblite.CBLDocument> source,
