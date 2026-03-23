@@ -144,7 +144,7 @@ final class FfiReplicator
       );
     }).toList();
 
-    final endpoint = config.createEndpoint();
+    final endpoint = config.createEndpoint(target);
     final authenticator = config.createAuthenticator();
     final headersDict = config.headers?.let(fl.MutableDict.new);
 
@@ -455,8 +455,7 @@ extension on CBLReplicatedDocument {
 }
 
 extension on ReplicatorConfiguration {
-  Pointer<CBLEndpoint> createEndpoint() {
-    final target = this.target;
+  Pointer<CBLEndpoint> createEndpoint(Endpoint target) {
     if (target is UrlEndpoint) {
       return ReplicatorBindings.createEndpointWithUrl(target.url.toString());
     } else if (target is DatabaseEndpoint) {
