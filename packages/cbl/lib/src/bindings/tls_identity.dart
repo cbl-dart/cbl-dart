@@ -132,12 +132,17 @@ final class TlsIdentityBindings {
     String key,
   ) {
     ensureInitializedForCurrentIsolate();
-    final encoded = utf8.encode(key);
-    return cblitedart.CBLDart_CBLCert_SubjectNameComponent(
-      pointer,
-      encoded.address.cast(),
-      encoded.length,
-    ).toDartStringAndRelease();
+    return withGlobalArena(() {
+      final (:buf, :size) = encodeStringToArena(key, globalArena);
+      final flKey = globalArena<cblite.FLSlice>();
+      flKey.ref
+        ..buf = buf
+        ..size = size;
+      return cblite.CBLCert_SubjectNameComponent(
+        pointer,
+        flKey.ref,
+      ).toDartStringAndRelease();
+    });
   }
 
   static ({DateTime created, DateTime expires}) certValidTimespan(
