@@ -94,19 +94,18 @@ CBLDart_IsolateId CBLDart_GetCurrentIsolateId();
 // === Log
 
 CBLDART_EXPORT
-bool CBLDart_CBLLog_SetCallback(CBLDart_AsyncCallback callback);
+void CBLDart_CBLLog_AddCallback(CBLDart_AsyncCallback callback,
+                                CBLLogLevel level);
 
 CBLDART_EXPORT
-void CBLDart_CBLLog_SetCallbackLevel(CBLLogLevel level);
+void CBLDart_CBLLog_SetCallbackLevel(CBLDart_AsyncCallback callback,
+                                     CBLLogLevel level);
 
 CBLDART_EXPORT
 void CBLDart_CBLLog_SetFileSink(CBLFileLogSink* sink);
 
 CBLDART_EXPORT
 CBLFileLogSink* CBLDart_CBLLog_GetFileSink();
-
-CBLDART_EXPORT
-bool CBLDart_CBLLog_SetSentryBreadcrumbs(bool enabled);
 
 // === Database
 

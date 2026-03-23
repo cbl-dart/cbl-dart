@@ -1,5 +1,6 @@
-// dart format width=80
 // GENERATED CODE - DO NOT MODIFY BY HAND
+// dart format width=80
+
 // ignore_for_file: avoid_positional_boolean_parameters, lines_longer_than_80_chars, invalid_use_of_internal_member, parameter_assignments, unnecessary_const, prefer_relative_imports, avoid_equals_and_hash_code_on_mutable_classes
 
 part of 'constructor_parameters.dart';
@@ -8,14 +9,17 @@ part of 'constructor_parameters.dart';
 // TypedDocumentGenerator
 // **************************************************************************
 
-mixin _$ParamDoc implements TypedDocumentObject<MutableParamDoc> {
+mixin _$ParamDoc {
   String get a;
 }
 
-abstract class _ParamDocImplBase<I extends Document>
+abstract class ParamDocDocument
+    implements ParamDoc, TypedDocumentObject<MutableParamDoc> {}
+
+abstract class _ParamDocDocumentImplBase<I extends Document>
     with _$ParamDoc
-    implements ParamDoc {
-  _ParamDocImplBase(this.internal);
+    implements ParamDocDocument {
+  _ParamDocDocumentImplBase(this.internal);
 
   @override
   final I internal;
@@ -41,13 +45,13 @@ abstract class _ParamDocImplBase<I extends Document>
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
-class ImmutableParamDoc extends _ParamDocImplBase {
+class ImmutableParamDoc extends _ParamDocDocumentImplBase {
   ImmutableParamDoc.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is ParamDoc &&
+      other is ParamDocDocument &&
           runtimeType == other.runtimeType &&
           internal == other.internal;
 
@@ -56,8 +60,8 @@ class ImmutableParamDoc extends _ParamDocImplBase {
 }
 
 /// Mutable version of [ParamDoc].
-class MutableParamDoc extends _ParamDocImplBase<MutableDocument>
-    implements TypedMutableDocumentObject<ParamDoc, MutableParamDoc> {
+class MutableParamDoc extends _ParamDocDocumentImplBase<MutableDocument>
+    implements TypedMutableDocumentObject<ParamDocDocument, MutableParamDoc> {
   /// Creates a new mutable [ParamDoc].
   MutableParamDoc(String a) : super(MutableDocument({})) {
     this.a = a;
@@ -76,15 +80,96 @@ class MutableParamDoc extends _ParamDocImplBase<MutableDocument>
   }
 }
 
-mixin _$OptionalParamDoc
-    implements TypedDocumentObject<MutableOptionalParamDoc> {
+mixin _$ParamDocDictionary
+    implements TypedDictionaryObject<MutableParamDocDictionary> {
+  String get a;
+}
+
+abstract class ParamDocDictionary
+    with _$ParamDocDictionary
+    implements ParamDoc {}
+
+abstract class _ParamDocDictionaryImplBase<I extends Dictionary>
+    with _$ParamDocDictionary
+    implements ParamDocDictionary {
+  _ParamDocDictionaryImplBase(this.internal);
+
+  @override
+  final I internal;
+
+  @override
+  String get a => TypedDataHelpers.readProperty(
+    internal: internal,
+    name: 'a',
+    key: 'a',
+    converter: TypedDataHelpers.stringConverter,
+  );
+
+  @override
+  MutableParamDocDictionary toMutable() =>
+      MutableParamDocDictionary.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => TypedDataHelpers.renderString(
+    indent: indent,
+    className: 'ParamDocDictionary',
+    fields: {'a': a},
+  );
+}
+
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
+class ImmutableParamDocDictionary extends _ParamDocDictionaryImplBase {
+  ImmutableParamDocDictionary.internal(super.internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ParamDocDictionary &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
+}
+
+/// Mutable version of [ParamDocDictionary].
+class MutableParamDocDictionary
+    extends _ParamDocDictionaryImplBase<MutableDictionary>
+    implements
+        TypedMutableDictionaryObject<
+          ParamDocDictionary,
+          MutableParamDocDictionary
+        > {
+  /// Creates a new mutable [ParamDocDictionary].
+  MutableParamDocDictionary(String a) : super(MutableDictionary()) {
+    this.a = a;
+  }
+
+  MutableParamDocDictionary.internal(super.internal);
+
+  set a(String value) {
+    final promoted = TypedDataHelpers.stringConverter.promote(value);
+    TypedDataHelpers.writeProperty(
+      internal: internal,
+      key: 'a',
+      value: promoted,
+      converter: TypedDataHelpers.stringConverter,
+    );
+  }
+}
+
+mixin _$OptionalParamDoc {
   String? get a;
 }
 
-abstract class _OptionalParamDocImplBase<I extends Document>
+abstract class OptionalParamDocDocument
+    implements OptionalParamDoc, TypedDocumentObject<MutableOptionalParamDoc> {}
+
+abstract class _OptionalParamDocDocumentImplBase<I extends Document>
     with _$OptionalParamDoc
-    implements OptionalParamDoc {
-  _OptionalParamDocImplBase(this.internal);
+    implements OptionalParamDocDocument {
+  _OptionalParamDocDocumentImplBase(this.internal);
 
   @override
   final I internal;
@@ -111,13 +196,13 @@ abstract class _OptionalParamDocImplBase<I extends Document>
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
-class ImmutableOptionalParamDoc extends _OptionalParamDocImplBase {
+class ImmutableOptionalParamDoc extends _OptionalParamDocDocumentImplBase {
   ImmutableOptionalParamDoc.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is OptionalParamDoc &&
+      other is OptionalParamDocDocument &&
           runtimeType == other.runtimeType &&
           internal == other.internal;
 
@@ -126,9 +211,13 @@ class ImmutableOptionalParamDoc extends _OptionalParamDocImplBase {
 }
 
 /// Mutable version of [OptionalParamDoc].
-class MutableOptionalParamDoc extends _OptionalParamDocImplBase<MutableDocument>
+class MutableOptionalParamDoc
+    extends _OptionalParamDocDocumentImplBase<MutableDocument>
     implements
-        TypedMutableDocumentObject<OptionalParamDoc, MutableOptionalParamDoc> {
+        TypedMutableDocumentObject<
+          OptionalParamDocDocument,
+          MutableOptionalParamDoc
+        > {
   /// Creates a new mutable [OptionalParamDoc].
   MutableOptionalParamDoc([String? a]) : super(MutableDocument({})) {
     if (a != null) {
@@ -151,17 +240,105 @@ class MutableOptionalParamDoc extends _OptionalParamDocImplBase<MutableDocument>
   }
 }
 
-mixin _$PositionalMixedParamDoc
-    implements TypedDocumentObject<MutablePositionalMixedParamDoc> {
+mixin _$OptionalParamDocDictionary
+    implements TypedDictionaryObject<MutableOptionalParamDocDictionary> {
+  String? get a;
+}
+
+abstract class OptionalParamDocDictionary
+    with _$OptionalParamDocDictionary
+    implements OptionalParamDoc {}
+
+abstract class _OptionalParamDocDictionaryImplBase<I extends Dictionary>
+    with _$OptionalParamDocDictionary
+    implements OptionalParamDocDictionary {
+  _OptionalParamDocDictionaryImplBase(this.internal);
+
+  @override
+  final I internal;
+
+  @override
+  String? get a => TypedDataHelpers.readNullableProperty(
+    internal: internal,
+    name: 'a',
+    key: 'a',
+    converter: TypedDataHelpers.stringConverter,
+  );
+
+  @override
+  MutableOptionalParamDocDictionary toMutable() =>
+      MutableOptionalParamDocDictionary.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => TypedDataHelpers.renderString(
+    indent: indent,
+    className: 'OptionalParamDocDictionary',
+    fields: {'a': a},
+  );
+}
+
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
+class ImmutableOptionalParamDocDictionary
+    extends _OptionalParamDocDictionaryImplBase {
+  ImmutableOptionalParamDocDictionary.internal(super.internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is OptionalParamDocDictionary &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
+}
+
+/// Mutable version of [OptionalParamDocDictionary].
+class MutableOptionalParamDocDictionary
+    extends _OptionalParamDocDictionaryImplBase<MutableDictionary>
+    implements
+        TypedMutableDictionaryObject<
+          OptionalParamDocDictionary,
+          MutableOptionalParamDocDictionary
+        > {
+  /// Creates a new mutable [OptionalParamDocDictionary].
+  MutableOptionalParamDocDictionary([String? a]) : super(MutableDictionary()) {
+    if (a != null) {
+      this.a = a;
+    }
+  }
+
+  MutableOptionalParamDocDictionary.internal(super.internal);
+
+  set a(String? value) {
+    final promoted = value == null
+        ? null
+        : TypedDataHelpers.stringConverter.promote(value);
+    TypedDataHelpers.writeNullableProperty(
+      internal: internal,
+      key: 'a',
+      value: promoted,
+      converter: TypedDataHelpers.stringConverter,
+    );
+  }
+}
+
+mixin _$PositionalMixedParamDoc {
   String get a;
 
   String? get b;
 }
 
-abstract class _PositionalMixedParamDocImplBase<I extends Document>
+abstract class PositionalMixedParamDocDocument
+    implements
+        PositionalMixedParamDoc,
+        TypedDocumentObject<MutablePositionalMixedParamDoc> {}
+
+abstract class _PositionalMixedParamDocDocumentImplBase<I extends Document>
     with _$PositionalMixedParamDoc
-    implements PositionalMixedParamDoc {
-  _PositionalMixedParamDocImplBase(this.internal);
+    implements PositionalMixedParamDocDocument {
+  _PositionalMixedParamDocDocumentImplBase(this.internal);
 
   @override
   final I internal;
@@ -197,13 +374,13 @@ abstract class _PositionalMixedParamDocImplBase<I extends Document>
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutablePositionalMixedParamDoc
-    extends _PositionalMixedParamDocImplBase {
+    extends _PositionalMixedParamDocDocumentImplBase {
   ImmutablePositionalMixedParamDoc.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is PositionalMixedParamDoc &&
+      other is PositionalMixedParamDocDocument &&
           runtimeType == other.runtimeType &&
           internal == other.internal;
 
@@ -213,10 +390,10 @@ class ImmutablePositionalMixedParamDoc
 
 /// Mutable version of [PositionalMixedParamDoc].
 class MutablePositionalMixedParamDoc
-    extends _PositionalMixedParamDocImplBase<MutableDocument>
+    extends _PositionalMixedParamDocDocumentImplBase<MutableDocument>
     implements
         TypedMutableDocumentObject<
-          PositionalMixedParamDoc,
+          PositionalMixedParamDocDocument,
           MutablePositionalMixedParamDoc
         > {
   /// Creates a new mutable [PositionalMixedParamDoc].
@@ -253,14 +430,123 @@ class MutablePositionalMixedParamDoc
   }
 }
 
-mixin _$NamedParamDoc implements TypedDocumentObject<MutableNamedParamDoc> {
+mixin _$PositionalMixedParamDocDictionary
+    implements TypedDictionaryObject<MutablePositionalMixedParamDocDictionary> {
+  String get a;
+
+  String? get b;
+}
+
+abstract class PositionalMixedParamDocDictionary
+    with _$PositionalMixedParamDocDictionary
+    implements PositionalMixedParamDoc {}
+
+abstract class _PositionalMixedParamDocDictionaryImplBase<I extends Dictionary>
+    with _$PositionalMixedParamDocDictionary
+    implements PositionalMixedParamDocDictionary {
+  _PositionalMixedParamDocDictionaryImplBase(this.internal);
+
+  @override
+  final I internal;
+
+  @override
+  String get a => TypedDataHelpers.readProperty(
+    internal: internal,
+    name: 'a',
+    key: 'a',
+    converter: TypedDataHelpers.stringConverter,
+  );
+
+  @override
+  String? get b => TypedDataHelpers.readNullableProperty(
+    internal: internal,
+    name: 'b',
+    key: 'b',
+    converter: TypedDataHelpers.stringConverter,
+  );
+
+  @override
+  MutablePositionalMixedParamDocDictionary toMutable() =>
+      MutablePositionalMixedParamDocDictionary.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => TypedDataHelpers.renderString(
+    indent: indent,
+    className: 'PositionalMixedParamDocDictionary',
+    fields: {'a': a, 'b': b},
+  );
+}
+
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
+class ImmutablePositionalMixedParamDocDictionary
+    extends _PositionalMixedParamDocDictionaryImplBase {
+  ImmutablePositionalMixedParamDocDictionary.internal(super.internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is PositionalMixedParamDocDictionary &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
+}
+
+/// Mutable version of [PositionalMixedParamDocDictionary].
+class MutablePositionalMixedParamDocDictionary
+    extends _PositionalMixedParamDocDictionaryImplBase<MutableDictionary>
+    implements
+        TypedMutableDictionaryObject<
+          PositionalMixedParamDocDictionary,
+          MutablePositionalMixedParamDocDictionary
+        > {
+  /// Creates a new mutable [PositionalMixedParamDocDictionary].
+  MutablePositionalMixedParamDocDictionary(String a, [String? b])
+    : super(MutableDictionary()) {
+    this.a = a;
+    if (b != null) {
+      this.b = b;
+    }
+  }
+
+  MutablePositionalMixedParamDocDictionary.internal(super.internal);
+
+  set a(String value) {
+    final promoted = TypedDataHelpers.stringConverter.promote(value);
+    TypedDataHelpers.writeProperty(
+      internal: internal,
+      key: 'a',
+      value: promoted,
+      converter: TypedDataHelpers.stringConverter,
+    );
+  }
+
+  set b(String? value) {
+    final promoted = value == null
+        ? null
+        : TypedDataHelpers.stringConverter.promote(value);
+    TypedDataHelpers.writeNullableProperty(
+      internal: internal,
+      key: 'b',
+      value: promoted,
+      converter: TypedDataHelpers.stringConverter,
+    );
+  }
+}
+
+mixin _$NamedParamDoc {
   String get a;
 }
 
-abstract class _NamedParamDocImplBase<I extends Document>
+abstract class NamedParamDocDocument
+    implements NamedParamDoc, TypedDocumentObject<MutableNamedParamDoc> {}
+
+abstract class _NamedParamDocDocumentImplBase<I extends Document>
     with _$NamedParamDoc
-    implements NamedParamDoc {
-  _NamedParamDocImplBase(this.internal);
+    implements NamedParamDocDocument {
+  _NamedParamDocDocumentImplBase(this.internal);
 
   @override
   final I internal;
@@ -287,13 +573,13 @@ abstract class _NamedParamDocImplBase<I extends Document>
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
-class ImmutableNamedParamDoc extends _NamedParamDocImplBase {
+class ImmutableNamedParamDoc extends _NamedParamDocDocumentImplBase {
   ImmutableNamedParamDoc.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is NamedParamDoc &&
+      other is NamedParamDocDocument &&
           runtimeType == other.runtimeType &&
           internal == other.internal;
 
@@ -302,8 +588,13 @@ class ImmutableNamedParamDoc extends _NamedParamDocImplBase {
 }
 
 /// Mutable version of [NamedParamDoc].
-class MutableNamedParamDoc extends _NamedParamDocImplBase<MutableDocument>
-    implements TypedMutableDocumentObject<NamedParamDoc, MutableNamedParamDoc> {
+class MutableNamedParamDoc
+    extends _NamedParamDocDocumentImplBase<MutableDocument>
+    implements
+        TypedMutableDocumentObject<
+          NamedParamDocDocument,
+          MutableNamedParamDoc
+        > {
   /// Creates a new mutable [NamedParamDoc].
   MutableNamedParamDoc({required String a}) : super(MutableDocument({})) {
     this.a = a;
@@ -322,15 +613,100 @@ class MutableNamedParamDoc extends _NamedParamDocImplBase<MutableDocument>
   }
 }
 
-mixin _$NamedOptionalParamDoc
-    implements TypedDocumentObject<MutableNamedOptionalParamDoc> {
+mixin _$NamedParamDocDictionary
+    implements TypedDictionaryObject<MutableNamedParamDocDictionary> {
+  String get a;
+}
+
+abstract class NamedParamDocDictionary
+    with _$NamedParamDocDictionary
+    implements NamedParamDoc {}
+
+abstract class _NamedParamDocDictionaryImplBase<I extends Dictionary>
+    with _$NamedParamDocDictionary
+    implements NamedParamDocDictionary {
+  _NamedParamDocDictionaryImplBase(this.internal);
+
+  @override
+  final I internal;
+
+  @override
+  String get a => TypedDataHelpers.readProperty(
+    internal: internal,
+    name: 'a',
+    key: 'a',
+    converter: TypedDataHelpers.stringConverter,
+  );
+
+  @override
+  MutableNamedParamDocDictionary toMutable() =>
+      MutableNamedParamDocDictionary.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => TypedDataHelpers.renderString(
+    indent: indent,
+    className: 'NamedParamDocDictionary',
+    fields: {'a': a},
+  );
+}
+
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
+class ImmutableNamedParamDocDictionary
+    extends _NamedParamDocDictionaryImplBase {
+  ImmutableNamedParamDocDictionary.internal(super.internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is NamedParamDocDictionary &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
+}
+
+/// Mutable version of [NamedParamDocDictionary].
+class MutableNamedParamDocDictionary
+    extends _NamedParamDocDictionaryImplBase<MutableDictionary>
+    implements
+        TypedMutableDictionaryObject<
+          NamedParamDocDictionary,
+          MutableNamedParamDocDictionary
+        > {
+  /// Creates a new mutable [NamedParamDocDictionary].
+  MutableNamedParamDocDictionary({required String a})
+    : super(MutableDictionary()) {
+    this.a = a;
+  }
+
+  MutableNamedParamDocDictionary.internal(super.internal);
+
+  set a(String value) {
+    final promoted = TypedDataHelpers.stringConverter.promote(value);
+    TypedDataHelpers.writeProperty(
+      internal: internal,
+      key: 'a',
+      value: promoted,
+      converter: TypedDataHelpers.stringConverter,
+    );
+  }
+}
+
+mixin _$NamedOptionalParamDoc {
   String? get a;
 }
 
-abstract class _NamedOptionalParamDocImplBase<I extends Document>
+abstract class NamedOptionalParamDocDocument
+    implements
+        NamedOptionalParamDoc,
+        TypedDocumentObject<MutableNamedOptionalParamDoc> {}
+
+abstract class _NamedOptionalParamDocDocumentImplBase<I extends Document>
     with _$NamedOptionalParamDoc
-    implements NamedOptionalParamDoc {
-  _NamedOptionalParamDocImplBase(this.internal);
+    implements NamedOptionalParamDocDocument {
+  _NamedOptionalParamDocDocumentImplBase(this.internal);
 
   @override
   final I internal;
@@ -357,13 +733,14 @@ abstract class _NamedOptionalParamDocImplBase<I extends Document>
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
-class ImmutableNamedOptionalParamDoc extends _NamedOptionalParamDocImplBase {
+class ImmutableNamedOptionalParamDoc
+    extends _NamedOptionalParamDocDocumentImplBase {
   ImmutableNamedOptionalParamDoc.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is NamedOptionalParamDoc &&
+      other is NamedOptionalParamDocDocument &&
           runtimeType == other.runtimeType &&
           internal == other.internal;
 
@@ -373,10 +750,10 @@ class ImmutableNamedOptionalParamDoc extends _NamedOptionalParamDocImplBase {
 
 /// Mutable version of [NamedOptionalParamDoc].
 class MutableNamedOptionalParamDoc
-    extends _NamedOptionalParamDocImplBase<MutableDocument>
+    extends _NamedOptionalParamDocDocumentImplBase<MutableDocument>
     implements
         TypedMutableDocumentObject<
-          NamedOptionalParamDoc,
+          NamedOptionalParamDocDocument,
           MutableNamedOptionalParamDoc
         > {
   /// Creates a new mutable [NamedOptionalParamDoc].
@@ -401,17 +778,106 @@ class MutableNamedOptionalParamDoc
   }
 }
 
-mixin _$NamedMixedParamDoc
-    implements TypedDocumentObject<MutableNamedMixedParamDoc> {
+mixin _$NamedOptionalParamDocDictionary
+    implements TypedDictionaryObject<MutableNamedOptionalParamDocDictionary> {
+  String? get a;
+}
+
+abstract class NamedOptionalParamDocDictionary
+    with _$NamedOptionalParamDocDictionary
+    implements NamedOptionalParamDoc {}
+
+abstract class _NamedOptionalParamDocDictionaryImplBase<I extends Dictionary>
+    with _$NamedOptionalParamDocDictionary
+    implements NamedOptionalParamDocDictionary {
+  _NamedOptionalParamDocDictionaryImplBase(this.internal);
+
+  @override
+  final I internal;
+
+  @override
+  String? get a => TypedDataHelpers.readNullableProperty(
+    internal: internal,
+    name: 'a',
+    key: 'a',
+    converter: TypedDataHelpers.stringConverter,
+  );
+
+  @override
+  MutableNamedOptionalParamDocDictionary toMutable() =>
+      MutableNamedOptionalParamDocDictionary.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => TypedDataHelpers.renderString(
+    indent: indent,
+    className: 'NamedOptionalParamDocDictionary',
+    fields: {'a': a},
+  );
+}
+
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
+class ImmutableNamedOptionalParamDocDictionary
+    extends _NamedOptionalParamDocDictionaryImplBase {
+  ImmutableNamedOptionalParamDocDictionary.internal(super.internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is NamedOptionalParamDocDictionary &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
+}
+
+/// Mutable version of [NamedOptionalParamDocDictionary].
+class MutableNamedOptionalParamDocDictionary
+    extends _NamedOptionalParamDocDictionaryImplBase<MutableDictionary>
+    implements
+        TypedMutableDictionaryObject<
+          NamedOptionalParamDocDictionary,
+          MutableNamedOptionalParamDocDictionary
+        > {
+  /// Creates a new mutable [NamedOptionalParamDocDictionary].
+  MutableNamedOptionalParamDocDictionary({String? a})
+    : super(MutableDictionary()) {
+    if (a != null) {
+      this.a = a;
+    }
+  }
+
+  MutableNamedOptionalParamDocDictionary.internal(super.internal);
+
+  set a(String? value) {
+    final promoted = value == null
+        ? null
+        : TypedDataHelpers.stringConverter.promote(value);
+    TypedDataHelpers.writeNullableProperty(
+      internal: internal,
+      key: 'a',
+      value: promoted,
+      converter: TypedDataHelpers.stringConverter,
+    );
+  }
+}
+
+mixin _$NamedMixedParamDoc {
   String get a;
 
   String? get b;
 }
 
-abstract class _NamedMixedParamDocImplBase<I extends Document>
+abstract class NamedMixedParamDocDocument
+    implements
+        NamedMixedParamDoc,
+        TypedDocumentObject<MutableNamedMixedParamDoc> {}
+
+abstract class _NamedMixedParamDocDocumentImplBase<I extends Document>
     with _$NamedMixedParamDoc
-    implements NamedMixedParamDoc {
-  _NamedMixedParamDocImplBase(this.internal);
+    implements NamedMixedParamDocDocument {
+  _NamedMixedParamDocDocumentImplBase(this.internal);
 
   @override
   final I internal;
@@ -446,13 +912,13 @@ abstract class _NamedMixedParamDocImplBase<I extends Document>
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
-class ImmutableNamedMixedParamDoc extends _NamedMixedParamDocImplBase {
+class ImmutableNamedMixedParamDoc extends _NamedMixedParamDocDocumentImplBase {
   ImmutableNamedMixedParamDoc.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is NamedMixedParamDoc &&
+      other is NamedMixedParamDocDocument &&
           runtimeType == other.runtimeType &&
           internal == other.internal;
 
@@ -462,10 +928,10 @@ class ImmutableNamedMixedParamDoc extends _NamedMixedParamDocImplBase {
 
 /// Mutable version of [NamedMixedParamDoc].
 class MutableNamedMixedParamDoc
-    extends _NamedMixedParamDocImplBase<MutableDocument>
+    extends _NamedMixedParamDocDocumentImplBase<MutableDocument>
     implements
         TypedMutableDocumentObject<
-          NamedMixedParamDoc,
+          NamedMixedParamDocDocument,
           MutableNamedMixedParamDoc
         > {
   /// Creates a new mutable [NamedMixedParamDoc].
@@ -478,6 +944,112 @@ class MutableNamedMixedParamDoc
   }
 
   MutableNamedMixedParamDoc.internal(super.internal);
+
+  set a(String value) {
+    final promoted = TypedDataHelpers.stringConverter.promote(value);
+    TypedDataHelpers.writeProperty(
+      internal: internal,
+      key: 'a',
+      value: promoted,
+      converter: TypedDataHelpers.stringConverter,
+    );
+  }
+
+  set b(String? value) {
+    final promoted = value == null
+        ? null
+        : TypedDataHelpers.stringConverter.promote(value);
+    TypedDataHelpers.writeNullableProperty(
+      internal: internal,
+      key: 'b',
+      value: promoted,
+      converter: TypedDataHelpers.stringConverter,
+    );
+  }
+}
+
+mixin _$NamedMixedParamDocDictionary
+    implements TypedDictionaryObject<MutableNamedMixedParamDocDictionary> {
+  String get a;
+
+  String? get b;
+}
+
+abstract class NamedMixedParamDocDictionary
+    with _$NamedMixedParamDocDictionary
+    implements NamedMixedParamDoc {}
+
+abstract class _NamedMixedParamDocDictionaryImplBase<I extends Dictionary>
+    with _$NamedMixedParamDocDictionary
+    implements NamedMixedParamDocDictionary {
+  _NamedMixedParamDocDictionaryImplBase(this.internal);
+
+  @override
+  final I internal;
+
+  @override
+  String get a => TypedDataHelpers.readProperty(
+    internal: internal,
+    name: 'a',
+    key: 'a',
+    converter: TypedDataHelpers.stringConverter,
+  );
+
+  @override
+  String? get b => TypedDataHelpers.readNullableProperty(
+    internal: internal,
+    name: 'b',
+    key: 'b',
+    converter: TypedDataHelpers.stringConverter,
+  );
+
+  @override
+  MutableNamedMixedParamDocDictionary toMutable() =>
+      MutableNamedMixedParamDocDictionary.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => TypedDataHelpers.renderString(
+    indent: indent,
+    className: 'NamedMixedParamDocDictionary',
+    fields: {'a': a, 'b': b},
+  );
+}
+
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
+class ImmutableNamedMixedParamDocDictionary
+    extends _NamedMixedParamDocDictionaryImplBase {
+  ImmutableNamedMixedParamDocDictionary.internal(super.internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is NamedMixedParamDocDictionary &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
+}
+
+/// Mutable version of [NamedMixedParamDocDictionary].
+class MutableNamedMixedParamDocDictionary
+    extends _NamedMixedParamDocDictionaryImplBase<MutableDictionary>
+    implements
+        TypedMutableDictionaryObject<
+          NamedMixedParamDocDictionary,
+          MutableNamedMixedParamDocDictionary
+        > {
+  /// Creates a new mutable [NamedMixedParamDocDictionary].
+  MutableNamedMixedParamDocDictionary(String a, {String? b})
+    : super(MutableDictionary()) {
+    this.a = a;
+    if (b != null) {
+      this.b = b;
+    }
+  }
+
+  MutableNamedMixedParamDocDictionary.internal(super.internal);
 
   set a(String value) {
     final promoted = TypedDataHelpers.stringConverter.promote(value);

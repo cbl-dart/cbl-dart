@@ -21,7 +21,8 @@ done
 echo "Couchbase Server REST API is ready"
 
 echo "Initializing cluster..."
-curl -sf -X POST "http://${CBS_HOST}:${CBS_PORT}/clusterInit" \
+attempt=0
+until curl -sf -X POST "http://${CBS_HOST}:${CBS_PORT}/clusterInit" \
     -d "hostname=${CBS_CLUSTER_HOSTNAME}" \
     -d "services=kv,index,n1ql" \
     -d "memoryQuota=256" \
@@ -29,7 +30,15 @@ curl -sf -X POST "http://${CBS_HOST}:${CBS_PORT}/clusterInit" \
     -d "username=${CBS_ADMIN_USER}" \
     -d "password=${CBS_ADMIN_PASS}" \
     -d "port=SAME" \
-    -d "indexerStorageMode=plasma"
+    -d "indexerStorageMode=plasma"; do
+    attempt=$((attempt + 1))
+    if ((attempt > 10)); then
+        echo "Cluster initialization failed after 10 attempts"
+        exit 1
+    fi
+    echo "Cluster init attempt $attempt failed, retrying in 5s..."
+    sleep 5
+done
 
 echo "Setting index replicas to 0 for single-node cluster..."
 curl -sf -X POST "http://${CBS_HOST}:${CBS_PORT}/settings/indexes" \

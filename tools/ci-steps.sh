@@ -49,6 +49,36 @@ syncGatewayLogFile="$workspaceDir/.tmp/sync-gateway.log"
 
 # === Steps ===================================================================
 
+function startAndWaitForSyncGateway() {
+    local startCmd="$1"
+    local maxAttempts=3
+    local attempt=0
+
+    while true; do
+        attempt=$((attempt + 1))
+        : >"$syncGatewayLogFile"
+        ./packages/cbl_e2e_tests/couchbase-services.sh "$startCmd" \
+            >>"$syncGatewayLogFile" 2>&1 &
+        local sgPid=$!
+
+        if ./packages/cbl_e2e_tests/couchbase-services.sh waitForSyncGateway; then
+            return 0
+        fi
+
+        # Kill the failed Sync Gateway process before retrying.
+        kill "$sgPid" 2>/dev/null || true
+        wait "$sgPid" 2>/dev/null || true
+
+        if ((attempt >= maxAttempts)); then
+            echo "Sync Gateway failed to start after $maxAttempts attempts"
+            exit 1
+        fi
+
+        echo "Retrying Sync Gateway start (attempt $((attempt + 1))/$maxAttempts)..."
+        sleep 5
+    done
+}
+
 function startCouchbaseServices() {
     mkdir -p "$(dirname "$syncGatewayLogFile")"
 
@@ -57,19 +87,13 @@ function startCouchbaseServices() {
         ./packages/cbl_e2e_tests/couchbase-services.sh startCouchbaseServerMacOS
         ./packages/cbl_e2e_tests/couchbase-services.sh waitForCouchbaseServer
         ./packages/cbl_e2e_tests/couchbase-services.sh initCouchbaseServer
-        : >"$syncGatewayLogFile"
-        ./packages/cbl_e2e_tests/couchbase-services.sh startSyncGatewayMacOS \
-            >>"$syncGatewayLogFile" 2>&1 &
-        ./packages/cbl_e2e_tests/couchbase-services.sh waitForSyncGateway
+        startAndWaitForSyncGateway startSyncGatewayMacOS
         ;;
     MINGW64* | MSYS* | CYGWIN*)
         ./packages/cbl_e2e_tests/couchbase-services.sh startCouchbaseServerWindows
         ./packages/cbl_e2e_tests/couchbase-services.sh waitForCouchbaseServer
         ./packages/cbl_e2e_tests/couchbase-services.sh initCouchbaseServer
-        : >"$syncGatewayLogFile"
-        ./packages/cbl_e2e_tests/couchbase-services.sh startSyncGatewayWindows \
-            >>"$syncGatewayLogFile" 2>&1 &
-        ./packages/cbl_e2e_tests/couchbase-services.sh waitForSyncGateway
+        startAndWaitForSyncGateway startSyncGatewayWindows
         ;;
     *)
         ./packages/cbl_e2e_tests/couchbase-services.sh setupDocker

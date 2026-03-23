@@ -7,7 +7,7 @@ import '../fixtures/typed_property.dart';
 import '../test_utils.dart';
 
 void main() {
-  setUpAll(initCouchbaseLiteForTest);
+  setUpAll(configureCouchbaseLiteForTest);
 
   test('custom data name', () {
     expect(

@@ -6,7 +6,6 @@ import 'package:meta/meta.dart';
 import 'database.dart';
 import 'document.dart';
 import 'query.dart';
-import 'support/isolate.dart';
 import 'support/tracing.dart';
 
 TraceDataHandler get _onTraceData => onTraceData;
@@ -28,10 +27,7 @@ TraceDataHandler get _onTraceData => onTraceData;
 ///
 /// # Lifecycle
 ///
-/// The [initialize] method is called when an isolate is [install]ed, if CBL
-/// Dart has already been initialized. If CBL Dart has not been initialized when
-/// [install] is called, the delegate is initialized after CBL Dart has been
-/// initialized.
+/// The [initialize] method is called when a delegate is [install]ed.
 ///
 /// The [close] method is called when a delegate is [uninstall]ed.
 ///
@@ -93,7 +89,7 @@ abstract base class TracingDelegate {
 
     _hasBeenInstalled = true;
     currentTracingDelegate = delegate;
-    await addPostIsolateInitTask(delegate.initialize);
+    await delegate.initialize();
   }
 
   /// Uninstalls a [TracingDelegate] from the current isolate.
@@ -112,7 +108,6 @@ abstract base class TracingDelegate {
 
     _hasBeenInstalled = false;
     currentTracingDelegate = const NoopTracingDelegate();
-    await removePostIsolateInitTask(delegate.initialize);
     await delegate.close();
   }
 

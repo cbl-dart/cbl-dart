@@ -90,7 +90,7 @@ class DocumentToPlainMap extends BenchmarkBase {
 }
 
 void main() async {
-  await initCouchbaseLite();
+  await configureCouchbaseLite();
 
   final benchmarks = [DocumentPropertyLookup(), DocumentToPlainMap()];
 

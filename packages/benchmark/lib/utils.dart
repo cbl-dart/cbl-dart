@@ -11,6 +11,8 @@ String loadFixtureAsString(String name) =>
 
 Object? loadFixtureAsJson(String name) => jsonDecode(loadFixtureAsString(name));
 
-Future<void> initCouchbaseLite() async {
-  await CouchbaseLite.init();
+Future<void> configureCouchbaseLite() async {
+  Database.defaultDirectory = Directory.systemTemp
+      .createTempSync('cbl_benchmark')
+      .path;
 }

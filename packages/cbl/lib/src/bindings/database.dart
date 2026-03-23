@@ -1,6 +1,7 @@
 import 'dart:ffi';
 import 'dart:typed_data';
 
+import '../support/isolate.dart';
 import 'base.dart';
 import 'cblite.dart' as cblite;
 import 'cblitedart.dart' as cblitedart;
@@ -74,54 +75,64 @@ final class DatabaseBindings {
     cblitedart.addresses.CBLDart_CBLDatabase_Release.cast(),
   );
 
-  static CBLEncryptionKey encryptionKeyFromPassword(String password) =>
-      withGlobalArena(() {
-        final key = globalArena<cblite.CBLEncryptionKey>();
-        if (!cblite.CBLEncryptionKey_FromPassword(
-          key,
-          password.makeGlobalFLString(),
-        )) {
-          throw createCouchbaseLiteException(
-            domain: CBLErrorDomain.couchbaseLite,
-            code: CBLErrorCode.unexpectedError,
-            message: 'There was a problem deriving the encryption key.',
-          );
-        }
+  static CBLEncryptionKey encryptionKeyFromPassword(String password) {
+    ensureInitializedForCurrentIsolate();
+    return withGlobalArena(() {
+      final key = globalArena<cblite.CBLEncryptionKey>();
+      if (!cblite.CBLEncryptionKey_FromPassword(
+        key,
+        password.makeGlobalFLString(),
+      )) {
+        throw createCouchbaseLiteException(
+          domain: CBLErrorDomain.couchbaseLite,
+          code: CBLErrorCode.unexpectedError,
+          message: 'There was a problem deriving the encryption key.',
+        );
+      }
 
-        return _readEncryptionKey(key.ref);
-      });
+      return _readEncryptionKey(key.ref);
+    });
+  }
 
   static bool copyDatabase(
     String from,
     String name,
     CBLDatabaseConfiguration? config,
-  ) => withGlobalArena(
-    () => cblitedart.CBLDart_CBL_CopyDatabase(
-      from.toFLString(),
-      name.toFLString(),
-      _createConfig(config),
-      globalCBLError,
-    ).checkError(),
-  );
+  ) {
+    ensureInitializedForCurrentIsolate();
+    return withGlobalArena(
+      () => cblitedart.CBLDart_CBL_CopyDatabase(
+        from.toFLString(),
+        name.toFLString(),
+        _createConfig(config),
+        globalCBLError,
+      ).checkError(),
+    );
+  }
 
-  static bool deleteDatabase(String name, String? inDirectory) =>
-      withGlobalArena(
-        () => cblite.CBL_DeleteDatabase(
-          name.toFLString(),
-          inDirectory.toFLString(),
-          globalCBLError,
-        ).checkError(),
-      );
+  static bool deleteDatabase(String name, String? inDirectory) {
+    ensureInitializedForCurrentIsolate();
+    return withGlobalArena(
+      () => cblite.CBL_DeleteDatabase(
+        name.toFLString(),
+        inDirectory.toFLString(),
+        globalCBLError,
+      ).checkError(),
+    );
+  }
 
-  static bool databaseExists(String name, String? inDirectory) =>
-      withGlobalArena(
-        () => cblite.CBL_DatabaseExists(
-          name.toFLString(),
-          inDirectory.toFLString(),
-        ),
-      );
+  static bool databaseExists(String name, String? inDirectory) {
+    ensureInitializedForCurrentIsolate();
+    return withGlobalArena(
+      () => cblite.CBL_DatabaseExists(
+        name.toFLString(),
+        inDirectory.toFLString(),
+      ),
+    );
+  }
 
   static CBLDatabaseConfiguration defaultConfiguration() {
+    ensureInitializedForCurrentIsolate();
     final config = cblitedart.CBLDart_CBLDatabaseConfiguration_Default();
     return CBLDatabaseConfiguration(
       directory: config.directory.toDartString()!,
@@ -132,18 +143,21 @@ final class DatabaseBindings {
   static Pointer<cblite.CBLDatabase> open(
     String name,
     CBLDatabaseConfiguration? config,
-  ) => withGlobalArena(() {
-    final nameFlStr = name.toFLString();
-    final cblConfig = _createConfig(config);
-    return nativeCallTracePoint(
-      TracedNativeCall.databaseOpen,
-      () => cblitedart.CBLDart_CBLDatabase_Open(
-        nameFlStr,
-        cblConfig,
-        globalCBLError,
-      ),
-    ).checkError();
-  });
+  ) {
+    ensureInitializedForCurrentIsolate();
+    return withGlobalArena(() {
+      final nameFlStr = name.toFLString();
+      final cblConfig = _createConfig(config);
+      return nativeCallTracePoint(
+        TracedNativeCall.databaseOpen,
+        () => cblitedart.CBLDart_CBLDatabase_Open(
+          nameFlStr,
+          cblConfig,
+          globalCBLError,
+        ),
+      ).checkError();
+    });
+  }
 
   static void bindToDartObject(
     Finalizable object,

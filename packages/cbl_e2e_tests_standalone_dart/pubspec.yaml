@@ -8,7 +8,7 @@ resolution: workspace
 
 dependencies:
   benchmark_harness: ^2.1.0
-  cbl: ^4.0.0-dev.3
+  cbl: ^4.0.0-dev.4
   collection: ^1.16.0
   crypto: ^3.0.1
   http: ^1.0.0

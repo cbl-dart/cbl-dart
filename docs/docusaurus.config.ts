@@ -1,102 +1,144 @@
 import type * as Preset from '@docusaurus/preset-classic'
 import type { Config } from '@docusaurus/types'
+import { execSync } from 'node:child_process'
 import { themes as prismThemes } from 'prism-react-renderer'
 import { codeLinks } from './src/remark/code-links'
 import { figureLinks } from './src/remark/figure-links'
 import { metaHeader } from './src/remark/meta-header'
 
-export default {
-  title: 'Couchbase Lite for Dart & Flutter',
-  tagline: 'Couchbase Lite for Dart & Flutter',
-  url: 'https://cbl-dart.dev',
-  baseUrl: '/',
-  onBrokenLinks: 'throw',
-  trailingSlash: true,
-  favicon: 'img/logo.png',
+/**
+ * Packages for which to resolve the latest version from git tags at build
+ * time. Tags must follow the `<package>-v<version>` convention. The versions
+ * are made available via `siteConfig.customFields.pubPackageVersions`.
+ */
+const pubPackages = ['cbl', 'cbl_generator']
 
-  organizationName: 'cbl-dart',
-  projectName: 'cbl-dart',
+function getLatestVersionFromGitTags(
+  packages: string[],
+): Record<string, string> {
+  const versions: Record<string, string> = {}
+  for (const pkg of packages) {
+    const tag = execSync(
+      `git tag --list '${pkg}-v*' --sort=-version:refname | head -1`,
+      { encoding: 'utf-8' },
+    ).trim()
+    if (!tag) {
+      throw new Error(`No git tag found for package "${pkg}".`)
+    }
+    // Strip the `<package>-v` prefix to get the version.
+    versions[pkg] = tag.slice(pkg.length + 2)
+  }
+  return versions
+}
 
-  i18n: {
-    defaultLocale: 'en',
-    locales: ['en'],
-  },
+export default function createConfig(): Config {
+  const pubPackageVersions = getLatestVersionFromGitTags(pubPackages)
 
-  markdown: {
-    mdx1Compat: {
-      comments: false,
-      admonitions: false,
-      headingIds: false,
+  return {
+    title: 'Couchbase Lite for Dart & Flutter',
+    tagline: 'Couchbase Lite for Dart & Flutter',
+    url: 'https://cbl-dart.dev',
+    baseUrl: '/',
+    onBrokenLinks: 'throw',
+    trailingSlash: true,
+    favicon: 'img/logo.png',
+
+    organizationName: 'cbl-dart',
+    projectName: 'cbl-dart',
+
+    customFields: {
+      pubPackageVersions,
     },
-    hooks: {
-      onBrokenMarkdownLinks: 'warn',
-    },
-  },
 
-  presets: [
-    [
-      'classic',
-      {
-        docs: {
-          sidebarPath: './sidebars.ts',
-          routeBasePath: '/',
-          editUrl: 'https://github.com/cbl-dart/cbl-dart/tree/main/docs/',
-          remarkPlugins: [figureLinks, metaHeader, codeLinks],
-        },
-        theme: {
-          customCss: './src/css/custom.css',
-        },
-        sitemap: {
-          changefreq: 'hourly',
-        },
-        gtag: {
-          trackingID: 'G-MX69D45K0L',
-          anonymizeIP: true,
-        },
-        googleTagManager: {
-          containerId: 'GTM-KNLPFXH',
-        },
-      } satisfies Preset.Options,
-    ],
-  ],
-
-  themeConfig: {
-    colorMode: {
-      respectPrefersColorScheme: true,
+    i18n: {
+      defaultLocale: 'en',
+      locales: ['en'],
     },
-    navbar: {
-      title: 'Couchbase Lite for Dart',
-      logo: {
-        src: '/img/logo.png',
-        alt: 'Couchbase Logo',
+
+    markdown: {
+      mdx1Compat: {
+        comments: false,
+        admonitions: false,
+        headingIds: false,
       },
-      items: [
+      hooks: {
+        onBrokenMarkdownLinks: 'warn',
+      },
+    },
+
+    presets: [
+      [
+        'classic',
         {
-          href: 'https://github.com/cbl-dart/cbl-dart',
-          label: 'GitHub',
-          position: 'right',
-        },
+          docs: {
+            sidebarPath: './sidebars.ts',
+            routeBasePath: '/',
+            editUrl: 'https://github.com/cbl-dart/cbl-dart/tree/main/docs/',
+            remarkPlugins: [figureLinks, metaHeader, codeLinks],
+          },
+          theme: {
+            customCss: './src/css/custom.css',
+          },
+          sitemap: {
+            changefreq: 'hourly',
+          },
+          gtag: {
+            trackingID: 'G-MX69D45K0L',
+            anonymizeIP: true,
+          },
+          googleTagManager: {
+            containerId: 'GTM-KNLPFXH',
+          },
+        } satisfies Preset.Options,
       ],
-      hideOnScroll: true,
-    },
-    docs: {
-      sidebar: {
-        autoCollapseCategories: false,
+    ],
+
+    themeConfig: {
+      announcementBar: {
+        id: 'v4_release',
+        content:
+          '🎉 <b>Couchbase Lite for Dart v4 is here!</b> If you\'re upgrading from v3, check out the <a href="/migration-v3-to-v4/">migration guide</a>.',
+        backgroundColor: '#e6f2ff',
+        textColor: '#003d75',
+        isCloseable: true,
       },
-    },
-    footer: {
-      style: 'dark',
-      copyright: `Copyright © ${new Date().getFullYear()} Couchbase Lite for Dart`,
-    },
-    prism: {
-      theme: prismThemes.github,
-      darkTheme: prismThemes.dracula,
-      additionalLanguages: ['bash', 'diff', 'json', 'dart'],
-    },
-    algolia: {
-      appId: 'T2JGR5IO20',
-      apiKey: 'af3e6f09aef0030c6ae7fc5c602e4cfa',
-      indexName: 'cbl-dart',
-    },
-  } satisfies Preset.ThemeConfig,
-} satisfies Config
+      colorMode: {
+        respectPrefersColorScheme: true,
+      },
+      navbar: {
+        title: 'Couchbase Lite for Dart',
+        logo: {
+          src: '/img/logo.png',
+          alt: 'Couchbase Logo',
+        },
+        items: [
+          {
+            href: 'https://github.com/cbl-dart/cbl-dart',
+            label: 'GitHub',
+            position: 'right',
+          },
+        ],
+        hideOnScroll: true,
+      },
+      docs: {
+        sidebar: {
+          autoCollapseCategories: false,
+        },
+      },
+      footer: {
+        style: 'dark',
+        copyright: `Copyright © ${new Date().getFullYear()} Couchbase Lite for Dart`,
+      },
+      prism: {
+        theme: prismThemes.github,
+        darkTheme: prismThemes.dracula,
+        additionalLanguages: ['bash', 'diff', 'json', 'dart'],
+      },
+      algolia: {
+        appId: 'T2JGR5IO20',
+        apiKey: 'af3e6f09aef0030c6ae7fc5c602e4cfa',
+        indexName: 'cbl-dart',
+      },
+    } satisfies Preset.ThemeConfig,
+  }
+}

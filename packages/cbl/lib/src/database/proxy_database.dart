@@ -21,6 +21,7 @@ import '../service/cbl_service_api.dart';
 import '../service/cbl_worker.dart';
 import '../service/proxy_object.dart';
 import '../support/edition.dart';
+import '../support/isolate.dart';
 import '../support/listener_token.dart';
 import '../support/resource.dart';
 import '../support/streams.dart';
@@ -286,13 +287,13 @@ final class WorkerDatabase extends ProxyDatabase {
 
   static Future<void> remove(String name, {String? directory}) =>
       CblWorker.executeCall(
-        RemoveDatabase(name, directory),
+        RemoveDatabase(name, directory ?? defaultDatabaseDirectory),
         debugName: 'WorkerDatabase.remove',
       );
 
   static Future<bool> exists(String name, {String? directory}) =>
       CblWorker.executeCall(
-        DatabaseExists(name, directory),
+        DatabaseExists(name, directory ?? defaultDatabaseDirectory),
         debugName: 'WorkerDatabase.exists',
       );
 
@@ -301,7 +302,7 @@ final class WorkerDatabase extends ProxyDatabase {
     required String name,
     DatabaseConfiguration? config,
   }) => CblWorker.executeCall(
-    CopyDatabase(from, name, config),
+    CopyDatabase(from, name, config ?? DatabaseConfiguration()),
     debugName: 'WorkerDatabase.copy',
   );
 

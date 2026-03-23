@@ -3,10 +3,11 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 
 import '../bindings.dart';
-import '../couchbase_lite.dart';
 import '../database.dart';
 import '../database/database.dart';
+import '../support/listener_token.dart';
 import '../support/resource.dart';
+import '../support/streams.dart';
 import 'parameters.dart';
 import 'query_change.dart';
 import 'result.dart';

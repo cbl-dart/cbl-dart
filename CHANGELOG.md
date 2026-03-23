@@ -3,6 +3,37 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2026-03-17
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`cbl` - `v4.0.0-dev.4`](#cbl---v400-dev4)
+ - [`cbl_generator` - `v0.4.0-dev.4`](#cbl_generator---v040-dev4)
+ - [`cbl_sentry` - `v3.0.0-dev.4`](#cbl_sentry---v300-dev4)
+
+Packages with dependency updates only:
+
+> Packages listed below depend on other packages in this workspace that have had changes. Their versions have been incremented to bump the minimum dependency versions of the packages they depend upon in this project.
+
+ - `cbl_generator` - `v0.4.0-dev.4`
+ - `cbl_sentry` - `v3.0.0-dev.4`
+
+---
+
+#### `cbl` - `v4.0.0-dev.4`
+
+ - **FIX**(cbl): upgrade native_toolchain_c to fix Android libc++ linking ([#919](https://github.com/cbl-dart/cbl-dart/issues/919)). ([8c374fc0](https://github.com/cbl-dart/cbl-dart/commit/8c374fc00c9dcebe3f5a169bcd4f634e6fe8ce69))
+ - **FIX**(cbl): add reachability fence for collections in replicator creation ([#915](https://github.com/cbl-dart/cbl-dart/issues/915)). ([bdafb468](https://github.com/cbl-dart/cbl-dart/commit/bdafb46810f1a9958a159f8c0b5cb0d98b52302f))
+
+
 ## 2026-03-16
 
 ### Changes

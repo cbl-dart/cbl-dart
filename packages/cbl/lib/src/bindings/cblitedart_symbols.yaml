@@ -59,16 +59,14 @@ files:
         name: CBLDart_CBLDatabase_Open
       c:@F@CBLDart_CBLDatabase_Release:
         name: CBLDart_CBLDatabase_Release
+      c:@F@CBLDart_CBLLog_AddCallback:
+        name: CBLDart_CBLLog_AddCallback
       c:@F@CBLDart_CBLLog_GetFileSink:
         name: CBLDart_CBLLog_GetFileSink
-      c:@F@CBLDart_CBLLog_SetCallback:
-        name: CBLDart_CBLLog_SetCallback
       c:@F@CBLDart_CBLLog_SetCallbackLevel:
         name: CBLDart_CBLLog_SetCallbackLevel
       c:@F@CBLDart_CBLLog_SetFileSink:
         name: CBLDart_CBLLog_SetFileSink
-      c:@F@CBLDart_CBLLog_SetSentryBreadcrumbs:
-        name: CBLDart_CBLLog_SetSentryBreadcrumbs
       c:@F@CBLDart_CBLQuery_AddChangeListener:
         name: CBLDart_CBLQuery_AddChangeListener
       c:@F@CBLDart_CBLReplicator_AddChangeListener:

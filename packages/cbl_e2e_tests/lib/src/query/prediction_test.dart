@@ -35,7 +35,7 @@ void main() {
   apiTest('register model in separate isolate', () async {
     final modelIsolate = await isolate.Isolate.spawn(
       uppercaseModelIsolate,
-      CouchbaseLite.context,
+      null,
     );
     addTearDown(modelIsolate.kill);
 
@@ -93,8 +93,7 @@ void registerModelForTest(String name, PredictiveModel model) {
   addTearDown(() => Database.prediction.unregisterModel(name));
 }
 
-Future<void> uppercaseModelIsolate(Object context) async {
-  await CouchbaseLite.initSecondary(context);
+void uppercaseModelIsolate(Object? _) {
   Database.prediction.registerModel('uppercase', UppercaseModel());
 }
 

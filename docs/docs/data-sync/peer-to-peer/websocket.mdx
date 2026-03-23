@@ -1,15 +1,17 @@
 ---
-title: Data Sync Peer-to-Peer
 description:
-  Couchbase Lite database Peer-to-Peer Synchronization concepts using websockets
+  Active-passive peer-to-peer synchronization over WebSockets for Couchbase Lite
+  for Dart.
 related_content:
   - name: Passive Peer
     url: /data-sync/peer-to-peer/passive-peer
   - name: Active Peer
     url: /data-sync/peer-to-peer/active-peer
+  - name: Data Sync using Sync Gateway
+    url: /data-sync/replication
 ---
 
-# Data Sync Peer-to-Peer
+# Active-Passive Peer-to-Peer Sync
 
 <EnterpriseFeatureCallout />
 
@@ -23,18 +25,13 @@ Couchbase Lite's Peer-to-Peer data synchronization provides:
 
 - Instant WebSocket-based listener for use in Peer-to-Peer applications
   communicating over IP-based networks.
-
 - Simple application development, enabling sync with a short amount of code.
-
 - Optimized network bandwidth usage and reduced data transfer costs with Delta
   Sync support.
-
 - Securely sync data with built-in support for Transport Layer Security (TLS)
   encryption and authentication support.
-
 - Document management. Reducing conflicts in concurrent writes with built-in
   conflict management support.
-
 - Built-in network resiliency.
 
 ## Overview
@@ -72,6 +69,13 @@ Here you can see configuration involves a
 [Passive Peer](/data-sync/peer-to-peer/passive-peer) and an
 [Active Peer](/data-sync/peer-to-peer/active-peer) and a user-friendly Listener
 configuration in [Basic Setup](#basic-setup).
+
+### Active-Passive Peer-to-Peer
+
+- Supports Wi-Fi and other IP-based network transports over WebSockets.
+
+For the step-by-step listener and replicator setup for this transport mode, see
+[Passive Peer](./passive-peer.mdx) and [Active Peer](./active-peer.mdx).
 
 ## Features
 
@@ -355,6 +359,13 @@ The `api|UrlEndpointListener` supports two authentication mechanisms:
 - Certificate Authentication, which authenticates clients using client
   certificates, and is only available when TLS is enabled.
 
+For peer-to-peer sync, that typically maps to:
+
+- `api|ListenerPasswordAuthenticator` on the listener and
+  `api|BasicAuthenticator` on the replicator.
+- `api|ListenerCertificateAuthenticator` on the listener and
+  `api|ClientCertificateAuthenticator` on the replicator.
+
 ### Using Secure Storage
 
 TLS and its associated keys and certificates might require using secure storage
@@ -380,10 +391,26 @@ to store keys and certificates.
 | **Notes**               | Use kSecAttrLabel of the SecCertificate to store the TLSIdentity's label                  |
 | **Reference**           | [Keychain services](https://developer.apple.com/documentation/security/keychain_services) |
 
+#### Android
+
+| Field                   | Value                                                                                                                   |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| **Key Storage**         | Application-defined                                                                                                     |
+| **Certificate Storage** | Application-defined                                                                                                     |
+| **Notes**               | Persisted `TlsIdentity`s are not currently supported. Use `KeyPair.fromExternal` if you need custom secure key storage. |
+
+#### Linux
+
+| Field                   | Value                                                                                                                   |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| **Key Storage**         | Application-defined                                                                                                     |
+| **Certificate Storage** | Application-defined                                                                                                     |
+| **Notes**               | Persisted `TlsIdentity`s are not currently supported. Use `KeyPair.fromExternal` if you need custom secure key storage. |
+
 #### Windows
 
-| Field                   | Value                                                                               |
-| ----------------------- | ----------------------------------------------------------------------------------- |
-| **Key Storage**         | Windows CNG Key Storage Provider                                                    |
-| **Certificate Storage** | Windows Certificate Store                                                           |
-| **Reference**           | [CNG Key Storage](https://docs.microsoft.com/en-us/windows/win32/seccng/cng-portal) |
+| Field                   | Value                                                                                |
+| ----------------------- | ------------------------------------------------------------------------------------ |
+| **Key Storage**         | Windows CNG Key Storage Provider                                                     |
+| **Certificate Storage** | Windows Certificate Store                                                            |
+| **Reference**           | [CNG Key Storage](https://learn.microsoft.com/en-us/windows/win32/seccng/cng-portal) |

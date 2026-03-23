@@ -7,7 +7,7 @@ import '../fixtures/builtin_types.dart';
 import '../test_utils.dart';
 
 void main() {
-  setUpAll(initCouchbaseLiteForTest);
+  setUpAll(configureCouchbaseLiteForTest);
 
   test('create instance with value and retrieve it', () {
     expect(StringDict('a').value, 'a');

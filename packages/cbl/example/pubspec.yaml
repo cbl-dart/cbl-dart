@@ -7,4 +7,4 @@ environment:
 resolution: workspace
 
 dependencies:
-  cbl: ^4.0.0-dev.3
+  cbl: ^4.0.0-dev.4

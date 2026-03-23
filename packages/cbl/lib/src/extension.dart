@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 
 import 'bindings.dart';
 import 'bindings/cblite_vector_search.dart' as vector_search;
+import 'support/isolate.dart';
 
 /// Status of the vector search extension on the current system.
 enum VectorSearchStatus {
@@ -36,6 +37,7 @@ abstract final class Extension {
   /// Throws `DatabaseException` if the vector search library is bundled but its
   /// file path cannot be resolved.
   static VectorSearchStatus get vectorSearchStatus {
+    ensureInitializedForCurrentIsolate();
     if (_vectorSearchEnabled) {
       return VectorSearchStatus.enabled;
     }
@@ -65,6 +67,7 @@ abstract final class Extension {
   /// enable.
   @useResult
   static VectorSearchStatus enableVectorSearch() {
+    ensureInitializedForCurrentIsolate();
     final status = vectorSearchStatus;
     if (status != VectorSearchStatus.available) {
       return status;

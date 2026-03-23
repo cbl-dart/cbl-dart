@@ -7,15 +7,12 @@ import 'package:cbl_sentry/src/sentry_tracing_delegate.dart';
 import 'package:sentry/sentry.dart';
 import 'package:test/test.dart';
 
-import 'utils/cbl.dart';
 import 'utils/mock_collection.dart';
 import 'utils/mock_hub.dart';
 import 'utils/mock_query.dart';
 import 'utils/mock_span.dart';
 
 void main() {
-  setUpAll(initCouchbaseLiteForTest);
-
   late MockHub hub;
 
   setUp(() {

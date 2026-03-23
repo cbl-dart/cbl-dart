@@ -1,5 +1,6 @@
-// dart format width=80
 // GENERATED CODE - DO NOT MODIFY BY HAND
+// dart format width=80
+
 // ignore_for_file: avoid_classes_with_only_static_members, lines_longer_than_80_chars, directives_ordering, avoid_redundant_argument_values
 
 // **************************************************************************
@@ -25,10 +26,16 @@ class AppDatabase extends $AppDatabase {
 
   static final _adapter = TypedDataRegistry(
     types: [
-      TypedDocumentMetadata<User, MutableUser>(
-        dartName: 'User',
+      TypedDocumentMetadata<UserDocument, MutableUser>(
+        dartName: 'UserDocument',
         factory: ImmutableUser.internal,
         mutableFactory: MutableUser.internal,
+        typeMatcher: const ValueTypeMatcher(path: ['type']),
+      ),
+      TypedDictionaryMetadata<UserDictionary, MutableUserDictionary>(
+        dartName: 'UserDictionary',
+        factory: ImmutableUserDictionary.internal,
+        mutableFactory: MutableUserDictionary.internal,
         typeMatcher: const ValueTypeMatcher(path: ['type']),
       ),
       TypedDictionaryMetadata<PersonalName, MutablePersonalName>(

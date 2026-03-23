@@ -24,7 +24,16 @@ final class _TypedDictionaryGeneratorBase<T> extends GeneratorForAnnotation<T> {
     final model = await TypedDataAnalyzer(
       buildStep.resolver,
     ).buildTypedDataClassModel(element, kind: kind);
-    return TypeDataCodeBuilder(object: model).build();
+
+    final documentCode = TypeDataCodeBuilder(object: model).build();
+
+    if (kind == TypedDataObjectKind.document) {
+      final companionModel = model.toCompanionDictionary();
+      final companionCode = TypeDataCodeBuilder(object: companionModel).build();
+      return '$documentCode\n$companionCode';
+    }
+
+    return documentCode;
   }
 }
 
