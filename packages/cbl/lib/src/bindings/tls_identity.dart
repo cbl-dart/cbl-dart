@@ -132,15 +132,15 @@ final class TlsIdentityBindings {
     String key,
   ) {
     ensureInitializedForCurrentIsolate();
+    // Use arena-allocated buffer instead of TypedData.address because
+    // .address combined with a struct return type triggers a Dart FFI bug
+    // on arm64 macOS where @ffi.Native(isLeaf: true) returns null.
     return withGlobalArena(() {
       final (:buf, :size) = encodeStringToArena(key, globalArena);
-      final flKey = globalArena<cblite.FLSlice>();
-      flKey.ref
-        ..buf = buf
-        ..size = size;
-      return cblite.CBLCert_SubjectNameComponent(
+      return cblitedart.CBLDart_CBLCert_SubjectNameComponent(
         pointer,
-        flKey.ref,
+        buf,
+        size,
       ).toDartStringAndRelease();
     });
   }
