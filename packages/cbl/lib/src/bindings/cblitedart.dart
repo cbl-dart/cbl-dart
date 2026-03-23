@@ -144,9 +144,6 @@ external void CBLDart_CBLLog_SetFileSink(ffi.Pointer<CBLFileLogSink> sink);
 @ffi.Native<NativeCBLDart_CBLLog_GetFileSink>(isLeaf: true)
 external ffi.Pointer<CBLFileLogSink> CBLDart_CBLLog_GetFileSink();
 
-@ffi.Native<NativeCBLDart_CBLLog_SetSentryBreadcrumbs>(isLeaf: true)
-external bool CBLDart_CBLLog_SetSentryBreadcrumbs(bool enabled);
-
 @ffi.Native<NativeCBLDart_CBLDatabaseConfiguration_Default>(isLeaf: true)
 external CBLDart_CBLDatabaseConfiguration
 CBLDart_CBLDatabaseConfiguration_Default();
@@ -558,9 +555,6 @@ typedef DartCBLDart_CBLLog_SetFileSink =
 typedef NativeCBLDart_CBLLog_GetFileSink =
     ffi.Pointer<CBLFileLogSink> Function();
 typedef DartCBLDart_CBLLog_GetFileSink = ffi.Pointer<CBLFileLogSink> Function();
-typedef NativeCBLDart_CBLLog_SetSentryBreadcrumbs =
-    ffi.Bool Function(ffi.Bool enabled);
-typedef DartCBLDart_CBLLog_SetSentryBreadcrumbs = bool Function(bool enabled);
 
 final class CBLDart_CBLEncryptionKey extends ffi.Struct {
   @ffi.Uint32()

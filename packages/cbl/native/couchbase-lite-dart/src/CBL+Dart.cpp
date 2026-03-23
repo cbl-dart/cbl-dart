@@ -8,7 +8,6 @@
 #include "AsyncCallback.h"
 #include "CBL+Dart.h"
 #include "CpuSupport.h"
-#include "Sentry.h"
 #include "Utils.h"
 #include "dart/dart_api.h"
 
@@ -242,21 +241,13 @@ static std::shared_mutex loggingMutex;
 static CBLDart::AsyncCallback* logCallback = nullptr;
 static CBLLogLevel logCallbackLevel = CBLLogSinks_CustomSink().level;
 static CBLFileLogSink* logFileSink = nullptr;
-static bool logSentryBreadcrumbsEnabled = false;
-
-// Forward declarations for the logging functions.
-static void CBLDart_LogSentryBreadcrumb(CBLLogDomain domain, CBLLogLevel level,
-                                        FLString message);
+// Forward declaration for the logging function.
 static void CBLDart_CallDartLogCallback(CBLLogDomain domain, CBLLogLevel level,
                                         FLString message);
 
 static void CBLDart_LogCallback(CBLLogDomain domain, CBLLogLevel level,
                                 FLString message) {
   std::shared_lock lock(loggingMutex);
-
-  if (logSentryBreadcrumbsEnabled) {
-    CBLDart_LogSentryBreadcrumb(domain, level, message);
-  }
 
   if (logCallback && level >= logCallbackLevel) {
     CBLDart_CallDartLogCallback(domain, level, message);
@@ -265,9 +256,9 @@ static void CBLDart_LogCallback(CBLLogDomain domain, CBLLogLevel level,
 
 static void CBLDart_UpdateEffectiveCustomLogSink() {
   CBLCustomLogSink sink{};
-  if (logSentryBreadcrumbsEnabled || logCallback) {
+  if (logCallback) {
     sink.callback = CBLDart_LogCallback;
-    sink.level = logSentryBreadcrumbsEnabled ? kCBLLogDebug : logCallbackLevel;
+    sink.level = logCallbackLevel;
   } else {
     sink.level = kCBLLogNone;
   }
@@ -367,70 +358,6 @@ static void CBLDart_CheckFileLogging() {
               "generated.");
     }
   });
-}
-
-static const char* CBLDart_LogDomainToSentryCategory(CBLLogDomain domain) {
-  switch (domain) {
-    case kCBLLogDomainDatabase:
-      return "cbl.db";
-    case kCBLLogDomainQuery:
-      return "cbl.query";
-    case kCBLLogDomainReplicator:
-      return "cbl.sync";
-    case kCBLLogDomainNetwork:
-      return "cbl.ws";
-    default:
-      return nullptr;
-  }
-}
-
-static const char* CBLDart_LogLevelToSentryLevel(CBLLogLevel level) {
-  switch (level) {
-    case kCBLLogDebug:
-    case kCBLLogVerbose:
-      return "debug";
-    case kCBLLogInfo:
-      return "info";
-    case kCBLLogWarning:
-      return "warning";
-    case kCBLLogError:
-      return "error";
-    case kCBLLogNone:
-    default:
-      return nullptr;
-  }
-}
-
-static void CBLDart_LogSentryBreadcrumb(CBLLogDomain domain, CBLLogLevel level,
-                                        FLString message) {
-  // Prepare breadcrumb data.
-  auto sentryCategory = CBLDart_LogDomainToSentryCategory(domain);
-  auto sentryLevel = CBLDart_LogLevelToSentryLevel(level);
-  auto message_ = CBLDart_FLStringToString(message);
-
-  // Build breadcrumb.
-  auto breadcrumb = sentry_value_new_breadcrumb("debug", message_.c_str());
-  sentry_value_set_by_key(breadcrumb, "category",
-                          sentry_value_new_string(sentryCategory));
-  if (sentryLevel) {
-    sentry_value_set_by_key(breadcrumb, "level",
-                            sentry_value_new_string(sentryLevel));
-  }
-
-  // Add breadcrumb to sentry.
-  sentry_add_breadcrumb(breadcrumb);
-}
-
-bool CBLDart_CBLLog_SetSentryBreadcrumbs(bool enabled) {
-  if (!CBLDart_InitSentryAPI()) {
-    // Sentry is not available, so we can't enable breadcrumbs logging.
-    return false;
-  }
-
-  std::unique_lock lock(loggingMutex);
-  logSentryBreadcrumbsEnabled = enabled;
-  CBLDart_UpdateEffectiveCustomLogSink();
-  return true;
 }
 
 // === Database

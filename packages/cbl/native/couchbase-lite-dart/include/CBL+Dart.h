@@ -105,9 +105,6 @@ void CBLDart_CBLLog_SetFileSink(CBLFileLogSink* sink);
 CBLDART_EXPORT
 CBLFileLogSink* CBLDart_CBLLog_GetFileSink();
 
-CBLDART_EXPORT
-bool CBLDart_CBLLog_SetSentryBreadcrumbs(bool enabled);
-
 // === Database
 
 typedef struct CBLDart_CBLEncryptionKey {
