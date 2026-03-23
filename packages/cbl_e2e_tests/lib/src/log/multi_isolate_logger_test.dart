@@ -91,11 +91,15 @@ void main() {
 
         // Register and immediately remove a logger in a secondary isolate.
         final context = IsolateContext.instance.forSecondaryIsolate();
-        await Isolate.run(() async {
-          await initSecondaryIsolate(context);
-          Database.log.custom = TestLogger((_, _, _) {});
-          Database.log.custom = null;
-        });
+        final donePort = ReceivePort();
+        await Isolate.spawn(
+          _registerAndRemoveLoggerIsolateMain,
+          _RegisterAndRemoveConfig(
+            context: context,
+            donePort: donePort.sendPort,
+          ),
+        );
+        await donePort.first;
 
         // Main isolate logger should still work.
         cblLogMessage(LogDomain.network, LogLevel.warning, 'B');
@@ -143,6 +147,22 @@ Future<void> _secondaryIsolateMain(_SecondaryIsolateConfig config) async {
   Database.log.custom = null;
 
   config.resultPort.send(messages);
+}
+
+final class _RegisterAndRemoveConfig {
+  _RegisterAndRemoveConfig({required this.context, required this.donePort});
+
+  final IsolateContext context;
+  final SendPort donePort;
+}
+
+Future<void> _registerAndRemoveLoggerIsolateMain(
+  _RegisterAndRemoveConfig config,
+) async {
+  await initSecondaryIsolate(config.context);
+  Database.log.custom = TestLogger((_, _, _) {});
+  Database.log.custom = null;
+  config.donePort.send(null);
 }
 
 final class TestLogger extends Logger {
