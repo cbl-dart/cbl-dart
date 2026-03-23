@@ -5,13 +5,15 @@ import 'dart:io';
 import '../bindings.dart';
 import '../database.dart';
 import '../database/ffi_database.dart';
+import '../database/proxy_database.dart';
 import '../document/document.dart';
 import '../document/ffi_document.dart';
 import '../errors.dart';
 import '../fleece/containers.dart' as fl;
+import '../service/cbl_service_api.dart'
+    show GetNativeDatabaseEndpoint, NativeDatabaseEndpoint;
 import '../support/async_callback.dart';
 import '../support/edition.dart';
-import '../support/errors.dart';
 import '../support/listener_token.dart';
 import '../support/resource.dart';
 import '../support/streams.dart';
@@ -63,13 +65,27 @@ final class FfiReplicator
     final database = replicatorCollections.$1;
     final collections = replicatorCollections.$2;
 
-    final target = config.target;
+    var target = config.target;
     if (target is DatabaseEndpoint) {
       useEnterpriseFeature(EnterpriseFeature.localDbReplication);
-      assertArgumentType<SyncDatabase>(
-        target.database,
-        'config.target.database',
-      );
+
+      final targetDatabase = target.database;
+      if (targetDatabase is FfiDatabase) {
+        // Target is a SyncDatabase — use its pointer directly.
+      } else if (targetDatabase is ProxyDatabase) {
+        // Target is an AsyncDatabase — fetch native pointer from its worker.
+        final sendable = await targetDatabase.channel.call(
+          GetNativeDatabaseEndpoint(targetDatabase.objectId),
+        );
+        target = sendable.endpoint;
+      } else {
+        throw ArgumentError(
+          'The target database must be an instance of AsyncDatabase or '
+          'SyncDatabase.',
+        );
+      }
+    } else if (target is NativeDatabaseEndpoint) {
+      useEnterpriseFeature(EnterpriseFeature.localDbReplication);
     }
 
     final fleeceContainers = <Object>[];
@@ -446,6 +462,8 @@ extension on ReplicatorConfiguration {
     } else if (target is DatabaseEndpoint) {
       final db = target.database as FfiDatabase;
       return ReplicatorBindings.createEndpointWithLocalDB(db.pointer);
+    } else if (target is NativeDatabaseEndpoint) {
+      return ReplicatorBindings.createEndpointWithLocalDB(target.pointer);
     } else {
       throw UnimplementedError('Endpoint type is not implemented: $target');
     }

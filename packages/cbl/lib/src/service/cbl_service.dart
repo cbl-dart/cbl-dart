@@ -293,6 +293,7 @@ final class CblService {
       ..addCallEndpoint(_indexUpdaterSetVector)
       ..addCallEndpoint(_indexUpdaterSkipVector)
       ..addCallEndpoint(_indexUpdaterFinish)
+      ..addCallEndpoint(_getNativeDatabaseEndpoint)
       ..addCallEndpoint(_createReplicator)
       ..addCallEndpoint(_getReplicatorStatus)
       ..addCallEndpoint(_getReplicatorServerCertificate)
@@ -692,10 +693,19 @@ final class CblService {
       .getObjectOrThrow<FfiIndexUpdater>(request.updaterId)
       .finish();
 
+  SendableNativeDatabaseEndpoint _getNativeDatabaseEndpoint(
+    GetNativeDatabaseEndpoint request,
+  ) {
+    final database = _getDatabaseById(request.databaseId);
+    return SendableNativeDatabaseEndpoint(
+      NativeDatabaseEndpoint.fromPointer(database.pointer, adopt: false),
+    );
+  }
+
   Future<int> _createReplicator(CreateReplicator request) async {
     var target = request.target;
-    if (target is ServiceDatabaseEndpoint) {
-      target = DatabaseEndpoint(_getDatabaseById(target.databaseId));
+    if (target is SendableNativeDatabaseEndpoint) {
+      target = target.endpoint;
     }
 
     final config = ReplicatorConfiguration(

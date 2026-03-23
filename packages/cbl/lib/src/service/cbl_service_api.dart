@@ -15,6 +15,7 @@ import '../replication/document_replication.dart';
 import '../replication/endpoint.dart';
 import '../replication/replicator.dart';
 import '../replication/tls_identity.dart';
+import '../support/native_object.dart';
 import '../support/utils.dart';
 import '../tracing.dart';
 import 'channel.dart';
@@ -439,8 +440,46 @@ final class IndexUpdaterFinish extends Request<Null> {
   final int updaterId;
 }
 
-final class ServiceDatabaseEndpoint implements Endpoint {
-  ServiceDatabaseEndpoint(this.databaseId);
+final class NativeDatabaseEndpoint implements Endpoint, Finalizable {
+  NativeDatabaseEndpoint._(this.pointer);
+
+  factory NativeDatabaseEndpoint.fromPointer(
+    Pointer<cblite.CBLDatabase> pointer, {
+    bool adopt = false,
+  }) {
+    final endpoint = NativeDatabaseEndpoint._(pointer);
+    bindCBLRefCountedToDartObject(endpoint, pointer: pointer, adopt: adopt);
+    return endpoint;
+  }
+
+  final Pointer<cblite.CBLDatabase> pointer;
+}
+
+final class SendableNativeDatabaseEndpoint implements Endpoint, SendAware {
+  SendableNativeDatabaseEndpoint(NativeDatabaseEndpoint endpoint)
+    : _endpoint = endpoint;
+
+  NativeDatabaseEndpoint get endpoint => _endpoint!;
+  NativeDatabaseEndpoint? _endpoint;
+  Pointer<cblite.CBLDatabase>? _pointer;
+
+  @override
+  void willSend() {
+    _pointer = _endpoint!.pointer;
+    BaseBindings.retainRefCounted(_pointer!.cast());
+    _endpoint = null;
+  }
+
+  @override
+  void didReceive() {
+    _endpoint = NativeDatabaseEndpoint.fromPointer(_pointer!, adopt: true);
+    _pointer = null;
+  }
+}
+
+final class GetNativeDatabaseEndpoint
+    extends Request<SendableNativeDatabaseEndpoint> {
+  GetNativeDatabaseEndpoint(this.databaseId);
 
   final int databaseId;
 }
@@ -494,6 +533,10 @@ final class CreateReplicator extends Request<int> implements SendAware {
 
   @override
   void willSend() {
+    if (target case final SendableNativeDatabaseEndpoint endpoint) {
+      endpoint.willSend();
+    }
+
     if (_authenticator
         case final ClientCertificateAuthenticator authenticator) {
       final identity = authenticator.identity as FfiTlsIdentity;
@@ -510,6 +553,10 @@ final class CreateReplicator extends Request<int> implements SendAware {
 
   @override
   void didReceive() {
+    if (target case final SendableNativeDatabaseEndpoint endpoint) {
+      endpoint.didReceive();
+    }
+
     if (_certificateAuthenticatorIdentityPointer case final pointer?) {
       final identity = FfiTlsIdentity.fromPointer(pointer, adopt: true);
       _authenticator = ClientCertificateAuthenticator(identity);
