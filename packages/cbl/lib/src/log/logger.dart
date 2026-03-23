@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ffi';
 
 import '../bindings.dart';
 import '../support/async_callback.dart';
@@ -152,8 +151,10 @@ void _cleanUpLogger() {
   _logger = null;
 }
 
-void _updateLogLevel() =>
-    LoggingBindings.setCallbackLevel(_logger!._level.toCBLLogLevel());
+void _updateLogLevel() => LoggingBindings.setCallbackLevel(
+  _callback!.pointer,
+  _logger!._level.toCBLLogLevel(),
+);
 
 void _setupCallback() {
   if (_callback != null) {
@@ -165,15 +166,10 @@ void _setupCallback() {
     debugName: 'Logger.log',
   );
 
-  // Try to set callback as the current global callback.
-  if (!LoggingBindings.setCallback(_callback!.pointer)) {
-    _cleanUpCallback();
-    throw StateError('Another isolate has already set a custom Logger.');
-  }
+  LoggingBindings.setCallback(_callback!.pointer);
 }
 
 void _cleanUpCallback() {
-  LoggingBindings.setCallback(nullptr);
   _callback?.close();
   _callback = null;
 }
