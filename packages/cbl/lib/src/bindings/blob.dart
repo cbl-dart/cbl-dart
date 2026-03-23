@@ -1,5 +1,6 @@
 import 'dart:ffi';
 
+import '../support/isolate.dart';
 import 'base.dart';
 import 'cblite.dart' as cblite;
 import 'cblitedart.dart' as cblitedart;
@@ -17,13 +18,16 @@ final class BlobBindings {
   static Pointer<cblite.CBLBlob> createWithData(
     String? contentType,
     Data content,
-  ) => runWithSingleFLString(contentType, (flContentType) {
-    final sliceResult = content.toSliceResult();
-    return cblite.CBLBlob_CreateWithData(
-      flContentType,
-      sliceResult.makeGlobal().ref,
-    );
-  });
+  ) {
+    ensureInitializedForCurrentIsolate();
+    return runWithSingleFLString(contentType, (flContentType) {
+      final sliceResult = content.toSliceResult();
+      return cblite.CBLBlob_CreateWithData(
+        flContentType,
+        sliceResult.makeGlobal().ref,
+      );
+    });
+  }
 
   static bool isBlob(cblite.FLDict dict) => cblite.FLDict_IsBlob(dict);
 

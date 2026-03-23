@@ -1,6 +1,7 @@
 import 'dart:ffi';
 
 import '../fleece/containers.dart';
+import '../support/isolate.dart';
 import 'base.dart';
 import 'cblite.dart' as cblite;
 import 'cblitedart.dart' as cblitedart;
@@ -21,22 +22,30 @@ final class UrlEndpointListenerBindings {
 
   static Pointer<cblite.CBLListenerAuthenticator> createPasswordAuthenticator(
     cblitedart.CBLDartListenerPasswordAuthCallback handler,
-  ) => cblite.CBLListenerAuth_CreatePassword(
-    cblitedart.addresses.CBLDart_ListenerPasswordAuthCallbackTrampoline,
-    handler.cast(),
-  );
+  ) {
+    ensureInitializedForCurrentIsolate();
+    return cblite.CBLListenerAuth_CreatePassword(
+      cblitedart.addresses.CBLDart_ListenerPasswordAuthCallbackTrampoline,
+      handler.cast(),
+    );
+  }
 
   static Pointer<cblite.CBLListenerAuthenticator>
   createCertificateAuthenticator(
     cblitedart.CBLDartListenerCertAuthCallback handler,
-  ) => cblite.CBLListenerAuth_CreateCertificate(
-    cblitedart.addresses.CBLDart_ListenerCertAuthCallbackTrampoline,
-    handler.cast(),
-  );
+  ) {
+    ensureInitializedForCurrentIsolate();
+    return cblite.CBLListenerAuth_CreateCertificate(
+      cblitedart.addresses.CBLDart_ListenerCertAuthCallbackTrampoline,
+      handler.cast(),
+    );
+  }
 
   static Pointer<cblite.CBLListenerAuthenticator>
-  createCertificateAuthenticatorWithRoots(Pointer<cblite.CBLCert> roots) =>
-      cblite.CBLListenerAuth_CreateCertificateWithRootCerts(roots);
+  createCertificateAuthenticatorWithRoots(Pointer<cblite.CBLCert> roots) {
+    ensureInitializedForCurrentIsolate();
+    return cblite.CBLListenerAuth_CreateCertificateWithRootCerts(roots);
+  }
 
   static Pointer<cblite.CBLURLEndpointListener> create({
     required List<Pointer<cblite.CBLCollection>> collections,
@@ -47,57 +56,72 @@ final class UrlEndpointListenerBindings {
     Pointer<cblite.CBLListenerAuthenticator>? authenticator,
     required bool enableDeltaSync,
     required bool readOnly,
-  }) => withGlobalArena(() {
-    final config = globalArena<cblite.CBLURLEndpointListenerConfiguration>();
+  }) {
+    ensureInitializedForCurrentIsolate();
+    return withGlobalArena(() {
+      final config = globalArena<cblite.CBLURLEndpointListenerConfiguration>();
 
-    final collectionsArray = globalArena<Pointer<cblite.CBLCollection>>(
-      collections.length,
-    );
-    for (var i = 0; i < collections.length; i++) {
-      collectionsArray[i] = collections[i];
-    }
+      final collectionsArray = globalArena<Pointer<cblite.CBLCollection>>(
+        collections.length,
+      );
+      for (var i = 0; i < collections.length; i++) {
+        collectionsArray[i] = collections[i];
+      }
 
-    config.ref.collections = collectionsArray;
-    config.ref.collectionCount = collections.length;
-    config.ref.port = port ?? 0;
-    config.ref.networkInterface = networkInterface.toFLString();
-    config.ref.disableTLS = disableTls;
-    config.ref.tlsIdentity = tlsIdentity ?? nullptr;
-    config.ref.authenticator = authenticator ?? nullptr;
-    config.ref.enableDeltaSync = enableDeltaSync;
-    config.ref.readOnly = readOnly;
+      config.ref.collections = collectionsArray;
+      config.ref.collectionCount = collections.length;
+      config.ref.port = port ?? 0;
+      config.ref.networkInterface = networkInterface.toFLString();
+      config.ref.disableTLS = disableTls;
+      config.ref.tlsIdentity = tlsIdentity ?? nullptr;
+      config.ref.authenticator = authenticator ?? nullptr;
+      config.ref.enableDeltaSync = enableDeltaSync;
+      config.ref.readOnly = readOnly;
 
-    return cblite.CBLURLEndpointListener_Create(
-      config,
-      globalCBLError,
-    ).checkError();
-  });
+      return cblite.CBLURLEndpointListener_Create(
+        config,
+        globalCBLError,
+      ).checkError();
+    });
+  }
 
   static int? port(Pointer<cblite.CBLURLEndpointListener> pointer) {
+    ensureInitializedForCurrentIsolate();
     final port = cblite.CBLURLEndpointListener_Port(pointer);
     return port == 0 ? null : port;
   }
 
-  static List<Uri>? urls(Pointer<cblite.CBLURLEndpointListener> pointer) =>
-      cblite.CBLURLEndpointListener_Urls(pointer)
-          .toNullable()
-          ?.let((pointer) => MutableArray.fromPointer(pointer, adopt: true))
-          .let(
-            (array) =>
-                array.map((value) => Uri.parse(value.asString!)).toList(),
-          );
+  static List<Uri>? urls(Pointer<cblite.CBLURLEndpointListener> pointer) {
+    ensureInitializedForCurrentIsolate();
+    return cblite.CBLURLEndpointListener_Urls(pointer)
+        .toNullable()
+        ?.let((pointer) => MutableArray.fromPointer(pointer, adopt: true))
+        .let(
+          (array) => array.map((value) => Uri.parse(value.asString!)).toList(),
+        );
+  }
 
   static Pointer<cblite.CBLTLSIdentity>? tlsIdentity(
     Pointer<cblite.CBLURLEndpointListener> pointer,
-  ) => cblite.CBLURLEndpointListener_TLSIdentity(pointer).toNullable();
+  ) {
+    ensureInitializedForCurrentIsolate();
+    return cblite.CBLURLEndpointListener_TLSIdentity(pointer).toNullable();
+  }
 
   static cblite.CBLConnectionStatus connectionStatus(
     Pointer<cblite.CBLURLEndpointListener> pointer,
-  ) => cblite.CBLURLEndpointListener_Status(pointer);
+  ) {
+    ensureInitializedForCurrentIsolate();
+    return cblite.CBLURLEndpointListener_Status(pointer);
+  }
 
-  static void start(Pointer<cblite.CBLURLEndpointListener> pointer) =>
-      cblite.CBLURLEndpointListener_Start(pointer, globalCBLError).checkError();
+  static void start(Pointer<cblite.CBLURLEndpointListener> pointer) {
+    ensureInitializedForCurrentIsolate();
+    cblite.CBLURLEndpointListener_Start(pointer, globalCBLError).checkError();
+  }
 
-  static void stop(Pointer<cblite.CBLURLEndpointListener> pointer) =>
-      cblite.CBLURLEndpointListener_Stop(pointer);
+  static void stop(Pointer<cblite.CBLURLEndpointListener> pointer) {
+    ensureInitializedForCurrentIsolate();
+    cblite.CBLURLEndpointListener_Stop(pointer);
+  }
 }

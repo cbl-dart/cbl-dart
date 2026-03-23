@@ -75,22 +75,24 @@ final class DatabaseBindings {
     cblitedart.addresses.CBLDart_CBLDatabase_Release.cast(),
   );
 
-  static CBLEncryptionKey encryptionKeyFromPassword(String password) =>
-      withGlobalArena(() {
-        final key = globalArena<cblite.CBLEncryptionKey>();
-        if (!cblite.CBLEncryptionKey_FromPassword(
-          key,
-          password.makeGlobalFLString(),
-        )) {
-          throw createCouchbaseLiteException(
-            domain: CBLErrorDomain.couchbaseLite,
-            code: CBLErrorCode.unexpectedError,
-            message: 'There was a problem deriving the encryption key.',
-          );
-        }
+  static CBLEncryptionKey encryptionKeyFromPassword(String password) {
+    ensureInitializedForCurrentIsolate();
+    return withGlobalArena(() {
+      final key = globalArena<cblite.CBLEncryptionKey>();
+      if (!cblite.CBLEncryptionKey_FromPassword(
+        key,
+        password.makeGlobalFLString(),
+      )) {
+        throw createCouchbaseLiteException(
+          domain: CBLErrorDomain.couchbaseLite,
+          code: CBLErrorCode.unexpectedError,
+          message: 'There was a problem deriving the encryption key.',
+        );
+      }
 
-        return _readEncryptionKey(key.ref);
-      });
+      return _readEncryptionKey(key.ref);
+    });
+  }
 
   static bool copyDatabase(
     String from,

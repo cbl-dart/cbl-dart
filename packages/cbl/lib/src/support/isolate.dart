@@ -17,6 +17,21 @@ class InitContext {
 
 final _bootstrapState = _IsolateBootstrapState();
 
+/// Lazily bootstraps Couchbase Lite for the current isolate.
+///
+/// Call this at the start of a standalone API or binding implementation when
+/// that API can be the first entry point in the current isolate that touches
+/// native Couchbase Lite state.
+///
+/// Do not call this from inside allocation-management helpers such as
+/// `withGlobalArena` or `runWithSingleFLString`. Bootstrap the isolate before
+/// entering those helpers so initialization does not happen while temporary
+/// allocation lifetimes are already active, and so entry points follow one
+/// consistent structure.
+///
+/// Implementations that are only reachable after another entry point has
+/// already bootstrapped the isolate do not need to call this again unless they
+/// are also public entry points that can be invoked independently.
 void ensureInitializedForCurrentIsolate() =>
     _bootstrapState.ensureInitializedForCurrentIsolate();
 

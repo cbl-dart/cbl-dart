@@ -3,6 +3,7 @@ import 'dart:ffi';
 import 'dart:typed_data';
 
 import '../errors.dart';
+import '../support/isolate.dart';
 import 'base.dart';
 import 'cblite.dart' as cblite;
 import 'cblitedart.dart' as cblitedart;
@@ -300,14 +301,14 @@ final class ReplicatorBindings {
     cblitedart.addresses.CBLDart_CBLReplicator_Release.cast(),
   );
 
-  static Pointer<cblite.CBLEndpoint> createEndpointWithUrl(String url) =>
-      runWithSingleFLString(
-        url,
-        (flUrl) => cblite.CBLEndpoint_CreateWithURL(
-          flUrl,
-          globalCBLError,
-        ).checkError(),
-      );
+  static Pointer<cblite.CBLEndpoint> createEndpointWithUrl(String url) {
+    ensureInitializedForCurrentIsolate();
+    return runWithSingleFLString(
+      url,
+      (flUrl) =>
+          cblite.CBLEndpoint_CreateWithURL(flUrl, globalCBLError).checkError(),
+    );
+  }
 
   static Pointer<cblite.CBLEndpoint> createEndpointWithLocalDB(
     Pointer<cblite.CBLDatabase> database,
@@ -320,26 +321,35 @@ final class ReplicatorBindings {
   static Pointer<cblite.CBLAuthenticator> createPasswordAuthenticator(
     String username,
     String password,
-  ) => withGlobalArena(
-    () => cblite.CBLAuth_CreatePassword(
-      username.toFLString(),
-      password.toFLString(),
-    ),
-  );
+  ) {
+    ensureInitializedForCurrentIsolate();
+    return withGlobalArena(
+      () => cblite.CBLAuth_CreatePassword(
+        username.toFLString(),
+        password.toFLString(),
+      ),
+    );
+  }
 
   static Pointer<cblite.CBLAuthenticator> createSessionAuthenticator(
     String sessionID,
     String? cookieName,
-  ) => withGlobalArena(
-    () => cblite.CBLAuth_CreateSession(
-      sessionID.toFLString(),
-      cookieName.toFLString(),
-    ),
-  );
+  ) {
+    ensureInitializedForCurrentIsolate();
+    return withGlobalArena(
+      () => cblite.CBLAuth_CreateSession(
+        sessionID.toFLString(),
+        cookieName.toFLString(),
+      ),
+    );
+  }
 
   static Pointer<cblite.CBLAuthenticator> createClientCertificateAuthenticator(
     Pointer<cblite.CBLTLSIdentity> pointer,
-  ) => cblite.CBLAuth_CreateCertificate(pointer);
+  ) {
+    ensureInitializedForCurrentIsolate();
+    return cblite.CBLAuth_CreateCertificate(pointer);
+  }
 
   static void freeAuthenticator(
     Pointer<cblite.CBLAuthenticator> authenticator,
@@ -349,12 +359,15 @@ final class ReplicatorBindings {
 
   static Pointer<cblite.CBLReplicator> createReplicator(
     CBLReplicatorConfiguration config,
-  ) => withGlobalArena(
-    () => cblitedart.CBLDart_CBLReplicator_Create(
-      _createConfigurationStruct(config),
-      globalCBLError,
-    ).checkError(),
-  );
+  ) {
+    ensureInitializedForCurrentIsolate();
+    return withGlobalArena(
+      () => cblitedart.CBLDart_CBLReplicator_Create(
+        _createConfigurationStruct(config),
+        globalCBLError,
+      ).checkError(),
+    );
+  }
 
   static void bindToDartObject(
     Finalizable object,
