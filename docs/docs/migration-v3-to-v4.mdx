@@ -105,16 +105,16 @@ await CouchbaseLiteDart.init(edition: Edition.enterprise);
 
 ### After (v4)
 
+Couchbase Lite no longer requires explicit initialization before use.
+
+If you previously passed `filesDir` to `CouchbaseLite.init` to customize the
+default database directory, use `api|Database.defaultDirectory` instead.
+
 ```dart
 import 'package:cbl/cbl.dart';
 
 Database.defaultDirectory = '/path/to/files';
 ```
-
-Couchbase Lite no longer requires explicit initialization before use.
-
-If you previously passed `filesDir` to `CouchbaseLite.init` to customize the
-default database directory, use `api|Database.defaultDirectory` instead.
 
 ## Vector search initialization
 
