@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 
@@ -16,6 +15,7 @@ import 'conflict_resolver.dart';
 import 'document_replication.dart';
 import 'endpoint.dart';
 import 'replicator.dart';
+import 'tls_identity.dart';
 
 /// Direction of replication: push, pull, or both.
 ///
@@ -89,7 +89,7 @@ final class CollectionConfiguration {
   });
 
   /// Creates a replication configuration for a [Collection] from another
-  /// [config] by coping it.
+  /// [config] by copying it.
   CollectionConfiguration.from(CollectionConfiguration config)
     : channels = config.channels,
       documentIds = config.documentIds,
@@ -198,8 +198,8 @@ final class ReplicatorConfiguration {
       ..maxAttemptWaitTime = maxAttemptWaitTime;
   }
 
-  /// Creates a configuration for a [Replicator] from another [config] by coping
-  /// it.
+  /// Creates a configuration for a [Replicator] from another [config] by
+  /// copying it.
   ReplicatorConfiguration.from(ReplicatorConfiguration config)
     : _collections = {...config._collections},
       target = config.target,
@@ -251,12 +251,14 @@ final class ReplicatorConfiguration {
     _acceptOnlySelfSignedServerCertificate = value;
   }
 
-  /// The remote target's SSL certificate (PEM or DER).
-  Uint8List? pinnedServerCertificate;
+  /// The remote target's SSL certificate.
+  ///
+  /// Can be provided as [PemData] or [DerData].
+  CryptoData? pinnedServerCertificate;
 
   /// A set of trusted root certificates to use for verifying the SSL
-  /// certificate of the remote target (PEM).
-  Uint8List? trustedRootCertificates;
+  /// certificate of the remote target.
+  PemData? trustedRootCertificates;
 
   /// Extra HTTP headers to send in all requests to the remote target.
   Map<String, String>? headers;

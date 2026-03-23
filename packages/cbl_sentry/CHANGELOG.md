@@ -1,3 +1,14 @@
+## 3.0.0-dev.4
+
+ - Update a dependency to the latest release.
+
+## 3.0.0-dev.3
+
+> Note: This release has breaking changes.
+
+ - **REFACTOR**: adopt Dart dot shorthand notation across codebase ([#901](https://github.com/cbl-dart/cbl-dart/issues/901)). ([3861bb7c](https://github.com/cbl-dart/cbl-dart/commit/3861bb7c2c7c1c5e775ac268479df419f62d9fcf))
+ - **BREAKING** **FEAT**(cbl): make `MutableDocument.withId` a named parameter and `data` non-nullable ([#909](https://github.com/cbl-dart/cbl-dart/issues/909)). ([a51ffb14](https://github.com/cbl-dart/cbl-dart/commit/a51ffb14864e7e0a9433729776cff808833dd816))
+
 ## 3.0.0-dev.2
 
 > Note: This release has breaking changes.

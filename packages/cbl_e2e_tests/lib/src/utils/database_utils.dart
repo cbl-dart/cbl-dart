@@ -226,7 +226,8 @@ void setupSharedTestWorkerIsolateClient() {
 }
 
 extension AsyncDatabaseUtilsExtension on Database {
-  /// Returns a stream wich emits the ids of all the documents in this database.
+  /// Returns a stream which emits the ids of all the documents in this
+  /// database.
   FutureOr<List<String>> getAllIds() => _allIdsQuery()
       .then((query) => query.execute())
       .then((resultSet) => resultSet.allResults())

@@ -173,7 +173,7 @@ final class SentryTracingDelegate extends TracingDelegate {
 
     if (operation is ChannelCallOp) {
       // All channel calls are traced through the ChannelCallOp trace point,
-      // but not all of the CBL APIs are trace, yet. We don't want to
+      // but not all of the CBL APIs are traced yet. We don't want to
       // add breadcrumbs for these operations.
       return false;
     }
@@ -213,7 +213,7 @@ final class SentryTracingDelegate extends TracingDelegate {
 
     if (operation is ChannelCallOp && !isInternalOperation) {
       // All channel calls are traced through the ChannelCallOp trace point,
-      // but not all of the CBL APIs are trace, yet. We don't want to
+      // but not all of the CBL APIs are traced yet. We don't want to
       // trace channel calls without the corresponding CBL API call.
       return false;
     }

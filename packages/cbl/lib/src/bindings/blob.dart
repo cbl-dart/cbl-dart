@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:ffi';
 
+import '../support/isolate.dart';
 import 'base.dart';
 import 'cblite.dart' as cblite;
 import 'cblitedart.dart' as cblitedart;
@@ -19,6 +20,7 @@ final class BlobBindings {
     String? contentType,
     Data content,
   ) {
+    ensureInitializedForCurrentIsolate();
     final sliceResult = content.toSliceResult();
     if (contentType == null) {
       return cblitedart.CBLDart_CBLBlob_CreateWithData(
@@ -93,8 +95,8 @@ final class BlobReadStreamBindings {
       throwError();
     }
 
-    // Empty buffer means stream has been fully read, but its important to
-    // create a SliceResult to ensure the the FLSliceResult is freed.
+    // Empty buffer means stream has been fully read, but it's important to
+    // create a SliceResult to ensure the FLSliceResult is freed.
     final sliceResult = SliceResult.fromFLSliceResult(buffer)!;
     return sliceResult.size == 0 ? null : sliceResult.toData();
   }

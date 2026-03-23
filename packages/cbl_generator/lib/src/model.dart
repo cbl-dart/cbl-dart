@@ -11,6 +11,7 @@ final class TypedDataObjectModel {
     required this.classNames,
     required this.fields,
     this.typeMatcher,
+    this.companionParentClassName,
   });
 
   final Uri libraryUri;
@@ -18,6 +19,33 @@ final class TypedDataObjectModel {
   final TypedDataObjectClassNames classNames;
   final List<TypedDataObjectField> fields;
   final TypeMatcher? typeMatcher;
+
+  /// For companion dictionary types: the declaring class name of the parent
+  /// document type that this companion should also implement (e.g., 'User').
+  final String? companionParentClassName;
+
+  bool get isCompanionDictionary => companionParentClassName != null;
+
+  /// For document types, the public abstract class that serves as the typed
+  /// document interface (e.g., 'UserDocument').
+  late final documentInterfaceName = kind == TypedDataObjectKind.document
+      ? '${classNames.declaringClassName}Document'
+      : null;
+
+  /// For document types, the impl base name includes 'Document' to distinguish
+  /// it from the dictionary companion's impl base.
+  late final effectiveImplBaseName = kind == TypedDataObjectKind.document
+      ? '_${classNames.declaringClassName}DocumentImplBase'
+      : classNames.implBaseName;
+
+  /// The type that the impl base implements and that is used as the first type
+  /// parameter in registry metadata.
+  ///
+  /// For documents: the document interface (e.g., 'UserDocument'). For
+  /// dictionaries: the declaring class name (e.g., 'PersonalName' or
+  /// 'UserDictionary').
+  late final typedInterfaceName =
+      documentInterfaceName ?? classNames.declaringClassName;
 
   late final metadataFields = fields
       .whereType<TypedDataMetadataField>()
@@ -37,6 +65,56 @@ final class TypedDataObjectModel {
 
   TypedDataMetadataField? _documentMetadataField(DocumentMetadataKind kind) =>
       metadataFields.firstWhereOrNull((field) => field.kind == kind);
+
+  /// Creates a companion dictionary model from this document model.
+  ///
+  /// Metadata fields are converted to regular properties, read from the
+  /// dictionary by key.
+  TypedDataObjectModel toCompanionDictionary() {
+    assert(kind == TypedDataObjectKind.document);
+
+    final parentName = classNames.declaringClassName;
+    final companionClassNames = TypedDataObjectClassNames(
+      '${parentName}Dictionary',
+    );
+
+    final companionFields = fields.map((field) {
+      if (field is TypedDataMetadataField) {
+        // Use the metadata field's type (which is non-nullable for document
+        // metadata like id). Adjust the constructor parameter type to match,
+        // since dictionaries don't auto-generate metadata values.
+        final constructorParam = field.constructorParameter;
+        final adjustedParam = constructorParam != null
+            ? ConstructorParameter(
+                type: field.type,
+                // Named parameters become required named.
+                // Positional parameters become required positional (even if
+                // the original was optional positional, since dictionaries
+                // don't auto-generate metadata values).
+                isPositional: constructorParam.isPositional,
+                isRequired: true,
+                documentationComment: constructorParam.documentationComment,
+              )
+            : null;
+        return TypedDataObjectProperty(
+          type: field.type,
+          name: field.name,
+          property: field.name,
+          constructorParameter: adjustedParam,
+        );
+      }
+      return field;
+    }).toList();
+
+    return TypedDataObjectModel(
+      libraryUri: libraryUri,
+      kind: TypedDataObjectKind.dictionary,
+      classNames: companionClassNames,
+      fields: companionFields,
+      typeMatcher: typeMatcher,
+      companionParentClassName: parentName,
+    );
+  }
 }
 
 final class TypedDataObjectClassNames {
@@ -81,12 +159,9 @@ final class TypedDataObjectProperty extends TypedDataObjectField {
     required super.type,
     required super.name,
     required this.property,
-    required ConstructorParameter super.constructorParameter,
+    super.constructorParameter,
     this.defaultValueCode,
   });
-
-  @override
-  ConstructorParameter get constructorParameter => super.constructorParameter!;
 
   final String property;
   final String? defaultValueCode;

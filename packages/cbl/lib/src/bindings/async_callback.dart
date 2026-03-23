@@ -1,6 +1,7 @@
 import 'dart:ffi';
 import 'dart:isolate';
 
+import '../support/isolate.dart';
 import 'cblitedart.dart' as cblitedart;
 
 export 'cblitedart.dart' show CBLDart_AsyncCallback;
@@ -16,6 +17,7 @@ final class AsyncCallbackBindings {
     SendPort sendPort, {
     required bool debug,
   }) {
+    ensureInitializedForCurrentIsolate();
     final result = cblitedart.CBLDart_AsyncCallback_New(
       id,
       sendPort.nativePort,

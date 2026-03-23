@@ -99,7 +99,7 @@ final class _VariantConfiguration {
     );
 
     if (entry == null) {
-      throw ArgumentError.value(variant, 'variant', 'has not value');
+      throw ArgumentError.value(variant, 'variant', 'has no value');
     }
 
     return entry.value as T;

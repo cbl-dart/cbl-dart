@@ -5,12 +5,9 @@ import 'package:cbl_sentry/src/couchbase_lite_integration.dart';
 import 'package:sentry/sentry.dart';
 import 'package:test/test.dart';
 
-import 'utils/cbl.dart';
 import 'utils/mock_hub.dart';
 
 void main() {
-  setUpAll(initCouchbaseLiteForTest);
-
   late MockHub hub;
   late SentryOptions options;
 

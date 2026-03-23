@@ -203,7 +203,7 @@ void main() {
         runWithApiValues(() async {
           final db = await getSharedTestDatabase();
           final collection = await db.defaultCollection;
-          final doc = MutableDocument.withId('SelectOneResult', {'a': true});
+          final doc = MutableDocument(id: 'SelectOneResult', {'a': true});
           await collection.saveDocument(doc);
         }),
       );
@@ -408,7 +408,7 @@ void main() {
       apiTest('orderBy', () async {
         final db = await openTestDatabase();
         final collection = await db.defaultCollection;
-        final docs = List.generate(5, (_) => MutableDocument());
+        final docs = List.generate(5, (_) => MutableDocument({}));
 
         await db.saveAllDocuments(docs);
 
@@ -429,7 +429,7 @@ void main() {
       apiTest('limit', () async {
         final db = await openTestDatabase();
         final collection = await db.defaultCollection;
-        final docs = List.generate(5, (_) => MutableDocument());
+        final docs = List.generate(5, (_) => MutableDocument({}));
 
         await db.saveAllDocuments(docs);
 
@@ -760,8 +760,8 @@ void main() {
 
     group('Meta', () {
       final expirationDate = DateTime.now().add(const Duration(days: 1));
-      final doc = apiProvider((_) => MutableDocument());
-      final deletedDoc = apiProvider((_) => MutableDocument());
+      final doc = apiProvider((_) => MutableDocument({}));
+      final deletedDoc = apiProvider((_) => MutableDocument({}));
 
       setUpAll(
         runWithApiValues(() async {
@@ -1000,6 +1000,50 @@ void main() {
         expect(await evalExpr(Function_.lower(valExpr('A'))), 'a');
       });
 
+      apiTest('lower with like', () async {
+        // Regression test for #828: Function_.lower doesn't work with like.
+
+        // lower() with exact like match on literal values.
+        expect(
+          await evalExpr(Function_.lower(valExpr('ABC')).like(valExpr('abc'))),
+          true,
+        );
+
+        // lower() with wildcard like match on literal values.
+        expect(
+          await evalExpr(Function_.lower(valExpr('ABC')).like(valExpr('%bc'))),
+          true,
+        );
+
+        // lower() with exact like match on property expression.
+        expect(
+          await evalExpr(
+            Function_.lower(Expression.property('a')).like(valExpr('hello')),
+            doc: MutableDocument({'a': 'Hello'}),
+          ),
+          true,
+        );
+
+        // lower() with wildcard like match on property expression.
+        expect(
+          await evalExpr(
+            Function_.lower(Expression.property('a')).like(valExpr('%ello')),
+            doc: MutableDocument({'a': 'HELLO'}),
+          ),
+          true,
+        );
+
+        // lower() with surrounding wildcard like match on property expression,
+        // matching the exact pattern from the bug report.
+        expect(
+          await evalExpr(
+            Function_.lower(Expression.property('a')).like(valExpr('%ell%')),
+            doc: MutableDocument({'a': 'HELLO'}),
+          ),
+          true,
+        );
+      });
+
       apiTest('ltrim', () async {
         expect(await evalExpr(Function_.ltrim(valExpr(' a '))), 'a ');
       });
@@ -1153,6 +1197,93 @@ void main() {
     });
 
     group('FullTextFunction', () {
+      apiTest('language enables stemming', () async {
+        final db = await openTestDatabase();
+        final collection = await db.defaultCollection;
+
+        // English stemming: searching for "run" should match "running".
+        await collection.createIndex(
+          'english',
+          IndexBuilder.fullTextIndex([
+            FullTextIndexItem.property('a'),
+          ]).language(FullTextLanguage.english),
+        );
+
+        // French stemming does not know English word roots, so searching
+        // for "run" should not match "running".
+        await collection.createIndex(
+          'french',
+          IndexBuilder.fullTextIndex([
+            FullTextIndexItem.property('a'),
+          ]).language(FullTextLanguage.french),
+        );
+
+        await collection.saveDocument(
+          MutableDocument({'a': 'He is running fast'}),
+        );
+
+        Future<int> matchCount(String indexName, String query) async {
+          final resultSet = await const QueryBuilder()
+              .select(SelectResult.expression(Meta.id))
+              .from(DataSource.collection(collection))
+              .where(FullTextFunction.match(indexName: indexName, query: query))
+              .execute();
+          return (await resultSet.allPlainListResults()).length;
+        }
+
+        // English stemmer reduces "running" to "run", so this matches.
+        expect(await matchCount('english', 'run'), 1);
+
+        // French stemmer does not reduce "running" to "run".
+        expect(await matchCount('french', 'run'), 0);
+      });
+
+      apiTest('default language does not enable stemming', () async {
+        final db = await openTestDatabase();
+        final collection = await db.defaultCollection;
+
+        await collection.createIndex(
+          'default',
+          IndexBuilder.fullTextIndex([FullTextIndexItem.property('a')]),
+        );
+
+        await collection.createIndex(
+          'english',
+          IndexBuilder.fullTextIndex([
+            FullTextIndexItem.property('a'),
+          ]).language(FullTextLanguage.english),
+        );
+
+        await collection.createIndex(
+          'french',
+          IndexBuilder.fullTextIndex([
+            FullTextIndexItem.property('a'),
+          ]).language(FullTextLanguage.french),
+        );
+
+        await collection.saveDocument(
+          MutableDocument({'a': 'He is running fast'}),
+        );
+
+        Future<int> matchCount(String indexName, String query) async {
+          final resultSet = await const QueryBuilder()
+              .select(SelectResult.expression(Meta.id))
+              .from(DataSource.collection(collection))
+              .where(FullTextFunction.match(indexName: indexName, query: query))
+              .execute();
+          return (await resultSet.allPlainListResults()).length;
+        }
+
+        final defaultMatches = await matchCount('default', 'run');
+        final englishMatches = await matchCount('english', 'run');
+        final frenchMatches = await matchCount('french', 'run');
+
+        expect(englishMatches, 1);
+        expect(frenchMatches, 0);
+        expect(defaultMatches, 0);
+        expect(defaultMatches, frenchMatches);
+      });
+
       apiTest('match and rank', () async {
         final db = await openTestDatabase();
         final collection = await db.defaultCollection;
@@ -1200,7 +1331,7 @@ void setupEvalExprUtils() {
     runWithApiValues(() async {
       final db = await getSharedTestDatabase();
       final collection = await db.defaultCollection;
-      await collection.saveDocument(MutableDocument.withId('EvalExpr'));
+      await collection.saveDocument(MutableDocument(id: 'EvalExpr', {}));
     }),
   );
 }
@@ -1301,10 +1432,10 @@ extension on Database {
 enum JoinType { join, leftJoin, leftOuterJoin, innerJoin, crossJoin }
 
 MutableDocument leftJoinDoc({required String id, String? on}) =>
-    MutableDocument.withId(id, {'side': 'left', 'on': ?on});
+    MutableDocument(id: id, {'side': 'left', 'on': ?on});
 
 MutableDocument rightJoinDoc({required String id, String? on}) =>
-    MutableDocument.withId(id, {'side': 'right', 'on': ?on});
+    MutableDocument(id: id, {'side': 'right', 'on': ?on});
 
 extension on Database {
   Future<Object?> evalJoin({
@@ -1360,7 +1491,7 @@ extension on Database {
 /// Matches numbers which are close to [value].
 ///
 /// This matcher is necessary because the results of database functions vary
-/// slightly between different platforms, usually only in the leas significant
+/// slightly between different platforms, usually only in the least significant
 /// decimal point. We just want to confirm we are using the right function.
 Matcher closeEnough(num value) => closeTo(value, .00000000001);
 

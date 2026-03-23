@@ -34,7 +34,7 @@ Future<IsolateWorker>? _worker;
 /// Starts a time bomb which will crash the process after a [timeout].
 ///
 /// The time bomb runs in its own isolate, so even if the current isolate
-/// encounters a deadlock, the time bomb with go off.
+/// encounters a deadlock, the time bomb will go off.
 ///
 /// Once the time bomb has been started it can be stopped through
 /// [stopTimeBomb].

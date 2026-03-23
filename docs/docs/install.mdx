@@ -23,13 +23,19 @@ Couchbase Lite for Dart requires Dart SDK `^3.10.0`.
 
 :::
 
+import { usePubPackageVersion } from '@site/src/components/PubPackageVersion'
+import CodeBlock from '@theme/CodeBlock'
+
+export const CblInstallCommand = () => {
+  const version = usePubPackageVersion('cbl')
+  return <CodeBlock language="bash">{`dart pub add cbl:${version}`}</CodeBlock>
+}
+
 ## Add dependency
 
 Add the `api|cbl|pkg:` package as a dependency:
 
-```bash
-dart pub add cbl
-```
+<CblInstallCommand />
 
 This single package works for both standalone Dart apps and Flutter apps.
 
@@ -61,21 +67,18 @@ more about the differences between the Community and Enterprise editions, see
 
 :::
 
-## Initialize Couchbase Lite
-
-Initialize Couchbase Lite before using it:
+## Use Couchbase Lite
 
 ```dart
 import 'package:cbl/cbl.dart';
 
 Future<void> main() async {
-  await CouchbaseLite.init();
   // Start using Couchbase Lite ...
 }
 ```
 
 If you enabled vector search in `pubspec.yaml`, enable it explicitly after
-initialization and before opening a database that uses it:
+startup and before opening a database that uses it:
 
 ```dart
 final status = Extension.enableVectorSearch();
@@ -84,7 +87,8 @@ if (status != VectorSearchStatus.enabled) {
 }
 ```
 
-See [Vector Search](vector-search.mdx) for details.
+See [Working with Vector Search](search/working-with-vector-search.mdx) for
+details.
 
 ## Platform requirements
 
@@ -95,14 +99,12 @@ platforms you want to support.
 ## Verify Installation
 
 To verify that Couchbase Lite is installed correctly, add the following code to
-your app and call it after initializing Couchbase Lite:
+your app and call it during startup:
 
 ```dart
 import 'package:cbl/cbl.dart';
 
 Future<void> run() async {
-  await CouchbaseLite.init();
-
   // Open the database (creating it if it doesn't exist).
   final database = await Database.openAsync('database');
 

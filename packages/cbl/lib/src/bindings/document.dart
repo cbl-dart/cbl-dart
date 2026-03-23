@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:ffi';
 
+import '../support/isolate.dart';
 import 'base.dart';
 import 'cblite.dart' as cblite;
 import 'cblitedart.dart' as cblitedart;
@@ -31,6 +32,7 @@ final class DocumentBindings {
 
 final class MutableDocumentBindings {
   static Pointer<cblite.CBLDocument> createWithID([String? id]) {
+    ensureInitializedForCurrentIsolate();
     if (id == null) {
       return cblitedart.CBLDart_CBLDocument_CreateWithID(nullptr, 0);
     }

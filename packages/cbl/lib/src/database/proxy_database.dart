@@ -21,6 +21,7 @@ import '../service/cbl_service_api.dart';
 import '../service/cbl_worker.dart';
 import '../service/proxy_object.dart';
 import '../support/edition.dart';
+import '../support/isolate.dart';
 import '../support/listener_token.dart';
 import '../support/resource.dart';
 import '../support/streams.dart';
@@ -286,13 +287,13 @@ final class WorkerDatabase extends ProxyDatabase {
 
   static Future<void> remove(String name, {String? directory}) =>
       CblWorker.executeCall(
-        RemoveDatabase(name, directory),
+        RemoveDatabase(name, directory ?? defaultDatabaseDirectory),
         debugName: 'WorkerDatabase.remove',
       );
 
   static Future<bool> exists(String name, {String? directory}) =>
       CblWorker.executeCall(
-        DatabaseExists(name, directory),
+        DatabaseExists(name, directory ?? defaultDatabaseDirectory),
         debugName: 'WorkerDatabase.exists',
       );
 
@@ -301,7 +302,7 @@ final class WorkerDatabase extends ProxyDatabase {
     required String name,
     DatabaseConfiguration? config,
   }) => CblWorker.executeCall(
-    CopyDatabase(from, name, config),
+    CopyDatabase(from, name, config ?? DatabaseConfiguration()),
     debugName: 'WorkerDatabase.copy',
   );
 
@@ -330,9 +331,9 @@ final class _ProxySaveTypedDocument<
   );
 
   @override
-  Future<bool> withConcurrencyControl([
+  Future<void> withConcurrencyControl([
     ConcurrencyControl concurrencyControl = .lastWriteWins,
-  ]) => super.withConcurrencyControl(concurrencyControl) as Future<bool>;
+  ]) async => super.withConcurrencyControl(concurrencyControl);
 
   @override
   Future<bool> withConflictHandler(
@@ -443,7 +444,7 @@ final class ProxyCollection extends ProxyObject
       super.typedDocument<D>(id)! as Future<D?>;
 
   @override
-  Future<bool> saveDocument(
+  Future<void> saveDocument(
     covariant MutableDelegateDocument document, [
     ConcurrencyControl concurrencyControl = .lastWriteWins,
   ]) => asyncOperationTracePoint(
@@ -460,12 +461,13 @@ final class ProxyCollection extends ProxyObject
         );
 
         if (state == null) {
-          return false;
+          throw DatabaseException(
+            'Conflict saving document.',
+            DatabaseErrorCode.conflict,
+          );
         }
 
         delegate.updateMetadata(state, database: database);
-
-        return true;
       }),
     ),
   );
@@ -489,7 +491,7 @@ final class ProxyCollection extends ProxyObject
       _ProxySaveTypedDocument(database, () => this, document);
 
   @override
-  Future<bool> deleteDocument(
+  Future<void> deleteDocument(
     covariant DelegateDocument document, [
     ConcurrencyControl concurrencyControl = .lastWriteWins,
   ]) => asyncOperationTracePoint(
@@ -510,18 +512,19 @@ final class ProxyCollection extends ProxyObject
         );
 
         if (state == null) {
-          return false;
+          throw DatabaseException(
+            'Conflict deleting document.',
+            DatabaseErrorCode.conflict,
+          );
         }
 
         delegate.updateMetadata(state, database: database);
-
-        return true;
       }),
     ),
   );
 
   @override
-  Future<bool> deleteTypedDocument(
+  Future<void> deleteTypedDocument(
     TypedDocumentObject document, [
     ConcurrencyControl concurrencyControl = .lastWriteWins,
   ]) {

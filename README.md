@@ -4,7 +4,7 @@
 
 # cbl-dart
 
-This is the mono-repository for the `cbl-dart` project, wich implements
+This is the mono-repository for the `cbl-dart` project, which implements
 Couchbase Lite for Dart and Flutter.
 
 To start using Couchbase Lite, go to the [**documentation**][docs].

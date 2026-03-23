@@ -26,7 +26,7 @@ import 'scope.dart';
 ///
 /// The handler receives the revision of the [conflictingDocument] currently in
 /// the database, which has been changed since [documentBeingSaved] was loaded.
-/// It can be be `null`, meaning that the document has been deleted.
+/// It can be `null`, meaning that the document has been deleted.
 ///
 /// The handler has to make a decision by returning `true` to save the document
 /// or `false` to abort the save.
@@ -94,12 +94,12 @@ abstract interface class SaveTypedDocument<
   /// [ConcurrencyControl].
   ///
   /// When write operations are executed concurrently, the last writer will win
-  /// by default. In this case the result is always `true`.
+  /// by default.
   ///
   /// To fail on conflict instead, pass [ConcurrencyControl.failOnConflict] to
-  /// [concurrencyControl]. In this case, if the document could not be saved the
-  /// result is `false`. On success it is `true`.
-  FutureOr<bool> withConcurrencyControl([
+  /// [concurrencyControl]. In this case, a [DatabaseException] with
+  /// [DatabaseErrorCode.conflict] is thrown if there is a conflict.
+  FutureOr<void> withConcurrencyControl([
     ConcurrencyControl concurrencyControl = .lastWriteWins,
   ]);
 
@@ -125,7 +125,7 @@ abstract interface class SaveTypedDocument<
 ///
 /// The handler receives the revision of the [conflictingDocument] currently in
 /// the database, which has been changed since [documentBeingSaved] was loaded.
-/// It can be be `null`, meaning that the document has been deleted.
+/// It can be `null`, meaning that the document has been deleted.
 ///
 /// The handler has to make a decision by returning `true` to save the document
 /// or `false` to abort the save.
@@ -158,7 +158,7 @@ abstract interface class SyncSaveTypedDocument<
 >
     extends SaveTypedDocument<D, MD> {
   @override
-  bool withConcurrencyControl([
+  void withConcurrencyControl([
     ConcurrencyControl concurrencyControl = .lastWriteWins,
   ]);
 
@@ -205,7 +205,7 @@ abstract interface class AsyncSaveTypedDocument<
 >
     extends SaveTypedDocument<D, MD> {
   @override
-  Future<bool> withConcurrencyControl([
+  Future<void> withConcurrencyControl([
     ConcurrencyControl concurrencyControl = .lastWriteWins,
   ]);
 
@@ -272,12 +272,12 @@ abstract interface class Collection {
   /// [ConcurrencyControl].
   ///
   /// When write operations are executed concurrently, the last writer will win
-  /// by default. In this case the result is always `true`.
+  /// by default.
   ///
   /// To fail on conflict instead, pass [ConcurrencyControl.failOnConflict] to
-  /// [concurrencyControl]. In this case, if the document could not be saved the
-  /// result is `false`. On success it is `true`.
-  FutureOr<bool> saveDocument(
+  /// [concurrencyControl]. In this case, a [DatabaseException] with
+  /// [DatabaseErrorCode.conflict] is thrown if there is a conflict.
+  FutureOr<void> saveDocument(
     MutableDocument document, [
     ConcurrencyControl concurrencyControl = .lastWriteWins,
   ]);
@@ -319,12 +319,12 @@ abstract interface class Collection {
   /// [ConcurrencyControl].
   ///
   /// When write operations are executed concurrently, the last writer will win
-  /// by default. In this case the result is always `true`.
+  /// by default.
   ///
   /// To fail on conflict instead, pass [ConcurrencyControl.failOnConflict] to
-  /// [concurrencyControl]. In this case, if the document could not be deleted
-  /// the result is `false`. On success it is `true`.
-  FutureOr<bool> deleteDocument(
+  /// [concurrencyControl]. In this case, a [DatabaseException] with
+  /// [DatabaseErrorCode.conflict] is thrown if there is a conflict.
+  FutureOr<void> deleteDocument(
     Document document, [
     ConcurrencyControl concurrencyControl = .lastWriteWins,
   ]);
@@ -333,13 +333,13 @@ abstract interface class Collection {
   /// through [ConcurrencyControl].
   ///
   /// When write operations are executed concurrently, the last writer will win
-  /// by default. In this case the result is always `true`.
+  /// by default.
   ///
   /// To fail on conflict instead, pass [ConcurrencyControl.failOnConflict] to
-  /// [concurrencyControl]. In this case, if the document could not be deleted
-  /// the result is `false`. On success it is `true`.
+  /// [concurrencyControl]. In this case, a [DatabaseException] with
+  /// [DatabaseErrorCode.conflict] is thrown if there is a conflict.
   @experimental
-  Future<bool> deleteTypedDocument(
+  Future<void> deleteTypedDocument(
     TypedDocumentObject document, [
     ConcurrencyControl concurrencyControl = .lastWriteWins,
   ]);
@@ -501,12 +501,12 @@ abstract interface class SyncCollection extends Collection {
   D? typedDocument<D extends TypedDocumentObject>(String id);
 
   @override
-  bool saveDocument(
+  void saveDocument(
     MutableDocument document, [
     ConcurrencyControl concurrencyControl = .lastWriteWins,
   ]);
 
-  /// Saves a [document] to this database, resolving conflicts with an sync
+  /// Saves a [document] to this database, resolving conflicts with a sync
   /// [conflictHandler].
   ///
   /// {@macro cbl.Collection.saveDocumentWithConflictHandler}
@@ -524,14 +524,14 @@ abstract interface class SyncCollection extends Collection {
   >(TypedMutableDocumentObject<D, MD> document);
 
   @override
-  bool deleteDocument(
+  void deleteDocument(
     Document document, [
     ConcurrencyControl concurrencyControl = .lastWriteWins,
   ]);
 
   @override
   @experimental
-  Future<bool> deleteTypedDocument(
+  Future<void> deleteTypedDocument(
     TypedDocumentObject document, [
     ConcurrencyControl concurrencyControl = .lastWriteWins,
   ]);
@@ -596,7 +596,7 @@ abstract interface class AsyncCollection extends Collection {
   Future<D?> typedDocument<D extends TypedDocumentObject>(String id);
 
   @override
-  Future<bool> saveDocument(
+  Future<void> saveDocument(
     MutableDocument document, [
     ConcurrencyControl concurrencyControl = .lastWriteWins,
   ]);
@@ -616,14 +616,14 @@ abstract interface class AsyncCollection extends Collection {
   >(TypedMutableDocumentObject<D, MD> document);
 
   @override
-  Future<bool> deleteDocument(
+  Future<void> deleteDocument(
     Document document, [
     ConcurrencyControl concurrencyControl = .lastWriteWins,
   ]);
 
   @override
   @experimental
-  Future<bool> deleteTypedDocument(
+  Future<void> deleteTypedDocument(
     TypedDocumentObject document, [
     ConcurrencyControl concurrencyControl = .lastWriteWins,
   ]);

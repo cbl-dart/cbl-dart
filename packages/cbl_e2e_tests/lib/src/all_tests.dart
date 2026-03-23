@@ -18,6 +18,7 @@ import 'fleece/slice_test.dart' as fleece_slice;
 import 'log/consoler_logger_test.dart' as log_console_logger;
 import 'log/file_logger_test.dart' as log_file_logger;
 import 'log/logger_test.dart' as log_logger;
+import 'log/multi_isolate_logger_test.dart' as log_multi_isolate_logger;
 import 'query/index/index_configuration_test.dart'
     as query_index_index_configuration;
 import 'query/parameters_test.dart' as query_parameters;
@@ -64,6 +65,7 @@ final tests = [
   log_console_logger.main,
   log_file_logger.main,
   log_logger.main,
+  log_multi_isolate_logger.main,
   query_builder.main,
   query_index_index_configuration.main,
   query_parameters.main,

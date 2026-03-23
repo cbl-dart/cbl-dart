@@ -34,10 +34,7 @@ void main() {
         final collection = await db.defaultCollection;
         final doc = MutableTestDocA();
 
-        expect(
-          await collection.saveTypedDocument(doc).withConcurrencyControl(),
-          isTrue,
-        );
+        await collection.saveTypedDocument(doc).withConcurrencyControl();
         expect(doc.internal.revisionId, isNotNull);
       });
 
@@ -368,7 +365,7 @@ void main() {
         final doc = MutableTestDocA();
         await collection.saveTypedDocument(doc).withConcurrencyControl();
 
-        expect(await collection.deleteTypedDocument(doc), isTrue);
+        await collection.deleteTypedDocument(doc);
         expect(
           await collection.typedDocument<TestDocA>(doc.internal.id),
           isNull,
@@ -425,7 +422,7 @@ class TestDocA<I extends Document>
 class MutableTestDocA extends TestDocA<MutableDocument>
     implements TypedMutableDocumentObject<TestDocA, MutableTestDocA> {
   MutableTestDocA([MutableDocument? document])
-    : super(document ?? MutableDocument());
+    : super(document ?? MutableDocument({}));
 
   @override
   String toString({String? indent}) => super.toString();
@@ -448,7 +445,7 @@ class TestDocB<I extends Document>
 class MutableTestDocB extends TestDocB<MutableDocument>
     implements TypedMutableDocumentObject<TestDocB, MutableTestDocB> {
   MutableTestDocB([MutableDocument? document])
-    : super(document ?? MutableDocument());
+    : super(document ?? MutableDocument({}));
 }
 
 class TestDocWithoutTypeMatcher<I extends Document>
@@ -474,7 +471,7 @@ class MutableTestDocWithoutTypeMatcher
           MutableTestDocWithoutTypeMatcher
         > {
   MutableTestDocWithoutTypeMatcher([MutableDocument? document])
-    : super(document ?? MutableDocument());
+    : super(document ?? MutableDocument({}));
 }
 
 final testAdapter = TypedDataRegistry(

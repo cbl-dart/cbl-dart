@@ -7,15 +7,12 @@ import 'package:cbl_sentry/src/sentry_tracing_delegate.dart';
 import 'package:sentry/sentry.dart';
 import 'package:test/test.dart';
 
-import 'utils/cbl.dart';
 import 'utils/mock_collection.dart';
 import 'utils/mock_hub.dart';
 import 'utils/mock_query.dart';
 import 'utils/mock_span.dart';
 
 void main() {
-  setUpAll(initCouchbaseLiteForTest);
-
   late MockHub hub;
 
   setUp(() {
@@ -26,7 +23,7 @@ void main() {
     test('adds breadcrumb at start of sync operations', () {
       final delegate = SentryTracingDelegate(sentryDsn: '', hub: hub);
       delegate.traceSyncOperation(
-        SaveDocumentOp(MockCollection(name: 'a'), MutableDocument.withId('b')),
+        SaveDocumentOp(MockCollection(name: 'a'), MutableDocument(id: 'b', {})),
         () {
           expect(hub.breadcrumbs, hasLength(1));
         },
@@ -45,7 +42,7 @@ void main() {
     test('adds breadcrumb at start of async operations', () async {
       final delegate = SentryTracingDelegate(sentryDsn: '', hub: hub);
       await delegate.traceAsyncOperation(
-        SaveDocumentOp(MockCollection(name: 'a'), MutableDocument.withId('b')),
+        SaveDocumentOp(MockCollection(name: 'a'), MutableDocument(id: 'b', {})),
         () async {
           expect(hub.breadcrumbs, hasLength(1));
         },
@@ -139,7 +136,7 @@ void main() {
         delegate.traceSyncOperation(
           SaveDocumentOp(
             MockCollection(name: 'a'),
-            MutableDocument.withId('b'),
+            MutableDocument(id: 'b', {}),
           ),
           () {},
         );
@@ -162,7 +159,7 @@ void main() {
         await delegate.traceAsyncOperation(
           SaveDocumentOp(
             MockCollection(name: 'a'),
-            MutableDocument.withId('b'),
+            MutableDocument(id: 'b', {}),
           ),
           () async {},
         );

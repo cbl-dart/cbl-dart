@@ -101,7 +101,7 @@ To reference a constructor, specify the `new` type before the type name:
 
 ```
 `api|new:MutableDocument`
-`api|new:MutableDocument.withId`
+`api|new:MutableDocument`
 ```
 
 To reference elements other than classes and mixins, specify a type:

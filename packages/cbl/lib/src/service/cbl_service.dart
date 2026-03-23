@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import '../bindings.dart';
 import '../database/collection.dart';
@@ -7,6 +8,7 @@ import '../database/database_configuration.dart';
 import '../database/ffi_database.dart';
 import '../document/document.dart';
 import '../document/ffi_document.dart';
+import '../errors.dart';
 import '../fleece/decoder.dart';
 import '../query/ffi_query.dart';
 import '../query/index/ffi_index_updater.dart';
@@ -484,14 +486,19 @@ final class CblService {
 
     document.setEncodedProperties(request.state.properties!.encodedValue!);
 
-    if (collection.saveDocument(document, request.concurrencyControl)) {
-      return document.createState(
-        withProperties: false,
-        objectRegistry: _objectRegistry,
-      );
-    } else {
-      return null;
+    try {
+      collection.saveDocument(document, request.concurrencyControl);
+    } on DatabaseException catch (e) {
+      if (e.code == DatabaseErrorCode.conflict) {
+        return null;
+      }
+      rethrow;
     }
+
+    return document.createState(
+      withProperties: false,
+      objectRegistry: _objectRegistry,
+    );
   }
 
   Future<DocumentState?> _deleteDocument(DeleteDocument request) async {
@@ -506,14 +513,19 @@ final class CblService {
       return null;
     }
 
-    if (collection.deleteDocument(document, request.concurrencyControl)) {
-      return document.createState(
-        withProperties: false,
-        objectRegistry: _objectRegistry,
-      );
-    } else {
-      return null;
+    try {
+      collection.deleteDocument(document, request.concurrencyControl);
+    } on DatabaseException catch (e) {
+      if (e.code == DatabaseErrorCode.conflict) {
+        return null;
+      }
+      rethrow;
     }
+
+    return document.createState(
+      withProperties: false,
+      objectRegistry: _objectRegistry,
+    );
   }
 
   void _purgeDocument(PurgeDocument request) => _getCollectionById(
@@ -693,8 +705,12 @@ final class CblService {
       authenticator: request.authenticator,
       acceptOnlySelfSignedServerCertificate:
           request.acceptOnlySelfSignedServerCertificate,
-      pinnedServerCertificate: request.pinnedServerCertificate?.toTypedList(),
-      trustedRootCertificates: request.trustedRootCertificates?.toTypedList(),
+      pinnedServerCertificate: request.pinnedServerCertificate?.let(
+        (data) => DerData(data.toTypedList()),
+      ),
+      trustedRootCertificates: request.trustedRootCertificates?.let(
+        (data) => PemData(utf8.decode(data.toTypedList())),
+      ),
       headers: request.headers,
       enableAutoPurge: request.enableAutoPurge,
       acceptParentDomainCookies: request.acceptParentDomainCookies,
@@ -806,7 +822,7 @@ final class CblService {
   }) {
     if (state.revisionId == null) {
       // The document is new.
-      return MutableDocument.withId(state.docId) as T;
+      return MutableDocument(id: state.docId, {}) as T;
     } else {
       if (state.id != null) {
         // A document has already been obtained and added to the object

@@ -108,7 +108,7 @@ void main() {
 
       final content = randomTestContent(large: blobSize.value == .large);
       Blob? writeBlobInstance;
-      final doc = MutableDocument();
+      final doc = MutableDocument({});
 
       switch (writeBlob.value) {
         case .data:

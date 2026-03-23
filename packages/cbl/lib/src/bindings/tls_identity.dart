@@ -3,6 +3,7 @@ import 'dart:ffi';
 import 'dart:typed_data';
 
 import '../fleece/containers.dart';
+import '../support/isolate.dart';
 import 'base.dart';
 import 'cblite.dart' as cblite;
 import 'cblitedart.dart' as cblitedart;
@@ -101,26 +102,36 @@ final class TlsIdentityBindings {
   static String get kCBLCertAttrKeyRegisteredID =>
       cblite.kCBLCertAttrKeyRegisteredID.toDartString()!;
 
-  static Pointer<cblite.CBLCert> certCreateWithData(Uint8List data) =>
-      cblite.CBLCert_CreateWithData(
-        SliceResult.fromTypedList(data).makeGlobal().ref,
-        globalCBLError..ref.reset(),
-      ).checkError();
+  static Pointer<cblite.CBLCert> certCreateWithData(Uint8List data) {
+    ensureInitializedForCurrentIsolate();
+    return cblite.CBLCert_CreateWithData(
+      SliceResult.fromTypedList(data).makeGlobal().ref,
+      globalCBLError..ref.reset(),
+    ).checkError();
+  }
 
   static Pointer<cblite.CBLCert>? certNextInChain(
     Pointer<cblite.CBLCert> pointer,
-  ) => cblite.CBLCert_CertNextInChain(pointer).toNullable();
+  ) {
+    ensureInitializedForCurrentIsolate();
+    return cblite.CBLCert_CertNextInChain(pointer).toNullable();
+  }
 
   static SliceResult certData(
     Pointer<cblite.CBLCert> pointer, {
     required bool pemEncoded,
-  }) =>
-      SliceResult.fromFLSliceResult(cblite.CBLCert_Data(pointer, pemEncoded))!;
+  }) {
+    ensureInitializedForCurrentIsolate();
+    return SliceResult.fromFLSliceResult(
+      cblite.CBLCert_Data(pointer, pemEncoded),
+    )!;
+  }
 
   static String? certSubjectNameComponent(
     Pointer<cblite.CBLCert> pointer,
     String key,
   ) {
+    ensureInitializedForCurrentIsolate();
     final encoded = utf8.encode(key);
     return cblitedart.CBLDart_CBLCert_SubjectNameComponent(
       pointer,
@@ -131,25 +142,31 @@ final class TlsIdentityBindings {
 
   static ({DateTime created, DateTime expires}) certValidTimespan(
     Pointer<cblite.CBLCert> pointer,
-  ) => withGlobalArena(() {
-    final outCreated = globalArena<cblite.CBLTimestamp>();
-    final outExpires = globalArena<cblite.CBLTimestamp>();
-    cblite.CBLCert_ValidTimespan(pointer, outCreated, outExpires);
-    return (
-      created: DateTime.fromMillisecondsSinceEpoch(
-        outCreated.value,
-        isUtc: true,
-      ),
-      expires: DateTime.fromMillisecondsSinceEpoch(
-        outExpires.value,
-        isUtc: true,
-      ),
-    );
-  });
+  ) {
+    ensureInitializedForCurrentIsolate();
+    return withGlobalArena(() {
+      final outCreated = globalArena<cblite.CBLTimestamp>();
+      final outExpires = globalArena<cblite.CBLTimestamp>();
+      cblite.CBLCert_ValidTimespan(pointer, outCreated, outExpires);
+      return (
+        created: DateTime.fromMillisecondsSinceEpoch(
+          outCreated.value,
+          isUtc: true,
+        ),
+        expires: DateTime.fromMillisecondsSinceEpoch(
+          outExpires.value,
+          isUtc: true,
+        ),
+      );
+    });
+  }
 
   static Pointer<cblite.CBLKeyPair> certPublicKey(
     Pointer<cblite.CBLCert> pointer,
-  ) => cblite.CBLCert_PublicKey(pointer);
+  ) {
+    ensureInitializedForCurrentIsolate();
+    return cblite.CBLCert_PublicKey(pointer);
+  }
 
   static Pointer<cblite.CBLKeyPair> keyPairCreateWithExternalKey({
     required int keySizeInBits,
@@ -157,19 +174,23 @@ final class TlsIdentityBindings {
     required cblitedart.CBLDartExternalKeyPublicKeyData publicKeyData,
     required cblitedart.CBLDartExternalKeyDecrypt decrypt,
     required cblitedart.CBLDartExternalKeySign sign,
-  }) => cblitedart.CBLDartKeyPair_CreateWithExternalKey(
-    keySizeInBits,
-    delegate,
-    publicKeyData,
-    decrypt,
-    sign,
-    globalCBLError,
-  ).checkError();
+  }) {
+    ensureInitializedForCurrentIsolate();
+    return cblitedart.CBLDartKeyPair_CreateWithExternalKey(
+      keySizeInBits,
+      delegate,
+      publicKeyData,
+      decrypt,
+      sign,
+      globalCBLError,
+    ).checkError();
+  }
 
   static Pointer<cblite.CBLKeyPair> keyPairCreateWithPrivateKey(
     Uint8List privateKey, {
     String? password,
   }) {
+    ensureInitializedForCurrentIsolate();
     final pkSlice = SliceResult.fromTypedList(privateKey);
     if (password == null) {
       return cblitedart.CBLDart_CBLKeyPair_CreateWithPrivateKeyData(
@@ -190,27 +211,36 @@ final class TlsIdentityBindings {
     ).checkError();
   }
 
-  static String? keyPairPublicKeyDigest(Pointer<cblite.CBLKeyPair> pointer) =>
-      cblite.CBLKeyPair_PublicKeyDigest(pointer).toDartStringAndRelease();
+  static String? keyPairPublicKeyDigest(Pointer<cblite.CBLKeyPair> pointer) {
+    ensureInitializedForCurrentIsolate();
+    return cblite.CBLKeyPair_PublicKeyDigest(pointer).toDartStringAndRelease();
+  }
 
-  static Uint8List? keyPairPublicKeyData(Pointer<cblite.CBLKeyPair> pointer) =>
-      SliceResult.fromFLSliceResult(
-        cblite.CBLKeyPair_PublicKeyData(pointer),
-      )?.asTypedList().let(Uint8List.fromList);
+  static Uint8List? keyPairPublicKeyData(Pointer<cblite.CBLKeyPair> pointer) {
+    ensureInitializedForCurrentIsolate();
+    return SliceResult.fromFLSliceResult(
+      cblite.CBLKeyPair_PublicKeyData(pointer),
+    )?.asTypedList().let(Uint8List.fromList);
+  }
 
-  static Uint8List? keyPairPrivateKeyData(Pointer<cblite.CBLKeyPair> pointer) =>
-      SliceResult.fromFLSliceResult(
-        cblite.CBLKeyPair_PrivateKeyData(pointer),
-      )?.asTypedList().let(Uint8List.fromList);
+  static Uint8List? keyPairPrivateKeyData(Pointer<cblite.CBLKeyPair> pointer) {
+    ensureInitializedForCurrentIsolate();
+    return SliceResult.fromFLSliceResult(
+      cblite.CBLKeyPair_PrivateKeyData(pointer),
+    )?.asTypedList().let(Uint8List.fromList);
+  }
 
   static Pointer<cblite.CBLTLSIdentity> withKeyPairAndCerts(
     Pointer<cblite.CBLKeyPair> keyPair,
     Pointer<cblite.CBLCert> certificate,
-  ) => cblite.CBLTLSIdentity_IdentityWithKeyPairAndCerts(
-    keyPair,
-    certificate,
-    globalCBLError..ref.reset(),
-  ).checkError();
+  ) {
+    ensureInitializedForCurrentIsolate();
+    return cblite.CBLTLSIdentity_IdentityWithKeyPairAndCerts(
+      keyPair,
+      certificate,
+      globalCBLError..ref.reset(),
+    ).checkError();
+  }
 
   static Pointer<cblite.CBLTLSIdentity> create(
     Set<CBLKeyUsages> keyUsages,
@@ -218,6 +248,7 @@ final class TlsIdentityBindings {
     Duration validityDuration,
     String? label,
   ) {
+    ensureInitializedForCurrentIsolate();
     final attributesDict = MutableDict(attributes);
     if (label == null) {
       return cblitedart.CBLDart_CBLTLSIdentity_CreateIdentity(
@@ -246,6 +277,7 @@ final class TlsIdentityBindings {
     Duration expiration,
     Pointer<cblite.CBLKeyPair> keyPair,
   ) {
+    ensureInitializedForCurrentIsolate();
     final attributesDict = MutableDict(attributes);
     return cblite.CBLTLSIdentity_CreateIdentityWithKeyPair(
       keyUsages.fold(0, (value, usage) => value | usage.value),
@@ -257,6 +289,7 @@ final class TlsIdentityBindings {
   }
 
   static Pointer<cblite.CBLTLSIdentity>? withLabel(String label) {
+    ensureInitializedForCurrentIsolate();
     final encoded = utf8.encode(label);
     return cblitedart.CBLDart_CBLTLSIdentity_IdentityWithLabel(
       encoded.address.cast(),
@@ -267,12 +300,16 @@ final class TlsIdentityBindings {
 
   static Pointer<cblite.CBLTLSIdentity> withCerts(
     Pointer<cblite.CBLCert> certificate,
-  ) => cblite.CBLTLSIdentity_IdentityWithCerts(
-    certificate,
-    globalCBLError..ref.reset(),
-  ).checkError();
+  ) {
+    ensureInitializedForCurrentIsolate();
+    return cblite.CBLTLSIdentity_IdentityWithCerts(
+      certificate,
+      globalCBLError..ref.reset(),
+    ).checkError();
+  }
 
   static void deleteWithLabel(String label) {
+    ensureInitializedForCurrentIsolate();
     final encoded = utf8.encode(label);
     cblitedart.CBLDart_CBLTLSIdentity_DeleteIdentityWithLabel(
       encoded.address.cast(),
@@ -283,11 +320,16 @@ final class TlsIdentityBindings {
 
   static Pointer<cblite.CBLCert> identityCertificates(
     Pointer<cblite.CBLTLSIdentity> pointer,
-  ) => cblite.CBLTLSIdentity_Certificates(pointer);
+  ) {
+    ensureInitializedForCurrentIsolate();
+    return cblite.CBLTLSIdentity_Certificates(pointer);
+  }
 
-  static DateTime identityExpiration(Pointer<cblite.CBLTLSIdentity> pointer) =>
-      DateTime.fromMillisecondsSinceEpoch(
-        cblite.CBLTLSIdentity_Expiration(pointer),
-        isUtc: true,
-      );
+  static DateTime identityExpiration(Pointer<cblite.CBLTLSIdentity> pointer) {
+    ensureInitializedForCurrentIsolate();
+    return DateTime.fromMillisecondsSinceEpoch(
+      cblite.CBLTLSIdentity_Expiration(pointer),
+      isUtc: true,
+    );
+  }
 }

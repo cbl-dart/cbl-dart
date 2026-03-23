@@ -34,12 +34,12 @@ void main() {
         level: LogLevel.error,
       );
 
-      // Wont be logged because its under the current level.
+      // Won't be logged because it's under the current level.
       cblLogMessage(LogDomain.network, LogLevel.warning, 'A');
 
       logger.level = LogLevel.warning;
 
-      // Will no be be logged after setting a new level.
+      // Will not be logged after setting a new level.
       cblLogMessage(LogDomain.network, LogLevel.warning, 'A');
     });
 
@@ -62,7 +62,7 @@ void main() {
 
       Database.log.custom = null;
 
-      // Wont be logged because logger has been removed.
+      // Won't be logged because logger has been removed.
       cblLogMessage(LogDomain.network, LogLevel.warning, 'A');
     });
 
@@ -76,7 +76,7 @@ void main() {
           emits(
             isA<LogMessage>()
                 .having((it) => it.domain, 'domain', LogDomain.network)
-                .having((it) => it.level, 'lever', LogLevel.warning)
+                .having((it) => it.level, 'level', LogLevel.warning)
                 .having((it) => it.message, 'message', 'A'),
           ),
         );

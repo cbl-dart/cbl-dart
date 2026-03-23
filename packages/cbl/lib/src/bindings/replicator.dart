@@ -3,6 +3,7 @@ import 'dart:ffi';
 import 'dart:typed_data';
 
 import '../errors.dart';
+import '../support/isolate.dart';
 import 'base.dart';
 import 'cblite.dart' as cblite;
 import 'cblitedart.dart' as cblitedart;
@@ -301,6 +302,7 @@ final class ReplicatorBindings {
   );
 
   static Pointer<cblite.CBLEndpoint> createEndpointWithUrl(String url) {
+    ensureInitializedForCurrentIsolate();
     final urlEncoded = utf8.encode(url);
     return cblitedart.CBLDart_CBLEndpoint_CreateWithURL(
       urlEncoded.address.cast(),
@@ -321,6 +323,7 @@ final class ReplicatorBindings {
     String username,
     String password,
   ) {
+    ensureInitializedForCurrentIsolate();
     final userEncoded = utf8.encode(username);
     final pwEncoded = utf8.encode(password);
     return cblitedart.CBLDart_CBLAuth_CreatePassword(
@@ -335,6 +338,7 @@ final class ReplicatorBindings {
     String sessionID,
     String? cookieName,
   ) {
+    ensureInitializedForCurrentIsolate();
     final sidEncoded = utf8.encode(sessionID);
     if (cookieName == null) {
       return cblitedart.CBLDart_CBLAuth_CreateSession(
@@ -355,7 +359,10 @@ final class ReplicatorBindings {
 
   static Pointer<cblite.CBLAuthenticator> createClientCertificateAuthenticator(
     Pointer<cblite.CBLTLSIdentity> pointer,
-  ) => cblite.CBLAuth_CreateCertificate(pointer);
+  ) {
+    ensureInitializedForCurrentIsolate();
+    return cblite.CBLAuth_CreateCertificate(pointer);
+  }
 
   static void freeAuthenticator(
     Pointer<cblite.CBLAuthenticator> authenticator,
@@ -365,12 +372,15 @@ final class ReplicatorBindings {
 
   static Pointer<cblite.CBLReplicator> createReplicator(
     CBLReplicatorConfiguration config,
-  ) => withGlobalArena(
-    () => cblitedart.CBLDart_CBLReplicator_Create(
-      _createConfigurationStruct(config),
-      globalCBLError,
-    ).checkError(),
-  );
+  ) {
+    ensureInitializedForCurrentIsolate();
+    return withGlobalArena(
+      () => cblitedart.CBLDart_CBLReplicator_Create(
+        _createConfigurationStruct(config),
+        globalCBLError,
+      ).checkError(),
+    );
+  }
 
   static void bindToDartObject(
     Finalizable object,

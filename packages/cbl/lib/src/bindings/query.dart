@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:ffi';
 
+import '../support/isolate.dart';
 import 'base.dart';
 import 'cblite.dart' as cblite;
 import 'cblitedart.dart' as cblitedart;
@@ -123,6 +124,7 @@ final class QueryBindings {
     cblitedart.CBLDart_PredictiveModel_PredictionAsync predictionAsync,
     cblitedart.CBLDart_PredictiveModel_Unregistered unregistered,
   ) {
+    ensureInitializedForCurrentIsolate();
     final encoded = utf8.encode(name);
     return cblitedart.CBLDart_PredictiveModel_New(
       encoded.address.cast(),
@@ -140,6 +142,7 @@ final class QueryBindings {
   ) => _predictiveModelFinalizer.attach(object, model.cast());
 
   static void unregisterPredictiveModel(String name) {
+    ensureInitializedForCurrentIsolate();
     final nameSlice = SliceResult.fromString(name);
     cblitedart.CBLDart_CBL_UnregisterPredictiveModel(
       nameSlice.buf,

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:ffi';
+import 'dart:isolate';
 
 import '../bindings.dart';
 import '../bindings/cblite.dart' hide CBLLogDomain, CBLLogLevel;
@@ -16,7 +17,6 @@ import '../database/ffi_database.dart';
 import '../database/proxy_database.dart';
 import '../errors.dart';
 import '../support/edition.dart';
-import '../support/isolate.dart';
 import '../support/native_object.dart';
 import '../support/utils.dart';
 import 'authenticator.dart';
@@ -501,7 +501,7 @@ final class FfiUrlEndpointListener implements UrlEndpointListener, Finalizable {
     required Pointer<CBLListenerAuthenticator>? authenticatorPointer,
     required bool enableDeltaSync,
     required bool readOnly,
-  }) => runInSecondaryIsolate(
+  }) => Isolate.run(
     () => UrlEndpointListenerBindings.create(
       collections: collections,
       port: port,
@@ -547,18 +547,14 @@ final class FfiUrlEndpointListener implements UrlEndpointListener, Finalizable {
   @override
   Future<void> start() async {
     final pointer = _pointer;
-    await runInSecondaryIsolate(
-      () => UrlEndpointListenerBindings.start(pointer),
-    );
+    await Isolate.run(() => UrlEndpointListenerBindings.start(pointer));
     _authenticator?._onListenerStarted();
   }
 
   @override
   Future<void> stop() async {
     final pointer = _pointer;
-    await runInSecondaryIsolate(
-      () => UrlEndpointListenerBindings.stop(pointer),
-    );
+    await Isolate.run(() => UrlEndpointListenerBindings.stop(pointer));
     _authenticator?._onListenerStopped();
   }
 

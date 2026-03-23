@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:ffi' as ffi;
 import 'dart:ffi';
 import 'dart:io';
+import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
@@ -15,7 +16,6 @@ import '../bindings/cblitedart.dart'
     hide CBLCert, CBLKeyPair, CBLTLSIdentity, FLSlice;
 import '../errors.dart';
 import '../support/edition.dart';
-import '../support/isolate.dart';
 import '../support/native_object.dart';
 import '../support/utils.dart';
 
@@ -1004,7 +1004,7 @@ final class FfiKeyPair implements KeyPair, Finalizable {
   }) async {
     useEnterpriseFeature(EnterpriseFeature.peerToPeerSync);
 
-    final pointer = await runInSecondaryIsolate(
+    final pointer = await Isolate.run(
       () => TlsIdentityBindings.keyPairCreateWithPrivateKey(
         privateKey._data,
         password: password,
@@ -1020,7 +1020,7 @@ final class FfiKeyPair implements KeyPair, Finalizable {
   @override
   Future<String?> get publicKeyDigest async {
     final pointer = this.pointer;
-    return _publicKeyDigest = await runInSecondaryIsolate(
+    return _publicKeyDigest = await Isolate.run(
       () => TlsIdentityBindings.keyPairPublicKeyDigest(pointer),
     );
   }
@@ -1028,7 +1028,7 @@ final class FfiKeyPair implements KeyPair, Finalizable {
   @override
   Future<DerData?> get publicKeyData async {
     final pointer = this.pointer;
-    final data = await runInSecondaryIsolate(
+    final data = await Isolate.run(
       () => TlsIdentityBindings.keyPairPublicKeyData(pointer),
     );
     return data?.let(DerData.new);
@@ -1037,7 +1037,7 @@ final class FfiKeyPair implements KeyPair, Finalizable {
   @override
   Future<DerData?> get privateKeyData async {
     final pointer = this.pointer;
-    final data = await runInSecondaryIsolate(
+    final data = await Isolate.run(
       () => TlsIdentityBindings.keyPairPrivateKeyData(pointer),
     );
     return data?.let(DerData.new);
@@ -1229,7 +1229,7 @@ final class FfiTlsIdentity implements TlsIdentity, Finalizable {
     final keyPairPointer = (keyPair as FfiKeyPair?)?.pointer;
 
     return FfiTlsIdentity.fromPointer(
-      await runInSecondaryIsolate(
+      await Isolate.run(
         () => keyPairPointer != null
             ? TlsIdentityBindings.createWithKeyPair(
                 cblKeyUsages,
@@ -1252,7 +1252,7 @@ final class FfiTlsIdentity implements TlsIdentity, Finalizable {
     useEnterpriseFeature(EnterpriseFeature.peerToPeerSync);
     _checkPersistedIdentitySupport();
 
-    final pointer = await runInSecondaryIsolate(
+    final pointer = await Isolate.run(
       () => TlsIdentityBindings.withLabel(label),
     );
     if (pointer == null) {
@@ -1270,7 +1270,7 @@ final class FfiTlsIdentity implements TlsIdentity, Finalizable {
 
     final certificatePointer = FfiCertificate.combined(certificates).pointer;
     return FfiTlsIdentity.fromPointer(
-      await runInSecondaryIsolate(
+      await Isolate.run(
         () => TlsIdentityBindings.withCerts(certificatePointer),
       ),
       adopt: true,
@@ -1280,9 +1280,7 @@ final class FfiTlsIdentity implements TlsIdentity, Finalizable {
   static Future<void> deleteIdentity(String label) async {
     useEnterpriseFeature(EnterpriseFeature.peerToPeerSync);
     _checkPersistedIdentitySupport();
-    await runInSecondaryIsolate(
-      () => TlsIdentityBindings.deleteWithLabel(label),
-    );
+    await Isolate.run(() => TlsIdentityBindings.deleteWithLabel(label));
   }
 
   static void _checkPersistedIdentitySupport() {
@@ -1308,4 +1306,8 @@ final class FfiTlsIdentity implements TlsIdentity, Finalizable {
     ['expires: $expires', 'certificates: $certificates'].join(', '),
     ')',
   ].join('');
+}
+
+extension InternalCryptoData on CryptoData {
+  Uint8List get bytes => _data;
 }

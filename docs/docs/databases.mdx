@@ -102,12 +102,19 @@ final database = Database.openSync('my-database');
 
 ## Close Database
 
-You are advised to incorporate the closing of all open database into your
+You are advised to incorporate the closing of all open databases into your
 application workflow.
 
-Closing a database is simple, just call use `api|Database.close`. See
-[Example 2](#). This also closes active replications, listeners, and-or live
-queries connected to the database.
+Closing a database is simple, just use `api|Database.close`. See [Example 2](#).
+This also closes active replications, listeners, and-or live queries connected
+to the database.
+
+:::note
+
+Closing a database soon after starting a replication involving it can cause an
+exception as the asynchronous replicator start may not yet be connected.
+
+:::
 
 <CodeExample id={2} title="Closing a Database">
 
@@ -116,6 +123,36 @@ await database.close();
 ```
 
 </CodeExample>
+
+## Database Full Sync
+
+Database Full Sync prevents the loss of transactional data due to an unexpected
+system crash or loss of power. This feature is not enabled by default and must
+be manually set in your database configuration using
+`api|DatabaseConfiguration.fullSync`.
+
+:::caution
+
+Database Full Sync is a safe method to prevent data loss but will incur a
+significant degradation of performance.
+
+:::
+
+<CodeExample id={3} title="Enable Database Full Sync">
+
+```dart
+final config = DatabaseConfiguration(fullSync: true);
+final database = await Database.openAsync('my-database', config);
+```
+
+</CodeExample>
+
+:::note
+
+Once a database is created, its configuration is immutable — modifying the
+`api|DatabaseConfiguration` afterwards has no effect on the existing instance.
+
+:::
 
 ## Database Encryption
 
@@ -129,9 +166,9 @@ the device. The algorithm used to encrypt the database is 256-bit AES.
 
 To enable encryption, use `api|DatabaseConfiguration.encryptionKey` to set the
 encryption key of your choice. Provide this encryption key every time the
-database is opened - see [Example 3](#).
+database is opened - see [Example 4](#).
 
-<CodeExample id={3} title="Opening an Encrypted Database">
+<CodeExample id={4} title="Opening an Encrypted Database">
 
 ```dart
 final key = await EncryptionKey.passwordAsync('secret password');
@@ -141,7 +178,7 @@ final database = await Database.openAsync('my-database', config);
 
 </CodeExample>
 
-### Persiting
+### Persisting
 
 Couchbase Lite does not persist the key. It is the application's responsibility
 to manage the key and store it in a platform specific secure store such as
@@ -202,10 +239,10 @@ more information about this extension from it's
 
 You should use console logs as your first source of diagnostic information. If
 the information in the default logging level is insufficient you can focus it on
-database errors and generate more verbose messages (see `api|enum:LogLevel`)
-— see: [Example 4](#).
+database errors and generate more verbose messages (see `api|enum:LogLevel`) —
+see: [Example 5](#).
 
-<CodeExample id={4} title="Increase level of Database Log Messages">
+<CodeExample id={5} title="Increase level of Database Log Messages">
 
 ```dart
 Database.log.console.level = LogLevel.verbose;

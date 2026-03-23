@@ -1,11 +1,12 @@
 import 'package:cbl/cbl.dart';
 import 'package:test/test.dart';
 
+import '../fixtures/builtin_types.dart';
 import '../fixtures/typed_data_list.dart';
 import '../test_utils.dart';
 
 void main() {
-  setUpAll(initCouchbaseLiteForTest);
+  setUpAll(configureCouchbaseLiteForTest);
 
   test('get list', () {
     expect(
@@ -64,6 +65,21 @@ void main() {
     ]);
     expect((MutableOptionalBoolListDict(null)..value = mutableList).value, [
       false,
+    ]);
+  });
+
+  test('enum list', () {
+    expect(
+      ImmutableEnumListDict.internal(
+        MutableDictionary({
+          'value': ['a'],
+        }),
+      ).value,
+      [TestEnum.a],
+    );
+    expect(MutableEnumListDict([TestEnum.a]).value, [TestEnum.a]);
+    expect((MutableEnumListDict([TestEnum.a])..value = [TestEnum.a]).value, [
+      TestEnum.a,
     ]);
   });
 

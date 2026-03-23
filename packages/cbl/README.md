@@ -45,8 +45,6 @@ Open a database and run a query:
 import 'package:cbl/cbl.dart';
 
 Future<void> main() async {
-  await CouchbaseLite.init();
-
   final database = await Database.openAsync('my-database');
   final collection = await database.createCollection('tasks');
 

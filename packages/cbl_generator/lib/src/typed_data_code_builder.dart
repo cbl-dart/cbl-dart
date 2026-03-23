@@ -22,9 +22,18 @@ final class TypeDataCodeBuilder {
 
   TypedDataObjectClassNames get _classNames => object.classNames;
 
+  bool get _isDocument => object.kind == TypedDataObjectKind.document;
+  bool get _isCompanionDictionary => object.isCompanionDictionary;
+
   String build() {
     _code.clear();
     _writeInterfaceMixin();
+    if (_isDocument) {
+      _writeDocumentInterface();
+    }
+    if (_isCompanionDictionary) {
+      _writeCompanionDictionaryInterface();
+    }
     _writeImplBase();
     _writeImmutableClass();
     _writeMutableClass();
@@ -32,11 +41,20 @@ final class TypeDataCodeBuilder {
   }
 
   void _writeInterfaceMixin() {
-    _code.writeln('''
+    if (_isDocument) {
+      // For document types, the mixin does NOT implement TypedDocumentObject.
+      // The document interface class does instead.
+      _code.writeln('''
+mixin ${_classNames.interfaceMixinName} {
+
+''');
+    } else {
+      _code.writeln('''
 mixin ${_classNames.interfaceMixinName} implements
     Typed${_internalType}Object<${_classNames.mutableClassName}> {
 
 ''');
+    }
 
     // Fields are either declared as constructor parameter or as abstract
     // getters. So, we only need to write the getters in the interface mixin
@@ -48,13 +66,34 @@ mixin ${_classNames.interfaceMixinName} implements
     _code.writeln('}');
   }
 
-  void _writeImplBase() {
+  void _writeDocumentInterface() {
     _code.writeln('''
-abstract class ${_classNames.implBaseName}<I extends $_internalType>
-    with ${_classNames.interfaceMixinName}
-    implements ${_classNames.declaringClassName} {
+abstract class ${object.documentInterfaceName!}
+    implements ${_classNames.declaringClassName},
+        TypedDocumentObject<${_classNames.mutableClassName}> {}
 
-  ${_classNames.implBaseName}(this.internal);
+''');
+  }
+
+  void _writeCompanionDictionaryInterface() {
+    _code.writeln('''
+abstract class ${_classNames.declaringClassName}
+    with ${_classNames.interfaceMixinName}
+    implements ${object.companionParentClassName!} {}
+
+''');
+  }
+
+  void _writeImplBase() {
+    final implBaseName = object.effectiveImplBaseName;
+    final implementsType = object.typedInterfaceName;
+
+    _code.writeln('''
+abstract class $implBaseName<I extends $_internalType>
+    with ${_classNames.interfaceMixinName}
+    implements $implementsType {
+
+  $implBaseName(this.internal);
 
   @override
   final I internal;
@@ -76,10 +115,12 @@ abstract class ${_classNames.implBaseName}<I extends $_internalType>
   }
 
   void _writeImmutableClass() {
+    final implBaseName = object.effectiveImplBaseName;
+
     _code.writeln('''
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
-class ${_classNames.immutableClassName} extends ${_classNames.implBaseName} {
+class ${_classNames.immutableClassName} extends $implBaseName {
 
   ${_classNames.immutableClassName}.internal(super.internal);
 
@@ -95,11 +136,14 @@ class ${_classNames.immutableClassName} extends ${_classNames.implBaseName} {
   }
 
   void _writeMutableClass() {
+    final implBaseName = object.effectiveImplBaseName;
+    final mutableFirstTypeParam = object.typedInterfaceName;
+
     _code.writeln('''
 /// Mutable version of [${_classNames.declaringClassName}].
 class ${_classNames.mutableClassName}
-    extends ${_classNames.implBaseName}<$_mutableInternalType>
-    implements TypedMutable${_internalType}Object<${_classNames.declaringClassName}, ${_classNames.mutableClassName}> {
+    extends $implBaseName<$_mutableInternalType>
+    implements TypedMutable${_internalType}Object<$mutableFirstTypeParam, ${_classNames.mutableClassName}> {
 
   /// Creates a new mutable [${_classNames.declaringClassName}].
   ${_classNames.mutableClassName}(
@@ -160,34 +204,32 @@ class ${_classNames.mutableClassName}
     final documentIdField = object.documentIdField;
     if (documentIdField != null &&
         documentIdField.constructorParameter != null) {
-      if (documentIdField.constructorParameter!.type.isNullable) {
-        _code
-          ..write(documentIdField.name)
-          ..write(' == null ? ')
-          ..write(_mutableInternalType)
-          ..write('() : ');
-      }
       _code
         ..write(_mutableInternalType)
-        ..write('.withId(')
+        ..write('(id: ')
         ..write(documentIdField.name)
-        ..write(')');
+        ..write(', {})');
     } else {
       _code
         ..write(_mutableInternalType)
-        ..write('()');
+        ..write(_isDocument ? '({})' : '()');
     }
 
     _code.write(')');
 
-    // Property initializers
-    if (object.properties.isEmpty) {
+    // Property initializers — only for properties that have constructor
+    // parameters (getter-only metadata fields converted to properties won't
+    // have constructor parameters).
+    final propertiesWithConstructor = object.properties
+        .where((p) => p.constructorParameter != null)
+        .toList();
+    if (propertiesWithConstructor.isEmpty) {
       _code
         ..writeln(';')
         ..writeln();
     } else {
       _code.writeln(' {');
-      for (final field in object.properties) {
+      for (final field in propertiesWithConstructor) {
         if (field.isNullable) {
           _code
             ..write('if (')
@@ -351,7 +393,7 @@ String toString({String? indent}) => TypedDataHelpers.renderString(
 @override
 bool operator ==(Object other) =>
     identical(this, other) ||
-    other is ${_classNames.declaringClassName} &&
+    other is ${object.typedInterfaceName} &&
         runtimeType == other.runtimeType &&
         internal == other.internal;
 

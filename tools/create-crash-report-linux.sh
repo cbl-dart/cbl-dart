@@ -10,13 +10,13 @@ crashReportName="crash-report.txt"
 
 function usage() {
     cat <<-EOF
-SYNOPSYS
-    -e EXECUTALBE -c CORE-DUMP -o OUTPUT-DIRECTORY
+SYNOPSIS
+    -e EXECUTABLE -c CORE-DUMP -o OUTPUT-DIRECTORY
         creates a crash report for an executable given a core dump
 
 DESCRIPTION
-    -e EXECUTALBE
-        executeable which crashed
+    -e EXECUTABLE
+        executable which crashed
 
     -c CORE-DUMP
         core dump of the crashed process
@@ -62,7 +62,7 @@ while getopts "e:c:o:" optName; do
     esac
 done
 
-requireOption -e EXECUTALBE "$executable"
+requireOption -e EXECUTABLE "$executable"
 requireOption -c CORE-DUMP "$coreDump"
 requireOption -o OUTPUT-DIRECTORY "$outputDirectory"
 
@@ -77,7 +77,7 @@ function installGdb() {
 }
 
 function checkCoreDump() {
-    # Wait a few seconds befor checking for core dump
+    # Wait a few seconds before checking for core dump
     sleep 5
 
     if [ ! -e "$coreDump" ]; then

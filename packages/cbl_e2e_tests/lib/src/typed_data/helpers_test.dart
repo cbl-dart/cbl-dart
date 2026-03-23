@@ -28,7 +28,7 @@ void main() {
     });
 
     group('readProperty', () {
-      test('can ready property', () {
+      test('can read property', () {
         expect(
           TypedDataHelpers.readProperty(
             internal: MutableDictionary({'a': 'b'}),
@@ -40,7 +40,7 @@ void main() {
         );
       });
 
-      test('throws when property does not exists', () {
+      test('throws when property does not exist', () {
         expect(
           () => TypedDataHelpers.readProperty(
             internal: MutableDictionary(),
@@ -100,7 +100,7 @@ void main() {
     });
 
     group('readNullableProperty', () {
-      test('can ready property', () {
+      test('can read property', () {
         expect(
           TypedDataHelpers.readNullableProperty(
             internal: MutableDictionary({'a': 'b'}),
@@ -124,7 +124,7 @@ void main() {
         );
       });
 
-      test('returns null if property does not exists', () {
+      test('returns null if property does not exist', () {
         expect(
           TypedDataHelpers.readNullableProperty(
             internal: MutableDictionary(),

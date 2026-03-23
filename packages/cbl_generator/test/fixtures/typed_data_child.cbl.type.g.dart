@@ -1,5 +1,6 @@
-// dart format width=80
 // GENERATED CODE - DO NOT MODIFY BY HAND
+// dart format width=80
+
 // ignore_for_file: avoid_positional_boolean_parameters, lines_longer_than_80_chars, invalid_use_of_internal_member, parameter_assignments, unnecessary_const, prefer_relative_imports, avoid_equals_and_hash_code_on_mutable_classes
 
 part of 'typed_data_child.dart';
@@ -8,15 +9,19 @@ part of 'typed_data_child.dart';
 // TypedDocumentGenerator
 // **************************************************************************
 
-mixin _$TypedDataPropertyDoc
-    implements TypedDocumentObject<MutableTypedDataPropertyDoc> {
+mixin _$TypedDataPropertyDoc {
   BoolDict get value;
 }
 
-abstract class _TypedDataPropertyDocImplBase<I extends Document>
+abstract class TypedDataPropertyDocDocument
+    implements
+        TypedDataPropertyDoc,
+        TypedDocumentObject<MutableTypedDataPropertyDoc> {}
+
+abstract class _TypedDataPropertyDocDocumentImplBase<I extends Document>
     with _$TypedDataPropertyDoc
-    implements TypedDataPropertyDoc {
-  _TypedDataPropertyDocImplBase(this.internal);
+    implements TypedDataPropertyDocDocument {
+  _TypedDataPropertyDocDocumentImplBase(this.internal);
 
   @override
   final I internal;
@@ -35,7 +40,8 @@ abstract class _TypedDataPropertyDocImplBase<I extends Document>
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
-class ImmutableTypedDataPropertyDoc extends _TypedDataPropertyDocImplBase {
+class ImmutableTypedDataPropertyDoc
+    extends _TypedDataPropertyDocDocumentImplBase {
   ImmutableTypedDataPropertyDoc.internal(super.internal);
 
   static const _valueConverter =
@@ -56,7 +62,7 @@ class ImmutableTypedDataPropertyDoc extends _TypedDataPropertyDocImplBase {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is TypedDataPropertyDoc &&
+      other is TypedDataPropertyDocDocument &&
           runtimeType == other.runtimeType &&
           internal == other.internal;
 
@@ -66,14 +72,14 @@ class ImmutableTypedDataPropertyDoc extends _TypedDataPropertyDocImplBase {
 
 /// Mutable version of [TypedDataPropertyDoc].
 class MutableTypedDataPropertyDoc
-    extends _TypedDataPropertyDocImplBase<MutableDocument>
+    extends _TypedDataPropertyDocDocumentImplBase<MutableDocument>
     implements
         TypedMutableDocumentObject<
-          TypedDataPropertyDoc,
+          TypedDataPropertyDocDocument,
           MutableTypedDataPropertyDoc
         > {
   /// Creates a new mutable [TypedDataPropertyDoc].
-  MutableTypedDataPropertyDoc(BoolDict value) : super(MutableDocument()) {
+  MutableTypedDataPropertyDoc(BoolDict value) : super(MutableDocument({})) {
     this.value = value;
   }
 
@@ -108,15 +114,125 @@ class MutableTypedDataPropertyDoc
   }
 }
 
-mixin _$OptionalTypedDataPropertyDoc
-    implements TypedDocumentObject<MutableOptionalTypedDataPropertyDoc> {
+mixin _$TypedDataPropertyDocDictionary
+    implements TypedDictionaryObject<MutableTypedDataPropertyDocDictionary> {
+  BoolDict get value;
+}
+
+abstract class TypedDataPropertyDocDictionary
+    with _$TypedDataPropertyDocDictionary
+    implements TypedDataPropertyDoc {}
+
+abstract class _TypedDataPropertyDocDictionaryImplBase<I extends Dictionary>
+    with _$TypedDataPropertyDocDictionary
+    implements TypedDataPropertyDocDictionary {
+  _TypedDataPropertyDocDictionaryImplBase(this.internal);
+
+  @override
+  final I internal;
+
+  @override
+  MutableTypedDataPropertyDocDictionary toMutable() =>
+      MutableTypedDataPropertyDocDictionary.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => TypedDataHelpers.renderString(
+    indent: indent,
+    className: 'TypedDataPropertyDocDictionary',
+    fields: {'value': value},
+  );
+}
+
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
+class ImmutableTypedDataPropertyDocDictionary
+    extends _TypedDataPropertyDocDictionaryImplBase {
+  ImmutableTypedDataPropertyDocDictionary.internal(super.internal);
+
+  static const _valueConverter =
+      const TypedDictionaryConverter<
+        Dictionary,
+        BoolDict,
+        TypedDictionaryObject<BoolDict>
+      >(ImmutableBoolDict.internal);
+
+  @override
+  late final value = TypedDataHelpers.readProperty(
+    internal: internal,
+    name: 'value',
+    key: 'value',
+    converter: _valueConverter,
+  );
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is TypedDataPropertyDocDictionary &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
+}
+
+/// Mutable version of [TypedDataPropertyDocDictionary].
+class MutableTypedDataPropertyDocDictionary
+    extends _TypedDataPropertyDocDictionaryImplBase<MutableDictionary>
+    implements
+        TypedMutableDictionaryObject<
+          TypedDataPropertyDocDictionary,
+          MutableTypedDataPropertyDocDictionary
+        > {
+  /// Creates a new mutable [TypedDataPropertyDocDictionary].
+  MutableTypedDataPropertyDocDictionary(BoolDict value)
+    : super(MutableDictionary()) {
+    this.value = value;
+  }
+
+  MutableTypedDataPropertyDocDictionary.internal(super.internal);
+
+  static const _valueConverter =
+      const TypedDictionaryConverter<
+        MutableDictionary,
+        MutableBoolDict,
+        BoolDict
+      >(MutableBoolDict.internal);
+
+  late MutableBoolDict _value = TypedDataHelpers.readProperty(
+    internal: internal,
+    name: 'value',
+    key: 'value',
+    converter: _valueConverter,
+  );
+
+  @override
+  MutableBoolDict get value => _value;
+
+  set value(BoolDict value) {
+    final promoted = _valueConverter.promote(value);
+    _value = promoted;
+    TypedDataHelpers.writeProperty(
+      internal: internal,
+      key: 'value',
+      value: promoted,
+      converter: _valueConverter,
+    );
+  }
+}
+
+mixin _$OptionalTypedDataPropertyDoc {
   BoolDict? get value;
 }
 
-abstract class _OptionalTypedDataPropertyDocImplBase<I extends Document>
+abstract class OptionalTypedDataPropertyDocDocument
+    implements
+        OptionalTypedDataPropertyDoc,
+        TypedDocumentObject<MutableOptionalTypedDataPropertyDoc> {}
+
+abstract class _OptionalTypedDataPropertyDocDocumentImplBase<I extends Document>
     with _$OptionalTypedDataPropertyDoc
-    implements OptionalTypedDataPropertyDoc {
-  _OptionalTypedDataPropertyDocImplBase(this.internal);
+    implements OptionalTypedDataPropertyDocDocument {
+  _OptionalTypedDataPropertyDocDocumentImplBase(this.internal);
 
   @override
   final I internal;
@@ -136,7 +252,7 @@ abstract class _OptionalTypedDataPropertyDocImplBase<I extends Document>
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableOptionalTypedDataPropertyDoc
-    extends _OptionalTypedDataPropertyDocImplBase {
+    extends _OptionalTypedDataPropertyDocDocumentImplBase {
   ImmutableOptionalTypedDataPropertyDoc.internal(super.internal);
 
   static const _valueConverter =
@@ -157,7 +273,7 @@ class ImmutableOptionalTypedDataPropertyDoc
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is OptionalTypedDataPropertyDoc &&
+      other is OptionalTypedDataPropertyDocDocument &&
           runtimeType == other.runtimeType &&
           internal == other.internal;
 
@@ -167,21 +283,134 @@ class ImmutableOptionalTypedDataPropertyDoc
 
 /// Mutable version of [OptionalTypedDataPropertyDoc].
 class MutableOptionalTypedDataPropertyDoc
-    extends _OptionalTypedDataPropertyDocImplBase<MutableDocument>
+    extends _OptionalTypedDataPropertyDocDocumentImplBase<MutableDocument>
     implements
         TypedMutableDocumentObject<
-          OptionalTypedDataPropertyDoc,
+          OptionalTypedDataPropertyDocDocument,
           MutableOptionalTypedDataPropertyDoc
         > {
   /// Creates a new mutable [OptionalTypedDataPropertyDoc].
   MutableOptionalTypedDataPropertyDoc(BoolDict? value)
-    : super(MutableDocument()) {
+    : super(MutableDocument({})) {
     if (value != null) {
       this.value = value;
     }
   }
 
   MutableOptionalTypedDataPropertyDoc.internal(super.internal);
+
+  static const _valueConverter =
+      const TypedDictionaryConverter<
+        MutableDictionary,
+        MutableBoolDict,
+        BoolDict
+      >(MutableBoolDict.internal);
+
+  late MutableBoolDict? _value = TypedDataHelpers.readNullableProperty(
+    internal: internal,
+    name: 'value',
+    key: 'value',
+    converter: _valueConverter,
+  );
+
+  @override
+  MutableBoolDict? get value => _value;
+
+  set value(BoolDict? value) {
+    final promoted = value == null ? null : _valueConverter.promote(value);
+    _value = promoted;
+    TypedDataHelpers.writeNullableProperty(
+      internal: internal,
+      key: 'value',
+      value: promoted,
+      converter: _valueConverter,
+    );
+  }
+}
+
+mixin _$OptionalTypedDataPropertyDocDictionary
+    implements
+        TypedDictionaryObject<MutableOptionalTypedDataPropertyDocDictionary> {
+  BoolDict? get value;
+}
+
+abstract class OptionalTypedDataPropertyDocDictionary
+    with _$OptionalTypedDataPropertyDocDictionary
+    implements OptionalTypedDataPropertyDoc {}
+
+abstract class _OptionalTypedDataPropertyDocDictionaryImplBase<
+  I extends Dictionary
+>
+    with _$OptionalTypedDataPropertyDocDictionary
+    implements OptionalTypedDataPropertyDocDictionary {
+  _OptionalTypedDataPropertyDocDictionaryImplBase(this.internal);
+
+  @override
+  final I internal;
+
+  @override
+  MutableOptionalTypedDataPropertyDocDictionary toMutable() =>
+      MutableOptionalTypedDataPropertyDocDictionary.internal(
+        internal.toMutable(),
+      );
+
+  @override
+  String toString({String? indent}) => TypedDataHelpers.renderString(
+    indent: indent,
+    className: 'OptionalTypedDataPropertyDocDictionary',
+    fields: {'value': value},
+  );
+}
+
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
+class ImmutableOptionalTypedDataPropertyDocDictionary
+    extends _OptionalTypedDataPropertyDocDictionaryImplBase {
+  ImmutableOptionalTypedDataPropertyDocDictionary.internal(super.internal);
+
+  static const _valueConverter =
+      const TypedDictionaryConverter<
+        Dictionary,
+        BoolDict,
+        TypedDictionaryObject<BoolDict>
+      >(ImmutableBoolDict.internal);
+
+  @override
+  late final value = TypedDataHelpers.readNullableProperty(
+    internal: internal,
+    name: 'value',
+    key: 'value',
+    converter: _valueConverter,
+  );
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is OptionalTypedDataPropertyDocDictionary &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
+}
+
+/// Mutable version of [OptionalTypedDataPropertyDocDictionary].
+class MutableOptionalTypedDataPropertyDocDictionary
+    extends _OptionalTypedDataPropertyDocDictionaryImplBase<MutableDictionary>
+    implements
+        TypedMutableDictionaryObject<
+          OptionalTypedDataPropertyDocDictionary,
+          MutableOptionalTypedDataPropertyDocDictionary
+        > {
+  /// Creates a new mutable [OptionalTypedDataPropertyDocDictionary].
+  MutableOptionalTypedDataPropertyDocDictionary(BoolDict? value)
+    : super(MutableDictionary()) {
+    if (value != null) {
+      this.value = value;
+    }
+  }
+
+  MutableOptionalTypedDataPropertyDocDictionary.internal(super.internal);
 
   static const _valueConverter =
       const TypedDictionaryConverter<

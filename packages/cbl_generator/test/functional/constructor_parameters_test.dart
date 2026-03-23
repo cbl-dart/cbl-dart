@@ -4,7 +4,7 @@ import '../fixtures/constructor_parameters.dart';
 import '../test_utils.dart';
 
 void main() {
-  setUpAll(initCouchbaseLiteForTest);
+  setUpAll(configureCouchbaseLiteForTest);
 
   test('initialize properties fields', () {
     expect(MutableParamDict('a').a, 'a');

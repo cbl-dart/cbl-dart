@@ -144,8 +144,8 @@ final class FfiReplicator
       headers: headersDict?.pointer.cast(),
       acceptOnlySelfSignedServerCertificate:
           config.acceptOnlySelfSignedServerCertificate,
-      pinnedServerCertificate: config.pinnedServerCertificate?.toData(),
-      trustedRootCertificates: config.trustedRootCertificates?.toData(),
+      pinnedServerCertificate: config.pinnedServerCertificate?.bytes.toData(),
+      trustedRootCertificates: config.trustedRootCertificates?.bytes.toData(),
       collections: replicationCollections,
       disableAutoPurge: !config.enableAutoPurge,
       acceptParentDomainCookies: config.acceptParentDomainCookies,
@@ -155,6 +155,10 @@ final class FfiReplicator
       final pointer = ReplicatorBindings.createReplicator(ffiConfig);
 
       cblReachabilityFence(fleeceContainers);
+      // The collections map is not Finalizable, so the GC can collect it
+      // (and finalize the FfiCollection keys) after its last use above.
+      // Keep the keys alive through the FFI call. See #856.
+      cblReachabilityFence(collections.keys);
 
       return FfiReplicator._(
         config: config,

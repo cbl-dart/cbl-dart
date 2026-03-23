@@ -97,7 +97,7 @@ class FleeceWrapperDecodingBenchmark extends DecodingBenchmark {
 }
 
 Future<void> main() async {
-  await initCouchbaseLite();
+  await configureCouchbaseLite();
 
   final benchmarks = [
     JsonDartDecodingBenchmark(),

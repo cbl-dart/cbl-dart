@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
 
+import '../support/isolate.dart';
 import 'base.dart';
 import 'cblite.dart' as cblite;
 import 'cblitedart.dart' as cblitedart;
@@ -78,6 +79,7 @@ final class DatabaseBindings {
   );
 
   static CBLEncryptionKey encryptionKeyFromPassword(String password) {
+    ensureInitializedForCurrentIsolate();
     final passwordEncoded = utf8.encode(password);
     return withGlobalArena(() {
       final key = globalArena<cblite.CBLEncryptionKey>();
@@ -102,6 +104,7 @@ final class DatabaseBindings {
     String name,
     CBLDatabaseConfiguration? config,
   ) {
+    ensureInitializedForCurrentIsolate();
     final fromEncoded = utf8.encode(from);
     final nameEncoded = utf8.encode(name);
     return withGlobalArena(
@@ -117,6 +120,7 @@ final class DatabaseBindings {
   }
 
   static bool deleteDatabase(String name, String? inDirectory) {
+    ensureInitializedForCurrentIsolate();
     final nameEncoded = utf8.encode(name);
     if (inDirectory == null) {
       return cblitedart.CBLDart_CBL_DeleteDatabase(
@@ -138,6 +142,7 @@ final class DatabaseBindings {
   }
 
   static bool databaseExists(String name, String? inDirectory) {
+    ensureInitializedForCurrentIsolate();
     final nameEncoded = utf8.encode(name);
     if (inDirectory == null) {
       return cblitedart.CBLDart_CBL_DatabaseExists(
@@ -157,6 +162,7 @@ final class DatabaseBindings {
   }
 
   static CBLDatabaseConfiguration defaultConfiguration() {
+    ensureInitializedForCurrentIsolate();
     final config = cblitedart.CBLDart_CBLDatabaseConfiguration_Default();
     return CBLDatabaseConfiguration(
       directory: config.directoryBuf.cast<Utf8>().toDartString(
@@ -170,6 +176,7 @@ final class DatabaseBindings {
     String name,
     CBLDatabaseConfiguration? config,
   ) {
+    ensureInitializedForCurrentIsolate();
     final nameEncoded = utf8.encode(name);
     return withGlobalArena(() {
       final cblConfig = _createConfig(config);

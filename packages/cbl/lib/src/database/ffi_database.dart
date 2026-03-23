@@ -9,7 +9,6 @@ import '../document/blob.dart';
 import '../document/document.dart';
 import '../document/ffi_document.dart';
 import '../document/fragment.dart';
-import '../errors.dart';
 import '../fleece/containers.dart' as fl;
 import '../fleece/decoder.dart';
 import '../fleece/dict_key.dart';
@@ -19,6 +18,7 @@ import '../query/index/ffi_query_index.dart';
 import '../query/index/index.dart';
 import '../support/async_callback.dart';
 import '../support/edition.dart';
+import '../support/isolate.dart';
 import '../support/listener_token.dart';
 import '../support/resource.dart';
 import '../support/streams.dart';
@@ -69,10 +69,16 @@ final class FfiDatabase
   }
 
   static void remove(String name, {String? directory}) =>
-      DatabaseBindings.deleteDatabase(name, directory);
+      DatabaseBindings.deleteDatabase(
+        name,
+        directory ?? defaultDatabaseDirectory,
+      );
 
   static bool exists(String name, {String? directory}) =>
-      DatabaseBindings.databaseExists(name, directory);
+      DatabaseBindings.databaseExists(
+        name,
+        directory ?? defaultDatabaseDirectory,
+      );
 
   static void copy({
     required String from,
@@ -81,7 +87,7 @@ final class FfiDatabase
   }) => DatabaseBindings.copyDatabase(
     _formatCopyFromPath(from),
     name,
-    config?.toCBLDatabaseConfiguration(),
+    (config ?? DatabaseConfiguration()).toCBLDatabaseConfiguration(),
   );
 
   /// Ensures that the path ends with a separator to signal that it is a
@@ -355,7 +361,7 @@ final class FfiCollection
       super.typedDocument<D>(id) as D?;
 
   @override
-  bool saveDocument(
+  void saveDocument(
     covariant MutableDelegateDocument document, [
     ConcurrencyControl concurrencyControl = .lastWriteWins,
   ]) => syncOperationTracePoint(
@@ -367,13 +373,11 @@ final class FfiCollection
           () => prepareDocument(document) as FfiDocumentDelegate,
         );
 
-        return _catchConflictException(() {
-          CollectionBindings.saveDocumentWithConcurrencyControl(
-            pointer,
-            delegate.pointer.cast(),
-            concurrencyControl.toCBLConcurrencyControl(),
-          );
-        });
+        CollectionBindings.saveDocumentWithConcurrencyControl(
+          pointer,
+          delegate.pointer.cast(),
+          concurrencyControl.toCBLConcurrencyControl(),
+        );
       }),
     ),
   );
@@ -412,7 +416,7 @@ final class FfiCollection
       _FfiSaveTypedDocument(database, () => this, document);
 
   @override
-  bool deleteDocument(
+  void deleteDocument(
     covariant DelegateDocument document, [
     ConcurrencyControl concurrencyControl = .lastWriteWins,
   ]) => syncOperationTracePoint(
@@ -426,27 +430,22 @@ final class FfiCollection
                   as FfiDocumentDelegate,
         );
 
-        return _catchConflictException(() {
-          CollectionBindings.deleteDocumentWithConcurrencyControl(
-            pointer,
-            delegate.pointer.cast(),
-            concurrencyControl.toCBLConcurrencyControl(),
-          );
-        });
+        CollectionBindings.deleteDocumentWithConcurrencyControl(
+          pointer,
+          delegate.pointer.cast(),
+          concurrencyControl.toCBLConcurrencyControl(),
+        );
       }),
     ),
   );
 
   @override
-  Future<bool> deleteTypedDocument(
+  Future<void> deleteTypedDocument(
     TypedDocumentObject<Object> document, [
     ConcurrencyControl concurrencyControl = .lastWriteWins,
   ]) async {
     database.useWithTypedData();
-    return deleteDocument(
-      document.internal as DelegateDocument,
-      concurrencyControl,
-    );
+    deleteDocument(document.internal as DelegateDocument, concurrencyControl);
   }
 
   @override
@@ -602,18 +601,6 @@ extension on DatabaseConfiguration {
       );
 }
 
-bool _catchConflictException(void Function() fn) {
-  try {
-    fn();
-    return true;
-  } on DatabaseException catch (e) {
-    if (e.code == DatabaseErrorCode.conflict) {
-      return false;
-    }
-    rethrow;
-  }
-}
-
 final class _FfiSaveTypedDocument<
   D extends TypedDocumentObject,
   MD extends TypedMutableDocumentObject
@@ -627,9 +614,9 @@ final class _FfiSaveTypedDocument<
   );
 
   @override
-  bool withConcurrencyControl([
+  void withConcurrencyControl([
     ConcurrencyControl concurrencyControl = .lastWriteWins,
-  ]) => super.withConcurrencyControl(concurrencyControl) as bool;
+  ]) => super.withConcurrencyControl(concurrencyControl);
 
   @override
   bool withConflictHandlerSync(

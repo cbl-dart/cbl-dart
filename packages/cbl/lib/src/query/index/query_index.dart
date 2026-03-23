@@ -16,7 +16,7 @@ abstract interface class QueryIndex {
   /// The name of the index.
   String get name;
 
-  /// Begins an update of a lazy index, if the it is not up-to-date.
+  /// Begins an update of a lazy index, if it is not up-to-date.
   ///
   /// {@macro cbl.EncryptionKey.enterpriseFeature}
   ///

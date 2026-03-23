@@ -3,14 +3,11 @@ import 'package:cbl/src/tracing.dart';
 import 'package:cbl_sentry/src/operation_debug_info.dart';
 import 'package:test/test.dart';
 
-import 'utils/cbl.dart';
 import 'utils/mock_collection.dart';
 import 'utils/mock_database.dart';
 import 'utils/mock_query.dart';
 
 void main() {
-  setUpAll(initCouchbaseLiteForTest);
-
   group('debugName', () {
     test('TracedOperations', () {
       // Decapitalize name.
@@ -55,7 +52,7 @@ void main() {
       expect(
         SaveDocumentOp(
           MockCollection(name: 'a'),
-          MutableDocument.withId('b'),
+          MutableDocument(id: 'b', {}),
         ).debugDescription,
         'b',
       );
@@ -81,7 +78,7 @@ void main() {
   group('debugDetails', () {
     test('SaveDocumentOp', () {
       final collection = MockCollection(name: 'a');
-      final document = MutableDocument.withId('b');
+      final document = MutableDocument(id: 'b', {});
       expect(SaveDocumentOp(collection, document).debugDetails, {
         'withConflictHandler': true,
       });
@@ -97,7 +94,7 @@ void main() {
 
     test('DeleteDocumentOp', () {
       final database = MockCollection(name: 'a');
-      final document = MutableDocument.withId('b');
+      final document = MutableDocument(id: 'b', {});
       expect(
         DeleteDocumentOp(
           database,

@@ -333,5 +333,5 @@ lefthook-local.yml
 ## AI Tools
 # Ignore for now while evaluating AI Tools.
 .agent-os/
-.claude/
+.claude/settings.local.json
 .serena/

@@ -6,7 +6,7 @@ import '../matchers.dart';
 import '../test_utils.dart';
 
 void main() {
-  setUpAll(initCouchbaseLiteForTest);
+  setUpAll(configureCouchbaseLiteForTest);
 
   group('nullable property', () {
     test('value has wrong type', () {

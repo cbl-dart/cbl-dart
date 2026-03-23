@@ -76,7 +76,7 @@ final class _OptimizedDictKey extends DictKey {
 
   @override
   FLValue? getValue(FLDict dict) {
-    // TODO(blaugold): Reenable use of `FLDictKey`s when we know how to safely
+    // TODO(blaugold): Re-enable use of `FLDictKey`s when we know how to safely
     // use them.
     // https://github.com/cbl-dart/cbl-dart/issues/329
     // https://github.com/couchbase/couchbase-lite-C/issues/287

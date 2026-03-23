@@ -62,19 +62,14 @@ abstract final class Document implements DictionaryInterface, Iterable<String> {
 /// {@category Document}
 abstract final class MutableDocument
     implements Document, MutableDictionaryInterface {
-  /// Creates a new [MutableDocument] with a random UUID, optionally initialized
-  /// with [data].
+  /// Creates a new [MutableDocument], optionally with a given [id] and
+  /// initialized with [data].
+  ///
+  /// If no [id] is provided, a random UUID will be assigned.
   ///
   /// {@macro cbl.MutableArray.allowedValueTypes}
-  factory MutableDocument([Map<String, Object?>? data]) =>
-      MutableDelegateDocument(data);
-
-  /// Creates a new [MutableDocument] with a given [id], optionally initialized
-  /// with [data].
-  ///
-  /// {@macro cbl.MutableArray.allowedValueTypes}
-  factory MutableDocument.withId(String id, [Map<String, Object?>? data]) =>
-      MutableDelegateDocument.withId(id, data);
+  factory MutableDocument(Map<String, Object?> data, {String? id}) =>
+      MutableDelegateDocument(data, id: id);
 }
 
 /// An interface to abstract over the differences between the documents of the
@@ -354,18 +349,15 @@ final class DelegateDocument with IterableMixin<String> implements Document {
 
 final class MutableDelegateDocument extends DelegateDocument
     implements MutableDocument {
-  MutableDelegateDocument([Map<String, Object?>? data])
-    : this.fromDelegate(NewDocumentDelegate(), data: data);
-
-  MutableDelegateDocument.withId(String id, [Map<String, Object?>? data])
+  MutableDelegateDocument(Map<String, Object?> data, {String? id})
     : this.fromDelegate(NewDocumentDelegate(id), data: data);
 
   MutableDelegateDocument.fromDelegate(
     super.delegate, {
     super.collection,
-    Map<String, Object?>? data,
+    Map<String, Object?> data = const {},
   }) {
-    if (data != null) {
+    if (data.isNotEmpty) {
       setData(data);
     }
   }

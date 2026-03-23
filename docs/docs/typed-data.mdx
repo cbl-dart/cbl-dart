@@ -28,12 +28,20 @@ be used with specialized APIs of `api|Database`, `api|Query` and
 
 1. Make sure your [app is setup](install.mdx) for using Couchbase Lite.
 
+import { usePubPackageVersion } from '@site/src/components/PubPackageVersion'
+import CodeBlock from '@theme/CodeBlock'
+
+export const CblGeneratorInstallCommand = () => {
+  const version = usePubPackageVersion('cbl_generator')
+  return (
+    <CodeBlock language="bash">{`flutter pub add --dev cbl_generator:${version} build_runner`}</CodeBlock>
+  )
+}
+
 1. Add `api|cbl_generator|pkg:` and `api|build_runner|pkg:` as development
    dependencies:
 
-   ```shell
-   flutter pub add --dev cbl_generator build_runner
-   ```
+   <CblGeneratorInstallCommand />
 
 1. Create typed data classes and annotated them with `api|TypedDocument` and
    `api|TypedDictionary`:

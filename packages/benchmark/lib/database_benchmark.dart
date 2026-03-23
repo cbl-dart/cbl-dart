@@ -128,8 +128,8 @@ abstract class DatabaseBenchmarkBase {
 abstract class CblDatabaseBenchmark extends DatabaseBenchmarkBase {
   var _nextDatabaseId = 0;
 
-  // A benchmark might open multiple databases (e.g. for warum up and testing).
-  // We need to make sure that each database has a unique in the temporary
+  // A benchmark might open multiple databases (e.g. for warm-up and testing).
+  // We need to make sure that each database has a unique name in the temporary
   // directory.
   String _nextDatabaseName() => '${_nextDatabaseId++}';
 
@@ -146,7 +146,7 @@ abstract class CblDatabaseBenchmark extends DatabaseBenchmarkBase {
   Future<void> setup() async {
     await super.setup();
 
-    await initCouchbaseLite();
+    await configureCouchbaseLite();
 
     _tempDirectory = await Directory.systemTemp.createTemp();
   }

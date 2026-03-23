@@ -6,7 +6,6 @@ import 'dart:typed_data';
 
 import 'package:cbl/src/bindings.dart';
 import 'package:cbl/src/service/channel.dart';
-import 'package:cbl/src/support/isolate.dart';
 import 'package:meta/meta.dart';
 import 'package:stream_channel/isolate_channel.dart';
 import 'package:stream_channel/stream_channel.dart';
@@ -88,7 +87,7 @@ void main() {
       expect(channel.stream(InfiniteStream()), emits(null));
     });
 
-    channelTest('list to stream of non-existente endpoint', () async {
+    channelTest('list to stream of non-existent endpoint', () async {
       final channel = await openTestChannel();
 
       expect(
@@ -172,10 +171,7 @@ Future<Channel> openTestChannel() async {
       localTransport = IsolateChannel.connectReceive(receivePort);
       final isolate = await Isolate.spawn(
         testIsolateMain,
-        TestIsolateConfig(
-          IsolateContext.instance.forSecondaryIsolate(),
-          receivePort.sendPort,
-        ),
+        receivePort.sendPort,
       );
       addTearDown(isolate.kill);
   }
@@ -210,18 +206,9 @@ void registerTestHandlers(Channel channel) {
     );
 }
 
-class TestIsolateConfig {
-  TestIsolateConfig(this.context, this.sendPort);
-
-  final IsolateContext context;
-  final SendPort? sendPort;
-}
-
-void testIsolateMain(TestIsolateConfig config) {
-  unawaited(initSecondaryIsolate(config.context));
-
+void testIsolateMain(SendPort sendPort) {
   final remote = Channel(
-    transport: IsolateChannel.connectSend(config.sendPort!),
+    transport: IsolateChannel.connectSend(sendPort),
     autoOpen: false,
   );
 

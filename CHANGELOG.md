@@ -3,6 +3,75 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2026-03-17
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`cbl` - `v4.0.0-dev.4`](#cbl---v400-dev4)
+ - [`cbl_generator` - `v0.4.0-dev.4`](#cbl_generator---v040-dev4)
+ - [`cbl_sentry` - `v3.0.0-dev.4`](#cbl_sentry---v300-dev4)
+
+Packages with dependency updates only:
+
+> Packages listed below depend on other packages in this workspace that have had changes. Their versions have been incremented to bump the minimum dependency versions of the packages they depend upon in this project.
+
+ - `cbl_generator` - `v0.4.0-dev.4`
+ - `cbl_sentry` - `v3.0.0-dev.4`
+
+---
+
+#### `cbl` - `v4.0.0-dev.4`
+
+ - **FIX**(cbl): upgrade native_toolchain_c to fix Android libc++ linking ([#919](https://github.com/cbl-dart/cbl-dart/issues/919)). ([8c374fc0](https://github.com/cbl-dart/cbl-dart/commit/8c374fc00c9dcebe3f5a169bcd4f634e6fe8ce69))
+ - **FIX**(cbl): add reachability fence for collections in replicator creation ([#915](https://github.com/cbl-dart/cbl-dart/issues/915)). ([bdafb468](https://github.com/cbl-dart/cbl-dart/commit/bdafb46810f1a9958a159f8c0b5cb0d98b52302f))
+
+
+## 2026-03-16
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - [`cbl` - `v4.0.0-dev.3`](#cbl---v400-dev3)
+ - [`cbl_generator` - `v0.4.0-dev.3`](#cbl_generator---v040-dev3)
+ - [`cbl_sentry` - `v3.0.0-dev.3`](#cbl_sentry---v300-dev3)
+
+Packages with other changes:
+
+ - There are no other changes in this release.
+
+---
+
+#### `cbl` - `v4.0.0-dev.3`
+
+ - **REFACTOR**(cbl): use asTypedList(finalizer) in SliceResult ([#904](https://github.com/cbl-dart/cbl-dart/issues/904)). ([8fff901f](https://github.com/cbl-dart/cbl-dart/commit/8fff901f098dc2dcf4b409a06f7937c296f49764))
+ - **REFACTOR**: adopt Dart dot shorthand notation across codebase ([#901](https://github.com/cbl-dart/cbl-dart/issues/901)). ([3861bb7c](https://github.com/cbl-dart/cbl-dart/commit/3861bb7c2c7c1c5e775ac268479df419f62d9fcf))
+ - **BREAKING** **FIX**(cbl): rename `FullTextIndex.langauge` to `language` ([#908](https://github.com/cbl-dart/cbl-dart/issues/908)). ([72c96158](https://github.com/cbl-dart/cbl-dart/commit/72c961584a705ec08ea644986a009d275351c5fd))
+ - **BREAKING** **FEAT**(cbl): make `MutableDocument.withId` a named parameter and `data` non-nullable ([#909](https://github.com/cbl-dart/cbl-dart/issues/909)). ([a51ffb14](https://github.com/cbl-dart/cbl-dart/commit/a51ffb14864e7e0a9433729776cff808833dd816))
+ - **BREAKING** **FEAT**(cbl): throw `DatabaseException` on conflict instead of returning false ([#910](https://github.com/cbl-dart/cbl-dart/issues/910)). ([cfe03e7f](https://github.com/cbl-dart/cbl-dart/commit/cfe03e7f00f3c766e0db06c98d3e937ac8e9fb0f))
+ - **BREAKING** **FEAT**(cbl): use typed CryptoData/PemData for certificate fields ([#907](https://github.com/cbl-dart/cbl-dart/issues/907)). ([3cb6aa81](https://github.com/cbl-dart/cbl-dart/commit/3cb6aa81de47d8b46d96f6614a908c5c23230cb7))
+
+#### `cbl_generator` - `v0.4.0-dev.3`
+
+ - **REFACTOR**: adopt Dart dot shorthand notation across codebase ([#901](https://github.com/cbl-dart/cbl-dart/issues/901)). ([3861bb7c](https://github.com/cbl-dart/cbl-dart/commit/3861bb7c2c7c1c5e775ac268479df419f62d9fcf))
+ - **BREAKING** **FEAT**(cbl): make `MutableDocument.withId` a named parameter and `data` non-nullable ([#909](https://github.com/cbl-dart/cbl-dart/issues/909)). ([a51ffb14](https://github.com/cbl-dart/cbl-dart/commit/a51ffb14864e7e0a9433729776cff808833dd816))
+
+#### `cbl_sentry` - `v3.0.0-dev.3`
+
+ - **REFACTOR**: adopt Dart dot shorthand notation across codebase ([#901](https://github.com/cbl-dart/cbl-dart/issues/901)). ([3861bb7c](https://github.com/cbl-dart/cbl-dart/commit/3861bb7c2c7c1c5e775ac268479df419f62d9fcf))
+ - **BREAKING** **FEAT**(cbl): make `MutableDocument.withId` a named parameter and `data` non-nullable ([#909](https://github.com/cbl-dart/cbl-dart/issues/909)). ([a51ffb14](https://github.com/cbl-dart/cbl-dart/commit/a51ffb14864e7e0a9433729776cff808833dd816))
+
+
 ## 2026-03-15
 
 ### Changes

@@ -23,15 +23,15 @@ abstract interface class DictionaryInterface implements DictionaryFragment {
 
   /// Returns the value for the given [key].
   ///
-  /// Returns `null` if the element is `null` or the there is no entry with the
+  /// Returns `null` if the element is `null` or there is no entry with the
   /// given [key].
   T? value<T extends Object>(String key);
 
   /// Returns the value for the given [key] as a [String].
   ///
   /// {@template cbl.DictionaryInterface.typedNullableGetter}
-  /// Returns `null` if the a value for the given [key] does not exists, is not
-  /// a of the expected typ or it is `null`.
+  /// Returns `null` if a value for the given [key] does not exist, is not of
+  /// the expected type or it is `null`.
   /// {@endtemplate}
   String? string(String key);
 
@@ -39,8 +39,8 @@ abstract interface class DictionaryInterface implements DictionaryFragment {
   ///
   /// {@template cbl.DictionaryInterface.typedDefaultedGetter}
   /// Returns a default value (integer: `0`, double: `0.0`, boolean: `false`) if
-  /// the value is not a of the expected typ, is `null` or does not exist for
-  /// the given [key].
+  /// the value is not of the expected type, is `null` or does not exist for the
+  /// given [key].
   /// {@endtemplate}
   int integer(String key);
 

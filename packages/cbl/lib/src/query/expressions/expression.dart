@@ -20,7 +20,7 @@ abstract interface class ExpressionInterface {
   /// [expression].
   ExpressionInterface modulo(ExpressionInterface expression);
 
-  /// Returns a new expression wich adds this expression to the given
+  /// Returns a new expression which adds this expression to the given
   /// [expression].
   ExpressionInterface add(ExpressionInterface expression);
 
@@ -40,8 +40,8 @@ abstract interface class ExpressionInterface {
   /// greater than the given [expression].
   ExpressionInterface greaterThan(ExpressionInterface expression);
 
-  /// Returns a new expression which evaluates whether this expression is less
-  /// grater than or equal to the given [expression].
+  /// Returns a new expression which evaluates whether this expression is
+  /// greater than or equal to the given [expression].
   ExpressionInterface greaterThanOrEqualTo(ExpressionInterface expression);
 
   /// Returns a new expression which evaluates whether this expression is equal
@@ -53,11 +53,11 @@ abstract interface class ExpressionInterface {
   ExpressionInterface notEqualTo(ExpressionInterface expression);
 
   /// Returns a new expression which evaluates whether this expression is LIKE
-  /// the the given [expression].
+  /// the given [expression].
   ExpressionInterface like(ExpressionInterface expression);
 
   /// Returns a new expression which evaluates whether this expression regex
-  /// matches the the given [expression].
+  /// matches the given [expression].
   ExpressionInterface regex(ExpressionInterface expression);
 
   /// Returns a new expression which evaluates whether this expression `IS`
