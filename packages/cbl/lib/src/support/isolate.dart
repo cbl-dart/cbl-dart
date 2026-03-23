@@ -69,8 +69,10 @@ CBLInitContext? _resolvedInitContext() => _initContext ??= () {
     return null;
   }
 
+  final databaseDir = '$resolvedFilesDir${Platform.pathSeparator}CouchbaseLite';
+
   return CBLInitContext(
-    filesDir: resolvedFilesDir,
+    filesDir: databaseDir,
     tempDir: Platform.isAndroid
         ? resolveAndroidCacheDirectory()
         : resolvedFilesDir,
@@ -80,7 +82,7 @@ CBLInitContext? _resolvedInitContext() => _initContext ??= () {
 String _resolvedDefaultDatabaseDirectory() {
   final filesDir = _resolvedInitContext()?.filesDir;
   if (filesDir != null) {
-    return '$filesDir${Platform.pathSeparator}CouchbaseLite';
+    return filesDir;
   }
 
   return Directory.current.path;

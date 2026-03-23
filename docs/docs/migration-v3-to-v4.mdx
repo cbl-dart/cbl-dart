@@ -161,14 +161,12 @@ to `language`:
 
 ```dart
 // Before (v3)
-final index = FullTextIndex([
-  FullTextIndexItem.property('text'),
-]).langauge(FullTextLanguage.english);
+final index = FullTextIndex([FullTextIndexItem.property('text')])
+    .langauge(FullTextLanguage.english);
 
 // After (v4)
-final index = FullTextIndex([
-  FullTextIndexItem.property('text'),
-]).language(FullTextLanguage.english);
+final index = FullTextIndex([FullTextIndexItem.property('text')])
+    .language(FullTextLanguage.english);
 ```
 
 ## `pinnedServerCertificate` and `trustedRootCertificates` type changes
@@ -223,10 +221,16 @@ The `maxRotateCount` property on `api|LogFileConfiguration` has been renamed to
 
 ```dart
 // Before (v3)
-final config = LogFileConfiguration(directory: logDir, maxRotateCount: 5);
+final config = LogFileConfiguration(
+  directory: logDir,
+  maxRotateCount: 5,
+);
 
 // After (v4)
-final config = LogFileConfiguration(directory: logDir, maxKeptFiles: 5);
+final config = LogFileConfiguration(
+  directory: logDir,
+  maxKeptFiles: 5,
+);
 ```
 
 ## Query boolean expressions return booleans instead of integers
@@ -291,7 +295,10 @@ if (!saved) {
 
 // After (v4)
 try {
-  await collection.saveDocument(doc, ConcurrencyControl.failOnConflict);
+  await collection.saveDocument(
+    doc,
+    ConcurrencyControl.failOnConflict,
+  );
 } on DatabaseException catch (e) {
   if (e.code == DatabaseErrorCode.conflict) {
     // handle conflict
@@ -395,14 +402,11 @@ final config = ReplicatorConfiguration(
 // After (v4)
 final collection = await db.defaultCollection;
 final config = ReplicatorConfiguration(target: urlEndpoint);
-config.addCollection(
-  collection,
-  CollectionConfiguration(
-    channels: ['channel1'],
-    pushFilter: myPushFilter,
-    conflictResolver: myResolver,
-  ),
-);
+config.addCollection(collection, CollectionConfiguration(
+  channels: ['channel1'],
+  pushFilter: myPushFilter,
+  conflictResolver: myResolver,
+));
 ```
 
 The following `api|ReplicatorConfiguration` properties have been removed:
@@ -421,10 +425,7 @@ final isPending = await replicator.isDocumentPending('doc-id');
 
 // After (v4)
 final ids = await replicator.pendingDocumentIdsInCollection(collection);
-final isPending = await replicator.isDocumentPendingInCollection(
-  'doc-id',
-  collection,
-);
+final isPending = await replicator.isDocumentPendingInCollection('doc-id', collection);
 ```
 
 ## Removed `DataSource.database`
