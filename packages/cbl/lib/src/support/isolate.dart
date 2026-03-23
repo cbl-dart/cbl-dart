@@ -43,9 +43,12 @@ String get defaultDatabaseDirectory =>
     (_resolvedDefaultDatabaseDirectoryCache ??=
         _resolvedDefaultDatabaseDirectory());
 
-set defaultDatabaseDirectory(String? value) {
+set defaultDatabaseDirectory(String value) {
   _defaultDatabaseDirectoryOverride = value;
-  _resolvedDefaultDatabaseDirectoryCache = null;
+}
+
+void resetDefaultDatabaseDirectory() {
+  _defaultDatabaseDirectoryOverride = null;
 }
 
 CBLInitContext? _ensureInitContextDirectories() {

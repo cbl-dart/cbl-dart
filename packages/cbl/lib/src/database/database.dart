@@ -151,8 +151,8 @@ abstract interface class Database implements ClosableResource {
   /// The default directory used by database APIs when no directory is specified
   /// explicitly.
   ///
-  /// Setting this property only affects the current isolate. Set it to `null`
-  /// to restore automatic directory resolution.
+  /// Setting this property only affects the current isolate. Use
+  /// [resetDefaultDirectory] to restore automatic directory resolution.
   ///
   /// {@template cbl.Database.defaultDirectoryBehavior}
   /// APIs that omit a database directory use [Database.defaultDirectory].
@@ -164,8 +164,15 @@ abstract interface class Database implements ClosableResource {
   /// {@endtemplate}
   static String get defaultDirectory => defaultDatabaseDirectory;
 
-  static set defaultDirectory(String? value) {
+  static set defaultDirectory(String value) {
     defaultDatabaseDirectory = value;
+  }
+
+  /// Resets [defaultDirectory] to its automatically resolved value.
+  ///
+  /// See [defaultDirectory] for details on how the directory is resolved.
+  static void resetDefaultDirectory() {
+    resetDefaultDatabaseDirectory();
   }
 
   /// The name of this database.
