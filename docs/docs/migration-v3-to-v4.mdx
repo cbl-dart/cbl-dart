@@ -92,7 +92,6 @@ If no edition is specified, the Community edition is used by default.
 ```dart
 import 'package:cbl_flutter/cbl_flutter.dart';
 
-
 await CouchbaseLiteFlutter.init();
 ```
 
@@ -101,7 +100,6 @@ await CouchbaseLiteFlutter.init();
 ```dart
 import 'package:cbl_dart/cbl_dart.dart';
 
-
 await CouchbaseLiteDart.init(edition: Edition.enterprise);
 ```
 
@@ -109,16 +107,14 @@ await CouchbaseLiteDart.init(edition: Edition.enterprise);
 
 ```dart
 import 'package:cbl/cbl.dart';
+
+Database.defaultDirectory = '/path/to/files';
 ```
 
 Couchbase Lite no longer requires explicit initialization before use.
 
 If you previously passed `filesDir` to `CouchbaseLite.init` to customize the
-default database directory, use `api|Database.defaultDirectory` instead:
-
-```dart
-Database.defaultDirectory = '/path/to/files';
-```
+default database directory, use `api|Database.defaultDirectory` instead.
 
 ## Vector search initialization
 
