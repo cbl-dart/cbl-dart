@@ -165,7 +165,7 @@ abstract interface class Database implements ClosableResource {
   static String get defaultDirectory => defaultDatabaseDirectory;
 
   static set defaultDirectory(String? value) {
-    setDefaultDatabaseDirectory(value);
+    defaultDatabaseDirectory = value;
   }
 
   /// The name of this database.

@@ -64,8 +64,7 @@ abstract final class Extension {
   /// file path cannot be resolved.
   ///
   /// Check [vectorSearchStatus] to query the status without attempting to
-  /// enable. This method bootstraps Couchbase Lite for the current isolate if
-  /// needed.
+  /// enable.
   @useResult
   static VectorSearchStatus enableVectorSearch() {
     ensureInitializedForCurrentIsolate();

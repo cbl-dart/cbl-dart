@@ -145,10 +145,10 @@ final class LoggingBindings {
     );
   }
 
-  static CBLLogLevel consoleLevel() => () {
+  static CBLLogLevel consoleLevel() {
     ensureInitializedForCurrentIsolate();
     return CBLLogLevel.fromValue(cblite.CBLLogSinks_Console().level);
-  }();
+  }
 
   static void setConsoleLevel(CBLLogLevel logLevel) {
     ensureInitializedForCurrentIsolate();
@@ -179,13 +179,13 @@ final class LoggingBindings {
     });
   }
 
-  static CBLLogFileConfiguration? getLogFileConfiguration() => () {
+  static CBLLogFileConfiguration? getLogFileConfiguration() {
     ensureInitializedForCurrentIsolate();
     return cblitedart.CBLDart_CBLLog_GetFileSink()
         .toNullable()
         ?.ref
         .toCBLLogFileConfiguration();
-  }();
+  }
 
   static Pointer<cblite.CBLFileLogSink> _logFileSink(
     CBLLogFileConfiguration? config,

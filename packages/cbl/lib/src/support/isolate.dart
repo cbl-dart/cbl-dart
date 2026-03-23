@@ -7,6 +7,7 @@ import 'tracing.dart';
 
 var _isInitialized = false;
 String? _defaultDatabaseDirectoryOverride;
+String? _resolvedDefaultDatabaseDirectoryCache;
 CBLInitContext? _initContext;
 
 /// Lazily bootstraps Couchbase Lite for the current isolate.
@@ -38,10 +39,13 @@ void ensureInitializedForCurrentIsolate() {
 }
 
 String get defaultDatabaseDirectory =>
-    _defaultDatabaseDirectoryOverride ?? _resolvedDefaultDatabaseDirectory();
+    _defaultDatabaseDirectoryOverride ??
+    (_resolvedDefaultDatabaseDirectoryCache ??=
+        _resolvedDefaultDatabaseDirectory());
 
-void setDefaultDatabaseDirectory(String? value) {
+set defaultDatabaseDirectory(String? value) {
   _defaultDatabaseDirectoryOverride = value;
+  _resolvedDefaultDatabaseDirectoryCache = null;
 }
 
 CBLInitContext? _ensureInitContextDirectories() {
