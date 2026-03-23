@@ -5,7 +5,9 @@ import '../bindings/tracing.dart' show onTracedCall;
 import 'app_directory.dart';
 import 'tracing.dart';
 
-final _bootstrapState = _IsolateBootstrapState();
+var _isInitialized = false;
+String? _defaultDatabaseDirectoryOverride;
+CBLInitContext? _initContext;
 
 /// Lazily bootstraps Couchbase Lite for the current isolate.
 ///
@@ -22,68 +24,57 @@ final _bootstrapState = _IsolateBootstrapState();
 /// Implementations that are only reachable after another entry point has
 /// already bootstrapped the isolate do not need to call this again unless they
 /// are also public entry points that can be invoked independently.
-void ensureInitializedForCurrentIsolate() =>
-    _bootstrapState.ensureInitializedForCurrentIsolate();
+void ensureInitializedForCurrentIsolate() {
+  if (_isInitialized) {
+    return;
+  }
 
-String get defaultDatabaseDirectory => _bootstrapState.defaultDatabaseDirectory;
+  final initContext = _ensureInitContextDirectories();
 
-void setDefaultDatabaseDirectory(String? value) {
-  _bootstrapState.defaultDatabaseDirectoryOverride = value;
+  onTracedCall = tracingDelegateTracedNativeCallHandler;
+  BaseBindings.initializeNativeLibraries(initContext);
+
+  _isInitialized = true;
 }
 
-final class _IsolateBootstrapState {
-  var _isInitialized = false;
-  String? defaultDatabaseDirectoryOverride;
-  CBLInitContext? _initContext;
+String get defaultDatabaseDirectory =>
+    _defaultDatabaseDirectoryOverride ?? _resolvedDefaultDatabaseDirectory();
 
-  String get defaultDatabaseDirectory =>
-      defaultDatabaseDirectoryOverride ?? _resolvedDefaultDatabaseDirectory();
+void setDefaultDatabaseDirectory(String? value) {
+  _defaultDatabaseDirectoryOverride = value;
+}
 
-  void ensureInitializedForCurrentIsolate() {
-    if (_isInitialized) {
-      return;
-    }
-
-    final initContext = _ensureInitContextDirectories();
-
-    onTracedCall = tracingDelegateTracedNativeCallHandler;
-    BaseBindings.initializeNativeLibraries(initContext);
-
-    _isInitialized = true;
+CBLInitContext? _ensureInitContextDirectories() {
+  final initContext = _resolvedInitContext();
+  if (initContext == null) {
+    return null;
   }
 
-  CBLInitContext? _ensureInitContextDirectories() {
-    final initContext = _resolvedInitContext();
-    if (initContext == null) {
-      return null;
-    }
+  Directory(initContext.filesDir).createSync(recursive: true);
+  Directory(initContext.tempDir).createSync(recursive: true);
 
-    Directory(initContext.filesDir).createSync(recursive: true);
-    Directory(initContext.tempDir).createSync(recursive: true);
+  return initContext;
+}
 
-    return initContext;
+CBLInitContext? _resolvedInitContext() => _initContext ??= () {
+  final resolvedFilesDir = resolveAppFilesDirectory();
+  if (resolvedFilesDir == null) {
+    return null;
   }
 
-  CBLInitContext? _resolvedInitContext() => _initContext ??= () {
-    final resolvedFilesDir = resolveAppFilesDirectory();
-    if (resolvedFilesDir == null) {
-      return null;
-    }
+  return CBLInitContext(
+    filesDir: resolvedFilesDir,
+    tempDir: Platform.isAndroid
+        ? resolveAndroidCacheDirectory()
+        : resolvedFilesDir,
+  );
+}();
 
-    return CBLInitContext(
-      filesDir: resolvedFilesDir,
-      tempDir: Platform.isAndroid
-          ? resolveAndroidCacheDirectory()
-          : resolvedFilesDir,
-    );
-  }();
-
-  String _resolvedDefaultDatabaseDirectory() {
-    final filesDir = _resolvedInitContext()?.filesDir;
-    if (filesDir != null) {
-      return '$filesDir${Platform.pathSeparator}CouchbaseLite';
-    }
-
-    return Directory.current.path;
+String _resolvedDefaultDatabaseDirectory() {
+  final filesDir = _resolvedInitContext()?.filesDir;
+  if (filesDir != null) {
+    return '$filesDir${Platform.pathSeparator}CouchbaseLite';
   }
+
+  return Directory.current.path;
 }
