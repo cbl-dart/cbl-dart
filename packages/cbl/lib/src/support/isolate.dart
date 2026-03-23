@@ -5,16 +5,6 @@ import '../bindings/tracing.dart' show onTracedCall;
 import 'app_directory.dart';
 import 'tracing.dart';
 
-class InitContext {
-  InitContext({required this.filesDir, required this.tempDir});
-
-  final String filesDir;
-  final String tempDir;
-
-  CBLInitContext toCbl() =>
-      CBLInitContext(filesDir: filesDir, tempDir: tempDir);
-}
-
 final _bootstrapState = _IsolateBootstrapState();
 
 /// Lazily bootstraps Couchbase Lite for the current isolate.
@@ -44,7 +34,7 @@ void setDefaultDatabaseDirectory(String? value) {
 final class _IsolateBootstrapState {
   var _isInitialized = false;
   String? defaultDatabaseDirectoryOverride;
-  InitContext? _initContext;
+  CBLInitContext? _initContext;
 
   String get defaultDatabaseDirectory =>
       defaultDatabaseDirectoryOverride ?? _resolvedDefaultDatabaseDirectory();
@@ -57,12 +47,12 @@ final class _IsolateBootstrapState {
     final initContext = _ensureInitContextDirectories();
 
     onTracedCall = tracingDelegateTracedNativeCallHandler;
-    BaseBindings.initializeNativeLibraries(initContext?.toCbl());
+    BaseBindings.initializeNativeLibraries(initContext);
 
     _isInitialized = true;
   }
 
-  InitContext? _ensureInitContextDirectories() {
+  CBLInitContext? _ensureInitContextDirectories() {
     final initContext = _resolvedInitContext();
     if (initContext == null) {
       return null;
@@ -74,13 +64,13 @@ final class _IsolateBootstrapState {
     return initContext;
   }
 
-  InitContext? _resolvedInitContext() => _initContext ??= () {
+  CBLInitContext? _resolvedInitContext() => _initContext ??= () {
     final resolvedFilesDir = resolveAppFilesDirectory();
     if (resolvedFilesDir == null) {
       return null;
     }
 
-    return InitContext(
+    return CBLInitContext(
       filesDir: resolvedFilesDir,
       tempDir: Platform.isAndroid
           ? resolveAndroidCacheDirectory()
