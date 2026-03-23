@@ -118,8 +118,8 @@ Database.defaultDirectory = '/path/to/files';
 
 ## Vector search initialization
 
-In v3, vector search was automatically enabled during `api|CouchbaseLite.init`
-if the extension was available and the system supported it. The `init` methods
+In v3, vector search was automatically enabled during `CouchbaseLite.init` if
+the extension was available and the system supported it. The `init` methods
 accepted an `autoEnableVectorSearch` parameter to control this behavior.
 
 In v4, vector search is **never** enabled automatically.
@@ -495,9 +495,10 @@ No manual steps are required.
      `import 'package:cbl/cbl.dart'`.
    - Replace `import 'package:cbl_dart/cbl_dart.dart'` with
      `import 'package:cbl/cbl.dart'`.
-6. **Update initialization**:
-   - Replace `CouchbaseLiteFlutter.init()` with `api|CouchbaseLite.init`.
-   - Replace `CouchbaseLiteDart.init(...)` with `api|CouchbaseLite.init`.
+6. **Remove initialization**: Remove calls to `CouchbaseLiteFlutter.init()` or
+   `CouchbaseLiteDart.init(...)`. Initialization is no longer required. If you
+   customized the default database directory via the `filesDir` parameter, use
+   `api|Database.defaultDirectory` instead.
 7. **Enable vector search** (if needed) via `pubspec.yaml` config and an
    explicit call to `api|Extension.enableVectorSearch`.
 8. **Rename `langauge`** to `language` on `FullTextIndex`.
