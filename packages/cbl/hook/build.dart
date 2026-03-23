@@ -78,7 +78,6 @@ Future<void> buildHook(BuildInput input, BuildOutputBuilder output) async {
       'native/couchbase-lite-dart/src/CBL+Dart.cpp',
       'native/couchbase-lite-dart/src/Fleece+Dart.cpp',
       'native/couchbase-lite-dart/src/AsyncCallback.cpp',
-      'native/couchbase-lite-dart/src/Sentry.cpp',
       'native/couchbase-lite-dart/src/Utils.cpp',
       'native/couchbase-lite-dart/src/CpuSupport.cpp',
       'native/couchbase-lite-dart/src/dart_api_dl.cpp',

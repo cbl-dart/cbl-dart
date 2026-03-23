@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ffi';
 
 import '../bindings.dart';
 import '../support/async_callback.dart';
@@ -117,16 +116,14 @@ void setupCustomLogger(Logger? logger) {
     return;
   }
 
-  // Remove older logger
+  // Remove older logger.
   _cleanUpLogger();
 
-  // Update callback
   if (logger == null) {
     _cleanUpCallback();
   } else {
-    _setupCallback();
-    // Install new logger only after the callback has been successfully setup.
     _setupLogger(logger);
+    _setupCallback();
   }
 }
 
@@ -143,7 +140,6 @@ void _setupLogger(Logger logger) {
     );
   });
   _logger!._levelChanged = _updateLogLevel;
-  _updateLogLevel();
 }
 
 void _cleanUpLogger() {
@@ -152,8 +148,10 @@ void _cleanUpLogger() {
   _logger = null;
 }
 
-void _updateLogLevel() =>
-    LoggingBindings.setCallbackLevel(_logger!._level.toCBLLogLevel());
+void _updateLogLevel() => LoggingBindings.setCallbackLevel(
+  _callback!.pointer,
+  _logger!._level.toCBLLogLevel(),
+);
 
 void _setupCallback() {
   if (_callback != null) {
@@ -165,15 +163,13 @@ void _setupCallback() {
     debugName: 'Logger.log',
   );
 
-  // Try to set callback as the current global callback.
-  if (!LoggingBindings.setCallback(_callback!.pointer)) {
-    _cleanUpCallback();
-    throw StateError('Another isolate has already set a custom Logger.');
-  }
+  LoggingBindings.addCallback(
+    _callback!.pointer,
+    _logger!._level.toCBLLogLevel(),
+  );
 }
 
 void _cleanUpCallback() {
-  LoggingBindings.setCallback(nullptr);
   _callback?.close();
   _callback = null;
 }

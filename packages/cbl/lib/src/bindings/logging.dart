@@ -156,14 +156,20 @@ final class LoggingBindings {
     cblite.CBLLogSinks_SetConsole(sink);
   }
 
-  static void setCallbackLevel(CBLLogLevel logLevel) {
+  static void setCallbackLevel(
+    cblitedart.CBLDart_AsyncCallback callback,
+    CBLLogLevel logLevel,
+  ) {
     ensureInitializedForCurrentIsolate();
-    cblitedart.CBLDart_CBLLog_SetCallbackLevel(logLevel.value);
+    cblitedart.CBLDart_CBLLog_SetCallbackLevel(callback, logLevel.value);
   }
 
-  static bool setCallback(cblitedart.CBLDart_AsyncCallback callback) {
+  static void addCallback(
+    cblitedart.CBLDart_AsyncCallback callback,
+    CBLLogLevel logLevel,
+  ) {
     ensureInitializedForCurrentIsolate();
-    return cblitedart.CBLDart_CBLLog_SetCallback(callback);
+    cblitedart.CBLDart_CBLLog_AddCallback(callback, logLevel.value);
   }
 
   static void setFileLogConfiguration(CBLLogFileConfiguration? config) {
@@ -180,11 +186,6 @@ final class LoggingBindings {
         ?.ref
         .toCBLLogFileConfiguration();
   }();
-
-  static bool setSentryBreadcrumbs({required bool enabled}) {
-    ensureInitializedForCurrentIsolate();
-    return cblitedart.CBLDart_CBLLog_SetSentryBreadcrumbs(enabled);
-  }
 
   static Pointer<cblite.CBLFileLogSink> _logFileSink(
     CBLLogFileConfiguration? config,
