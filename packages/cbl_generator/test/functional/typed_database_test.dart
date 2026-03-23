@@ -7,7 +7,7 @@ import '../fixtures/typed_database.cbl.database.g.dart';
 import '../test_utils.dart';
 
 void main() {
-  setUpAll(initCouchbaseLiteForTest);
+  setUpAll(configureCouchbaseLiteForTest);
 
   test('load document', () {
     final db = DocWithIdDatabase.openSync('test');

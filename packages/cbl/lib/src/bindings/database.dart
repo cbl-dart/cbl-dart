@@ -1,6 +1,7 @@
 import 'dart:ffi';
 import 'dart:typed_data';
 
+import '../support/isolate.dart';
 import 'base.dart';
 import 'cblite.dart' as cblite;
 import 'cblitedart.dart' as cblitedart;
@@ -95,33 +96,41 @@ final class DatabaseBindings {
     String from,
     String name,
     CBLDatabaseConfiguration? config,
-  ) => withGlobalArena(
-    () => cblitedart.CBLDart_CBL_CopyDatabase(
-      from.toFLString(),
-      name.toFLString(),
-      _createConfig(config),
-      globalCBLError,
-    ).checkError(),
-  );
+  ) {
+    ensureInitializedForCurrentIsolate();
+    return withGlobalArena(
+      () => cblitedart.CBLDart_CBL_CopyDatabase(
+        from.toFLString(),
+        name.toFLString(),
+        _createConfig(config),
+        globalCBLError,
+      ).checkError(),
+    );
+  }
 
-  static bool deleteDatabase(String name, String? inDirectory) =>
-      withGlobalArena(
-        () => cblite.CBL_DeleteDatabase(
-          name.toFLString(),
-          inDirectory.toFLString(),
-          globalCBLError,
-        ).checkError(),
-      );
+  static bool deleteDatabase(String name, String? inDirectory) {
+    ensureInitializedForCurrentIsolate();
+    return withGlobalArena(
+      () => cblite.CBL_DeleteDatabase(
+        name.toFLString(),
+        inDirectory.toFLString(),
+        globalCBLError,
+      ).checkError(),
+    );
+  }
 
-  static bool databaseExists(String name, String? inDirectory) =>
-      withGlobalArena(
-        () => cblite.CBL_DatabaseExists(
-          name.toFLString(),
-          inDirectory.toFLString(),
-        ),
-      );
+  static bool databaseExists(String name, String? inDirectory) {
+    ensureInitializedForCurrentIsolate();
+    return withGlobalArena(
+      () => cblite.CBL_DatabaseExists(
+        name.toFLString(),
+        inDirectory.toFLString(),
+      ),
+    );
+  }
 
   static CBLDatabaseConfiguration defaultConfiguration() {
+    ensureInitializedForCurrentIsolate();
     final config = cblitedart.CBLDart_CBLDatabaseConfiguration_Default();
     return CBLDatabaseConfiguration(
       directory: config.directory.toDartString()!,
@@ -132,18 +141,21 @@ final class DatabaseBindings {
   static Pointer<cblite.CBLDatabase> open(
     String name,
     CBLDatabaseConfiguration? config,
-  ) => withGlobalArena(() {
-    final nameFlStr = name.toFLString();
-    final cblConfig = _createConfig(config);
-    return nativeCallTracePoint(
-      TracedNativeCall.databaseOpen,
-      () => cblitedart.CBLDart_CBLDatabase_Open(
-        nameFlStr,
-        cblConfig,
-        globalCBLError,
-      ),
-    ).checkError();
-  });
+  ) {
+    ensureInitializedForCurrentIsolate();
+    return withGlobalArena(() {
+      final nameFlStr = name.toFLString();
+      final cblConfig = _createConfig(config);
+      return nativeCallTracePoint(
+        TracedNativeCall.databaseOpen,
+        () => cblitedart.CBLDart_CBLDatabase_Open(
+          nameFlStr,
+          cblConfig,
+          globalCBLError,
+        ),
+      ).checkError();
+    });
+  }
 
   static void bindToDartObject(
     Finalizable object,

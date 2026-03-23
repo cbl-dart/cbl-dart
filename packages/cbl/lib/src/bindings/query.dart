@@ -1,5 +1,6 @@
 import 'dart:ffi';
 
+import '../support/isolate.dart';
 import 'base.dart';
 import 'cblite.dart' as cblite;
 import 'cblitedart.dart' as cblitedart;
@@ -118,24 +119,29 @@ final class QueryBindings {
     cblitedart.CBLDart_PredictiveModel_PredictionSync predictionSync,
     cblitedart.CBLDart_PredictiveModel_PredictionAsync predictionAsync,
     cblitedart.CBLDart_PredictiveModel_Unregistered unregistered,
-  ) => runWithSingleFLString(
-    name,
-    (flName) => cblitedart.CBLDart_PredictiveModel_New(
-      flName,
-      BaseBindings.isolateId,
-      predictionSync,
-      predictionAsync,
-      unregistered,
-    ),
-  );
+  ) {
+    ensureInitializedForCurrentIsolate();
+    return runWithSingleFLString(
+      name,
+      (flName) => cblitedart.CBLDart_PredictiveModel_New(
+        flName,
+        BaseBindings.isolateId,
+        predictionSync,
+        predictionAsync,
+        unregistered,
+      ),
+    );
+  }
 
   static void bindCBLDartPredictiveModelToDartObject(
     Finalizable object,
     cblitedart.CBLDart_PredictiveModel model,
   ) => _predictiveModelFinalizer.attach(object, model.cast());
 
-  static void unregisterPredictiveModel(String name) =>
-      runWithSingleFLString(name, cblite.CBL_UnregisterPredictiveModel);
+  static void unregisterPredictiveModel(String name) {
+    ensureInitializedForCurrentIsolate();
+    runWithSingleFLString(name, cblite.CBL_UnregisterPredictiveModel);
+  }
 }
 
 final class ResultSetBindings {

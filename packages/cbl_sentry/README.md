@@ -44,7 +44,6 @@ await Sentry.init(
     ..tracesSampleRate = 1
     ..addIntegration(CouchbaseLiteIntegration()),
   appRunner: () async {
-    await CouchbaseLite.init();
     // ...
   },
 );

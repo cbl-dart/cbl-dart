@@ -6,7 +6,7 @@ import '../fixtures/typed_data_child.dart';
 import '../test_utils.dart';
 
 void main() {
-  setUpAll(initCouchbaseLiteForTest);
+  setUpAll(configureCouchbaseLiteForTest);
 
   test('immutable object', () {
     final internalDict = MutableDictionary({

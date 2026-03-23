@@ -107,12 +107,9 @@ await CouchbaseLiteDart.init(edition: Edition.enterprise);
 
 ```dart
 import 'package:cbl/cbl.dart';
-
-await CouchbaseLite.init();
 ```
 
-The initialization API is now unified. There is no need to use different imports
-or classes depending on whether you are in a Flutter or standalone Dart context.
+Couchbase Lite no longer requires explicit initialization before use.
 
 ## Vector search initialization
 
@@ -122,12 +119,10 @@ accepted an `autoEnableVectorSearch` parameter to control this behavior.
 
 In v4, vector search is **never** enabled automatically.
 `autoEnableVectorSearch` has been removed. You must explicitly call
-`api|Extension.enableVectorSearch` after initialization and before opening a
-database that uses vector search:
+`api|Extension.enableVectorSearch` before opening a database that uses vector
+search:
 
 ```dart
-await CouchbaseLite.init();
-
 final status = Extension.enableVectorSearch();
 if (status != VectorSearchStatus.enabled) {
   // Handle the case where vector search could not be enabled.

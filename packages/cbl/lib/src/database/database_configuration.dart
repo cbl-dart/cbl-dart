@@ -1,6 +1,5 @@
 // ignore_for_file: avoid_equals_and_hash_code_on_mutable_classes
 
-import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -140,7 +139,7 @@ final class DatabaseConfiguration {
     String? directory,
     this.encryptionKey,
     this.fullSync = false,
-  }) : directory = directory ?? _defaultDirectory();
+  }) : directory = directory ?? defaultDatabaseDirectory;
 
   /// Creates a configuration from another [config], by copying its properties.
   ///
@@ -150,6 +149,8 @@ final class DatabaseConfiguration {
     : this(directory: config.directory);
 
   /// Path to the directory to store the [Database] in.
+  ///
+  /// {@macro cbl.Database.defaultDirectoryBehavior}
   String directory;
 
   /// The key to encrypt the database with.
@@ -193,13 +194,4 @@ final class DatabaseConfiguration {
     ].join(', '),
     ')',
   ].join();
-}
-
-String _defaultDirectory() {
-  final filesDir = IsolateContext.instance.initContext?.filesDir;
-  if (filesDir != null) {
-    return '$filesDir${Platform.pathSeparator}CouchbaseLite';
-  }
-
-  return Directory.current.path;
 }

@@ -56,7 +56,7 @@ abstract base class CblE2eTestBinding {
   /// The global instance of [CblE2eTestBinding] which is used by tests.
   static CblE2eTestBinding get instance => _instance!;
 
-  FutureOr<void> initCouchbaseLite();
+  FutureOr<void> configureCouchbaseLite();
 
   /// Temporary directory for files created during tests, such as databases.
   FutureOr<String> resolveTmpDir();
@@ -119,7 +119,7 @@ abstract base class CblE2eTestBinding {
       print('Using temporary directory: $tmpDir');
 
       await _cleanTestTmpDir();
-      await initCouchbaseLite();
+      await configureCouchbaseLite();
 
       const consoleLogLevel = LogLevel.warning;
       const fileLogLevel = LogLevel.verbose;

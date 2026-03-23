@@ -9,6 +9,7 @@ import '../log/log.dart';
 import '../query/prediction.dart';
 import '../query/query.dart';
 import '../replication/replicator.dart';
+import '../support/isolate.dart';
 import '../support/resource.dart';
 import '../support/tracing.dart';
 import '../tracing.dart';
@@ -79,12 +80,16 @@ abstract interface class Database implements ClosableResource {
 
   /// {@template cbl.Database.remove}
   /// Deletes a database of the given [name] in the given [directory].
+  ///
+  /// {@macro cbl.Database.defaultDirectoryBehavior}
   /// {@endtemplate}
   static Future<void> remove(String name, {String? directory}) =>
       AsyncDatabase.remove(name, directory: directory);
 
   /// {@template cbl.Database.removeSync}
   /// Deletes a database of the given [name] in the given [directory].
+  ///
+  /// {@macro cbl.Database.defaultDirectoryBehavior}
   /// {@endtemplate}
   static void removeSync(String name, {String? directory}) =>
       SyncDatabase.remove(name, directory: directory);
@@ -92,6 +97,8 @@ abstract interface class Database implements ClosableResource {
   /// {@template cbl.Database.exists}
   /// Checks whether a database of the given [name] exists in the given
   /// [directory] or not.
+  ///
+  /// {@macro cbl.Database.defaultDirectoryBehavior}
   /// {@endtemplate}
   static Future<bool> exists(String name, {String? directory}) =>
       AsyncDatabase.exists(name, directory: directory);
@@ -99,6 +106,8 @@ abstract interface class Database implements ClosableResource {
   /// {@template cbl.Database.existsSync}
   /// Checks whether a database of the given [name] exists in the given
   /// [directory] or not.
+  ///
+  /// {@macro cbl.Database.defaultDirectoryBehavior}
   /// {@endtemplate}
   static bool existsSync(String name, {String? directory}) =>
       SyncDatabase.exists(name, directory: directory);
@@ -107,8 +116,10 @@ abstract interface class Database implements ClosableResource {
   /// Copies a canned database [from] the given path to a new database with the
   /// given [name] and [config].
   ///
-  /// The new database will be created at the directory specified in the
-  /// [config].
+  /// The new database will be created at the directory specified in [config].
+  /// If [config] is omitted, a default [DatabaseConfiguration] is used.
+  ///
+  /// {@macro cbl.Database.defaultDirectoryBehavior}
   /// {@endtemplate}
   static Future<void> copy({
     required String from,
@@ -120,8 +131,10 @@ abstract interface class Database implements ClosableResource {
   /// Copies a canned database [from] the given path to a new database with the
   /// given [name] and [config].
   ///
-  /// The new database will be created at the directory specified in the
-  /// [config].
+  /// The new database will be created at the directory specified in [config].
+  /// If [config] is omitted, a default [DatabaseConfiguration] is used.
+  ///
+  /// {@macro cbl.Database.defaultDirectoryBehavior}
   /// {@endtemplate}
   static void copySync({
     required String from,
@@ -134,6 +147,26 @@ abstract interface class Database implements ClosableResource {
 
   /// Manager for registering and unregistering [PredictiveModel]s.
   static final Prediction prediction = PredictionImpl();
+
+  /// The default directory used by database APIs when no directory is specified
+  /// explicitly.
+  ///
+  /// Setting this property only affects the current isolate. Set it to `null`
+  /// to restore automatic directory resolution.
+  ///
+  /// {@template cbl.Database.defaultDirectoryBehavior}
+  /// APIs that omit a database directory use [Database.defaultDirectory].
+  ///
+  /// Unless overridden for the current isolate, it resolves to a
+  /// `CouchbaseLite` subdirectory of the app files directory when that
+  /// directory can be resolved. Otherwise it falls back to the current working
+  /// directory.
+  /// {@endtemplate}
+  static String get defaultDirectory => defaultDatabaseDirectory;
+
+  static set defaultDirectory(String? value) {
+    setDefaultDatabaseDirectory(value);
+  }
 
   /// The name of this database.
   String get name;

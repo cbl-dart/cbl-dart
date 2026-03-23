@@ -4,7 +4,7 @@ import '../fixtures/document_meta_data.dart';
 import '../test_utils.dart';
 
 void main() {
-  setUpAll(initCouchbaseLiteForTest);
+  setUpAll(configureCouchbaseLiteForTest);
 
   group('document id', () {
     test('pass id to constructor', () {
