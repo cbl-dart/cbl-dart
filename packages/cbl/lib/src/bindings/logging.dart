@@ -170,9 +170,6 @@ final class LoggingBindings {
           ?.ref
           .toCBLLogFileConfiguration();
 
-  static bool setSentryBreadcrumbs({required bool enabled}) =>
-      cblitedart.CBLDart_CBLLog_SetSentryBreadcrumbs(enabled);
-
   static Pointer<cblite.CBLFileLogSink> _logFileSink(
     CBLLogFileConfiguration? config,
   ) {

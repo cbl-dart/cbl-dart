@@ -67,8 +67,6 @@ files:
         name: CBLDart_CBLLog_SetCallbackLevel
       c:@F@CBLDart_CBLLog_SetFileSink:
         name: CBLDart_CBLLog_SetFileSink
-      c:@F@CBLDart_CBLLog_SetSentryBreadcrumbs:
-        name: CBLDart_CBLLog_SetSentryBreadcrumbs
       c:@F@CBLDart_CBLQuery_AddChangeListener:
         name: CBLDart_CBLQuery_AddChangeListener
       c:@F@CBLDart_CBLReplicator_AddChangeListener:
