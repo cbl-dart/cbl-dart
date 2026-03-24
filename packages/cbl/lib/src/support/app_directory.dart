@@ -106,9 +106,7 @@ String? resolveAppFilesDirectory({PlatformContext? context}) {
 /// Used as the temporary directory for Couchbase Lite on Android.
 String resolveAndroidCacheDirectory({PlatformContext? context}) {
   final ctx = context ?? PlatformContext.current();
-  final name = ctx.androidPackageName ?? _readAndroidPackageName();
-  final userId = ctx.androidUserId ?? _getAndroidUserId();
-  return '/data/user/$userId/$name/cache';
+  return '${_androidAppBasePath(ctx)}/cache';
 }
 
 // === Internal helpers ========================================================
@@ -120,6 +118,13 @@ String resolveAndroidCacheDirectory({PlatformContext? context}) {
 const _kIsFlutter = bool.fromEnvironment('dart.library.ui');
 
 bool _isFlutterApp(PlatformContext ctx) => ctx.isFlutterApp ?? _kIsFlutter;
+
+/// Returns `/data/user/<userId>/<packageName>` for Android.
+String _androidAppBasePath(PlatformContext ctx) {
+  final name = ctx.androidPackageName ?? _readAndroidPackageName();
+  final userId = ctx.androidUserId ?? _getAndroidUserId();
+  return '/data/user/$userId/$name';
+}
 
 String? _xdgDataHome(Map<String, String> environment) {
   final explicit = environment['XDG_DATA_HOME'];
@@ -194,11 +199,7 @@ class _AndroidStrategy extends _AppDirectoryStrategy {
   bool appliesTo(PlatformContext ctx) => ctx.os == OperatingSystem.android;
 
   @override
-  String resolve(PlatformContext ctx) {
-    final name = ctx.androidPackageName ?? _readAndroidPackageName();
-    final userId = ctx.androidUserId ?? _getAndroidUserId();
-    return '/data/user/$userId/$name/files';
-  }
+  String resolve(PlatformContext ctx) => '${_androidAppBasePath(ctx)}/files';
 }
 
 /// Linux: Check for snap/flatpak containers, then use XDG with the app name.
