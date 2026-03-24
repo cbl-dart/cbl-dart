@@ -3,12 +3,14 @@ import 'dart:io';
 import 'package:args/command_runner.dart';
 import 'package:cli_launcher/cli_launcher.dart';
 
+import 'command/ci_flaky_jobs.dart';
 import 'command/generate_bindings.dart';
 import 'error.dart';
 
 final class CbdRunner extends CommandRunner<void> {
   CbdRunner({required this.projectDir})
     : super('cbd', 'CBL Dart dev tools CLI') {
+    addCommand(CiFlakyJobs());
     addCommand(GenerateBindings());
 
     argParser.addFlag('verbose', abbr: 'v', help: 'Print verbose output');
