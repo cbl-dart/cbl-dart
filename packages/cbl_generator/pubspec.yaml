@@ -1,5 +1,5 @@
 name: cbl_generator
-version: 0.4.0-dev.4
+version: 0.4.0-dev.5
 description: >-
   Code generator for Couchbase Lite — generates typed document model classes
   for the embedded, offline-first, NoSQL JSON document database.
@@ -23,7 +23,7 @@ resolution: workspace
 dependencies:
   analyzer: ^10.0.0
   build: ^4.0.4
-  cbl: ^4.0.0-dev.4
+  cbl: ^4.0.0-dev.5
   collection: ^1.15.0
   meta: ^1.7.0
   source_gen: ^4.2.0

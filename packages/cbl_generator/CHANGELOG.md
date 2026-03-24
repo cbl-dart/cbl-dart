@@ -1,3 +1,10 @@
+## 0.4.0-dev.5
+
+> Note: This release has breaking changes.
+
+ - **BREAKING** **FEAT**(cbl): remove `CouchbaseLite.init` and auto init lazily ([#926](https://github.com/cbl-dart/cbl-dart/issues/926)). ([f64c5dcd](https://github.com/cbl-dart/cbl-dart/commit/f64c5dcdaa388aac4f939e05a52b055df33556b4))
+ - **BREAKING** **FEAT**(cbl_generator): generate companion dictionary for typed documents ([#917](https://github.com/cbl-dart/cbl-dart/issues/917)). ([b848bfe5](https://github.com/cbl-dart/cbl-dart/commit/b848bfe55323b19dd1ae51e0fe81af0a368166b6))
+
 ## 0.4.0-dev.4
 
  - Update a dependency to the latest release.
