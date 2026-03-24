@@ -745,6 +745,142 @@ void main() {
       },
     );
 
+    // Tests that the Dart DefaultConflictResolver produces the same outcomes
+    // as the native CBLDefaultConflictResolver across different conflict
+    // scenarios. Each scenario is run twice: once with null (native default)
+    // and once with DefaultConflictResolver() (Dart implementation).
+    for (final (resolverLabel, resolver) in [
+      ('native', null),
+      ('dart', const DefaultConflictResolver()),
+    ]) {
+      apiTest('default conflict resolver ($resolverLabel): '
+          'remote has later timestamp', () async {
+        // DB-A writes first (earlier timestamp), DB-B writes second (later
+        // timestamp). Remote (DB-B's doc) should win.
+
+        final dbA = await openTestDatabase(name: 'A');
+        final replicatorA = await dbA.createTestReplicator(
+          conflictResolverObject: resolver,
+        );
+        addTearDown(replicatorA.close);
+
+        final dbB = await openTestDatabase(name: 'B');
+        final replicatorB = await dbB.createTestReplicator();
+        addTearDown(replicatorB.close);
+
+        // Create doc in DB-A and sync to both databases.
+        await dbA.writeTestDocument('DB-A-1');
+        await replicatorA.replicateOneShot();
+        await replicatorB.replicateOneShot();
+
+        // DB-A modifies first (earlier timestamp).
+        await dbA.writeTestDocument('DB-A-2');
+        // DB-B modifies second (later timestamp).
+        await dbB.writeTestDocument('DB-B-1');
+
+        // DB-B pushes, then DB-A pulls => conflict.
+        await replicatorB.replicateOneShot();
+        await replicatorA.replicateOneShot();
+
+        // Remote (DB-B) has the later timestamp, so it should win.
+        expect(await dbA.getTestDocumentOrNull(), isTestDocument('DB-B-1'));
+      });
+
+      apiTest('default conflict resolver ($resolverLabel): '
+          'local has later timestamp', () async {
+        // DB-B writes first (earlier timestamp), DB-A writes second (later
+        // timestamp). Local (DB-A's doc) should win.
+
+        final dbA = await openTestDatabase(name: 'A');
+        final replicatorA = await dbA.createTestReplicator(
+          conflictResolverObject: resolver,
+        );
+        addTearDown(replicatorA.close);
+
+        final dbB = await openTestDatabase(name: 'B');
+        final replicatorB = await dbB.createTestReplicator();
+        addTearDown(replicatorB.close);
+
+        // Create doc in DB-A and sync to both databases.
+        await dbA.writeTestDocument('DB-A-1');
+        await replicatorA.replicateOneShot();
+        await replicatorB.replicateOneShot();
+
+        // DB-B modifies first (earlier timestamp).
+        await dbB.writeTestDocument('DB-B-1');
+        // DB-A modifies second (later timestamp).
+        await dbA.writeTestDocument('DB-A-2');
+
+        // DB-B pushes, then DB-A pulls => conflict.
+        await replicatorB.replicateOneShot();
+        await replicatorA.replicateOneShot();
+
+        // Local (DB-A) has the later timestamp, so it should win.
+        expect(await dbA.getTestDocumentOrNull(), isTestDocument('DB-A-2'));
+      });
+
+      apiTest('default conflict resolver ($resolverLabel): '
+          'local deleted', () async {
+        final dbA = await openTestDatabase(name: 'A');
+        final replicatorA = await dbA.createTestReplicator(
+          conflictResolverObject: resolver,
+        );
+        addTearDown(replicatorA.close);
+
+        final dbB = await openTestDatabase(name: 'B');
+        final replicatorB = await dbB.createTestReplicator();
+        addTearDown(replicatorB.close);
+
+        // Create doc and sync to both databases.
+        await dbA.writeTestDocument('DB-A-1');
+        await replicatorA.replicateOneShot();
+        await replicatorB.replicateOneShot();
+
+        // DB-A deletes the document locally.
+        final docA = await dbA.getTestDocumentOrNull();
+        await (await dbA.defaultCollection).deleteDocument(docA!);
+
+        // DB-B modifies the document and pushes.
+        await dbB.writeTestDocument('DB-B-1');
+        await replicatorB.replicateOneShot();
+
+        // DB-A pulls => conflict: local=deleted, remote=present => delete.
+        await replicatorA.replicateOneShot();
+
+        expect(await dbA.getTestDocumentOrNull(), isNull);
+      });
+
+      apiTest('default conflict resolver ($resolverLabel): '
+          'remote deleted', () async {
+        final dbA = await openTestDatabase(name: 'A');
+        final replicatorA = await dbA.createTestReplicator(
+          conflictResolverObject: resolver,
+        );
+        addTearDown(replicatorA.close);
+
+        final dbB = await openTestDatabase(name: 'B');
+        final replicatorB = await dbB.createTestReplicator();
+        addTearDown(replicatorB.close);
+
+        // Create doc and sync to both databases.
+        await dbA.writeTestDocument('DB-A-1');
+        await replicatorA.replicateOneShot();
+        await replicatorB.replicateOneShot();
+
+        // Delete the document on the server (simulating remote deletion).
+        final docB = (await dbB.getTestDocumentOrNull())!;
+        await deleteDocumentByAdmin(docB);
+
+        // DB-A modifies the document locally.
+        await dbA.writeTestDocument('DB-A-2');
+
+        // DB-A syncs => conflict: local=present, remote=deleted => delete.
+        await replicatorA.replicateOneShot();
+
+        expect(await dbA.getTestDocumentOrNull(), isNull);
+      });
+    }
+
     apiTest('conflict resolver exception handling', () async {
       Object? uncaughtError;
       await runZonedGuarded(

@@ -89,8 +89,8 @@ final class DefaultConflictResolver implements ConflictResolver {
       return null;
     }
 
-    // Resolve to the most recently changed document.
-    if (localDocument.revisionId!.compareTo(remoteDocument.revisionId!) > 0) {
+    // Resolve to the document with the later timestamp.
+    if (localDocument.timestamp > remoteDocument.timestamp) {
       return localDocument;
     } else {
       return remoteDocument;
