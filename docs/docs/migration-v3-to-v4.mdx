@@ -107,6 +107,12 @@ await CouchbaseLiteDart.init(edition: Edition.enterprise);
 
 Couchbase Lite no longer requires explicit initialization before use.
 
+In v4, `api|Database.defaultDirectory` automatically resolves to the platform's
+standard app data directory for Flutter apps (see
+[Default database directory](./supported-platforms.mdx#default-database-directory)
+for the per-platform locations). For standalone Dart processes, the current
+working directory is used.
+
 If you previously passed `filesDir` to `CouchbaseLite.init` to customize the
 default database directory, use `api|Database.defaultDirectory` instead.
 

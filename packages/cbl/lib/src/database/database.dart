@@ -158,9 +158,19 @@ abstract interface class Database implements ClosableResource {
   /// APIs that omit a database directory use [Database.defaultDirectory].
   ///
   /// Unless overridden for the current isolate, it resolves to a
-  /// `CouchbaseLite` subdirectory of the app files directory when that
-  /// directory can be resolved. Otherwise it falls back to the current working
-  /// directory.
+  /// `CouchbaseLite` subdirectory of the platform's standard app data directory
+  /// for Flutter apps. For standalone Dart processes (e.g. `dart run`, compiled
+  /// CLI executables), it falls back to the current working directory.
+  ///
+  /// The per-platform app data directories for Flutter apps:
+  ///
+  /// - **iOS** — Application Support
+  /// - **macOS** — `<Application Support>/<bundleId>`
+  /// - **Android** — `/data/user/<userId>/<pkg>/files`
+  /// - **Linux** — `<XDG_DATA_HOME>/<appName>` (respects Snap/Flatpak
+  ///   sandboxes)
+  /// - **Windows** — `<LocalAppData>/<appName>`
+  ///
   /// {@endtemplate}
   static String get defaultDirectory => defaultDatabaseDirectory;
 

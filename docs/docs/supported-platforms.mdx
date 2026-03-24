@@ -21,8 +21,19 @@ Couchbase Lite for Dart requires Dart SDK `^3.10.0`.
 
 ## Default database directory
 
-When opening a database without specifying a directory, Couchbase Lite uses the
-platform's standard app data directory for mobile and deployed desktop
-applications. When running during development (e.g. via `dart run`), the current
-working directory is used. `api|Database.defaultDirectory` allows you to specify
-a different default directory.
+When opening a database without specifying a directory, Couchbase Lite uses
+`api|Database.defaultDirectory`. For Flutter apps it resolves to a
+`CouchbaseLite` subdirectory of the platform's standard app data directory. For
+standalone Dart processes (e.g. `dart run`, compiled CLI executables), the
+current working directory is used.
+
+| Platform | App data directory                                              |
+| -------: | :-------------------------------------------------------------- |
+|      iOS | Application Support (via `NSSearchPathForDirectoriesInDomains`) |
+|    macOS | `<Application Support>/<bundleId>`                              |
+|  Android | `/data/user/<userId>/<packageName>/files`                       |
+|    Linux | `<XDG_DATA_HOME>/<appName>` (respects Snap/Flatpak sandboxes)   |
+|  Windows | `<LocalAppData>/<appName>`                                      |
+
+You can override the default directory by setting
+`api|Database.defaultDirectory` to a custom path.
