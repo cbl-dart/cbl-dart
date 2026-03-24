@@ -18,6 +18,7 @@ class PlatformContext {
     required this.resolvedExecutable,
     this.environment = const {},
     required this.os,
+    this.isFlutterApp,
     this.appleAppSupportDir,
     this.macOSBundleId,
     this.androidPackageName,
@@ -40,6 +41,10 @@ class PlatformContext {
   /// The current operating system.
   final OperatingSystem os;
 
+  /// Whether the current process is a Flutter app. When `null`, this is
+  /// auto-detected from the runtime environment. Set explicitly in tests.
+  final bool? isFlutterApp;
+
   /// Override for the Apple Application Support directory (iOS / macOS). When
   /// `null`, resolved via `NSSearchPathForDirectoriesInDomains` FFI.
   final String? appleAppSupportDir;
@@ -57,14 +62,32 @@ class PlatformContext {
   final String? windowsAppDataDir;
 }
 
+/// Whether the current process is running inside a Flutter app.
+///
+/// Returns `false` for standalone Dart processes (`dart run`, `dart test`,
+/// compiled Dart CLI executables, etc.).
+///
+/// Detection is based on the availability of `dart:ui`, which is provided
+/// exclusively by the Flutter engine and is absent in standalone Dart.
+///
+/// The [context] parameter allows overriding this via
+/// [PlatformContext.isFlutterApp] for testing.
+bool isFlutterApp({PlatformContext? context}) {
+  final ctx = context ?? PlatformContext.current();
+  return _isFlutterApp(ctx);
+}
+
 /// Resolves the platform's standard app data directory for storing databases
 /// and other app data.
 ///
-/// Returns the app data directory for mobile and deployed desktop applications.
-/// Returns `null` when running during development (e.g. via `dart run`), in
-/// which case callers should fall back to the current working directory.
+/// Only resolves a directory for Flutter apps. Standalone Dart processes always
+/// get `null`, in which case callers should fall back to the current working
+/// directory.
 String? resolveAppFilesDirectory({PlatformContext? context}) {
   final ctx = context ?? PlatformContext.current();
+  if (!_isFlutterApp(ctx)) {
+    return null;
+  }
   for (final strategy in _strategies) {
     if (strategy.appliesTo(ctx)) {
       return strategy.resolve(ctx);
@@ -84,13 +107,13 @@ String resolveAndroidCacheDirectory({PlatformContext? context}) {
 
 // === Internal helpers ========================================================
 
-String? _detectAppName(String resolvedExecutable) {
-  final name = p.basenameWithoutExtension(resolvedExecutable);
-  if (name == 'dart' || name == 'flutter_tester') {
-    return null;
-  }
-  return name;
-}
+/// `dart:ui` is provided exclusively by the Flutter engine and is absent in
+/// standalone Dart. This compile-time constant is the canonical way to detect
+/// Flutter without depending on it.
+// ignore: do_not_use_environment
+const _kIsFlutter = bool.fromEnvironment('dart.library.ui');
+
+bool _isFlutterApp(PlatformContext ctx) => ctx.isFlutterApp ?? _kIsFlutter;
 
 String? _xdgDataHome(Map<String, String> environment) {
   final explicit = environment['XDG_DATA_HOME'];
@@ -133,8 +156,7 @@ class _IOSStrategy extends _AppDirectoryStrategy {
       ctx.appleAppSupportDir ?? _nsSearchPathForApplicationSupport();
 }
 
-/// macOS: Use `<Application Support>/<bundleId>` when running inside a `.app`
-/// bundle. Returns `null` for CLI / development contexts.
+/// macOS: Use `<Application Support>/<bundleId>`.
 class _MacOSStrategy extends _AppDirectoryStrategy {
   const _MacOSStrategy();
 
@@ -167,7 +189,7 @@ class _AndroidStrategy extends _AppDirectoryStrategy {
   }
 }
 
-/// Linux: Check for snap/flatpak containers, then detect compiled app name.
+/// Linux: Check for snap/flatpak containers, then use XDG with the app name.
 class _LinuxStrategy extends _AppDirectoryStrategy {
   const _LinuxStrategy();
 
@@ -193,20 +215,18 @@ class _LinuxStrategy extends _AppDirectoryStrategy {
       }
     }
 
-    // Regular compiled app (not running via `dart` CLI).
-    final appName = _detectAppName(ctx.resolvedExecutable);
-    if (appName != null) {
-      final dataHome = _xdgDataHome(env);
-      if (dataHome != null) {
-        return p.join(dataHome, appName);
-      }
+    // Regular Flutter app: use XDG data directory with the executable name.
+    final appName = p.basenameWithoutExtension(ctx.resolvedExecutable);
+    final dataHome = _xdgDataHome(env);
+    if (dataHome != null) {
+      return p.join(dataHome, appName);
     }
 
     return null;
   }
 }
 
-/// Windows: Use `<Roaming AppData>/<appName>` for compiled apps.
+/// Windows: Use `<Roaming AppData>/<appName>`.
 class _WindowsStrategy extends _AppDirectoryStrategy {
   const _WindowsStrategy();
 
@@ -215,11 +235,7 @@ class _WindowsStrategy extends _AppDirectoryStrategy {
 
   @override
   String? resolve(PlatformContext ctx) {
-    final appName = _detectAppName(ctx.resolvedExecutable);
-    if (appName == null) {
-      return null;
-    }
-
+    final appName = p.basenameWithoutExtension(ctx.resolvedExecutable);
     final appData = ctx.windowsAppDataDir ?? _windowsRoamingAppDataPath();
     if (appData == null) {
       return null;

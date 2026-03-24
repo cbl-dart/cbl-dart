@@ -9,13 +9,60 @@ import '../test_binding.dart';
 void main() {
   setupTestBinding();
 
+  group('isFlutterApp', () {
+    test('uses explicit override when set', () {
+      expect(
+        isFlutterApp(
+          context: const PlatformContext(
+            resolvedExecutable: '/path/to/dart',
+            os: OperatingSystem.linux,
+            isFlutterApp: true,
+          ),
+        ),
+        isTrue,
+      );
+
+      expect(
+        isFlutterApp(
+          context: const PlatformContext(
+            resolvedExecutable: '/path/to/my_app',
+            os: OperatingSystem.ios,
+            isFlutterApp: false,
+          ),
+        ),
+        isFalse,
+      );
+    });
+
+    test('auto-detects based on dart:ui availability', () {
+      // When isFlutterApp is not set, detection falls back to the
+      // compile-time constant `bool.fromEnvironment('dart.library.ui')`.
+      // In standalone Dart tests this is always false.
+      expect(isFlutterApp(), isFalse);
+    });
+  });
+
   group('resolveAppFilesDirectory', () {
+    test('returns null when not a Flutter app', () {
+      final result = resolveAppFilesDirectory(
+        context: const PlatformContext(
+          resolvedExecutable: '/usr/bin/my_dart_cli',
+          os: OperatingSystem.linux,
+          isFlutterApp: false,
+          environment: {'HOME': '/home/user'},
+        ),
+      );
+
+      expect(result, isNull);
+    });
+
     group('iOS', () {
       test('returns the Application Support directory', () {
         final result = resolveAppFilesDirectory(
           context: const PlatformContext(
             resolvedExecutable: '/path/to/Runner',
             os: OperatingSystem.ios,
+            isFlutterApp: true,
             appleAppSupportDir:
                 '/var/mobile/Containers/Data/Application/ABC123'
                 '/Library/Application Support',
@@ -36,6 +83,7 @@ void main() {
           context: const PlatformContext(
             resolvedExecutable: '/path/to/MyApp',
             os: OperatingSystem.macos,
+            isFlutterApp: true,
             macOSBundleId: 'com.example.myapp',
             appleAppSupportDir: '/Users/testuser/Library/Application Support',
           ),
@@ -49,23 +97,6 @@ void main() {
           ),
         );
       });
-
-      // When macOSBundleId is not provided, the strategy falls through to FFI
-      // which only works on macOS. On standalone Dart (no .app bundle) the FFI
-      // call returns null.
-      if (Platform.isMacOS) {
-        test('returns null when no bundle ID is available', () {
-          final result = resolveAppFilesDirectory(
-            context: const PlatformContext(
-              resolvedExecutable: '/usr/local/bin/my_tool',
-              os: OperatingSystem.macos,
-              appleAppSupportDir: '/Users/testuser/Library/Application Support',
-            ),
-          );
-
-          expect(result, isNull);
-        });
-      }
     });
 
     group('Android', () {
@@ -74,6 +105,7 @@ void main() {
           context: const PlatformContext(
             resolvedExecutable: '/system/bin/app_process',
             os: OperatingSystem.android,
+            isFlutterApp: true,
             androidPackageName: 'com.example.myapp',
           ),
         );
@@ -87,6 +119,7 @@ void main() {
         final result = resolveAppFilesDirectory(
           context: const PlatformContext(
             resolvedExecutable: '/snap/my-app/current/bin/my_app',
+            isFlutterApp: true,
             environment: {
               'SNAP_USER_DATA': '/home/user/snap/my-app/current',
               'HOME': '/home/user',
@@ -102,6 +135,7 @@ void main() {
         final result = resolveAppFilesDirectory(
           context: const PlatformContext(
             resolvedExecutable: '/app/bin/my_app',
+            isFlutterApp: true,
             environment: {
               'FLATPAK_ID': 'com.example.MyApp',
               'XDG_DATA_HOME': '/home/user/.var/app/com.example.MyApp/data',
@@ -114,10 +148,11 @@ void main() {
         expect(result, '/home/user/.var/app/com.example.MyApp/data');
       });
 
-      test('uses XDG_DATA_HOME/<appName> for compiled apps', () {
+      test('uses XDG_DATA_HOME/<appName> for Flutter apps', () {
         final result = resolveAppFilesDirectory(
           context: const PlatformContext(
             resolvedExecutable: '/usr/bin/my_flutter_app',
+            isFlutterApp: true,
             environment: {
               'XDG_DATA_HOME': '/home/user/.local/share',
               'HOME': '/home/user',
@@ -133,6 +168,7 @@ void main() {
         final result = resolveAppFilesDirectory(
           context: const PlatformContext(
             resolvedExecutable: '/usr/bin/my_flutter_app',
+            isFlutterApp: true,
             environment: {'HOME': '/home/user'},
             os: OperatingSystem.linux,
           ),
@@ -148,6 +184,7 @@ void main() {
         final result = resolveAppFilesDirectory(
           context: const PlatformContext(
             resolvedExecutable: '/snap/my-app/current/bin/my_app',
+            isFlutterApp: true,
             environment: {
               'SNAP_USER_DATA': '/home/user/snap/my-app/current',
               'FLATPAK_ID': 'com.example.ignored',
@@ -164,6 +201,7 @@ void main() {
         final result = resolveAppFilesDirectory(
           context: const PlatformContext(
             resolvedExecutable: '/usr/bin/my_app',
+            isFlutterApp: true,
             os: OperatingSystem.linux,
           ),
         );
@@ -176,10 +214,11 @@ void main() {
     // POSIX semantics on macOS/Linux where these tests run. On actual
     // Windows, `p.basenameWithoutExtension` correctly handles backslash paths.
     group('Windows', () {
-      test('returns appDataDir/<appName> for compiled apps', () {
+      test('returns appDataDir/<appName> for Flutter apps', () {
         final result = resolveAppFilesDirectory(
           context: const PlatformContext(
             resolvedExecutable: '/Program Files/MyApp/my_app.exe',
+            isFlutterApp: true,
             os: OperatingSystem.windows,
             windowsAppDataDir: '/Users/user/AppData/Roaming',
           ),
@@ -189,45 +228,11 @@ void main() {
       });
     });
 
-    group('returns null for development executables', () {
-      const devExecutables = {
-        'dart': '/usr/lib/dart/bin/dart',
-        'dart.exe': '/dart-sdk/bin/dart.exe',
-        'flutter_tester': '/flutter/bin/cache/flutter_tester',
-        'flutter_tester.exe': '/flutter/bin/cache/flutter_tester.exe',
-      };
-
-      const platformContexts = {
-        'Linux': (OperatingSystem.linux, {'HOME': '/home/user'}),
-        'Windows': (OperatingSystem.windows, <String, String>{}),
-      };
-
-      for (final MapEntry(key: exeName, value: exePath)
-          in devExecutables.entries) {
-        for (final MapEntry(key: osName, value: (os, env))
-            in platformContexts.entries) {
-          test('$exeName on $osName', () {
-            final result = resolveAppFilesDirectory(
-              context: PlatformContext(
-                resolvedExecutable: exePath,
-                environment: env,
-                os: os,
-                windowsAppDataDir: os == OperatingSystem.windows
-                    ? '/Users/user/AppData/Roaming'
-                    : null,
-              ),
-            );
-
-            expect(result, isNull);
-          });
-        }
-      }
-    });
-
     test('returns null for unknown OS', () {
       final result = resolveAppFilesDirectory(
         context: const PlatformContext(
           resolvedExecutable: '/usr/bin/my_app',
+          isFlutterApp: true,
           os: OperatingSystem.unknown,
         ),
       );
@@ -250,24 +255,41 @@ void main() {
     });
   });
 
-  // Integration tests that exercise the real platform FFI calls. Each test
-  // only registers on the platform where its FFI is available.
   group('platform integration', () {
-    if (Platform.isMacOS || Platform.isIOS) {
-      test('resolveAppFilesDirectory returns a path on Apple platforms', () {
-        final result = resolveAppFilesDirectory();
+    group('macOS', () {
+      test(
+        'in a Flutter app, resolves to Application Support/<bundleId>',
+        () {
+          final result = resolveAppFilesDirectory();
 
-        // On iOS and Flutter macOS apps we always get a path. On standalone
-        // Dart on macOS there is no bundle ID so the result is null.
-        if (Platform.isIOS) {
           expect(result, isNotNull);
           expect(result, contains('/Library/Application Support'));
-        }
-      });
-    }
+        },
+        skip: isFlutterApp() ? null : 'Only in a Flutter app',
+      );
 
-    if (Platform.isAndroid) {
-      test('resolveAppFilesDirectory returns a path on Android', () {
+      test(
+        'outside a Flutter app, returns null',
+        () {
+          final result = resolveAppFilesDirectory();
+
+          expect(result, isNull);
+        },
+        skip: !isFlutterApp() ? null : 'Only outside a Flutter app',
+      );
+    }, skip: Platform.isMacOS ? null : 'Requires macOS');
+
+    group('iOS', () {
+      test('resolves to Application Support directory', () {
+        final result = resolveAppFilesDirectory();
+
+        expect(result, isNotNull);
+        expect(result, contains('/Library/Application Support'));
+      });
+    }, skip: Platform.isIOS ? null : 'Requires iOS');
+
+    group('Android', () {
+      test('resolves to /data/data/<packageName>/files', () {
         final result = resolveAppFilesDirectory();
 
         expect(result, isNotNull);
@@ -275,29 +297,56 @@ void main() {
         expect(result, endsWith('/files'));
       });
 
-      test('resolveAndroidCacheDirectory returns a path', () {
+      test('resolveAndroidCacheDirectory resolves to cache directory', () {
         final result = resolveAndroidCacheDirectory();
 
         expect(result, startsWith('/data/data/'));
         expect(result, endsWith('/cache'));
       });
-    }
+    }, skip: Platform.isAndroid ? null : 'Requires Android');
 
-    if (Platform.isLinux) {
-      // On Linux with a compiled app this returns a path; with `dart test`
-      // it returns null. Either is acceptable — the important thing is that
-      // the FFI / environment lookup doesn't throw.
+    group('Linux', () {
       test(
-        'resolveAppFilesDirectory returns a result on Linux',
-        resolveAppFilesDirectory,
-      );
-    }
+        'in a Flutter app, resolves to a non-null path',
+        () {
+          final result = resolveAppFilesDirectory();
 
-    if (Platform.isWindows) {
-      test(
-        'resolveAppFilesDirectory returns a result on Windows',
-        resolveAppFilesDirectory,
+          expect(result, isNotNull);
+        },
+        skip: isFlutterApp() ? null : 'Only in a Flutter app',
       );
-    }
+
+      test(
+        'outside a Flutter app, returns null',
+        () {
+          final result = resolveAppFilesDirectory();
+
+          expect(result, isNull);
+        },
+        skip: !isFlutterApp() ? null : 'Only outside a Flutter app',
+      );
+    }, skip: Platform.isLinux ? null : 'Requires Linux');
+
+    group('Windows', () {
+      test(
+        'in a Flutter app, resolves to a non-null path',
+        () {
+          final result = resolveAppFilesDirectory();
+
+          expect(result, isNotNull);
+        },
+        skip: isFlutterApp() ? null : 'Only in a Flutter app',
+      );
+
+      test(
+        'outside a Flutter app, returns null',
+        () {
+          final result = resolveAppFilesDirectory();
+
+          expect(result, isNull);
+        },
+        skip: !isFlutterApp() ? null : 'Only outside a Flutter app',
+      );
+    }, skip: Platform.isWindows ? null : 'Requires Windows');
   });
 }
