@@ -117,7 +117,22 @@ String resolveAndroidCacheDirectory({PlatformContext? context}) {
 // ignore: do_not_use_environment
 const _kIsFlutter = bool.fromEnvironment('dart.library.ui');
 
-bool _isFlutterApp(PlatformContext ctx) => ctx.isFlutterApp ?? _kIsFlutter;
+bool _isFlutterApp(PlatformContext ctx) {
+  if (ctx.isFlutterApp != null) {
+    return ctx.isFlutterApp!;
+  }
+  if (!_kIsFlutter) {
+    return false;
+  }
+  // `dart.library.ui` is also true under `flutter test`, which runs inside
+  // the Flutter engine but is not a real app. Filter out the test runner
+  // executable so tests fall back to the working directory.
+  final exe = p.basenameWithoutExtension(ctx.resolvedExecutable);
+  if (exe == 'flutter_tester') {
+    return false;
+  }
+  return true;
+}
 
 /// Returns `/data/user/<userId>/<packageName>` for Android.
 String _androidAppBasePath(PlatformContext ctx) {
@@ -325,6 +340,7 @@ String _nsSearchPathForApplicationSupport() {
           Pointer Function(Pointer, int)
         >('CFArrayGetValueAtIndex');
 
+    // Arguments: directory (14), domainMask (1), expandTilde (YES = 1).
     final array = nsSearchPath(14, 1, 1);
     final firstElement = cfArrayGetValueAtIndex(array, 0);
     return _nsStringToString(foundation, firstElement);
@@ -467,15 +483,15 @@ Pointer<GUID> _localAppDataFolderId() {
   ptr.ref
     ..data1 = 0xF1B32785
     ..data2 = 0x6FBA
-    ..data3 = 0x4FCF
-    ..data4_0 = 0x9D
-    ..data4_1 = 0x55
-    ..data4_2 = 0x7B
-    ..data4_3 = 0x8E
-    ..data4_4 = 0x7F
-    ..data4_5 = 0x15
-    ..data4_6 = 0x70
-    ..data4_7 = 0x91;
+    ..data3 = 0x4FCF;
+  ptr.ref.data4[0] = 0x9D;
+  ptr.ref.data4[1] = 0x55;
+  ptr.ref.data4[2] = 0x7B;
+  ptr.ref.data4[3] = 0x8E;
+  ptr.ref.data4[4] = 0x7F;
+  ptr.ref.data4[5] = 0x15;
+  ptr.ref.data4[6] = 0x70;
+  ptr.ref.data4[7] = 0x91;
   return ptr;
 }
 
@@ -490,27 +506,6 @@ final class GUID extends Struct {
   @Uint16()
   external int data3;
 
-  @Uint8()
-  external int data4_0;
-
-  @Uint8()
-  external int data4_1;
-
-  @Uint8()
-  external int data4_2;
-
-  @Uint8()
-  external int data4_3;
-
-  @Uint8()
-  external int data4_4;
-
-  @Uint8()
-  external int data4_5;
-
-  @Uint8()
-  external int data4_6;
-
-  @Uint8()
-  external int data4_7;
+  @Array(8)
+  external Array<Uint8> data4;
 }

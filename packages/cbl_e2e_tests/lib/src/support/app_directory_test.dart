@@ -36,11 +36,26 @@ void main() {
 
     test('auto-detects based on dart:ui availability', () {
       // When isFlutterApp is not set, detection falls back to the
-      // compile-time constant `bool.fromEnvironment('dart.library.ui')`.
-      // In standalone Dart this is false; in Flutter it is true.
+      // compile-time constant `bool.fromEnvironment('dart.library.ui')`,
+      // but also filters out the `flutter_tester` executable used by
+      // `flutter test`.
       // ignore: do_not_use_environment
       const kIsFlutter = bool.fromEnvironment('dart.library.ui');
-      expect(isFlutterApp(), kIsFlutter);
+      final exe = p.basenameWithoutExtension(Platform.resolvedExecutable);
+      final expected = kIsFlutter && exe != 'flutter_tester';
+      expect(isFlutterApp(), expected);
+    });
+
+    test('returns false for flutter_tester even with dart:ui available', () {
+      expect(
+        isFlutterApp(
+          context: const PlatformContext(
+            resolvedExecutable: '/flutter/bin/cache/flutter_tester',
+            os: OperatingSystem.linux,
+          ),
+        ),
+        isFalse,
+      );
     });
   });
 
