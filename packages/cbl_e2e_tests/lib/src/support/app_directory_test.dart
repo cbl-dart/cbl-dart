@@ -100,17 +100,32 @@ void main() {
     });
 
     group('Android', () {
-      test('returns /data/data/<packageName>/files', () {
+      test('returns /data/user/<userId>/<packageName>/files', () {
         final result = resolveAppFilesDirectory(
           context: const PlatformContext(
             resolvedExecutable: '/system/bin/app_process',
             os: OperatingSystem.android,
             isFlutterApp: true,
             androidPackageName: 'com.example.myapp',
+            androidUserId: 0,
           ),
         );
 
-        expect(result, '/data/data/com.example.myapp/files');
+        expect(result, '/data/user/0/com.example.myapp/files');
+      });
+
+      test('uses correct path for secondary user profiles', () {
+        final result = resolveAppFilesDirectory(
+          context: const PlatformContext(
+            resolvedExecutable: '/system/bin/app_process',
+            os: OperatingSystem.android,
+            isFlutterApp: true,
+            androidPackageName: 'com.example.myapp',
+            androidUserId: 10,
+          ),
+        );
+
+        expect(result, '/data/user/10/com.example.myapp/files');
       });
     });
 
@@ -220,11 +235,11 @@ void main() {
             resolvedExecutable: '/Program Files/MyApp/my_app.exe',
             isFlutterApp: true,
             os: OperatingSystem.windows,
-            windowsAppDataDir: '/Users/user/AppData/Roaming',
+            windowsAppDataDir: '/Users/user/AppData/Local',
           ),
         );
 
-        expect(result, p.join('/Users/user/AppData/Roaming', 'my_app'));
+        expect(result, p.join('/Users/user/AppData/Local', 'my_app'));
       });
     });
 
@@ -242,16 +257,17 @@ void main() {
   });
 
   group('resolveAndroidCacheDirectory', () {
-    test('returns /data/data/<packageName>/cache', () {
+    test('returns /data/user/<userId>/<packageName>/cache', () {
       final result = resolveAndroidCacheDirectory(
         context: const PlatformContext(
           resolvedExecutable: '/system/bin/app_process',
           os: OperatingSystem.android,
           androidPackageName: 'com.example.myapp',
+          androidUserId: 0,
         ),
       );
 
-      expect(result, '/data/data/com.example.myapp/cache');
+      expect(result, '/data/user/0/com.example.myapp/cache');
     });
   });
 
@@ -289,18 +305,18 @@ void main() {
     }, skip: Platform.isIOS ? null : 'Requires iOS');
 
     group('Android', () {
-      test('resolves to /data/data/<packageName>/files', () {
+      test('resolves to /data/user/<userId>/<packageName>/files', () {
         final result = resolveAppFilesDirectory();
 
         expect(result, isNotNull);
-        expect(result, startsWith('/data/data/'));
+        expect(result, startsWith('/data/user/'));
         expect(result, endsWith('/files'));
       });
 
       test('resolveAndroidCacheDirectory resolves to cache directory', () {
         final result = resolveAndroidCacheDirectory();
 
-        expect(result, startsWith('/data/data/'));
+        expect(result, startsWith('/data/user/'));
         expect(result, endsWith('/cache'));
       });
     }, skip: Platform.isAndroid ? null : 'Requires Android');

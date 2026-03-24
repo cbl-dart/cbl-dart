@@ -22,6 +22,7 @@ class PlatformContext {
     this.appleAppSupportDir,
     this.macOSBundleId,
     this.androidPackageName,
+    this.androidUserId,
     this.windowsAppDataDir,
   });
 
@@ -57,7 +58,11 @@ class PlatformContext {
   /// `/proc/self/cmdline`.
   final String? androidPackageName;
 
-  /// Override for the Windows Roaming AppData directory. When `null`, resolved
+  /// Override for the Android user ID. When `null`, derived from the process
+  /// UID via `getuid()` FFI (`uid ~/ 100000`).
+  final int? androidUserId;
+
+  /// Override for the Windows Local AppData directory. When `null`, resolved
   /// via `SHGetKnownFolderPath` FFI.
   final String? windowsAppDataDir;
 }
@@ -102,7 +107,8 @@ String? resolveAppFilesDirectory({PlatformContext? context}) {
 String resolveAndroidCacheDirectory({PlatformContext? context}) {
   final ctx = context ?? PlatformContext.current();
   final name = ctx.androidPackageName ?? _readAndroidPackageName();
-  return '/data/data/$name/cache';
+  final userId = ctx.androidUserId ?? _getAndroidUserId();
+  return '/data/user/$userId/$name/cache';
 }
 
 // === Internal helpers ========================================================
@@ -175,7 +181,12 @@ class _MacOSStrategy extends _AppDirectoryStrategy {
   }
 }
 
-/// Android: Resolve from the package name read via `/proc/self/cmdline`.
+/// Android: Resolve from the package name and user ID.
+///
+/// Uses `/data/user/<userId>/<package>/files` which is the canonical path that
+/// works correctly for both the primary user (ID 0) and secondary user
+/// profiles. The commonly seen `/data/data/` path is merely a symlink to
+/// `/data/user/0/` and does not work for other user profiles.
 class _AndroidStrategy extends _AppDirectoryStrategy {
   const _AndroidStrategy();
 
@@ -185,7 +196,8 @@ class _AndroidStrategy extends _AppDirectoryStrategy {
   @override
   String resolve(PlatformContext ctx) {
     final name = ctx.androidPackageName ?? _readAndroidPackageName();
-    return '/data/data/$name/files';
+    final userId = ctx.androidUserId ?? _getAndroidUserId();
+    return '/data/user/$userId/$name/files';
   }
 }
 
@@ -226,7 +238,7 @@ class _LinuxStrategy extends _AppDirectoryStrategy {
   }
 }
 
-/// Windows: Use `<Roaming AppData>/<appName>`.
+/// Windows: Use `<Local AppData>/<appName>`.
 class _WindowsStrategy extends _AppDirectoryStrategy {
   const _WindowsStrategy();
 
@@ -236,7 +248,7 @@ class _WindowsStrategy extends _AppDirectoryStrategy {
   @override
   String? resolve(PlatformContext ctx) {
     final appName = p.basenameWithoutExtension(ctx.resolvedExecutable);
-    final appData = ctx.windowsAppDataDir ?? _windowsRoamingAppDataPath();
+    final appData = ctx.windowsAppDataDir ?? _windowsLocalAppDataPath();
     if (appData == null) {
       return null;
     }
@@ -272,6 +284,18 @@ String _readAndroidPackageName() {
   return String.fromCharCodes(
     nullIndex == -1 ? cmdlineBytes : cmdlineBytes.sublist(0, nullIndex),
   );
+}
+
+/// Returns the Android user ID by calling `getuid()` via FFI.
+///
+/// Android assigns UIDs as `userId * 100000 + appId`, so integer division by
+/// 100000 recovers the user ID.
+int _getAndroidUserId() {
+  final libc = DynamicLibrary.open('libc.so');
+  final getuid = libc.lookupFunction<Uint32 Function(), int Function()>(
+    'getuid',
+  );
+  return getuid() ~/ 100000;
 }
 
 // === Apple FFI helpers =======================================================
@@ -395,9 +419,13 @@ void _autoreleasePoolPop(DynamicLibrary foundation, Pointer pool) {
 
 // === Windows FFI helpers =====================================================
 
-/// Calls `SHGetKnownFolderPath(FOLDERID_RoamingAppData, 0, NULL, &path)` via
-/// FFI to get the Roaming AppData directory.
-String? _windowsRoamingAppDataPath() {
+/// Calls `SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, NULL, &path)` via FFI
+/// to get the Local AppData directory.
+///
+/// Local AppData is preferred over Roaming AppData for database files because
+/// they are large, machine-specific, and should not be synced via roaming
+/// profiles.
+String? _windowsLocalAppDataPath() {
   final shell32 = DynamicLibrary.open('shell32.dll');
   final ole32 = DynamicLibrary.open('ole32.dll');
 
@@ -412,8 +440,8 @@ String? _windowsRoamingAppDataPath() {
         'CoTaskMemFree',
       );
 
-  // FOLDERID_RoamingAppData = {3EB685DB-65F9-4CF6-A03A-E3EF65729F3D}
-  final folderIdPtr = _roamingAppDataFolderId();
+  // FOLDERID_LocalAppData = {F1B32785-6FBA-4FCF-9D55-7B8E7F157091}
+  final folderIdPtr = _localAppDataFolderId();
 
   final pathPtr = malloc<Pointer<Utf16>>();
 
@@ -433,20 +461,20 @@ String? _windowsRoamingAppDataPath() {
   }
 }
 
-Pointer<GUID> _roamingAppDataFolderId() {
+Pointer<GUID> _localAppDataFolderId() {
   final ptr = malloc<GUID>();
   ptr.ref
-    ..data1 = 0x3EB685DB
-    ..data2 = 0x65F9
-    ..data3 = 0x4CF6
-    ..data4_0 = 0xA0
-    ..data4_1 = 0x3A
-    ..data4_2 = 0xE3
-    ..data4_3 = 0xEF
-    ..data4_4 = 0x65
-    ..data4_5 = 0x72
-    ..data4_6 = 0x9F
-    ..data4_7 = 0x3D;
+    ..data1 = 0xF1B32785
+    ..data2 = 0x6FBA
+    ..data3 = 0x4FCF
+    ..data4_0 = 0x9D
+    ..data4_1 = 0x55
+    ..data4_2 = 0x7B
+    ..data4_3 = 0x8E
+    ..data4_4 = 0x7F
+    ..data4_5 = 0x15
+    ..data4_6 = 0x70
+    ..data4_7 = 0x91;
   return ptr;
 }
 
