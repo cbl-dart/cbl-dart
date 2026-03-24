@@ -39,6 +39,7 @@ import 'replication/url_endpoint_listener_test.dart' as url_endpoint_listener;
 import 'service/cbl_worker_test.dart' as service_cbl_worker;
 import 'service/channel_test.dart' as service_channel;
 import 'service/isolate_worker_test.dart' as service_isolate_worker;
+import 'support/app_directory_test.dart' as support_app_directory;
 import 'support/async_callback_test.dart' as support_async_callback;
 import 'tracing_test.dart' as tracing;
 import 'typed_data/collection_test.dart' as typed_data_collection;
@@ -81,6 +82,7 @@ final tests = [
   service_cbl_worker.main,
   service_channel.main,
   service_isolate_worker.main,
+  support_app_directory.main,
   support_async_callback.main,
   tls_identity.main,
   tracing.main,
