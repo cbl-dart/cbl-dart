@@ -614,7 +614,7 @@ void main() {
 
           expect(ids, documents.map((doc) => doc.id));
         },
-        skip: vectorSearchEnabled
+        skip: vectorSearchAvailable
             ? null
             : 'Vector search not available on this system',
       );
