@@ -17,16 +17,13 @@ void main() {
     group('iOS', () {
       test('returns the provided Application Support directory', () {
         final result = resolveAppFilesDirectory(
-          resolvedExecutable: '/path/to/Runner',
-          environment: {},
-          isIOS: true,
-          isMacOS: false,
-          isAndroid: false,
-          isLinux: false,
-          isWindows: false,
-          iosAppSupportDir:
-              '/var/mobile/Containers/Data/Application/ABC123'
-              '/Library/Application Support',
+          context: const PlatformContext(
+            resolvedExecutable: '/path/to/Runner',
+            os: OperatingSystem.ios,
+            appleAppSupportDir:
+                '/var/mobile/Containers/Data/Application/ABC123'
+                '/Library/Application Support',
+          ),
         );
 
         expect(
@@ -40,15 +37,12 @@ void main() {
     group('macOS', () {
       test('returns Application Support/<bundleId> when bundle ID is set', () {
         final result = resolveAppFilesDirectory(
-          resolvedExecutable: '/path/to/MyApp',
-          environment: {},
-          isIOS: false,
-          isMacOS: true,
-          isAndroid: false,
-          isLinux: false,
-          isWindows: false,
-          macOSBundleId: 'com.example.myapp',
-          macOSAppSupportDir: '/Users/testuser/Library/Application Support',
+          context: const PlatformContext(
+            resolvedExecutable: '/path/to/MyApp',
+            os: OperatingSystem.macos,
+            macOSBundleId: 'com.example.myapp',
+            appleAppSupportDir: '/Users/testuser/Library/Application Support',
+          ),
         );
 
         expect(
@@ -59,21 +53,36 @@ void main() {
           ),
         );
       });
+
+      // This test calls _cfBundleIdentifier() via FFI, so it can only run on
+      // macOS. When running via `dart test`, the main bundle has no identifier,
+      // so the function returns null.
+      if (Platform.isMacOS && !_isFlutter) {
+        test('returns null when no bundle ID is found', () {
+          final result = resolveAppFilesDirectory(
+            context: const PlatformContext(
+              resolvedExecutable: '/usr/local/bin/my_tool',
+              os: OperatingSystem.macos,
+              appleAppSupportDir: '/Users/testuser/Library/Application Support',
+            ),
+          );
+
+          expect(result, isNull);
+        });
+      }
     });
 
     group('Linux', () {
       test('returns SNAP_USER_DATA for snap apps', () {
         final result = resolveAppFilesDirectory(
-          resolvedExecutable: '/snap/my-app/current/bin/my_app',
-          environment: {
-            'SNAP_USER_DATA': '/home/user/snap/my-app/current',
-            'HOME': '/home/user',
-          },
-          isIOS: false,
-          isMacOS: false,
-          isAndroid: false,
-          isLinux: true,
-          isWindows: false,
+          context: const PlatformContext(
+            resolvedExecutable: '/snap/my-app/current/bin/my_app',
+            environment: {
+              'SNAP_USER_DATA': '/home/user/snap/my-app/current',
+              'HOME': '/home/user',
+            },
+            os: OperatingSystem.linux,
+          ),
         );
 
         expect(result, '/home/user/snap/my-app/current');
@@ -81,17 +90,15 @@ void main() {
 
       test('returns XDG_DATA_HOME for flatpak apps', () {
         final result = resolveAppFilesDirectory(
-          resolvedExecutable: '/app/bin/my_app',
-          environment: {
-            'FLATPAK_ID': 'com.example.MyApp',
-            'XDG_DATA_HOME': '/home/user/.var/app/com.example.MyApp/data',
-            'HOME': '/home/user',
-          },
-          isIOS: false,
-          isMacOS: false,
-          isAndroid: false,
-          isLinux: true,
-          isWindows: false,
+          context: const PlatformContext(
+            resolvedExecutable: '/app/bin/my_app',
+            environment: {
+              'FLATPAK_ID': 'com.example.MyApp',
+              'XDG_DATA_HOME': '/home/user/.var/app/com.example.MyApp/data',
+              'HOME': '/home/user',
+            },
+            os: OperatingSystem.linux,
+          ),
         );
 
         expect(result, '/home/user/.var/app/com.example.MyApp/data');
@@ -99,16 +106,14 @@ void main() {
 
       test('returns XDG_DATA_HOME/<appName> for compiled apps', () {
         final result = resolveAppFilesDirectory(
-          resolvedExecutable: '/usr/bin/my_flutter_app',
-          environment: {
-            'XDG_DATA_HOME': '/home/user/.local/share',
-            'HOME': '/home/user',
-          },
-          isIOS: false,
-          isMacOS: false,
-          isAndroid: false,
-          isLinux: true,
-          isWindows: false,
+          context: const PlatformContext(
+            resolvedExecutable: '/usr/bin/my_flutter_app',
+            environment: {
+              'XDG_DATA_HOME': '/home/user/.local/share',
+              'HOME': '/home/user',
+            },
+            os: OperatingSystem.linux,
+          ),
         );
 
         expect(result, p.join('/home/user/.local/share', 'my_flutter_app'));
@@ -116,13 +121,11 @@ void main() {
 
       test('uses default XDG_DATA_HOME when not explicitly set', () {
         final result = resolveAppFilesDirectory(
-          resolvedExecutable: '/usr/bin/my_flutter_app',
-          environment: {'HOME': '/home/user'},
-          isIOS: false,
-          isMacOS: false,
-          isAndroid: false,
-          isLinux: true,
-          isWindows: false,
+          context: const PlatformContext(
+            resolvedExecutable: '/usr/bin/my_flutter_app',
+            environment: {'HOME': '/home/user'},
+            os: OperatingSystem.linux,
+          ),
         );
 
         expect(
@@ -131,16 +134,13 @@ void main() {
         );
       });
 
-      test('uses linuxXdgDataHome override', () {
+      test('uses XDG_DATA_HOME from environment', () {
         final result = resolveAppFilesDirectory(
-          resolvedExecutable: '/usr/bin/my_flutter_app',
-          environment: {},
-          isIOS: false,
-          isMacOS: false,
-          isAndroid: false,
-          isLinux: true,
-          isWindows: false,
-          linuxXdgDataHome: '/custom/data/home',
+          context: const PlatformContext(
+            resolvedExecutable: '/usr/bin/my_flutter_app',
+            environment: {'XDG_DATA_HOME': '/custom/data/home'},
+            os: OperatingSystem.linux,
+          ),
         );
 
         expect(result, p.join('/custom/data/home', 'my_flutter_app'));
@@ -148,13 +148,11 @@ void main() {
 
       test('returns null for dart executable', () {
         final result = resolveAppFilesDirectory(
-          resolvedExecutable: '/usr/lib/dart/bin/dart',
-          environment: {'HOME': '/home/user'},
-          isIOS: false,
-          isMacOS: false,
-          isAndroid: false,
-          isLinux: true,
-          isWindows: false,
+          context: const PlatformContext(
+            resolvedExecutable: '/usr/lib/dart/bin/dart',
+            environment: {'HOME': '/home/user'},
+            os: OperatingSystem.linux,
+          ),
         );
 
         expect(result, isNull);
@@ -162,13 +160,11 @@ void main() {
 
       test('returns null for flutter_tester', () {
         final result = resolveAppFilesDirectory(
-          resolvedExecutable: '/flutter/bin/cache/flutter_tester',
-          environment: {'HOME': '/home/user'},
-          isIOS: false,
-          isMacOS: false,
-          isAndroid: false,
-          isLinux: true,
-          isWindows: false,
+          context: const PlatformContext(
+            resolvedExecutable: '/flutter/bin/cache/flutter_tester',
+            environment: {'HOME': '/home/user'},
+            os: OperatingSystem.linux,
+          ),
         );
 
         expect(result, isNull);
@@ -176,13 +172,10 @@ void main() {
 
       test('returns null when HOME is not set and no XDG_DATA_HOME', () {
         final result = resolveAppFilesDirectory(
-          resolvedExecutable: '/usr/bin/my_app',
-          environment: {},
-          isIOS: false,
-          isMacOS: false,
-          isAndroid: false,
-          isLinux: true,
-          isWindows: false,
+          context: const PlatformContext(
+            resolvedExecutable: '/usr/bin/my_app',
+            os: OperatingSystem.linux,
+          ),
         );
 
         expect(result, isNull);
@@ -190,17 +183,15 @@ void main() {
 
       test('prefers SNAP_USER_DATA over other detection', () {
         final result = resolveAppFilesDirectory(
-          resolvedExecutable: '/snap/my-app/current/bin/my_app',
-          environment: {
-            'SNAP_USER_DATA': '/home/user/snap/my-app/current',
-            'FLATPAK_ID': 'com.example.ignored',
-            'HOME': '/home/user',
-          },
-          isIOS: false,
-          isMacOS: false,
-          isAndroid: false,
-          isLinux: true,
-          isWindows: false,
+          context: const PlatformContext(
+            resolvedExecutable: '/snap/my-app/current/bin/my_app',
+            environment: {
+              'SNAP_USER_DATA': '/home/user/snap/my-app/current',
+              'FLATPAK_ID': 'com.example.ignored',
+              'HOME': '/home/user',
+            },
+            os: OperatingSystem.linux,
+          ),
         );
 
         expect(result, '/home/user/snap/my-app/current');
@@ -214,14 +205,11 @@ void main() {
     group('Windows', () {
       test('returns appDataDir/<appName> for compiled apps', () {
         final result = resolveAppFilesDirectory(
-          resolvedExecutable: '/Program Files/MyApp/my_app.exe',
-          environment: {},
-          isIOS: false,
-          isMacOS: false,
-          isAndroid: false,
-          isLinux: false,
-          isWindows: true,
-          windowsAppDataDir: '/Users/user/AppData/Roaming',
+          context: const PlatformContext(
+            resolvedExecutable: '/Program Files/MyApp/my_app.exe',
+            os: OperatingSystem.windows,
+            windowsAppDataDir: '/Users/user/AppData/Roaming',
+          ),
         );
 
         expect(result, p.join('/Users/user/AppData/Roaming', 'my_app'));
@@ -229,14 +217,11 @@ void main() {
 
       test('returns null for dart.exe', () {
         final result = resolveAppFilesDirectory(
-          resolvedExecutable: '/dart-sdk/bin/dart.exe',
-          environment: {},
-          isIOS: false,
-          isMacOS: false,
-          isAndroid: false,
-          isLinux: false,
-          isWindows: true,
-          windowsAppDataDir: '/Users/user/AppData/Roaming',
+          context: const PlatformContext(
+            resolvedExecutable: '/dart-sdk/bin/dart.exe',
+            os: OperatingSystem.windows,
+            windowsAppDataDir: '/Users/user/AppData/Roaming',
+          ),
         );
 
         expect(result, isNull);
@@ -244,14 +229,11 @@ void main() {
 
       test('returns null for flutter_tester.exe', () {
         final result = resolveAppFilesDirectory(
-          resolvedExecutable: '/flutter/bin/cache/flutter_tester.exe',
-          environment: {},
-          isIOS: false,
-          isMacOS: false,
-          isAndroid: false,
-          isLinux: false,
-          isWindows: true,
-          windowsAppDataDir: '/Users/user/AppData/Roaming',
+          context: const PlatformContext(
+            resolvedExecutable: '/flutter/bin/cache/flutter_tester.exe',
+            os: OperatingSystem.windows,
+            windowsAppDataDir: '/Users/user/AppData/Roaming',
+          ),
         );
 
         expect(result, isNull);
@@ -261,14 +243,11 @@ void main() {
     group('Android', () {
       test('returns /data/data/<packageName>/files', () {
         final result = resolveAppFilesDirectory(
-          resolvedExecutable: '/system/bin/app_process',
-          environment: {},
-          isIOS: false,
-          isMacOS: false,
-          isAndroid: true,
-          isLinux: false,
-          isWindows: false,
-          androidPackageName: 'com.example.myapp',
+          context: const PlatformContext(
+            resolvedExecutable: '/system/bin/app_process',
+            os: OperatingSystem.android,
+            androidPackageName: 'com.example.myapp',
+          ),
         );
 
         expect(result, '/data/data/com.example.myapp/files');
@@ -279,7 +258,11 @@ void main() {
   group('resolveAndroidCacheDirectory', () {
     test('returns /data/data/<packageName>/cache', () {
       final result = resolveAndroidCacheDirectory(
-        packageName: 'com.example.myapp',
+        context: const PlatformContext(
+          resolvedExecutable: '/system/bin/app_process',
+          os: OperatingSystem.android,
+          androidPackageName: 'com.example.myapp',
+        ),
       );
 
       expect(result, '/data/data/com.example.myapp/cache');
@@ -377,6 +360,14 @@ void main() {
     if (Platform.isLinux) {
       test('xdgDataHome returns a path', () {
         final path = xdgDataHome();
+        expect(path, isNotNull);
+        expect(path, isNotEmpty);
+      });
+    }
+
+    if (Platform.isWindows) {
+      test('windowsRoamingAppDataPath returns a path', () {
+        final path = windowsRoamingAppDataPath();
         expect(path, isNotNull);
         expect(path, isNotEmpty);
       });
