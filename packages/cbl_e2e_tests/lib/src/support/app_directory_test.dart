@@ -2,12 +2,20 @@ import 'dart:io';
 
 import 'package:cbl/src/support/app_directory.dart';
 import 'package:path/path.dart' as p;
-import 'package:test/test.dart';
+
+import '../../test_binding_impl.dart';
+import '../test_binding.dart';
+
+/// Whether we are running as a compiled Flutter app (as opposed to via the
+/// `dart` CLI in standalone Dart tests).
+final _isFlutter = detectAppName(Platform.resolvedExecutable) != null;
 
 void main() {
+  setupTestBinding();
+
   group('resolveAppFilesDirectory', () {
     group('iOS', () {
-      test('returns Application Support under sandbox home', () {
+      test('returns the provided Application Support directory', () {
         final result = resolveAppFilesDirectory(
           resolvedExecutable: '/path/to/Runner',
           environment: {},
@@ -16,135 +24,40 @@ void main() {
           isAndroid: false,
           isLinux: false,
           isWindows: false,
-          iosHome: '/var/mobile/Containers/Data/Application/ABC123',
+          iosAppSupportDir:
+              '/var/mobile/Containers/Data/Application/ABC123'
+              '/Library/Application Support',
         );
 
         expect(
           result,
-          p.join(
-            '/var/mobile/Containers/Data/Application/ABC123',
-            'Library',
-            'Application Support',
-          ),
+          '/var/mobile/Containers/Data/Application/ABC123'
+          '/Library/Application Support',
         );
       });
     });
 
     group('macOS', () {
-      late Directory tempDir;
-
-      setUp(() {
-        tempDir = Directory.systemTemp.createTempSync('app_directory_test_');
-      });
-
-      tearDown(() {
-        tempDir.deleteSync(recursive: true);
-      });
-
-      test('returns Application Support/<bundleId> for .app bundle', () {
-        // Create a fake .app bundle structure.
-        final appDir = Directory(
-          p.join(tempDir.path, 'MyApp.app', 'Contents', 'MacOS'),
-        )..createSync(recursive: true);
-        final plistPath = p.join(
-          tempDir.path,
-          'MyApp.app',
-          'Contents',
-          'Info.plist',
-        );
-        File(plistPath).writeAsStringSync('''
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-  <key>CFBundleIdentifier</key>
-  <string>com.example.myapp</string>
-</dict>
-</plist>
-''');
-
-        final exePath = p.join(appDir.path, 'MyApp');
-
+      test('returns Application Support/<bundleId> when bundle ID is set', () {
         final result = resolveAppFilesDirectory(
-          resolvedExecutable: exePath,
-          environment: {'HOME': '/Users/testuser'},
-          isIOS: false,
-          isMacOS: true,
-          isAndroid: false,
-          isLinux: false,
-          isWindows: false,
-        );
-
-        expect(
-          result,
-          p.join(
-            '/Users/testuser',
-            'Library',
-            'Application Support',
-            'com.example.myapp',
-          ),
-        );
-      });
-
-      test('returns null for a CLI tool (no .app bundle)', () {
-        final result = resolveAppFilesDirectory(
-          resolvedExecutable: '/usr/local/bin/my_tool',
-          environment: {'HOME': '/Users/testuser'},
-          isIOS: false,
-          isMacOS: true,
-          isAndroid: false,
-          isLinux: false,
-          isWindows: false,
-        );
-
-        expect(result, isNull);
-      });
-
-      test('returns null for dart executable', () {
-        final result = resolveAppFilesDirectory(
-          resolvedExecutable: '/usr/lib/dart/bin/dart',
-          environment: {'HOME': '/Users/testuser'},
-          isIOS: false,
-          isMacOS: true,
-          isAndroid: false,
-          isLinux: false,
-          isWindows: false,
-        );
-
-        expect(result, isNull);
-      });
-
-      test('returns null when HOME is not set', () {
-        final appDir = Directory(
-          p.join(tempDir.path, 'MyApp.app', 'Contents', 'MacOS'),
-        )..createSync(recursive: true);
-        final plistPath = p.join(
-          tempDir.path,
-          'MyApp.app',
-          'Contents',
-          'Info.plist',
-        );
-        File(plistPath).writeAsStringSync('''
-<?xml version="1.0" encoding="UTF-8"?>
-<plist version="1.0">
-<dict>
-  <key>CFBundleIdentifier</key>
-  <string>com.example.myapp</string>
-</dict>
-</plist>
-''');
-
-        final result = resolveAppFilesDirectory(
-          resolvedExecutable: p.join(appDir.path, 'MyApp'),
+          resolvedExecutable: '/path/to/MyApp',
           environment: {},
           isIOS: false,
           isMacOS: true,
           isAndroid: false,
           isLinux: false,
           isWindows: false,
+          macOSBundleId: 'com.example.myapp',
+          macOSAppSupportDir: '/Users/testuser/Library/Application Support',
         );
 
-        expect(result, isNull);
+        expect(
+          result,
+          p.join(
+            '/Users/testuser/Library/Application Support',
+            'com.example.myapp',
+          ),
+        );
       });
     });
 
@@ -218,6 +131,21 @@ void main() {
         );
       });
 
+      test('uses linuxXdgDataHome override', () {
+        final result = resolveAppFilesDirectory(
+          resolvedExecutable: '/usr/bin/my_flutter_app',
+          environment: {},
+          isIOS: false,
+          isMacOS: false,
+          isAndroid: false,
+          isLinux: true,
+          isWindows: false,
+          linuxXdgDataHome: '/custom/data/home',
+        );
+
+        expect(result, p.join('/custom/data/home', 'my_flutter_app'));
+      });
+
       test('returns null for dart executable', () {
         final result = resolveAppFilesDirectory(
           resolvedExecutable: '/usr/lib/dart/bin/dart',
@@ -280,52 +208,11 @@ void main() {
     });
 
     // Note: These tests use forward-slash paths because `package:path` uses
-    // POSIX semantics on macOS/Linux where these tests run. On actual Windows,
-    // `p.basenameWithoutExtension` correctly handles backslash paths.
+    // POSIX semantics on macOS/Linux where these tests run. On actual
+    // Windows, `p.basenameWithoutExtension` correctly handles backslash
+    // paths.
     group('Windows', () {
-      test('returns APPDATA/<appName> for compiled apps', () {
-        final result = resolveAppFilesDirectory(
-          resolvedExecutable: '/Program Files/MyApp/my_app.exe',
-          environment: {'APPDATA': '/Users/user/AppData/Roaming'},
-          isIOS: false,
-          isMacOS: false,
-          isAndroid: false,
-          isLinux: false,
-          isWindows: true,
-        );
-
-        expect(result, p.join('/Users/user/AppData/Roaming', 'my_app'));
-      });
-
-      test('returns null for dart.exe', () {
-        final result = resolveAppFilesDirectory(
-          resolvedExecutable: '/dart-sdk/bin/dart.exe',
-          environment: {'APPDATA': '/Users/user/AppData/Roaming'},
-          isIOS: false,
-          isMacOS: false,
-          isAndroid: false,
-          isLinux: false,
-          isWindows: true,
-        );
-
-        expect(result, isNull);
-      });
-
-      test('returns null for flutter_tester.exe', () {
-        final result = resolveAppFilesDirectory(
-          resolvedExecutable: '/flutter/bin/cache/flutter_tester.exe',
-          environment: {'APPDATA': '/Users/user/AppData/Roaming'},
-          isIOS: false,
-          isMacOS: false,
-          isAndroid: false,
-          isLinux: false,
-          isWindows: true,
-        );
-
-        expect(result, isNull);
-      });
-
-      test('returns null when APPDATA is not set', () {
+      test('returns appDataDir/<appName> for compiled apps', () {
         final result = resolveAppFilesDirectory(
           resolvedExecutable: '/Program Files/MyApp/my_app.exe',
           environment: {},
@@ -334,6 +221,37 @@ void main() {
           isAndroid: false,
           isLinux: false,
           isWindows: true,
+          windowsAppDataDir: '/Users/user/AppData/Roaming',
+        );
+
+        expect(result, p.join('/Users/user/AppData/Roaming', 'my_app'));
+      });
+
+      test('returns null for dart.exe', () {
+        final result = resolveAppFilesDirectory(
+          resolvedExecutable: '/dart-sdk/bin/dart.exe',
+          environment: {},
+          isIOS: false,
+          isMacOS: false,
+          isAndroid: false,
+          isLinux: false,
+          isWindows: true,
+          windowsAppDataDir: '/Users/user/AppData/Roaming',
+        );
+
+        expect(result, isNull);
+      });
+
+      test('returns null for flutter_tester.exe', () {
+        final result = resolveAppFilesDirectory(
+          resolvedExecutable: '/flutter/bin/cache/flutter_tester.exe',
+          environment: {},
+          isIOS: false,
+          isMacOS: false,
+          isAndroid: false,
+          isLinux: false,
+          isWindows: true,
+          windowsAppDataDir: '/Users/user/AppData/Roaming',
         );
 
         expect(result, isNull);
@@ -368,108 +286,25 @@ void main() {
     });
   });
 
-  group('detectMacOSBundleId', () {
-    late Directory tempDir;
-
-    setUp(() {
-      tempDir = Directory.systemTemp.createTempSync('bundle_id_test_');
-    });
-
-    tearDown(() {
-      tempDir.deleteSync(recursive: true);
-    });
-
-    test('detects bundle ID from .app bundle', () {
-      final macosDir = Directory(
-        p.join(tempDir.path, 'Test.app', 'Contents', 'MacOS'),
-      )..createSync(recursive: true);
-      File(
-        p.join(tempDir.path, 'Test.app', 'Contents', 'Info.plist'),
-      ).writeAsStringSync('''
-<?xml version="1.0" encoding="UTF-8"?>
-<plist version="1.0">
-<dict>
-  <key>CFBundleIdentifier</key>
-  <string>com.test.bundle</string>
-</dict>
-</plist>
-''');
-
-      expect(
-        detectMacOSBundleId(p.join(macosDir.path, 'Test')),
-        'com.test.bundle',
+  group('xdgDataHome', () {
+    test('returns XDG_DATA_HOME when set', () {
+      final result = xdgDataHome(
+        environment: {'XDG_DATA_HOME': '/custom/data', 'HOME': '/home/user'},
       );
+
+      expect(result, '/custom/data');
     });
 
-    test('returns null for non-.app executable', () {
-      expect(detectMacOSBundleId('/usr/local/bin/tool'), isNull);
+    test('falls back to HOME/.local/share', () {
+      final result = xdgDataHome(environment: {'HOME': '/home/user'});
+
+      expect(result, p.join('/home/user', '.local', 'share'));
     });
 
-    test('returns null when Info.plist is missing', () {
-      final macosDir = Directory(
-        p.join(tempDir.path, 'Test.app', 'Contents', 'MacOS'),
-      )..createSync(recursive: true);
+    test('returns null when neither XDG_DATA_HOME nor HOME is set', () {
+      final result = xdgDataHome(environment: {});
 
-      expect(detectMacOSBundleId(p.join(macosDir.path, 'Test')), isNull);
-    });
-
-    test('returns null when CFBundleIdentifier is missing from plist', () {
-      final macosDir = Directory(
-        p.join(tempDir.path, 'Test.app', 'Contents', 'MacOS'),
-      )..createSync(recursive: true);
-      File(
-        p.join(tempDir.path, 'Test.app', 'Contents', 'Info.plist'),
-      ).writeAsStringSync('''
-<?xml version="1.0" encoding="UTF-8"?>
-<plist version="1.0">
-<dict>
-  <key>CFBundleName</key>
-  <string>Test</string>
-</dict>
-</plist>
-''');
-
-      expect(detectMacOSBundleId(p.join(macosDir.path, 'Test')), isNull);
-    });
-
-    test('handles path with too few components', () {
-      expect(detectMacOSBundleId('/a'), isNull);
-      expect(detectMacOSBundleId('/a/b'), isNull);
-    });
-  });
-
-  group('parseBundleIdFromPlistXml', () {
-    test('parses standard plist format', () {
-      expect(
-        parseBundleIdFromPlistXml('''
-<dict>
-  <key>CFBundleIdentifier</key>
-  <string>com.example.app</string>
-</dict>
-'''),
-        'com.example.app',
-      );
-    });
-
-    test('handles whitespace variations', () {
-      expect(
-        parseBundleIdFromPlistXml(
-          '<key> CFBundleIdentifier </key>\n  <string>com.test</string>',
-        ),
-        'com.test',
-      );
-    });
-
-    test('returns null for missing key', () {
-      expect(
-        parseBundleIdFromPlistXml('''
-<dict>
-  <key>CFBundleName</key>
-  <string>MyApp</string>
-</dict>
-'''),
-        isNull,
-      );
+      expect(result, isNull);
     });
   });
 
@@ -497,5 +332,54 @@ void main() {
     test('returns null for flutter_tester.exe', () {
       expect(detectAppName('/flutter/bin/cache/flutter_tester.exe'), isNull);
     });
+  });
+
+  group('Platform app directory APIs', () {
+    if (Platform.isIOS || Platform.isMacOS) {
+      test('nsSearchPathForApplicationSupport returns Application '
+          'Support path', () {
+        final path = nsSearchPathForApplicationSupport();
+        expect(path, isNotEmpty);
+        expect(path, endsWith('/Library/Application Support'));
+      });
+    }
+
+    if (Platform.isIOS) {
+      test('cfBundleIdentifier returns bundle ID on iOS', () {
+        final bundleId = cfBundleIdentifier();
+        expect(bundleId, isNotNull);
+        expect(bundleId, isNotEmpty);
+      });
+    }
+
+    if (Platform.isMacOS) {
+      if (_isFlutter) {
+        test('cfBundleIdentifier returns bundle ID on Flutter', () {
+          final bundleId = cfBundleIdentifier();
+          expect(bundleId, isNotNull);
+          expect(bundleId, isNotEmpty);
+        });
+      } else {
+        test('cfBundleIdentifier returns null for standalone Dart', () {
+          final bundleId = cfBundleIdentifier();
+          expect(bundleId, isNull);
+        });
+      }
+    }
+
+    if (Platform.isAndroid) {
+      test('readAndroidPackageName returns a package name', () {
+        final packageName = readAndroidPackageName();
+        expect(packageName, isNotEmpty);
+      });
+    }
+
+    if (Platform.isLinux) {
+      test('xdgDataHome returns a path', () {
+        final path = xdgDataHome();
+        expect(path, isNotNull);
+        expect(path, isNotEmpty);
+      });
+    }
   });
 }
