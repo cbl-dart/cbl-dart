@@ -82,13 +82,9 @@ String resolveAndroidCacheDirectory({PlatformContext? context}) {
   return '/data/data/$name/cache';
 }
 
-// === Helpers visible for testing =============================================
+// === Internal helpers ========================================================
 
-/// Detects the app name from the resolved executable path.
-///
-/// Returns `null` if the executable appears to be the Dart CLI or Flutter test
-/// runner, indicating a development context.
-String? detectAppName(String resolvedExecutable) {
+String? _detectAppName(String resolvedExecutable) {
   final name = p.basenameWithoutExtension(resolvedExecutable);
   if (name == 'dart' || name == 'flutter_tester') {
     return null;
@@ -96,36 +92,17 @@ String? detectAppName(String resolvedExecutable) {
   return name;
 }
 
-/// Resolves the XDG data home directory.
-///
-/// Reads `XDG_DATA_HOME`, falling back to `$HOME/.local/share`.
-String? xdgDataHome({Map<String, String>? environment}) {
-  final env = environment ?? Platform.environment;
-  final explicit = env['XDG_DATA_HOME'];
+String? _xdgDataHome(Map<String, String> environment) {
+  final explicit = environment['XDG_DATA_HOME'];
   if (explicit != null) {
     return explicit;
   }
-  final home = env['HOME'];
+  final home = environment['HOME'];
   if (home == null) {
     return null;
   }
   return p.join(home, '.local', 'share');
 }
-
-/// Returns the Application Support directory via
-/// `NSSearchPathForDirectoriesInDomains`.
-String nsSearchPathForApplicationSupport() =>
-    _nsSearchPathForApplicationSupport();
-
-/// Returns the main bundle identifier via `CFBundleGetIdentifier`, or `null` if
-/// not running inside a `.app` bundle.
-String? cfBundleIdentifier() => _cfBundleIdentifier();
-
-/// Reads the Android package name from `/proc/self/cmdline`.
-String readAndroidPackageName() => _readAndroidPackageName();
-
-/// Returns the Roaming AppData directory via `SHGetKnownFolderPath`.
-String? windowsRoamingAppDataPath() => _windowsRoamingAppDataPath();
 
 // === Strategies ==============================================================
 
@@ -210,16 +187,16 @@ class _LinuxStrategy extends _AppDirectoryStrategy {
     // Flatpak container: XDG dirs are already redirected inside the sandbox.
     final flatpakId = env['FLATPAK_ID'];
     if (flatpakId != null) {
-      final dataHome = xdgDataHome(environment: env);
+      final dataHome = _xdgDataHome(env);
       if (dataHome != null) {
         return dataHome;
       }
     }
 
     // Regular compiled app (not running via `dart` CLI).
-    final appName = detectAppName(ctx.resolvedExecutable);
+    final appName = _detectAppName(ctx.resolvedExecutable);
     if (appName != null) {
-      final dataHome = xdgDataHome(environment: env);
+      final dataHome = _xdgDataHome(env);
       if (dataHome != null) {
         return p.join(dataHome, appName);
       }
@@ -238,7 +215,7 @@ class _WindowsStrategy extends _AppDirectoryStrategy {
 
   @override
   String? resolve(PlatformContext ctx) {
-    final appName = detectAppName(ctx.resolvedExecutable);
+    final appName = _detectAppName(ctx.resolvedExecutable);
     if (appName == null) {
       return null;
     }
