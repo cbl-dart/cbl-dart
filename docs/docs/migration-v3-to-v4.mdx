@@ -270,6 +270,40 @@ strategy. Applications that relied on detecting conflict resolver failures
 should catch exceptions within their `api|ConflictResolver.resolve`
 implementation and handle them explicitly.
 
+## `DefaultConflictResolver` uses timestamp-based logic
+
+In v3, the `DefaultConflictResolver` used revision ID string comparison to pick
+the winning document during replication conflicts. Since v4 revision IDs are no
+longer deterministic (see above), this strategy is no longer meaningful.
+
+In v4, `DefaultConflictResolver` uses HLC timestamp comparison instead, matching
+the behavior of the native `CBLDefaultConflictResolver`: the document with the
+later timestamp wins, and if either side is a deletion, the deletion wins. This
+is the same strategy used as the fallback when a custom conflict resolver throws
+an exception.
+
+`DefaultConflictResolver` is now also exported from the public API, so you can
+use it directly in a custom `api|ConflictResolver` to apply the default strategy
+for some documents:
+
+```dart
+class MyConflictResolver extends ConflictResolver {
+  const MyConflictResolver();
+
+  @override
+  FutureOr<Document?> resolve(Conflict conflict) {
+    if (shouldUseCustomStrategy(conflict)) {
+      return customResolve(conflict);
+    }
+    // Fall back to the default timestamp-based strategy.
+    return const DefaultConflictResolver().resolve(conflict);
+  }
+}
+```
+
+If your code relied on revision ID ordering to predict conflict outcomes, update
+it to account for the new timestamp-based behavior.
+
 ## Conflict handling in `saveDocument` and `deleteDocument`
 
 In v3, `api|Collection.saveDocument` and `api|Collection.deleteDocument`
@@ -514,20 +548,22 @@ No manual steps are required.
     or `0` — they now return `true`/`false`.
 13. **Remove hardcoded revision IDs** — revision IDs are no longer
     deterministic.
-14. **Update conflict handling** — `saveDocument` and `deleteDocument` with
+14. **Review conflict resolution logic** — `DefaultConflictResolver` now uses
+    timestamp comparison instead of revision ID comparison.
+15. **Update conflict handling** — `saveDocument` and `deleteDocument` with
     `failOnConflict` now throw `DatabaseException` instead of returning `false`.
-15. **Migrate Database document/index/listener APIs** to use `defaultCollection`
+16. **Migrate Database document/index/listener APIs** to use `defaultCollection`
     methods instead.
-16. **Migrate ReplicatorConfiguration** — replace `database` parameter with
+17. **Migrate ReplicatorConfiguration** — replace `database` parameter with
     `addCollection`, move `channels`/`documentIds`/filters/resolvers into
     `CollectionConfiguration`.
-17. **Migrate Replicator pending document APIs** — replace
+18. **Migrate Replicator pending document APIs** — replace
     `pendingDocumentIds`/`isDocumentPending` with
     `pendingDocumentIdsInCollection`/`isDocumentPendingInCollection`.
-18. **Replace `DataSource.database(db)`** with
+19. **Replace `DataSource.database(db)`** with
     `DataSource.collection(collection)`.
-19. **Replace `InvalidJsonException`** with `FleeceException`.
-20. **Remove `TracingDelegate` usage** — the tracing API has been removed from
+20. **Replace `InvalidJsonException`** with `FleeceException`.
+21. **Remove `TracingDelegate` usage** — the tracing API has been removed from
     the public API.
-21. **Run your app** — native libraries will be built automatically on first
+22. **Run your app** — native libraries will be built automatically on first
     run.
