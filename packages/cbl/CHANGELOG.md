@@ -1,3 +1,8 @@
+## 4.0.0-dev.6
+
+ - **FIX**(cbl): align DefaultConflictResolver with native timestamp-based logic ([#934](https://github.com/cbl-dart/cbl-dart/issues/934)). ([13c33230](https://github.com/cbl-dart/cbl-dart/commit/13c332305ce68e4a3a168ad24127cab57d78c9d8))
+ - **FEAT**(cbl): use standard platform APIs for app data directory discovery ([#933](https://github.com/cbl-dart/cbl-dart/issues/933)). ([96dc05f7](https://github.com/cbl-dart/cbl-dart/commit/96dc05f7cc945b7f899127c0a63c3ff009fc641a))
+
 ## 4.0.0-dev.5
 
 > Note: This release has breaking changes.

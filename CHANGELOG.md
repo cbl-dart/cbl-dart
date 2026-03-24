@@ -11,6 +11,37 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 Packages with breaking changes:
 
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`cbl` - `v4.0.0-dev.6`](#cbl---v400-dev6)
+ - [`cbl_generator` - `v0.4.0-dev.6`](#cbl_generator---v040-dev6)
+ - [`cbl_sentry` - `v3.0.0-dev.6`](#cbl_sentry---v300-dev6)
+
+Packages with dependency updates only:
+
+> Packages listed below depend on other packages in this workspace that have had changes. Their versions have been incremented to bump the minimum dependency versions of the packages they depend upon in this project.
+
+ - `cbl_generator` - `v0.4.0-dev.6`
+ - `cbl_sentry` - `v3.0.0-dev.6`
+
+---
+
+#### `cbl` - `v4.0.0-dev.6`
+
+ - **FIX**(cbl): align DefaultConflictResolver with native timestamp-based logic ([#934](https://github.com/cbl-dart/cbl-dart/issues/934)). ([13c33230](https://github.com/cbl-dart/cbl-dart/commit/13c332305ce68e4a3a168ad24127cab57d78c9d8))
+ - **FEAT**(cbl): use standard platform APIs for app data directory discovery ([#933](https://github.com/cbl-dart/cbl-dart/issues/933)). ([96dc05f7](https://github.com/cbl-dart/cbl-dart/commit/96dc05f7cc945b7f899127c0a63c3ff009fc641a))
+
+
+## 2026-03-24
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
  - [`cbl` - `v4.0.0-dev.5`](#cbl---v400-dev5)
  - [`cbl_generator` - `v0.4.0-dev.5`](#cbl_generator---v040-dev5)
  - [`cbl_sentry` - `v3.0.0-dev.5`](#cbl_sentry---v300-dev5)
