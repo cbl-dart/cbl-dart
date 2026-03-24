@@ -17,10 +17,10 @@ abstract interface class SendAware {
 
   /// Called before this object is sent through a [SendPort].
   ///
-  /// This allows an object to make itself sendable by replacing references to
-  /// objects that are not sendable, e.g. [Pointer], with sendable ones. The
-  /// received copy will have [didReceive] called on it, where it should restore
-  /// itself to the state of the original before [willSend] was called on it.
+  /// This allows an object to prepare itself for sending, e.g. by retaining
+  /// ref-counted native objects whose [Pointer] will be sent. The received copy
+  /// will have [didReceive] called on it, where it should restore itself to the
+  /// state of the original before [willSend] was called on it.
   ///
   /// If this object contains other [SendAware]s, it must call [willSend] on
   /// them from this method.

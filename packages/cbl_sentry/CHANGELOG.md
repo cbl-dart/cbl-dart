@@ -1,3 +1,9 @@
+## 3.0.0-dev.5
+
+> Note: This release has breaking changes.
+
+ - **BREAKING** **FEAT**(cbl): remove `CouchbaseLite.init` and auto init lazily ([#926](https://github.com/cbl-dart/cbl-dart/issues/926)). ([f64c5dcd](https://github.com/cbl-dart/cbl-dart/commit/f64c5dcdaa388aac4f939e05a52b055df33556b4))
+
 ## 3.0.0-dev.4
 
  - Update a dependency to the latest release.

@@ -1,3 +1,13 @@
+## 4.0.0-dev.5
+
+> Note: This release has breaking changes.
+
+ - **FEAT**(cbl): support local replication across all sync/async API combinations ([#929](https://github.com/cbl-dart/cbl-dart/issues/929)). ([af57ad4a](https://github.com/cbl-dart/cbl-dart/commit/af57ad4a9bb7027d42cea5c07ca6e6b5b7025ea4))
+ - **FEAT**(cbl): support custom loggers from multiple isolates ([#928](https://github.com/cbl-dart/cbl-dart/issues/928)). ([c46e757e](https://github.com/cbl-dart/cbl-dart/commit/c46e757e0d38963a172236de22ca2caf061480ce))
+ - **BREAKING** **REFACTOR**(cbl): remove native Sentry breadcrumb integration ([#927](https://github.com/cbl-dart/cbl-dart/issues/927)). ([7dde0b71](https://github.com/cbl-dart/cbl-dart/commit/7dde0b71fed69f750596d306b309fab0f00d140b))
+ - **BREAKING** **FEAT**(cbl): remove `CouchbaseLite.init` and auto init lazily ([#926](https://github.com/cbl-dart/cbl-dart/issues/926)). ([f64c5dcd](https://github.com/cbl-dart/cbl-dart/commit/f64c5dcdaa388aac4f939e05a52b055df33556b4))
+ - **BREAKING** **FEAT**(cbl_generator): generate companion dictionary for typed documents ([#917](https://github.com/cbl-dart/cbl-dart/issues/917)). ([b848bfe5](https://github.com/cbl-dart/cbl-dart/commit/b848bfe55323b19dd1ae51e0fe81af0a368166b6))
+
 ## 4.0.0-dev.4
 
  - **FIX**(cbl): upgrade native_toolchain_c to fix Android libc++ linking ([#919](https://github.com/cbl-dart/cbl-dart/issues/919)). ([8c374fc0](https://github.com/cbl-dart/cbl-dart/commit/8c374fc00c9dcebe3f5a169bcd4f634e6fe8ce69))

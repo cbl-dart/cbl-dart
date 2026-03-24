@@ -1011,23 +1011,26 @@ void main() {
       expect(await collectionB.document(doc.id), isNotNull);
     });
 
-    apiTest(
-      'throws when wrong type of database is used with database endpoint',
-      () async {
-        final dbA = await openTestDatabase(name: 'a');
-        final dbB = await runWithApi(
-          sync: getSharedAsyncTestDatabase,
-          async: getSharedSyncTestDatabase,
-        );
+    apiTest('use database endpoint with cross-type target database', () async {
+      final dbA = await openTestDatabase(name: 'a');
+      final dbB = await runWithApi(
+        sync: () => openAsyncTestDatabase(name: 'b'),
+        async: () => openSyncTestDatabase(name: 'b'),
+      );
+      final collectionA = await dbA.defaultCollection;
+      final collectionB = await dbB.defaultCollection;
+      final config = ReplicatorConfiguration(target: DatabaseEndpoint(dbB))
+        ..addCollection(collectionA);
+      final repl = await Replicator.create(config);
+      addTearDown(repl.close);
 
-        final config = ReplicatorConfiguration(target: DatabaseEndpoint(dbB))
-          ..addCollection(await dbA.defaultCollection);
-        expect(
-          Future.sync(() => Replicator.create(config)),
-          throwsArgumentError,
-        );
-      },
-    );
+      final doc = MutableDocument({});
+      await collectionA.saveDocument(doc);
+
+      await repl.replicateOneShot();
+
+      expect(await collectionB.document(doc.id), isNotNull);
+    });
 
     test('supports starting replicator while async document save', () async {
       final db = await openAsyncTestDatabase();

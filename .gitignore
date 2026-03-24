@@ -326,6 +326,7 @@ doc/api/
 
 ## Claude Code
 CLAUDE.local.md
+.claude/worktrees/
 
 ## Lefthook
 lefthook-local.yml

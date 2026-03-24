@@ -1,5 +1,5 @@
 name: 'cbl_sentry'
-version: 3.0.0-dev.4
+version: 3.0.0-dev.5
 description: >-
   Sentry integration for Couchbase Lite — automatic breadcrumb recording and
   performance tracing for database operations and data sync.
@@ -21,7 +21,7 @@ environment:
 resolution: workspace
 
 dependencies:
-  cbl: ^4.0.0-dev.4
+  cbl: ^4.0.0-dev.5
   sentry: ^9.14.0
 
 dev_dependencies:
