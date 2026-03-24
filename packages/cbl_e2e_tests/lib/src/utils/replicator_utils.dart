@@ -114,7 +114,10 @@ Future<void> _purgeSyncGatewayDatabase() async {
 
 Future<void> deleteDocumentByAdmin(Document doc) async {
   await syncGatewayRequest(
-    Uri.parse('$syncGatewayDatabase/${doc.id}?rev=${doc.revisionId}'),
+    Uri(
+      path: '$syncGatewayDatabase/${doc.id}',
+      queryParameters: {'rev': doc.revisionId},
+    ),
     method: 'DELETE',
     admin: true,
   );
@@ -145,10 +148,15 @@ extension ReplicatorUtilsDatabaseExtension on Database {
     ReplicationFilter? pullFilter,
     TypedReplicationFilter? typedPullFilter,
     ConflictResolverFunction? conflictResolver,
+    ConflictResolver? conflictResolverObject,
     TypedConflictResolverFunction? typedConflictResolver,
     bool? enableAutoPurge,
     Authenticator? authenticator,
   }) async {
+    assert(
+      conflictResolver == null || conflictResolverObject == null,
+      'Cannot specify both conflictResolver and conflictResolverObject.',
+    );
     final collectionConfig = CollectionConfiguration(
       channels: channels,
       documentIds: documentIds,
@@ -156,9 +164,11 @@ extension ReplicatorUtilsDatabaseExtension on Database {
       typedPushFilter: typedPushFilter,
       pullFilter: pullFilter,
       typedPullFilter: typedPullFilter,
-      conflictResolver: conflictResolver != null
-          ? ConflictResolver.from(conflictResolver)
-          : null,
+      conflictResolver:
+          conflictResolverObject ??
+          (conflictResolver != null
+              ? ConflictResolver.from(conflictResolver)
+              : null),
       typedConflictResolver: typedConflictResolver != null
           ? TypedConflictResolver.from(typedConflictResolver)
           : null,

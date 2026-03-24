@@ -17,6 +17,7 @@ export 'replication/conflict_resolver.dart'
     show
         ConflictResolver,
         ConflictResolverFunction,
+        DefaultConflictResolver,
         TypedConflictResolver,
         TypedConflictResolverFunction;
 export 'replication/document_replication.dart'
