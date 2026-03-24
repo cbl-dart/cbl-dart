@@ -997,23 +997,26 @@ void main() {
         final doc = MutableDocument({});
         await collection.saveDocument(doc);
 
-        late final ListenerToken token;
-        token = await replicator.addDocumentReplicationListener(
-          expectAsync1((change) {
-            expect(change.replicator, replicator);
-            expect(change.isPush, isTrue);
-            expect(change.documents.map((it) => it.id), [doc.id]);
-            expect(change.documents.map((it) => it.scope), [Scope.defaultName]);
-            expect(change.documents.map((it) => it.collection), [
-              Collection.defaultName,
-            ]);
-            unawaited(Future.value(replicator.removeChangeListener(token)));
-          }),
-        );
+        final listenerCalled = Completer<void>();
+        final token = await replicator.addDocumentReplicationListener((change) {
+          expect(change.replicator, replicator);
+          expect(change.isPush, isTrue);
+          expect(change.documents.map((it) => it.id), [doc.id]);
+          expect(change.documents.map((it) => it.scope), [Scope.defaultName]);
+          expect(change.documents.map((it) => it.collection), [
+            Collection.defaultName,
+          ]);
+          if (!listenerCalled.isCompleted) {
+            listenerCalled.complete();
+          }
+        });
 
-        // Trigger two replication runs, to verify that after the listener is
-        // removed it won't be called any more.
         await replicator.replicateOneShot();
+        await listenerCalled.future;
+        await replicator.removeChangeListener(token);
+
+        // Trigger a second replication run to verify that after the listener is
+        // removed it won't be called any more.
         await collection.saveDocument(doc);
         await replicator.replicateOneShot();
       },

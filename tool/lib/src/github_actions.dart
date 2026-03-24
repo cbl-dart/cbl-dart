@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:cli_util/cli_logging.dart';
+import 'package:yaml/yaml.dart';
 
 import 'utils.dart';
 
@@ -154,6 +155,7 @@ final class FlakyReport {
     required this.dateFrom,
     required this.dateTo,
     required this.event,
+    required this.branch,
     required this.jobs,
   });
 
@@ -162,18 +164,97 @@ final class FlakyReport {
   final DateTime dateFrom;
   final DateTime dateTo;
   final String event;
+  final String branch;
   final List<JobStats> jobs;
 
   Map<String, Object?> toJson() => {
     'generated_at': generatedAt.toIso8601String(),
     'runs_analyzed': runsAnalyzed,
     'event': event,
+    'branch': branch,
     'date_range': {
       'from': dateFrom.toIso8601String().substring(0, 10),
       'to': dateTo.toIso8601String().substring(0, 10),
     },
     'jobs': jobs.map((job) => job.toJson()).toList(),
   };
+}
+
+/// Represents a job definition from the CI workflow YAML.
+final class CiJobConfig {
+  CiJobConfig({required this.name, required this.stepNames});
+
+  final String name;
+  final Set<String> stepNames;
+}
+
+/// Parsed CI workflow configuration for filtering stale jobs/steps.
+final class CiWorkflowConfig {
+  CiWorkflowConfig({required this.jobs});
+
+  /// Parses the CI workflow YAML file and extracts job names and step names.
+  factory CiWorkflowConfig.parse(String workflowPath) {
+    final content = File(workflowPath).readAsStringSync();
+    final yaml = loadYaml(content) as YamlMap;
+    final jobs = <CiJobConfig>[];
+
+    final jobsMap = yaml['jobs'] as YamlMap?;
+    if (jobsMap == null) {
+      return CiWorkflowConfig(jobs: []);
+    }
+
+    for (final entry in jobsMap.entries) {
+      final jobDef = entry.value as YamlMap;
+      final name = jobDef['name'] as String?;
+      if (name == null) {
+        continue;
+      }
+
+      final stepNames = <String>{};
+      final steps = jobDef['steps'] as YamlList?;
+      if (steps != null) {
+        for (final step in steps) {
+          if (step is YamlMap) {
+            final stepName = step['name'] as String?;
+            if (stepName != null) {
+              stepNames.add(stepName);
+            }
+          }
+        }
+      }
+
+      jobs.add(CiJobConfig(name: name, stepNames: stepNames));
+    }
+
+    return CiWorkflowConfig(jobs: jobs);
+  }
+
+  final List<CiJobConfig> jobs;
+
+  /// Returns whether a job name from the API matches a current CI job.
+  ///
+  /// GitHub Actions formats matrix job names as "Job Name (val1, val2, ...)".
+  /// We match by checking if the API job name equals or starts with a known job
+  /// name followed by " (".
+  bool isCurrentJob(String apiJobName) => _matchingJob(apiJobName) != null;
+
+  /// Returns whether a step name is current for the given API job name.
+  bool isCurrentStep(String apiJobName, String stepName) {
+    final job = _matchingJob(apiJobName);
+    if (job == null) {
+      return false;
+    }
+    return job.stepNames.contains(stepName);
+  }
+
+  CiJobConfig? _matchingJob(String apiJobName) {
+    for (final job in jobs) {
+      if (apiJobName == job.name || apiJobName.startsWith('${job.name} (')) {
+        return job;
+      }
+    }
+    return null;
+  }
 }
 
 final class GitHubActionsClient {
@@ -186,12 +267,14 @@ final class GitHubActionsClient {
 
   Future<List<WorkflowRun>> fetchRuns({
     String? event,
+    String? branch,
     required int count,
   }) async {
     final eventParam = event != null ? '&event=$event' : '';
+    final branchParam = branch != null ? '&branch=$branch' : '';
     final path =
         '/repos/$_owner/$_repo/actions/workflows'
-        '/$_workflowFile/runs?branch=main$eventParam&per_page=$count';
+        '/$_workflowFile/runs?$branchParam$eventParam&per_page=$count';
     final result = await _gh(['api', path]);
 
     final json = jsonDecode(result.stdout as String) as Map<String, Object?>;

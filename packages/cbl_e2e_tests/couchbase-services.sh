@@ -53,7 +53,7 @@ function waitForService() {
     name="$1"
     url="$2"
     diagnostics="${3:-}"
-    maxAttempts=10
+    maxAttempts=30
     delayBetweenAttempts=5
     attempt=0
 
@@ -61,7 +61,7 @@ function waitForService() {
 
     while true; do
         echo "Attempt $attempt to connect to $name"
-        curl --silent -o /dev/null "$url" && break
+        curl --silent --connect-timeout 5 --max-time 10 -o /dev/null "$url" && break
 
         attempt=$((attempt + 1))
 

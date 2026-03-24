@@ -51,7 +51,7 @@ syncGatewayLogFile="$workspaceDir/.tmp/sync-gateway.log"
 
 function startAndWaitForSyncGateway() {
     local startCmd="$1"
-    local maxAttempts=3
+    local maxAttempts=2
     local attempt=0
 
     while true; do

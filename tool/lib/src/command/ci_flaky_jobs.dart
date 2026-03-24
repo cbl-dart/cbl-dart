@@ -23,6 +23,13 @@ final class CiFlakyJobs extends BaseCommand {
         defaultsTo: 'all',
       )
       ..addOption(
+        'branch',
+        abbr: 'b',
+        help:
+            'Only include runs from this branch. '
+            'By default all branches are included.',
+      )
+      ..addOption(
         'threshold',
         abbr: 't',
         help:
@@ -41,8 +48,7 @@ final class CiFlakyJobs extends BaseCommand {
   String get name => 'ci-flaky-jobs';
 
   @override
-  String get description =>
-      'Analyzes CI run history on main to identify flaky jobs.';
+  String get description => 'Analyzes CI run history to identify flaky jobs.';
 
   @override
   Future<void> doRun() async {
@@ -64,6 +70,7 @@ final class CiFlakyJobs extends BaseCommand {
       );
     }
 
+    final branch = optionalArg<String>('branch');
     final jsonOutput = arg<bool>('json');
 
     final cacheDir = Directory('${projectLayout.rootDir}/.cache/ci-flaky-jobs');
@@ -71,14 +78,15 @@ final class CiFlakyJobs extends BaseCommand {
 
     // Fetch workflow runs.
     final eventLabel = event ?? 'all';
+    final branchLabel = branch ?? 'all branches';
     final workflowRuns = await logger.runWithProgress(
-      message: 'Fetching $eventLabel runs on main',
+      message: 'Fetching $eventLabel runs on $branchLabel',
       showTiming: true,
-      () => client.fetchRuns(event: event, count: count),
+      () => client.fetchRuns(event: event, branch: branch, count: count),
     );
 
     if (workflowRuns.isEmpty) {
-      logger.stderr('No $eventLabel runs found on main.');
+      logger.stderr('No $eventLabel runs found on $branchLabel.');
       return;
     }
 
@@ -97,8 +105,13 @@ final class CiFlakyJobs extends BaseCommand {
       },
     );
 
+    // Parse current CI workflow to filter out stale jobs/steps.
+    final workflowPath = '${projectLayout.rootDir}/.github/workflows/ci.yaml';
+    final ciConfig = CiWorkflowConfig.parse(workflowPath);
+
     // Aggregate stats per job name. We include all runs, but skip
-    // individual jobs that didn't complete (cancelled/skipped/in-progress).
+    // individual jobs that didn't complete (cancelled/skipped/in-progress)
+    // or that no longer exist in the current CI configuration.
     final statsMap = <String, JobStats>{};
     for (final run in workflowRuns) {
       final jobs = jobsByRun[run.id]!;
@@ -106,6 +119,10 @@ final class CiFlakyJobs extends BaseCommand {
         if (job.conclusion == null ||
             job.conclusion == 'cancelled' ||
             job.conclusion == 'skipped') {
+          continue;
+        }
+
+        if (!ciConfig.isCurrentJob(job.name)) {
           continue;
         }
 
@@ -119,12 +136,18 @@ final class CiFlakyJobs extends BaseCommand {
           stats.successes++;
         } else {
           stats.failures++;
+          // Only record the failed step if it still exists in the current
+          // CI configuration.
+          final failedStep = job.failedStep;
+          final currentStep =
+              failedStep != null &&
+              ciConfig.isCurrentStep(job.name, failedStep);
           stats.recentFailures.add(
             JobFailure(
               runId: run.id,
               date: run.createdAt,
               url: job.htmlUrl,
-              failedStep: job.failedStep,
+              failedStep: currentStep ? failedStep : null,
             ),
           );
         }
@@ -149,6 +172,7 @@ final class CiFlakyJobs extends BaseCommand {
       dateFrom: workflowRuns.last.createdAt,
       dateTo: workflowRuns.first.createdAt,
       event: eventLabel,
+      branch: branchLabel,
       jobs: jobs,
     );
 
@@ -171,8 +195,8 @@ final class CiFlakyJobs extends BaseCommand {
     stdout
       ..writeln(
         'CI Flaky Jobs Report '
-        '(last ${report.runsAnalyzed} ${report.event} runs, '
-        '$from to $to)',
+        '(last ${report.runsAnalyzed} ${report.event} runs '
+        'on ${report.branch}, $from to $to)',
       )
       ..writeln('=' * 72)
       ..writeln();
