@@ -91,18 +91,20 @@ Future<void> flushDatabaseByAdmin() async {
 }
 
 Future<void> _purgeSyncGatewayDatabase() async {
+  // Use _changes instead of _all_docs to also capture tombstones (deleted
+  // documents) that _all_docs does not return.
   final response = await syncGatewayRequest(
-    Uri.parse('$syncGatewayDatabase/_all_docs'),
+    Uri.parse('$syncGatewayDatabase/_changes?since=0'),
     admin: true,
   );
-  final allDocs = jsonDecode(response) as Map<String, Object?>;
-  final rows = allDocs['rows']! as List<Object?>;
-  if (rows.isEmpty) {
+  final changes = jsonDecode(response) as Map<String, Object?>;
+  final results = changes['results']! as List<Object?>;
+  if (results.isEmpty) {
     return;
   }
   final purgeBody = {
-    for (final row in rows.cast<Map<String, Object?>>())
-      row['id']! as String: ['*'],
+    for (final result in results.cast<Map<String, Object?>>())
+      result['id']! as String: ['*'],
   };
   await syncGatewayRequest(
     Uri.parse('$syncGatewayDatabase/_purge'),
@@ -114,7 +116,10 @@ Future<void> _purgeSyncGatewayDatabase() async {
 
 Future<void> deleteDocumentByAdmin(Document doc) async {
   await syncGatewayRequest(
-    Uri.parse('$syncGatewayDatabase/${doc.id}?rev=${doc.revisionId}'),
+    Uri(
+      path: '$syncGatewayDatabase/${doc.id}',
+      queryParameters: {'rev': doc.revisionId},
+    ),
     method: 'DELETE',
     admin: true,
   );
@@ -145,10 +150,15 @@ extension ReplicatorUtilsDatabaseExtension on Database {
     ReplicationFilter? pullFilter,
     TypedReplicationFilter? typedPullFilter,
     ConflictResolverFunction? conflictResolver,
+    ConflictResolver? conflictResolverObject,
     TypedConflictResolverFunction? typedConflictResolver,
     bool? enableAutoPurge,
     Authenticator? authenticator,
   }) async {
+    assert(
+      conflictResolver == null || conflictResolverObject == null,
+      'Cannot specify both conflictResolver and conflictResolverObject.',
+    );
     final collectionConfig = CollectionConfiguration(
       channels: channels,
       documentIds: documentIds,
@@ -156,9 +166,11 @@ extension ReplicatorUtilsDatabaseExtension on Database {
       typedPushFilter: typedPushFilter,
       pullFilter: pullFilter,
       typedPullFilter: typedPullFilter,
-      conflictResolver: conflictResolver != null
-          ? ConflictResolver.from(conflictResolver)
-          : null,
+      conflictResolver:
+          conflictResolverObject ??
+          (conflictResolver != null
+              ? ConflictResolver.from(conflictResolver)
+              : null),
       typedConflictResolver: typedConflictResolver != null
           ? TypedConflictResolver.from(typedConflictResolver)
           : null,
