@@ -1,6 +1,5 @@
 #include "AsyncCallback.h"
 
-#include <algorithm>
 #include <sstream>
 
 #include "Utils.h"

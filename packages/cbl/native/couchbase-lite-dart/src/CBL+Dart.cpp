@@ -443,51 +443,6 @@ static CBLDatabaseConfiguration CBLDatabaseConfiguration_FromCBLDart(
   return result;
 }
 
-#if defined(__linux__) && !defined(__ANDROID__)
-static void CBLDart_SeedHybridClockIfNeeded(CBLDatabase* database) {
-  // Empty Linux databases can start with an uninitialized HybridClock, which
-  // causes replicated revisions with real timestamps to be rejected.
-  CBLError error{};
-  auto collection = CBLDatabase_DefaultCollection(database, &error);
-  if (!collection) {
-    auto errorMessage = CBLError_Message(&error);
-    CBL_Log(
-        kCBLLogDomainDatabase, kCBLLogWarning,
-        "Could not access default collection to seed HybridClock: %d/%d %*.s",
-        error.domain, error.code, static_cast<int>(errorMessage.size),
-        (char*)errorMessage.buf);
-    FLSliceResult_Release(errorMessage);
-    return;
-  }
-
-  if (CBLCollection_Count(collection) != 0) {
-    CBLCollection_Release(collection);
-    return;
-  }
-
-  auto doc = CBLDocument_CreateWithID(FLSTR("cbl_seed_hybrid_clock"));
-  const auto saved = CBLCollection_SaveDocument(collection, doc, &error);
-  if (!saved) {
-    auto errorMessage = CBLError_Message(&error);
-    CBL_Log(kCBLLogDomainDatabase, kCBLLogWarning,
-            "Could not seed HybridClock for empty database: %d/%d %*.s",
-            error.domain, error.code, static_cast<int>(errorMessage.size),
-            (char*)errorMessage.buf);
-    FLSliceResult_Release(errorMessage);
-  } else if (!CBLCollection_PurgeDocument(collection, doc, &error)) {
-    auto errorMessage = CBLError_Message(&error);
-    CBL_Log(kCBLLogDomainDatabase, kCBLLogWarning,
-            "Could not purge HybridClock seed document: %d/%d %*.s",
-            error.domain, error.code, static_cast<int>(errorMessage.size),
-            (char*)errorMessage.buf);
-    FLSliceResult_Release(errorMessage);
-  }
-
-  CBLDocument_Release(doc);
-  CBLCollection_Release(collection);
-}
-#endif
-
 CBLDart_CBLDatabaseConfiguration CBLDart_CBLDatabaseConfiguration_Default() {
   auto config = CBLDatabaseConfiguration_Default();
   auto result = CBLDart_CBLDatabaseConfiguration{};
@@ -516,9 +471,6 @@ CBLDatabase* CBLDart_CBLDatabase_Open(FLString name,
   auto database = CBLDatabase_Open(name, &config_, errorOut);
 
   if (database) {
-#if defined(__linux__) && !defined(__ANDROID__)
-    CBLDart_SeedHybridClockIfNeeded(database);
-#endif
     CBLDart_RegisterOpenDatabase(database);
     CBLDart_CreateDatabaseLock(database);
   }
