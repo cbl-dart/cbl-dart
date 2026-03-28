@@ -342,3 +342,50 @@ jobs:
         shell: bash
         run: |
           ./tools/ci-steps.sh uploadCoverageData "e2e.cbl.${{ matrix.embedder }}.${{ matrix.os }}"
+
+  test-e2e-vm-asan:
+    name: E2E tests (vm-asan)
+    timeout-minutes: 25
+    runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-4cpu
+    env:
+      EMBEDDER: standalone
+      TARGET_OS: Ubuntu
+      TEST_PACKAGE: cbl_e2e_tests_standalone_dart
+    steps:
+      - uses: runs-on/action@v2
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Dart SDK
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: main
+          flavor: raw
+
+      - name: Get dependencies
+        run: dart pub get
+
+      - name: Start Couchbase services
+        shell: bash
+        run: ./tools/ci-steps.sh startCouchbaseServices
+
+      - name: Run tests
+        timeout-minutes: 20
+        shell: bash
+        run: |
+          cd packages/cbl_e2e_tests_standalone_dart
+          export ENABLE_TIME_BOMB=true
+          ulimit -c unlimited
+          dart test -p vm-asan -r expanded -j 1
+
+      - name: Collect test results
+        if: failure()
+        shell: bash
+        run: ./tools/ci-steps.sh collectTestResults
+
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-results-Ubuntu-standalone-vm-asan
+          path: test-results
