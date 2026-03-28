@@ -356,6 +356,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
+      - name: Setup Flutter
+        uses: ./.github/actions/setup-flutter
+        with:
+          channel: ${{ env.flutter-channel }}
+          cache: true
+          pub-cache-hash-pattern: pubspec.lock
+
       - name: Setup Dart SDK
         uses: dart-lang/setup-dart@v1
         with:
