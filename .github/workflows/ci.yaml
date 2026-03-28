@@ -385,6 +385,34 @@ jobs:
           cd packages/cbl_e2e_tests_standalone_dart
           export ENABLE_TIME_BOMB=true
           ulimit -c unlimited
+
+          # `dart test -p vm-asan` compiles test suites to native shared
+          # libraries, but that execution path does not currently wire native
+          # assets into the generated process. Build hooks still materialize the
+          # native libraries into `.dart_tool/lib`, so preload them to satisfy
+          # `@ffi.DefaultAsset`'s fallback to process symbol lookup.
+          dart test --help >/dev/null
+
+          native_lib_dir="$PWD/.dart_tool/lib"
+          export LD_LIBRARY_PATH="$native_lib_dir${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+
+          libcblite="$(find "$native_lib_dir" -maxdepth 1 -type f -name 'libcblite.so*' | head -n 1)"
+          libcblitedart="$(find "$native_lib_dir" -maxdepth 1 -type f -name 'libcblitedart.so*' | head -n 1)"
+          extra_libs="$(find "$native_lib_dir" -maxdepth 1 -type f \( -name '*.so' -o -name '*.so.*' \) \
+            ! -name 'libcblite.so*' \
+            ! -name 'libcblitedart.so*' | sort | paste -sd ':' -)"
+
+          preload_libs=()
+          [ -n "$libcblite" ] && preload_libs+=("$libcblite")
+          [ -n "$libcblitedart" ] && preload_libs+=("$libcblitedart")
+          [ -n "$extra_libs" ] && preload_libs+=("$extra_libs")
+
+          if [ "${#preload_libs[@]}" -eq 0 ]; then
+            echo "No native libraries found to preload in $native_lib_dir"
+            exit 1
+          fi
+
+          export LD_PRELOAD="$(IFS=:; echo "${preload_libs[*]}")"
           dart test -p vm-asan -r expanded -j 1
 
       - name: Collect test results
