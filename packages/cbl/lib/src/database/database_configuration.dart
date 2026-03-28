@@ -77,7 +77,7 @@ final class EncryptionKeyImpl implements EncryptionKey {
 
   // ignore: prefer_constructors_over_static_methods
   static EncryptionKeyImpl key(Uint8List bytes) {
-    useEnterpriseFeature(EnterpriseFeature.databaseEncryption);
+    requireEnterprise('Database encryption');
 
     final keySize = CBLEncryptionAlgorithm.aes256.keySize;
     if (bytes.length != keySize) {
@@ -98,13 +98,13 @@ final class EncryptionKeyImpl implements EncryptionKey {
 
   // ignore: prefer_constructors_over_static_methods
   static EncryptionKeyImpl passwordSync(String password) {
-    useEnterpriseFeature(EnterpriseFeature.databaseEncryption);
+    requireEnterprise('Database encryption');
     final key = DatabaseBindings.encryptionKeyFromPassword(password);
     return EncryptionKeyImpl(key);
   }
 
   static Future<EncryptionKeyImpl> passwordAsync(String password) {
-    useEnterpriseFeature(EnterpriseFeature.databaseEncryption);
+    requireEnterprise('Database encryption');
     return CblWorker.executeCall(
       EncryptionKeyFromPassword(password),
       debugName: 'EncryptionKeyImpl.passwordAsync()',

@@ -2,33 +2,30 @@ import 'package:cbl/src/support/edition.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group('useEnterpriseFeature', () {
+  group('requireEnterprise', () {
     test('returns normally when the enterprise edition is active', () {
       overrideEdition(Edition.enterprise);
 
-      expect(
-        () => useEnterpriseFeature(EnterpriseFeature.databaseEncryption),
-        returnsNormally,
-      );
+      expect(() => requireEnterprise('Database encryption'), returnsNormally);
     });
 
     test('throws when the enterprise edition is not active', () {
       overrideEdition(Edition.community);
 
-      final featureDescription = {
-        EnterpriseFeature.localDbReplication: 'Local database replication',
-        EnterpriseFeature.databaseEncryption: 'Database encryption',
-        EnterpriseFeature.propertyEncryption: 'Property encryption',
-      };
+      const capabilities = [
+        'Local database replication',
+        'Database encryption',
+        'TLS identities',
+      ];
 
-      for (final entry in featureDescription.entries) {
+      for (final capability in capabilities) {
         expect(
-          () => useEnterpriseFeature(entry.key),
+          () => requireEnterprise(capability),
           throwsA(
             isA<StateError>().having(
               (it) => it.message,
               'message',
-              contains(entry.value),
+              contains(capability),
             ),
           ),
         );

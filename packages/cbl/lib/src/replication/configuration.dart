@@ -246,7 +246,7 @@ final class ReplicatorConfiguration {
 
   set acceptOnlySelfSignedServerCertificate(bool value) {
     if (value) {
-      useEnterpriseFeature(EnterpriseFeature.peerToPeerSync);
+      requireEnterprise('Self-signed server certificates');
     }
     _acceptOnlySelfSignedServerCertificate = value;
   }

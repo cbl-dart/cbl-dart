@@ -609,7 +609,7 @@ final class FfiCertificate implements Certificate, Finalizable {
   }
 
   static FfiCertificate decode(CryptoData data) {
-    useEnterpriseFeature(EnterpriseFeature.peerToPeerSync);
+    requireEnterprise('Certificate decoding');
 
     if (data is PemData && data.blocks.length > 1) {
       throw ArgumentError.value(
@@ -627,7 +627,7 @@ final class FfiCertificate implements Certificate, Finalizable {
   }
 
   static List<FfiCertificate> decodeMultiple(PemData data) {
-    useEnterpriseFeature(EnterpriseFeature.peerToPeerSync);
+    requireEnterprise('Certificate decoding');
     return data.blocks.map(decode).toList();
   }
 
@@ -984,7 +984,7 @@ final class FfiKeyPair implements KeyPair, Finalizable {
   }
 
   static Future<FfiKeyPair> fromExternal(ExternalKeyPairDelegate delegate) {
-    useEnterpriseFeature(EnterpriseFeature.peerToPeerSync);
+    requireEnterprise('TLS key pairs');
 
     final pointer = TlsIdentityBindings.keyPairCreateWithExternalKey(
       keySizeInBits: delegate.keySizeInBits,
@@ -1001,7 +1001,7 @@ final class FfiKeyPair implements KeyPair, Finalizable {
     CryptoData privateKey, {
     String? password,
   }) async {
-    useEnterpriseFeature(EnterpriseFeature.peerToPeerSync);
+    requireEnterprise('TLS key pairs');
 
     final pointer = await Isolate.run(
       () => TlsIdentityBindings.keyPairCreateWithPrivateKey(
@@ -1184,7 +1184,7 @@ final class FfiTlsIdentity implements TlsIdentity, Finalizable {
     required KeyPair keyPair,
     required List<FfiCertificate> certificates,
   }) {
-    useEnterpriseFeature(EnterpriseFeature.peerToPeerSync);
+    requireEnterprise('TLS identities');
 
     final keyPairPointer = (keyPair as FfiKeyPair).pointer;
     final certificateChainPointer = FfiCertificate.combined(
@@ -1207,7 +1207,7 @@ final class FfiTlsIdentity implements TlsIdentity, Finalizable {
     String? label,
     KeyPair? keyPair,
   }) async {
-    useEnterpriseFeature(EnterpriseFeature.peerToPeerSync);
+    requireEnterprise('TLS identities');
 
     if (label != null) {
       _checkPersistedIdentitySupport();
@@ -1248,7 +1248,7 @@ final class FfiTlsIdentity implements TlsIdentity, Finalizable {
   }
 
   static Future<FfiTlsIdentity?> identity(String label) async {
-    useEnterpriseFeature(EnterpriseFeature.peerToPeerSync);
+    requireEnterprise('TLS identities');
     _checkPersistedIdentitySupport();
 
     final pointer = await Isolate.run(
@@ -1264,7 +1264,7 @@ final class FfiTlsIdentity implements TlsIdentity, Finalizable {
   static Future<FfiTlsIdentity> identityWithCertificates(
     List<FfiCertificate> certificates,
   ) async {
-    useEnterpriseFeature(EnterpriseFeature.peerToPeerSync);
+    requireEnterprise('TLS identities');
     _checkPersistedIdentitySupport();
 
     final certificatePointer = FfiCertificate.combined(certificates).pointer;
@@ -1277,7 +1277,7 @@ final class FfiTlsIdentity implements TlsIdentity, Finalizable {
   }
 
   static Future<void> deleteIdentity(String label) async {
-    useEnterpriseFeature(EnterpriseFeature.peerToPeerSync);
+    requireEnterprise('TLS identities');
     _checkPersistedIdentitySupport();
     await Isolate.run(() => TlsIdentityBindings.deleteWithLabel(label));
   }
