@@ -92,6 +92,13 @@ void main() {
       expect(copy, config);
     });
 
+    test('from copies fullSync', () {
+      final config = DatabaseConfiguration(fullSync: true);
+      final copy = DatabaseConfiguration.from(config);
+
+      expect(copy.fullSync, isTrue);
+    });
+
     test('from does not copy encryptionKey', () {
       final config = DatabaseConfiguration(
         encryptionKey: EncryptionKey.key(randomRawEncryptionKey()),
@@ -119,5 +126,41 @@ void main() {
       final config = DatabaseConfiguration(directory: 'A');
       expect(config.toString(), 'DatabaseConfiguration(directory: A)');
     });
+
+    apiTest(
+      'repeated opens with fullSync disabled produce valid document timestamps',
+      () async {
+        final directory = databaseDirectoryForTest();
+
+        for (var i = 0; i < 20; i++) {
+          final db = await openTestDatabase(
+            name: 'db_${i.toString().padLeft(4, '0')}',
+            config: DatabaseConfiguration(
+              directory: directory,
+              fullSync: false,
+            ),
+            tearDown: false,
+          );
+          final collection = await db.defaultCollection;
+
+          final doc = MutableDocument({'iter': i});
+          await collection.saveDocument(doc);
+
+          expect(doc.revisionId, isNotNull, reason: 'iteration $i');
+          expect(doc.timestamp, greaterThanOrEqualTo(_minValidTimestamp));
+          expect(
+            _parseRevisionPrefix(doc.revisionId!),
+            greaterThanOrEqualTo(_minValidTimestamp),
+          );
+
+          await db.close();
+        }
+      },
+    );
   });
 }
+
+int _parseRevisionPrefix(String revisionId) =>
+    int.parse(revisionId.substring(0, revisionId.indexOf('@')), radix: 16);
+
+const _minValidTimestamp = 0x10000000000;
