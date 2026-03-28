@@ -1,6 +1,7 @@
 import 'dart:ffi' show Abi;
 import 'dart:io';
 
+import 'package:cbl/src/native_libraries.dart' as native_install;
 import 'package:code_assets/code_assets.dart';
 import 'package:hooks/hooks.dart';
 import 'package:path/path.dart' as p;
@@ -342,23 +343,16 @@ Future<void> _runBuildHookDirect({
 }
 
 void _expectCommunityEditionCache(BuildInput input) {
-  final sharedEntries = Directory(input.outputDirectoryShared.toFilePath())
+  final sharedEntries = Directory(native_install.downloadedPackagesCacheDir)
       .listSync()
       .whereType<Directory>()
       .map((dir) => p.basename(dir.path))
       .toList();
 
   expect(
-    sharedEntries.any((name) => name.startsWith('cblite-community-')),
+    sharedEntries.any((name) => name.startsWith('couchbase-lite-c-community-')),
     isTrue,
     reason: 'Expected a community cblite cache directory in $sharedEntries.',
-  );
-  expect(
-    sharedEntries.any((name) => name.startsWith('cblite-enterprise-')),
-    isFalse,
-    reason:
-        'Did not expect an enterprise cblite cache directory in '
-        '$sharedEntries.',
   );
 }
 
