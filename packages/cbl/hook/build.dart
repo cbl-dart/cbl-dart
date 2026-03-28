@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:code_assets/code_assets.dart';
+import 'package:data_assets/data_assets.dart';
 import 'package:hooks/hooks.dart';
 import 'package:native_toolchain_c/native_toolchain_c.dart';
 import 'package:path/path.dart' as p;
@@ -17,6 +18,7 @@ void main(List<String> args) async {
 Future<void> buildHook(BuildInput input, BuildOutputBuilder output) async {
   final edition = (input.userDefines['edition'] as String?) ?? 'community';
   final vectorSearch = input.userDefines['vector_search']?.toString() == 'true';
+  final debugSymbols = input.userDefines['debug_symbols']?.toString() == 'true';
 
   if (edition != 'community' && edition != 'enterprise') {
     throw BuildError(
@@ -51,11 +53,23 @@ Future<void> buildHook(BuildInput input, BuildOutputBuilder output) async {
   const libDir = 'lib';
   final libPath = p.join(input.outputDirectory.toFilePath(), libDir);
   await Directory(libPath).create(recursive: true);
+  final debugSymbolPaths = <String>[];
   final cbliteAssetPath = await _stageCblite(
     cblite,
     stagingDir: libPath,
     targetOS: targetOS,
     targetArchitecture: targetArchitecture,
+  );
+  debugSymbolPaths.addAll(
+    await _stageCbliteDebugSymbols(
+      input: input,
+      cblite: cblite,
+      stagingDir: libPath,
+      edition: edition,
+      debugSymbolsRequested: debugSymbols,
+      targetOS: targetOS,
+      targetArchitecture: targetArchitecture,
+    ),
   );
 
   output.assets.code.add(
@@ -90,6 +104,7 @@ Future<void> buildHook(BuildInput input, BuildOutputBuilder output) async {
     libraryDirectories: [if (targetOS != OS.iOS) libDir],
     flags: [
       if (targetOS != OS.windows) '-fvisibility=hidden',
+      if (targetOS == OS.windows) '/Zi' else '-g',
       '-I${cblite.includeDir}',
       if (targetOS == OS.iOS) ...[
         '-F${p.dirname(p.dirname(cblite.libPath.toFilePath()))}',
@@ -105,6 +120,12 @@ Future<void> buildHook(BuildInput input, BuildOutputBuilder output) async {
     cppLinkStdLib: targetOS == OS.android ? 'c++_static' : null,
   );
   await builder.run(input: input, output: output);
+  debugSymbolPaths.addAll(
+    await _findCblitedartDebugSymbols(
+      targetOS: targetOS,
+      outputDir: input.outputDirectory.toFilePath(),
+    ),
+  );
 
   // 3. Optionally download vector search extension.
   // Vector search is supported on ARM64 and x86-64.
@@ -113,24 +134,37 @@ Future<void> buildHook(BuildInput input, BuildOutputBuilder output) async {
       targetArchitecture != Architecture.ia32;
 
   if (edition == 'enterprise' && vectorSearch && vectorSearchSupported) {
-    var vectorSearchLibPath = await _downloadVectorSearch(
+    var vectorSearch = await _downloadVectorSearch(
       input: input,
       targetOS: targetOS,
       targetArchitecture: targetArchitecture,
     );
 
     if (targetOS == OS.macOS || targetOS == OS.iOS) {
-      vectorSearchLibPath = await _lipoThin(
-        vectorSearchLibPath,
-        targetArchitecture: targetArchitecture,
-        outputDir: input.outputDirectory,
+      vectorSearch = (
+        libPath: await _lipoThin(
+          vectorSearch.libPath,
+          targetArchitecture: targetArchitecture,
+          outputDir: input.outputDirectory,
+        ),
+        package: vectorSearch.package,
       );
     }
+    debugSymbolPaths.addAll(
+      await _stageVectorSearchDebugSymbols(
+        input: input,
+        package: vectorSearch.package,
+        stagingDir: libPath,
+        debugSymbolsRequested: debugSymbols,
+        targetOS: targetOS,
+        targetArchitecture: targetArchitecture,
+      ),
+    );
 
     // Stage the vector search library into the shared lib directory.
-    final vsFileName = p.basename(vectorSearchLibPath.toFilePath());
+    final vsFileName = p.basename(vectorSearch.libPath.toFilePath());
     final vsDest = p.join(libPath, vsFileName);
-    await File(vectorSearchLibPath.toFilePath()).copy(vsDest);
+    await File(vectorSearch.libPath.toFilePath()).copy(vsDest);
 
     output.assets.code.add(
       CodeAsset(
@@ -146,8 +180,8 @@ Future<void> buildHook(BuildInput input, BuildOutputBuilder output) async {
     // alongside the main DLL. Copy and register any additional DLLs as code
     // assets so they are available at runtime.
     if (targetOS == OS.windows) {
-      final vsSourceDir = p.dirname(vectorSearchLibPath.toFilePath());
-      final vsMainName = p.basename(vectorSearchLibPath.toFilePath());
+      final vsSourceDir = p.dirname(vectorSearch.libPath.toFilePath());
+      final vsMainName = p.basename(vectorSearch.libPath.toFilePath());
       var depIndex = 0;
       for (final entity in Directory(vsSourceDir).listSync()) {
         if (entity is! File) {
@@ -171,11 +205,26 @@ Future<void> buildHook(BuildInput input, BuildOutputBuilder output) async {
       }
     }
   }
+
+  if (input.config.buildDataAssets && debugSymbolPaths.isNotEmpty) {
+    output.assets.data.addAll([
+      for (final path in await _expandDebugSymbolPaths(debugSymbolPaths))
+        DataAsset(
+          package: 'cbl',
+          name: p.join(
+            'src',
+            'debug_symbols',
+            p.relative(path, from: input.outputDirectory.toFilePath()),
+          ),
+          file: Uri.file(path),
+        ),
+    ]);
+  }
 }
 
 // === Download cblite ========================================================
 
-Future<({Uri libPath, String includeDir})> _downloadCblite({
+Future<({Uri libPath, String includeDir, dl.Package package})> _downloadCblite({
   required BuildInput input,
   required String edition,
   required OS targetOS,
@@ -207,17 +256,22 @@ Future<({Uri libPath, String includeDir})> _downloadCblite({
   final package = await loader.load(config);
 
   if (targetOS == OS.iOS) {
-    return _findIOSFramework(package, input);
+    final framework = await _findIOSFramework(package, input);
+    return (
+      libPath: framework.libPath,
+      includeDir: framework.includeDir,
+      package: package,
+    );
   }
 
   final libPath = _findLibrary(package, os);
   final includeDir = p.join(package.rootDir, 'include');
-  return (libPath: libPath, includeDir: includeDir);
+  return (libPath: libPath, includeDir: includeDir, package: package);
 }
 
 // === Download vector search ================================================
 
-Future<Uri> _downloadVectorSearch({
+Future<({Uri libPath, dl.Package package})> _downloadVectorSearch({
   required BuildInput input,
   required OS targetOS,
   required Architecture targetArchitecture,
@@ -241,10 +295,13 @@ Future<Uri> _downloadVectorSearch({
   final package = await loader.load(config);
 
   if (targetOS == OS.iOS) {
-    return _findIOSVectorSearchLibrary(package, input);
+    return (
+      libPath: _findIOSVectorSearchLibrary(package, input),
+      package: package,
+    );
   }
 
-  return _findLibrary(package, os);
+  return (libPath: _findLibrary(package, os), package: package);
 }
 
 // === Helpers ================================================================
@@ -337,10 +394,277 @@ Uri _findLibrary(dl.Package package, dl.OS os) {
   throw InfraError(message: 'Could not find $libraryName library in $libDir');
 }
 
+Future<List<String>> _stageCbliteDebugSymbols({
+  required BuildInput input,
+  required ({Uri libPath, String includeDir, dl.Package package}) cblite,
+  required String stagingDir,
+  required String edition,
+  required bool debugSymbolsRequested,
+  required OS targetOS,
+  required Architecture targetArchitecture,
+}) async {
+  switch (targetOS) {
+    case OS.android:
+      return const [];
+    case OS.iOS:
+      if (!debugSymbolsRequested) {
+        return const [];
+      }
+      final sourceDir = _findIOSFrameworkDebugSymbolsDir(
+        package: cblite.package,
+        input: input,
+        frameworkName: 'CouchbaseLite.framework.dSYM',
+      );
+      final destDir = p.join(stagingDir, 'CouchbaseLite.framework.dSYM');
+      await _copyDirectory(sourceDir, destDir);
+      return [destDir];
+    case OS.macOS || OS.linux || OS.windows:
+      if (!debugSymbolsRequested) {
+        return const [];
+      }
+      final symbolsPackage = await _downloadCbliteDebugSymbols(
+        input: input,
+        edition: edition,
+        targetOS: targetOS,
+        targetArchitecture: targetArchitecture,
+      );
+      return switch (targetOS) {
+        OS.macOS => [
+          await _stageDebugSymbolsDirectory(
+            sourceDir: p.join(symbolsPackage.rootDir, 'libcblite.dylib.dSYM'),
+            stagingDir: stagingDir,
+          ),
+        ],
+        OS.linux => [
+          await _stageDebugSymbolsFile(
+            sourceFile: p.join(symbolsPackage.rootDir, 'libcblite.so.sym'),
+            stagingDir: stagingDir,
+          ),
+        ],
+        OS.windows => [
+          await _stageDebugSymbolsFile(
+            sourceFile: p.join(symbolsPackage.packageDir, 'cblite.pdb'),
+            stagingDir: stagingDir,
+          ),
+        ],
+        _ => const [],
+      };
+    default:
+      throw BuildError(message: 'Unsupported OS: $targetOS');
+  }
+}
+
+Future<List<String>> _stageVectorSearchDebugSymbols({
+  required BuildInput input,
+  required dl.Package package,
+  required String stagingDir,
+  required bool debugSymbolsRequested,
+  required OS targetOS,
+  required Architecture targetArchitecture,
+}) async {
+  if (!debugSymbolsRequested) {
+    return const [];
+  }
+
+  switch (targetOS) {
+    case OS.android:
+      return const [];
+    case OS.iOS:
+      final sourceDir = _findIOSFrameworkDebugSymbolsDir(
+        package: package,
+        input: input,
+        frameworkName: 'CouchbaseLiteVectorSearch.framework.dSYM',
+      );
+      final destDir = p.join(
+        stagingDir,
+        'CouchbaseLiteVectorSearch.framework.dSYM',
+      );
+      await _copyDirectory(sourceDir, destDir);
+      return [destDir];
+    case OS.macOS:
+      final symbolsPackage = await _downloadVectorSearchDebugSymbols(
+        input: input,
+        targetOS: targetOS,
+        targetArchitecture: targetArchitecture,
+      );
+      return [
+        await _stageDebugSymbolsDirectory(
+          sourceDir: p.join(
+            symbolsPackage.packageDir,
+            'CouchbaseLiteVectorSearch.dSYM',
+          ),
+          stagingDir: stagingDir,
+        ),
+      ];
+    case OS.linux:
+      final symbolsPackage = await _downloadVectorSearchDebugSymbols(
+        input: input,
+        targetOS: targetOS,
+        targetArchitecture: targetArchitecture,
+      );
+      return [
+        await _stageDebugSymbolsFile(
+          sourceFile: p.join(
+            symbolsPackage.packageDir,
+            'debug',
+            'CouchbaseLiteVectorSearch.so.sym',
+          ),
+          stagingDir: stagingDir,
+        ),
+      ];
+    case OS.windows:
+      return [
+        await _stageDebugSymbolsFile(
+          sourceFile: p.join(
+            package.packageDir,
+            'bin',
+            'CouchbaseLiteVectorSearch.pdb',
+          ),
+          stagingDir: stagingDir,
+        ),
+      ];
+    default:
+      throw BuildError(message: 'Unsupported OS: $targetOS');
+  }
+}
+
+Future<dl.Package> _downloadCbliteDebugSymbols({
+  required BuildInput input,
+  required String edition,
+  required OS targetOS,
+  required Architecture targetArchitecture,
+}) {
+  final os = _mapOS(targetOS);
+  final arch = _mapArchitecture(targetArchitecture);
+  final config = dl.DatabaseDebugSymbolsPackageConfig(
+    os: os,
+    architectures: _cbliteArchitectures(os, arch),
+    release: _cbliteRelease,
+    edition: edition == 'enterprise'
+        ? dl.Edition.enterprise
+        : dl.Edition.community,
+  );
+  final cacheDir = p.join(
+    input.outputDirectoryShared.toFilePath(),
+    'cblite-debug-symbols-$edition-${os.name}-${arch.name}-$_cbliteRelease',
+  );
+  return dl.RemotePackageLoader(cacheDir: cacheDir).load(config);
+}
+
+Future<dl.Package> _downloadVectorSearchDebugSymbols({
+  required BuildInput input,
+  required OS targetOS,
+  required Architecture targetArchitecture,
+}) {
+  final os = _mapOS(targetOS);
+  final arch = _mapArchitecture(targetArchitecture);
+  final config = dl.VectorSearchDebugSymbolsPackageConfig(
+    os: os,
+    architectures: _vsArchitectures(os, arch),
+    release: _vectorSearchRelease,
+  );
+  final cacheDir = p.join(
+    input.outputDirectoryShared.toFilePath(),
+    'vector-search-debug-symbols-${os.name}-${arch.name}-$_vectorSearchRelease',
+  );
+  return dl.RemotePackageLoader(cacheDir: cacheDir).load(config);
+}
+
+String _findIOSFrameworkDebugSymbolsDir({
+  required dl.Package package,
+  required BuildInput input,
+  required String frameworkName,
+}) {
+  final targetSdk = input.config.code.iOS.targetSdk;
+  final sliceDir = switch (targetSdk) {
+    IOSSdk.iPhoneOS => 'ios-arm64',
+    IOSSdk.iPhoneSimulator => 'ios-arm64_x86_64-simulator',
+    _ => throw BuildError(message: 'Unsupported iOS SDK: $targetSdk'),
+  };
+  final xcframeworkName = frameworkName.startsWith('CouchbaseLiteVectorSearch')
+      ? 'CouchbaseLiteVectorSearch.xcframework'
+      : 'CouchbaseLite.xcframework';
+  return p.join(
+    package.packageDir,
+    xcframeworkName,
+    sliceDir,
+    'dSYMs',
+    frameworkName,
+  );
+}
+
+Future<String> _stageDebugSymbolsFile({
+  required String sourceFile,
+  required String stagingDir,
+}) async {
+  final destPath = p.join(stagingDir, p.basename(sourceFile));
+  await File(sourceFile).copy(destPath);
+  return destPath;
+}
+
+Future<String> _stageDebugSymbolsDirectory({
+  required String sourceDir,
+  required String stagingDir,
+}) async {
+  final destDir = p.join(stagingDir, p.basename(sourceDir));
+  await _copyDirectory(sourceDir, destDir);
+  return destDir;
+}
+
+Future<List<String>> _findCblitedartDebugSymbols({
+  required OS targetOS,
+  required String outputDir,
+}) async {
+  if (targetOS != OS.windows) {
+    return const [];
+  }
+
+  final pdbFile = File(p.join(outputDir, 'cblitedart.pdb'));
+  return pdbFile.existsSync() ? [pdbFile.path] : const [];
+}
+
+Future<List<String>> _expandDebugSymbolPaths(List<String> paths) async {
+  final files = <String>[];
+  for (final path in paths) {
+    final type = FileSystemEntity.typeSync(path);
+    if (type == FileSystemEntityType.file) {
+      files.add(path);
+      continue;
+    }
+    if (type == FileSystemEntityType.directory) {
+      await for (final entity in Directory(path).list(recursive: true)) {
+        if (entity is File) {
+          files.add(entity.path);
+        }
+      }
+    }
+  }
+  return files;
+}
+
+Future<void> _copyDirectory(String sourceDir, String destinationDir) async {
+  final source = Directory(sourceDir);
+  await Directory(destinationDir).create(recursive: true);
+
+  await for (final entity in source.list(recursive: true, followLinks: false)) {
+    final relativePath = p.relative(entity.path, from: sourceDir);
+    final destPath = p.join(destinationDir, relativePath);
+
+    if (entity is Directory) {
+      await Directory(destPath).create(recursive: true);
+    } else if (entity is File) {
+      await File(destPath).create(recursive: true);
+      await entity.copy(destPath);
+    } else if (entity is Link) {
+      await Link(destPath).create(await entity.target());
+    }
+  }
+}
+
 /// Stages cblite library files into the staging directory for linking and
 /// bundling. Returns the URI of the shared library to register as a code asset.
 Future<Uri> _stageCblite(
-  ({Uri libPath, String includeDir}) cblite, {
+  ({Uri libPath, String includeDir, dl.Package package}) cblite, {
   required String stagingDir,
   required OS targetOS,
   required Architecture targetArchitecture,

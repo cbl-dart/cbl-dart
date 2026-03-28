@@ -2,6 +2,7 @@ import 'dart:ffi' show Abi;
 import 'dart:io';
 
 import 'package:code_assets/code_assets.dart';
+import 'package:data_assets/data_assets.dart';
 import 'package:hooks/hooks.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
@@ -97,6 +98,104 @@ void main() {
             vectorSearch: false,
           );
           _expectCommunityEditionCache(input);
+        },
+      );
+    },
+  );
+
+  test(
+    'bundles cblite debug symbols when requested',
+    skip: hostTarget == null
+        ? 'No supported host target is available for this platform.'
+        : null,
+    timeout: const Timeout(Duration(minutes: 5)),
+    () async {
+      final target = hostTarget!;
+      await _testBuildHookWithDataAssets(
+        targetOS: target.os,
+        targetArchitecture: target.arch,
+        userDefines: PackageUserDefines(
+          workspacePubspec: PackageUserDefinesSource(
+            defines: {'debug_symbols': true},
+            basePath: Directory.current.uri,
+          ),
+        ),
+        check: (input, output) async {
+          final dataAssets = output.assets.encodedAssets
+              .where((asset) => asset.isDataAsset)
+              .map((asset) => asset.asDataAsset)
+              .toList();
+          expect(dataAssets, isNotEmpty);
+
+          final expectedSuffix = switch (target.os) {
+            OS.macOS => p.join(
+              'libcblite.dylib.dSYM',
+              'Contents',
+              'Info.plist',
+            ),
+            OS.linux => 'libcblite.so.sym',
+            OS.windows => 'cblite.pdb',
+            _ => throw UnsupportedError('Unsupported OS: ${target.os}'),
+          };
+          expect(
+            dataAssets.any(
+              (asset) => asset.file.toFilePath().endsWith(expectedSuffix),
+            ),
+            isTrue,
+          );
+        },
+      );
+    },
+  );
+
+  test(
+    'bundles vector search debug symbols when requested',
+    skip: switch (hostTarget) {
+      null => 'No supported host target is available for this platform.',
+      (os: OS.linux, arch: Architecture.x64) ||
+      (os: OS.macOS, arch: _) ||
+      (os: OS.windows, arch: _) => null,
+      _ =>
+        'Vector search debug symbol test is only enabled on supported hosts.',
+    },
+    timeout: const Timeout(Duration(minutes: 5)),
+    () async {
+      final target = hostTarget!;
+      await _testBuildHookWithDataAssets(
+        targetOS: target.os,
+        targetArchitecture: target.arch,
+        userDefines: PackageUserDefines(
+          workspacePubspec: PackageUserDefinesSource(
+            defines: {
+              'edition': 'enterprise',
+              'vector_search': true,
+              'debug_symbols': true,
+            },
+            basePath: Directory.current.uri,
+          ),
+        ),
+        check: (input, output) async {
+          final dataAssets = output.assets.encodedAssets
+              .where((asset) => asset.isDataAsset)
+              .map((asset) => asset.asDataAsset)
+              .toList();
+
+          final expectedSuffix = switch (target.os) {
+            OS.macOS => p.join(
+              'CouchbaseLiteVectorSearch.dSYM',
+              'Contents',
+              'Info.plist',
+            ),
+            OS.linux => 'CouchbaseLiteVectorSearch.so.sym',
+            OS.windows => 'CouchbaseLiteVectorSearch.pdb',
+            _ => throw UnsupportedError('Unsupported OS: ${target.os}'),
+          };
+          expect(
+            dataAssets.any(
+              (asset) => asset.file.toFilePath().endsWith(expectedSuffix),
+            ),
+            isTrue,
+          );
         },
       );
     },
@@ -339,6 +438,33 @@ Future<void> _runBuildHookDirect({
   } finally {
     tempDir.deleteSync(recursive: true);
   }
+}
+
+Future<void> _testBuildHookWithDataAssets({
+  required OS targetOS,
+  required Architecture targetArchitecture,
+  required PackageUserDefines userDefines,
+  required Future<void> Function(BuildInput input, BuildOutput output) check,
+}) {
+  final codeExtension = CodeAssetExtension(
+    linkModePreference: LinkModePreference.dynamic,
+    targetArchitecture: targetArchitecture,
+    targetOS: targetOS,
+    iOS: targetOS == OS.iOS
+        ? IOSCodeConfig(targetSdk: IOSSdk.iPhoneOS, targetVersion: 17)
+        : null,
+    macOS: targetOS == OS.macOS ? MacOSCodeConfig(targetVersion: 13) : null,
+    android: targetOS == OS.android
+        ? AndroidCodeConfig(targetNdkApi: 30)
+        : null,
+  );
+
+  return testBuildHook(
+    mainMethod: hook.main,
+    userDefines: userDefines,
+    extensions: [codeExtension, DataAssetsExtension()],
+    check: check,
+  );
 }
 
 void _expectCommunityEditionCache(BuildInput input) {

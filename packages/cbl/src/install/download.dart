@@ -29,6 +29,8 @@ enum Library {
   };
 }
 
+enum PackageType { library, debugSymbols }
+
 enum Edition { community, enterprise }
 
 enum ArchiveFormat {
@@ -62,6 +64,7 @@ enum Architecture {
 abstract final class PackageConfig {
   PackageConfig({
     required this.library,
+    this.packageType = PackageType.library,
     required this.os,
     required this.architectures,
     required this.release,
@@ -69,6 +72,7 @@ abstract final class PackageConfig {
   });
 
   final Library library;
+  final PackageType packageType;
   final OS os;
   final List<Architecture> architectures;
   final String release;
@@ -84,6 +88,18 @@ abstract final class PackageConfig {
 
   String get _archiveUrl;
 
+  String? get packageRootDirName => switch (packageType) {
+    PackageType.library => switch (library) {
+      Library.cblite => 'libcblite-$version',
+      Library.vectorSearch => null,
+    },
+    PackageType.debugSymbols => switch ((library, os)) {
+      (Library.cblite, OS.macOS || OS.linux) => 'libcblite-$version',
+      (Library.cblite, OS.android || OS.iOS || OS.windows) => null,
+      (Library.vectorSearch, _) => null,
+    },
+  };
+
   Package _package(String packageDir) =>
       Package(config: this, packageDir: packageDir);
 
@@ -97,10 +113,7 @@ final class Package {
   final String packageDir;
 
   String get rootDir {
-    final rootDirName = switch (config.library) {
-      Library.cblite => 'libcblite-${config.version}',
-      Library.vectorSearch => null,
-    };
+    final rootDirName = config.packageRootDirName;
     return rootDirName != null ? p.join(packageDir, rootDirName) : packageDir;
   }
 
@@ -157,6 +170,40 @@ final class DatabasePackageConfig extends PackageConfig {
   ).toString();
 }
 
+final class DatabaseDebugSymbolsPackageConfig extends PackageConfig {
+  DatabaseDebugSymbolsPackageConfig({
+    required super.os,
+    required super.architectures,
+    required super.release,
+    required this.edition,
+  }) : super(
+         library: Library.cblite,
+         packageType: PackageType.debugSymbols,
+         archiveFormat: os == OS.linux
+             ? ArchiveFormat.tarGz
+             : ArchiveFormat.zip,
+       );
+
+  final Edition edition;
+
+  @override
+  String get _archiveUrl => Uri(
+    scheme: 'https',
+    host: 'packages.couchbase.com',
+    pathSegments: [
+      'releases',
+      'couchbase-lite-c',
+      release,
+      [
+        'couchbase-lite-c',
+        edition.name,
+        release,
+        '$targetId-symbols.${archiveFormat.extension}',
+      ].join('-'),
+    ],
+  ).toString();
+}
+
 final class VectorSearchPackageConfig extends PackageConfig {
   VectorSearchPackageConfig({
     required super.os,
@@ -192,6 +239,41 @@ final class VectorSearchPackageConfig extends PackageConfig {
           '.',
           archiveFormat.extension,
         ].join(),
+    ],
+  ).toString();
+}
+
+final class VectorSearchDebugSymbolsPackageConfig extends PackageConfig {
+  VectorSearchDebugSymbolsPackageConfig({
+    required super.os,
+    required super.architectures,
+    required super.release,
+  }) : super(
+         library: Library.vectorSearch,
+         packageType: PackageType.debugSymbols,
+         archiveFormat: os == OS.linux ? ArchiveFormat.zip : ArchiveFormat.zip,
+       );
+
+  @override
+  String get _archiveUrl => Uri(
+    scheme: 'https',
+    host: 'packages.couchbase.com',
+    pathSegments: [
+      'releases',
+      'couchbase-lite-vector-search',
+      release,
+      [
+        'couchbase-lite-vector-search',
+        release,
+        os._couchbaseSdkName,
+        if (!isMultiArchitecture) ...[
+          if (os == OS.android && architectures.single == Architecture.arm64)
+            'arm64-v8a'
+          else
+            architectures.single.couchbaseSdkName,
+        ],
+        'symbols.${archiveFormat.extension}',
+      ].join('-'),
     ],
   ).toString();
 }

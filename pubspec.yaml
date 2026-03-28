@@ -9,6 +9,7 @@ hooks:
     cbl:
       edition: enterprise
       vector_search: true
+      debug_symbols: true
 
 workspace:
   - packages/benchmark

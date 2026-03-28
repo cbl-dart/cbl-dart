@@ -74,6 +74,7 @@ hooks:
   user_defines:
     cbl:
       edition: enterprise
+      debug_symbols: true
 ```
 
 ## Related Packages
