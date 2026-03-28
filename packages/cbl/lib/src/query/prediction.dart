@@ -122,13 +122,13 @@ abstract final class Prediction {
 final class PredictionImpl implements Prediction {
   @override
   void registerModel(String name, PredictiveModel model) {
-    useEnterpriseFeature(EnterpriseFeature.prediction);
+    requireEnterprise('Prediction');
     _FfiPredictiveModel(name, model);
   }
 
   @override
   void unregisterModel(String name) {
-    useEnterpriseFeature(EnterpriseFeature.prediction);
+    requireEnterprise('Prediction');
     QueryBindings.unregisterPredictiveModel(name);
   }
 }

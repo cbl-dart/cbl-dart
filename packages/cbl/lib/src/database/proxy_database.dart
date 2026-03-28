@@ -600,7 +600,7 @@ final class ProxyCollection extends ProxyObject
   @override
   Future<void> createIndex(String name, covariant IndexImplInterface index) {
     if (index is VectorIndexConfiguration) {
-      useEnterpriseFeature(EnterpriseFeature.vectorIndex);
+      requireEnterprise('Vector indexes');
     }
 
     return use(

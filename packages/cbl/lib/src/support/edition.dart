@@ -2,24 +2,6 @@ import '../bindings/cblitedart.dart' as cblitedart;
 
 enum Edition { community, enterprise }
 
-enum EnterpriseFeature {
-  localDbReplication,
-  databaseEncryption,
-  propertyEncryption,
-  prediction,
-  vectorIndex,
-  peerToPeerSync;
-
-  String get description => switch (this) {
-    localDbReplication => 'Local database replication',
-    databaseEncryption => 'Database encryption',
-    propertyEncryption => 'Property encryption',
-    prediction => 'Prediction',
-    vectorIndex => 'Vector index',
-    peerToPeerSync => 'Peer-to-peer sync',
-  };
-}
-
 Edition get activeEdition =>
     _activeEditionOverride ??
     (cblitedart.CBLDart_IsEnterprise()
@@ -32,10 +14,10 @@ set activeEditionOverride(Edition? edition) {
   _activeEditionOverride = edition;
 }
 
-void useEnterpriseFeature(EnterpriseFeature feature) {
+void requireEnterprise(String capability) {
   if (activeEdition != Edition.enterprise) {
     throw StateError(
-      '${feature.description} is only available in the Enterprise Edition.',
+      '$capability is only available in the Enterprise Edition.',
     );
   }
 }

@@ -67,7 +67,7 @@ final class FfiReplicator
 
     var target = config.target;
     if (target is DatabaseEndpoint) {
-      useEnterpriseFeature(EnterpriseFeature.localDbReplication);
+      requireEnterprise('Local database replication');
 
       final targetDatabase = target.database;
       if (targetDatabase is ProxyDatabase) {
@@ -83,7 +83,7 @@ final class FfiReplicator
         );
       }
     } else if (target is NativeDatabaseEndpoint) {
-      useEnterpriseFeature(EnterpriseFeature.localDbReplication);
+      requireEnterprise('Local database replication');
     }
 
     final fleeceContainers = <Object>[];
@@ -218,7 +218,7 @@ final class FfiReplicator
 
   @override
   Certificate? get serverCertificate => useSync(() {
-    useEnterpriseFeature(EnterpriseFeature.peerToPeerSync);
+    requireEnterprise('Replicator server certificates');
     return ReplicatorBindings.serverCertificate(
       pointer,
     )?.let((pointer) => FfiCertificate.fromPointer(pointer, adopt: true));

@@ -90,7 +90,7 @@ final class _ListenerPasswordAuthenticator extends FfiListenAuthenticator
   factory _ListenerPasswordAuthenticator(
     ListenerPasswordAuthenticatorFunction handler,
   ) {
-    useEnterpriseFeature(EnterpriseFeature.peerToPeerSync);
+    requireEnterprise('Peer-to-peer sync');
 
     Future<void> trampoline(
       CBLDart_Completer completer,
@@ -181,7 +181,7 @@ final class _ListenerCertificateAuthenticator extends FfiListenAuthenticator
   factory _ListenerCertificateAuthenticator(
     ListenerCertificateAuthenticatorFunction handler,
   ) {
-    useEnterpriseFeature(EnterpriseFeature.peerToPeerSync);
+    requireEnterprise('Peer-to-peer sync');
 
     Future<void> trampoline(
       CBLDart_Completer completer,
@@ -231,7 +231,7 @@ final class _ListenerCertificateAuthenticatorFromRoots
   factory _ListenerCertificateAuthenticatorFromRoots(
     List<Certificate> certificates,
   ) {
-    useEnterpriseFeature(EnterpriseFeature.peerToPeerSync);
+    requireEnterprise('Peer-to-peer sync');
 
     return _ListenerCertificateAuthenticatorFromRoots.fromPointer(
       UrlEndpointListenerBindings.createCertificateAuthenticatorWithRoots(
@@ -460,7 +460,7 @@ final class FfiUrlEndpointListener implements UrlEndpointListener, Finalizable {
   static Future<FfiUrlEndpointListener> create(
     UrlEndpointListenerConfiguration config,
   ) async {
-    useEnterpriseFeature(EnterpriseFeature.peerToPeerSync);
+    requireEnterprise('Peer-to-peer sync');
 
     final pointer = await _create(
       collections: config.collections

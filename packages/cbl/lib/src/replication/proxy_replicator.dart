@@ -51,7 +51,7 @@ final class ProxyReplicator extends ProxyObject
     final configTarget = config.target;
     Endpoint target;
     if (configTarget is DatabaseEndpoint) {
-      useEnterpriseFeature(EnterpriseFeature.localDbReplication);
+      requireEnterprise('Local database replication');
 
       final targetDatabase = configTarget.database;
       if (targetDatabase is ProxyDatabase) {

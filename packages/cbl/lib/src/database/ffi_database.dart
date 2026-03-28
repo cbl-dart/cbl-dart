@@ -495,7 +495,7 @@ final class FfiCollection
   @override
   void createIndex(String name, covariant IndexImplInterface index) {
     if (index is VectorIndexConfiguration) {
-      useEnterpriseFeature(EnterpriseFeature.vectorIndex);
+      requireEnterprise('Vector indexes');
     }
 
     useSync(() {
