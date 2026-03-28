@@ -146,7 +146,7 @@ final class DatabaseConfiguration {
   /// Does not copy [encryptionKey], to reduce locations and length of storage
   /// of security sensitive key material.
   DatabaseConfiguration.from(DatabaseConfiguration config)
-    : this(directory: config.directory);
+    : this(directory: config.directory, fullSync: config.fullSync);
 
   /// Path to the directory to store the [Database] in.
   ///

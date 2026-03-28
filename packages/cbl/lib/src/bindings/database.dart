@@ -297,6 +297,8 @@ final class DatabaseBindings {
       result.ref.encryptionKey = key.ref;
     }
 
+    result.ref.fullSync = config.fullSync;
+
     return result;
   }
 }
