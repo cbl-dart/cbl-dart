@@ -163,7 +163,7 @@ void validateNativeLibraryRequest(NativeLibraryRequest request) {
 }
 
 IOSSdk _defaultIOSSdkForAssembly(Architecture architecture) {
-  if (architecture == currentHostArchitecture()) {
+  if (architecture == Architecture.x64) {
     return IOSSdk.iPhoneSimulator;
   }
   return IOSSdk.iPhoneOS;

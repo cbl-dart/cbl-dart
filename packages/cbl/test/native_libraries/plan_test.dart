@@ -1,5 +1,6 @@
 import 'package:args/args.dart';
 import 'package:cbl/src/native_libraries.dart';
+import 'package:code_assets/code_assets.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -44,6 +45,20 @@ void main() {
       );
 
       expect(() => resolveNativeLibrariesPlan(request), returnsNormally);
+    });
+
+    test('defaults x64 iOS targets to the simulator SDK', () {
+      final plan = resolveNativeLibrariesPlan(
+        NativeLibraryRequest(
+          editions: {Edition.community},
+          vectorSearch: false,
+          outputDirectory: 'build/cbl-native-libraries',
+          platforms: {OS.iOS},
+          architectures: {Architecture.x64},
+        ),
+      );
+
+      expect(plan.targets.single.target.iOSSdk, IOSSdk.iPhoneSimulator);
     });
   });
 }

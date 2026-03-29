@@ -46,17 +46,20 @@ Future<void> buildHook(BuildInput input, BuildOutputBuilder output) async {
     ),
   );
 
-  final cblitedartCacheDir = await native.ensureCblitedartBuildCache(
-    packageRoot: input.packageRoot,
+  final cblitedartOutput = BuildOutputBuilder();
+  await native.buildCblitedartAsset(
+    input: input,
+    output: cblitedartOutput,
+    cbliteIncludeDir: cblite.includeDir,
+    cbliteFrameworkSearchPath: cblite.frameworkSearchPath,
     edition: edition,
-    targetOS: targetOS,
-    targetArchitecture: targetArchitecture,
-    targetIOSSdk: targetOS == OS.iOS ? input.config.code.iOS.targetSdk : null,
   );
-
-  final cblitedartBinary = native.findCblitedartBinary(cblitedartCacheDir);
+  final cblitedartAsset = cblitedartOutput.build().assets.code.singleWhere(
+    (asset) => asset.id == 'package:cbl/src/bindings/cblitedart.dart',
+  );
+  final cblitedartBinary = File.fromUri(cblitedartAsset.file!);
   final cblitedartDest = p.join(libDir, p.basename(cblitedartBinary.path));
-  await File(cblitedartBinary.path).copy(cblitedartDest);
+  await cblitedartBinary.copy(cblitedartDest);
   output.assets.code.add(
     CodeAsset(
       package: 'cbl',
@@ -66,10 +69,7 @@ Future<void> buildHook(BuildInput input, BuildOutputBuilder output) async {
     ),
   );
 
-  for (final entity in cblitedartCacheDir.listSync()) {
-    if (p.basename(entity.path) == p.basename(cblitedartBinary.path)) {
-      continue;
-    }
+  for (final entity in native.findDebugCompanions(cblitedartBinary)) {
     await native.stagePath(
       source: entity.path,
       destination: p.join(libDir, p.basename(entity.path)),

@@ -417,6 +417,7 @@ void _checkAssets({
   final cblitedartAsset = codeAssets.singleWhere((a) => a.id == cblitedartId);
   expect(cblitedartAsset.linkMode, isA<DynamicLoadingBundled>());
   expect(File.fromUri(cblitedartAsset.file!).existsSync(), isTrue);
+  expect(cblitedartAsset.file!.toFilePath(), startsWith(libDir));
 
   final expectedCblitedartExt = switch (targetOS) {
     OS.macOS || OS.iOS => '.dylib',

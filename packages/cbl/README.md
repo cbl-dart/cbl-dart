@@ -78,8 +78,8 @@ hooks:
 
 ## Native Libraries
 
-To assemble native runtime libraries together with their debug-symbol files,
-run:
+To assemble downloadable native libraries together with their debug-symbol
+files for Sentry uploads, run:
 
 ```bash
 dart run cbl:cbl native-libraries assemble

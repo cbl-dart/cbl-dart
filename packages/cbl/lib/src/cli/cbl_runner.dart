@@ -78,27 +78,7 @@ Future<void> runCblCli(List<String> args) async {
         mode: StageMode.symlink,
       );
     }
-
-    if (canBuildLocally(target.os, target.architecture)) {
-      final buildDir = await ensureCblitedartBuildCache(
-        packageRoot: _packageRootUri(),
-        edition: resolvedTarget.edition,
-        targetOS: target.os,
-        targetArchitecture: target.architecture,
-        targetIOSSdk: target.iOSSdk,
-      );
-      await stageDirectoryContents(
-        sourceDir: buildDir.path,
-        destinationDir: '$targetDir${Platform.pathSeparator}cblitedart',
-        mode: StageMode.symlink,
-      );
-    }
   }
-}
-
-Uri _packageRootUri() {
-  final scriptFile = File.fromUri(Platform.script);
-  return scriptFile.parent.parent.uri;
 }
 
 void _printUsage(ArgParser parser) {
