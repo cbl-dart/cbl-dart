@@ -51,6 +51,10 @@ await Sentry.init(
 
 **[Read the full documentation at cbl-dart.dev](https://cbl-dart.dev)**
 
+For native crash symbol uploads, see the `cbl native-libraries assemble`
+workflow in the main docs:
+[cbl-dart.dev/native-libraries](https://cbl-dart.dev/native-libraries)
+
 ## Contributing
 
 Pull requests are welcome. For major changes, please open an

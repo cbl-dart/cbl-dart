@@ -76,6 +76,18 @@ hooks:
       edition: enterprise
 ```
 
+## Native Libraries
+
+To assemble native runtime libraries together with their debug-symbol files,
+run:
+
+```bash
+dart run cbl:cbl native-libraries assemble
+```
+
+See the full guide at
+[cbl-dart.dev/native-libraries](https://cbl-dart.dev/native-libraries).
+
 ## Related Packages
 
 - [cbl_sentry](https://pub.dev/packages/cbl_sentry) — Sentry integration for

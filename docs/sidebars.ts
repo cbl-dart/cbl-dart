@@ -135,6 +135,10 @@ export default {
       id: 'supported-platforms',
     },
     {
+      type: 'doc',
+      id: 'native-libraries',
+    },
+    {
       type: 'category',
       label: 'References',
       collapsed: true,
