@@ -136,14 +136,6 @@ function runUnitTests() {
     esac
 }
 
-function prepareStandaloneSanitizerE2ETests() {
-    requireEnvVar TEST_PACKAGE
-    requireEnvVar DART_TEST_PLATFORM
-
-    cd "$workspaceDir"
-    dart pub get
-}
-
 function _prepareStandaloneSanitizerNativeAssets() {
     requireEnvVar DART_TEST_PLATFORM
 

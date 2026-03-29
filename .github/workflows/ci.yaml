@@ -208,7 +208,7 @@ jobs:
 
   test-e2e:
     name: E2E tests
-    timeout-minutes: 15
+    timeout-minutes: 25
     strategy:
       fail-fast: false
       matrix:
@@ -219,6 +219,13 @@ jobs:
           - Android
           - Ubuntu
           - Windows
+        test_platform: [""]
+        include:
+          # `vm-asan` currently requires the raw Dart SDK from the `main`
+          # channel, so we run it as an extra standalone Ubuntu matrix leg.
+          - embedder: standalone
+            os: Ubuntu
+            test_platform: vm-asan
         exclude:
           - embedder: standalone
             os: iOS
@@ -239,6 +246,7 @@ jobs:
     env:
       EMBEDDER: ${{ matrix.embedder }}
       TARGET_OS: ${{ matrix.os }}
+      DART_TEST_PLATFORM: ${{ matrix.test_platform }}
       TEST_PACKAGE: >-
         ${{ fromJSON('{
           "standalone":"cbl_e2e_tests_standalone_dart",
@@ -289,6 +297,13 @@ jobs:
           pub-cache-hash-pattern: pubspec.lock
           cache-provider: ${{ (matrix.os == 'iOS' && matrix.embedder == 'flutter') && 'warp' || 'github' }}
 
+      - name: Setup Dart SDK
+        if: matrix.test_platform == 'vm-asan'
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: main
+          flavor: raw
+
       - name: Enable Flutter native assets
         if: matrix.embedder == 'flutter'
         run: flutter config --enable-native-assets
@@ -318,67 +333,6 @@ jobs:
         run: ./tools/ci-steps.sh startVirtualDevices
 
       - name: Run tests
-        timeout-minutes: 10
-        shell: bash
-        run: ./tools/ci-steps.sh runE2ETests
-
-      - name: Collect test results
-        if: failure()
-        shell: bash
-        run: ./tools/ci-steps.sh collectTestResults
-
-      - name: Upload test results
-        if: failure()
-        uses: actions/upload-artifact@v7
-        with:
-          name: test-results-${{ matrix.os }}-${{ matrix.embedder }}
-          path: test-results
-
-      - name: Upload coverage data
-        # Disabled until we figure out how to get coverage data from flutter tests
-        if: ${{ matrix.embedder != 'flutter' }}
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-        shell: bash
-        run: |
-          ./tools/ci-steps.sh uploadCoverageData "e2e.cbl.${{ matrix.embedder }}.${{ matrix.os }}"
-
-  test-e2e-vm-asan:
-    name: E2E tests (vm-asan)
-    timeout-minutes: 25
-    runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-4cpu
-    env:
-      EMBEDDER: standalone
-      TARGET_OS: Ubuntu
-      TEST_PACKAGE: cbl_e2e_tests_standalone_dart
-      DART_TEST_PLATFORM: vm-asan
-    steps:
-      - uses: runs-on/action@v2
-      - name: Checkout repository
-        uses: actions/checkout@v6
-
-      - name: Setup Flutter
-        uses: ./.github/actions/setup-flutter
-        with:
-          channel: ${{ env.flutter-channel }}
-          cache: true
-          pub-cache-hash-pattern: pubspec.lock
-
-      - name: Setup Dart SDK
-        uses: dart-lang/setup-dart@v1
-        with:
-          sdk: main
-          flavor: raw
-
-      - name: Get dependencies
-        shell: bash
-        run: ./tools/ci-steps.sh prepareStandaloneSanitizerE2ETests
-
-      - name: Start Couchbase services
-        shell: bash
-        run: ./tools/ci-steps.sh startCouchbaseServices
-
-      - name: Run tests
         timeout-minutes: 20
         shell: bash
         run: ./tools/ci-steps.sh runE2ETests
@@ -392,5 +346,14 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v7
         with:
-          name: test-results-Ubuntu-standalone-vm-asan
+          name: test-results-${{ matrix.os }}-${{ matrix.embedder }}${{ matrix.test_platform && format('-{0}', matrix.test_platform) || '' }}
           path: test-results
+
+      - name: Upload coverage data
+        # Disabled until we figure out how to get coverage data from flutter tests
+        if: ${{ matrix.embedder != 'flutter' && matrix.test_platform == '' }}
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        shell: bash
+        run: |
+          ./tools/ci-steps.sh uploadCoverageData "e2e.cbl.${{ matrix.embedder }}.${{ matrix.os }}"
