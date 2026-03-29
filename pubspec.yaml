@@ -31,6 +31,9 @@ dev_dependencies:
 
 dependency_overrides:
   meta: ^1.18.0
+  test: 1.31.0
+  test_api: 0.7.11
+  test_core: 0.6.17
 
 melos:
   repository: https://github.com/cbl-dart/cbl-dart

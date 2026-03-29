@@ -351,10 +351,18 @@ jobs:
       EMBEDDER: standalone
       TARGET_OS: Ubuntu
       TEST_PACKAGE: cbl_e2e_tests_standalone_dart
+      DART_TEST_PLATFORM: vm-asan
     steps:
       - uses: runs-on/action@v2
       - name: Checkout repository
         uses: actions/checkout@v6
+
+      - name: Setup Flutter
+        uses: ./.github/actions/setup-flutter
+        with:
+          channel: ${{ env.flutter-channel }}
+          cache: true
+          pub-cache-hash-pattern: pubspec.lock
 
       - name: Setup Dart SDK
         uses: dart-lang/setup-dart@v1
@@ -364,15 +372,7 @@ jobs:
 
       - name: Get dependencies
         shell: bash
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          pubspec = Path('pubspec.yaml')
-          pubspec.write_text(
-              pubspec.read_text().replace('  - packages/cbl_e2e_tests_flutter\n', ''),
-          )
-          PY
-          dart pub upgrade test test_api test_core
+        run: ./tools/ci-steps.sh prepareStandaloneSanitizerE2ETests
 
       - name: Start Couchbase services
         shell: bash
@@ -381,39 +381,7 @@ jobs:
       - name: Run tests
         timeout-minutes: 20
         shell: bash
-        run: |
-          cd packages/cbl_e2e_tests_standalone_dart
-          export ENABLE_TIME_BOMB=true
-          ulimit -c unlimited
-
-          # `dart test -p vm-asan` compiles test suites to native shared
-          # libraries, but that execution path does not currently wire native
-          # assets into the generated process. Build hooks still materialize the
-          # native libraries into `.dart_tool/lib`, so preload them to satisfy
-          # `@ffi.DefaultAsset`'s fallback to process symbol lookup.
-          dart test --help >/dev/null
-
-          native_lib_dir="$PWD/.dart_tool/lib"
-          export LD_LIBRARY_PATH="$native_lib_dir${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-
-          libcblite="$(find "$native_lib_dir" -maxdepth 1 -type f -name 'libcblite.so*' | head -n 1)"
-          libcblitedart="$(find "$native_lib_dir" -maxdepth 1 -type f -name 'libcblitedart.so*' | head -n 1)"
-          extra_libs="$(find "$native_lib_dir" -maxdepth 1 -type f \( -name '*.so' -o -name '*.so.*' \) \
-            ! -name 'libcblite.so*' \
-            ! -name 'libcblitedart.so*' | sort | paste -sd ':' -)"
-
-          preload_libs=()
-          [ -n "$libcblite" ] && preload_libs+=("$libcblite")
-          [ -n "$libcblitedart" ] && preload_libs+=("$libcblitedart")
-          [ -n "$extra_libs" ] && preload_libs+=("$extra_libs")
-
-          if [ "${#preload_libs[@]}" -eq 0 ]; then
-            echo "No native libraries found to preload in $native_lib_dir"
-            exit 1
-          fi
-
-          export LD_PRELOAD="$(IFS=:; echo "${preload_libs[*]}")"
-          dart test -p vm-asan -r expanded -j 1
+        run: ./tools/ci-steps.sh runE2ETests
 
       - name: Collect test results
         if: failure()

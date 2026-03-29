@@ -136,6 +136,49 @@ function runUnitTests() {
     esac
 }
 
+function prepareStandaloneSanitizerE2ETests() {
+    requireEnvVar TEST_PACKAGE
+    requireEnvVar DART_TEST_PLATFORM
+
+    cd "$workspaceDir"
+    dart pub get
+}
+
+function _prepareStandaloneSanitizerNativeAssets() {
+    requireEnvVar DART_TEST_PLATFORM
+
+    # `dart test -p vm-asan` compiles test suites to native shared libraries,
+    # but that execution path does not currently wire native assets into the
+    # generated process. Build hooks still materialize the native libraries
+    # into `.dart_tool/lib`, so preload them to satisfy `@ffi.DefaultAsset`'s
+    # fallback to process symbol lookup.
+    dart test --help >/dev/null
+
+    local nativeLibDir="$PWD/.dart_tool/lib"
+    export LD_LIBRARY_PATH="$nativeLibDir${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+
+    local libcblite
+    libcblite="$(find "$nativeLibDir" -maxdepth 1 -type f -name 'libcblite.so*' | head -n 1)"
+    local libcblitedart
+    libcblitedart="$(find "$nativeLibDir" -maxdepth 1 -type f -name 'libcblitedart.so*' | head -n 1)"
+    local extraLibs
+    extraLibs="$(find "$nativeLibDir" -maxdepth 1 -type f \( -name '*.so' -o -name '*.so.*' \) \
+        ! -name 'libcblite.so*' \
+        ! -name 'libcblitedart.so*' | sort | paste -sd ':' -)"
+
+    local preloadLibs=()
+    [ -n "$libcblite" ] && preloadLibs+=("$libcblite")
+    [ -n "$libcblitedart" ] && preloadLibs+=("$libcblitedart")
+    [ -n "$extraLibs" ] && preloadLibs+=("$extraLibs")
+
+    if [ "${#preloadLibs[@]}" -eq 0 ]; then
+        echo "No native libraries found to preload in $nativeLibDir"
+        exit 1
+    fi
+
+    export LD_PRELOAD="$(IFS=:; echo "${preloadLibs[*]}")"
+}
+
 function runE2ETests() {
     requireEnvVar EMBEDDER
     requireEnvVar TARGET_OS
@@ -148,7 +191,14 @@ function runE2ETests() {
         cd "$testPackageDir"
 
         export ENABLE_TIME_BOMB=true
-        testCommand="dart test --coverage coverage/dart -r expanded -j 1"
+        testCommand="dart test -r expanded -j 1"
+
+        if [[ -n "${DART_TEST_PLATFORM:-}" ]]; then
+            testCommand="$testCommand -p $DART_TEST_PLATFORM"
+            _prepareStandaloneSanitizerNativeAssets
+        else
+            testCommand="$testCommand --coverage coverage/dart"
+        fi
 
         case "$targetOs" in
         macOS)
