@@ -185,17 +185,14 @@ final class TypedDataRegistry implements TypedDataAdapter {
         TypedDataErrorCode.typeMatchingConflict,
       );
     } else {
-      assert(() {
-        if (matchingMetadata.isNotEmpty) {
-          throw TypedDataException(
-            'Expected to find a document that matches no type matcher, '
-            'but found a document that matches the type matchers of the '
-            'following types: $matchingMetadata',
-            TypedDataErrorCode.typeMatchingConflict,
-          );
-        }
-        return true;
-      }());
+      if (matchingMetadata.isNotEmpty) {
+        throw TypedDataException(
+          'Expected to find a document that matches no type matcher, '
+          'but found a document that matches the type matchers of the '
+          'following types: $matchingMetadata',
+          TypedDataErrorCode.typeMatchingConflict,
+        );
+      }
     }
   }
 
