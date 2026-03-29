@@ -15,6 +15,98 @@ void CBLDart_FLSliceResult_ReleaseByBuf(void* buf) {
   (void)FLSliceResult_Release({buf, 0});
 }
 
+bool CBLDart_FLSlice_Equal(const void* aBuf, size_t aSize, const void* bBuf,
+                           size_t bSize) {
+  return FLSlice_Equal(FLSLICE_FROM_ARGS(aBuf, aSize),
+                       FLSLICE_FROM_ARGS(bBuf, bSize));
+}
+
+int CBLDart_FLSlice_Compare(const void* aBuf, size_t aSize, const void* bBuf,
+                            size_t bSize) {
+  return FLSlice_Compare(FLSLICE_FROM_ARGS(aBuf, aSize),
+                         FLSLICE_FROM_ARGS(bBuf, bSize));
+}
+
+FLSliceResult CBLDart_FLSlice_Copy(const void* buf, size_t size) {
+  return FLSlice_Copy(FLSLICE_FROM_ARGS(buf, size));
+}
+
+// === Data
+
+FLStringResult CBLDart_FLData_Dump(const void* dataBuf, size_t dataSize) {
+  return FLData_Dump(FLSLICE_FROM_ARGS(dataBuf, dataSize));
+}
+
+// === Value
+
+FLValue CBLDart_FLValue_FromData(const void* buf, size_t size, int trust) {
+  return FLValue_FromData(FLSLICE_FROM_ARGS(buf, size),
+                          static_cast<FLTrust>(trust));
+}
+
+// === Doc
+
+FLDoc CBLDart_FLDoc_FromResultData(const void* dataBuf, size_t dataSize,
+                                   int trust, FLSharedKeys sharedKeys,
+                                   const void* externBuf, size_t externSize) {
+  // Construct an FLSliceResult from the data. The caller is responsible for
+  // ensuring the data stays alive.
+  FLSliceResult data = {const_cast<void*>(dataBuf), dataSize};
+  return FLDoc_FromResultData(data, static_cast<FLTrust>(trust), sharedKeys,
+                              FLSLICE_FROM_ARGS(externBuf, externSize));
+}
+
+FLDoc CBLDart_FLDoc_FromJSON(const void* jsonBuf, size_t jsonSize,
+                             FLError* outError) {
+  return FLDoc_FromJSON(FLSLICE_FROM_ARGS(jsonBuf, jsonSize), outError);
+}
+
+// === Dict
+
+FLValue CBLDart_FLDict_Get(FLDict dict, const void* keyBuf, size_t keySize) {
+  return FLDict_Get(dict, FLSLICE_FROM_ARGS(keyBuf, keySize));
+}
+
+FLDictKey CBLDart_FLDictKey_Init(const void* keyBuf, size_t keySize) {
+  return FLDictKey_Init(FLSLICE_FROM_ARGS(keyBuf, keySize));
+}
+
+// === MutableDict
+
+FLSlot CBLDart_FLMutableDict_Set(FLMutableDict dict, const void* keyBuf,
+                                 size_t keySize) {
+  return FLMutableDict_Set(dict, FLSLICE_FROM_ARGS(keyBuf, keySize));
+}
+
+void CBLDart_FLMutableDict_Remove(FLMutableDict dict, const void* keyBuf,
+                                  size_t keySize) {
+  FLMutableDict_Remove(dict, FLSLICE_FROM_ARGS(keyBuf, keySize));
+}
+
+FLMutableArray CBLDart_FLMutableDict_GetMutableArray(FLMutableDict dict,
+                                                     const void* keyBuf,
+                                                     size_t keySize) {
+  return FLMutableDict_GetMutableArray(dict,
+                                       FLSLICE_FROM_ARGS(keyBuf, keySize));
+}
+
+FLMutableDict CBLDart_FLMutableDict_GetMutableDict(FLMutableDict dict,
+                                                   const void* keyBuf,
+                                                   size_t keySize) {
+  return FLMutableDict_GetMutableDict(dict, FLSLICE_FROM_ARGS(keyBuf, keySize));
+}
+
+// === Slot
+
+void CBLDart_FLSlot_SetString(FLSlot slot, const void* valueBuf,
+                              size_t valueSize) {
+  FLSlot_SetString(slot, FLSLICE_FROM_ARGS(valueBuf, valueSize));
+}
+
+void CBLDart_FLSlot_SetData(FLSlot slot, const void* dataBuf, size_t dataSize) {
+  FLSlot_SetData(slot, FLSLICE_FROM_ARGS(dataBuf, dataSize));
+}
+
 // === Decoder ================================================================
 
 static const size_t kMaxSharedKeys = 2048;
@@ -129,9 +221,11 @@ void CBLDart_FLArray_GetLoadedFLValue(FLArray array, uint32_t index,
   CBLDart_GetLoadedFLValue(value, out);
 }
 
-void CBLDart_FLDict_GetLoadedFLValue(FLDict dict, FLString key,
+void CBLDart_FLDict_GetLoadedFLValue(FLDict dict, const void* keyBuf,
+                                     size_t keySize,
                                      CBLDart_LoadedFLValue* out) {
-  CBLDart_GetLoadedFLValue(FLDict_Get(dict, key), out);
+  CBLDart_GetLoadedFLValue(FLDict_Get(dict, FLSLICE_FROM_ARGS(keyBuf, keySize)),
+                           out);
 }
 
 struct CBLDart_FLDictIterator {
@@ -242,4 +336,24 @@ bool CBLDart_FLArrayIterator_Next(CBLDart_FLArrayIterator* iterator) {
 bool CBLDart_FLEncoder_WriteArrayValue(FLEncoder encoder, FLArray array,
                                        uint32_t index) {
   return FLEncoder_WriteValue(encoder, FLArray_Get(array, index));
+}
+
+bool CBLDart_FLEncoder_WriteString(FLEncoder encoder, const void* strBuf,
+                                   size_t strSize) {
+  return FLEncoder_WriteString(encoder, FLSLICE_FROM_ARGS(strBuf, strSize));
+}
+
+bool CBLDart_FLEncoder_WriteKey(FLEncoder encoder, const void* keyBuf,
+                                size_t keySize) {
+  return FLEncoder_WriteKey(encoder, FLSLICE_FROM_ARGS(keyBuf, keySize));
+}
+
+bool CBLDart_FLEncoder_WriteData(FLEncoder encoder, const void* dataBuf,
+                                 size_t dataSize) {
+  return FLEncoder_WriteData(encoder, FLSLICE_FROM_ARGS(dataBuf, dataSize));
+}
+
+bool CBLDart_FLEncoder_ConvertJSON(FLEncoder encoder, const void* jsonBuf,
+                                   size_t jsonSize) {
+  return FLEncoder_ConvertJSON(encoder, FLSLICE_FROM_ARGS(jsonBuf, jsonSize));
 }

@@ -59,8 +59,6 @@ final class UrlEndpointListenerBindings {
   }) {
     ensureInitializedForCurrentIsolate();
     return withGlobalArena(() {
-      final config = globalArena<cblite.CBLURLEndpointListenerConfiguration>();
-
       final collectionsArray = globalArena<Pointer<cblite.CBLCollection>>(
         collections.length,
       );
@@ -68,18 +66,28 @@ final class UrlEndpointListenerBindings {
         collectionsArray[i] = collections[i];
       }
 
-      config.ref.collections = collectionsArray;
-      config.ref.collectionCount = collections.length;
-      config.ref.port = port ?? 0;
-      config.ref.networkInterface = networkInterface.toFLString();
-      config.ref.disableTLS = disableTls;
-      config.ref.tlsIdentity = tlsIdentity ?? nullptr;
-      config.ref.authenticator = authenticator ?? nullptr;
-      config.ref.enableDeltaSync = enableDeltaSync;
-      config.ref.readOnly = readOnly;
+      Pointer<Void> niBuf = nullptr;
+      var niSize = 0;
+      if (networkInterface != null) {
+        final (:buf, :size) = encodeStringToArena(
+          networkInterface,
+          globalArena,
+        );
+        niBuf = buf;
+        niSize = size;
+      }
 
-      return cblite.CBLURLEndpointListener_Create(
-        config,
+      return cblitedart.CBLDart_CBLURLEndpointListener_Create(
+        collectionsArray,
+        collections.length,
+        port ?? 0,
+        niBuf,
+        niSize,
+        disableTls,
+        tlsIdentity ?? nullptr,
+        authenticator ?? nullptr,
+        enableDeltaSync,
+        readOnly,
         globalCBLError,
       ).checkError();
     });

@@ -3,10 +3,21 @@
 #include "CBLDart_Export.h"
 #include "dart/dart_api_dl.h"
 #ifdef CBL_FRAMEWORK_HEADERS
+#include <CouchbaseLite/FLExpert.h>
 #include <CouchbaseLite/Fleece.h>
 #else
+#include "fleece/FLExpert.h"
 #include "fleece/Fleece.h"
 #endif
+
+// Helper to construct FLSlice from (buf, size) pair.
+// Uses an inline function instead of a C99 compound literal to support MSVC.
+inline FLSlice FLSLICE_FROM_ARGS(const void* buf, size_t size) {
+  FLSlice s;
+  s.buf = buf;
+  s.size = size;
+  return s;
+}
 
 // === Slice ==================================================================
 
@@ -15,6 +26,75 @@ void CBLDart_FLSliceResult_RetainByBuf(void* buf);
 
 CBLDART_EXPORT
 void CBLDart_FLSliceResult_ReleaseByBuf(void* buf);
+
+CBLDART_EXPORT
+bool CBLDart_FLSlice_Equal(const void* aBuf, size_t aSize, const void* bBuf,
+                           size_t bSize);
+
+CBLDART_EXPORT
+int CBLDart_FLSlice_Compare(const void* aBuf, size_t aSize, const void* bBuf,
+                            size_t bSize);
+
+CBLDART_EXPORT
+FLSliceResult CBLDart_FLSlice_Copy(const void* buf, size_t size);
+
+// === Data ===================================================================
+
+CBLDART_EXPORT
+FLStringResult CBLDart_FLData_Dump(const void* dataBuf, size_t dataSize);
+
+// === Value ==================================================================
+
+CBLDART_EXPORT
+FLValue CBLDart_FLValue_FromData(const void* buf, size_t size, int trust);
+
+// === Doc ====================================================================
+
+CBLDART_EXPORT
+FLDoc CBLDart_FLDoc_FromResultData(const void* dataBuf, size_t dataSize,
+                                   int trust, FLSharedKeys sharedKeys,
+                                   const void* externBuf, size_t externSize);
+
+CBLDART_EXPORT
+FLDoc CBLDart_FLDoc_FromJSON(const void* jsonBuf, size_t jsonSize,
+                             FLError* outError);
+
+// === Dict ===================================================================
+
+CBLDART_EXPORT
+FLValue CBLDart_FLDict_Get(FLDict dict, const void* keyBuf, size_t keySize);
+
+CBLDART_EXPORT
+FLDictKey CBLDart_FLDictKey_Init(const void* keyBuf, size_t keySize);
+
+// === MutableDict ============================================================
+
+CBLDART_EXPORT
+FLSlot CBLDart_FLMutableDict_Set(FLMutableDict dict, const void* keyBuf,
+                                 size_t keySize);
+
+CBLDART_EXPORT
+void CBLDart_FLMutableDict_Remove(FLMutableDict dict, const void* keyBuf,
+                                  size_t keySize);
+
+CBLDART_EXPORT
+FLMutableArray CBLDart_FLMutableDict_GetMutableArray(FLMutableDict dict,
+                                                     const void* keyBuf,
+                                                     size_t keySize);
+
+CBLDART_EXPORT
+FLMutableDict CBLDart_FLMutableDict_GetMutableDict(FLMutableDict dict,
+                                                   const void* keyBuf,
+                                                   size_t keySize);
+
+// === Slot ===================================================================
+
+CBLDART_EXPORT
+void CBLDart_FLSlot_SetString(FLSlot slot, const void* valueBuf,
+                              size_t valueSize);
+
+CBLDART_EXPORT
+void CBLDart_FLSlot_SetData(FLSlot slot, const void* dataBuf, size_t dataSize);
 
 // === Decoder ================================================================
 
@@ -60,7 +140,8 @@ void CBLDart_FLArray_GetLoadedFLValue(FLArray array, uint32_t index,
                                       CBLDart_LoadedFLValue* out);
 
 CBLDART_EXPORT
-void CBLDart_FLDict_GetLoadedFLValue(FLDict dict, FLString key,
+void CBLDart_FLDict_GetLoadedFLValue(FLDict dict, const void* keyBuf,
+                                     size_t keySize,
                                      CBLDart_LoadedFLValue* out);
 
 struct CBLDart_FLDictIterator;
@@ -94,3 +175,19 @@ bool CBLDart_FLArrayIterator_Next(CBLDart_FLArrayIterator* iterator);
 CBLDART_EXPORT
 bool CBLDart_FLEncoder_WriteArrayValue(FLEncoder encoder, FLArray array,
                                        uint32_t index);
+
+CBLDART_EXPORT
+bool CBLDart_FLEncoder_WriteString(FLEncoder encoder, const void* strBuf,
+                                   size_t strSize);
+
+CBLDART_EXPORT
+bool CBLDart_FLEncoder_WriteKey(FLEncoder encoder, const void* keyBuf,
+                                size_t keySize);
+
+CBLDART_EXPORT
+bool CBLDart_FLEncoder_WriteData(FLEncoder encoder, const void* dataBuf,
+                                 size_t dataSize);
+
+CBLDART_EXPORT
+bool CBLDart_FLEncoder_ConvertJSON(FLEncoder encoder, const void* jsonBuf,
+                                   size_t jsonSize);

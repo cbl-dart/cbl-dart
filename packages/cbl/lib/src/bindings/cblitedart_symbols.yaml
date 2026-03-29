@@ -31,6 +31,8 @@ files:
         name: CBLDartInitializeResult
       c:@EA@CBLDart_IndexType:
         name: CBLDart_IndexType
+      c:@EA@FLError:
+        name: FLError
       c:@F@CBLDartKeyPair_CreateWithExternalKey:
         name: CBLDartKeyPair_CreateWithExternalKey
       c:@F@CBLDart_AllocateIsolateId:
@@ -43,22 +45,62 @@ files:
         name: CBLDart_AsyncCallback_Delete
       c:@F@CBLDart_AsyncCallback_New:
         name: CBLDart_AsyncCallback_New
+      c:@F@CBLDart_CBLAuth_CreatePassword:
+        name: CBLDart_CBLAuth_CreatePassword
+      c:@F@CBLDart_CBLAuth_CreateSession:
+        name: CBLDart_CBLAuth_CreateSession
       c:@F@CBLDart_CBLBlobReader_Read:
         name: CBLDart_CBLBlobReader_Read
+      c:@F@CBLDart_CBLBlob_CreateWithData:
+        name: CBLDart_CBLBlob_CreateWithData
+      c:@F@CBLDart_CBLBlob_CreateWithStream:
+        name: CBLDart_CBLBlob_CreateWithStream
+      c:@F@CBLDart_CBLCert_SubjectNameComponent:
+        name: CBLDart_CBLCert_SubjectNameComponent
       c:@F@CBLDart_CBLCollection_AddChangeListener:
         name: CBLDart_CBLCollection_AddChangeListener
       c:@F@CBLDart_CBLCollection_AddDocumentChangeListener:
         name: CBLDart_CBLCollection_AddDocumentChangeListener
       c:@F@CBLDart_CBLCollection_CreateIndex:
         name: CBLDart_CBLCollection_CreateIndex
+      c:@F@CBLDart_CBLCollection_DeleteIndex:
+        name: CBLDart_CBLCollection_DeleteIndex
+      c:@F@CBLDart_CBLCollection_GetDocument:
+        name: CBLDart_CBLCollection_GetDocument
+      c:@F@CBLDart_CBLCollection_GetDocumentExpiration:
+        name: CBLDart_CBLCollection_GetDocumentExpiration
+      c:@F@CBLDart_CBLCollection_GetIndex:
+        name: CBLDart_CBLCollection_GetIndex
+      c:@F@CBLDart_CBLCollection_PurgeDocumentByID:
+        name: CBLDart_CBLCollection_PurgeDocumentByID
+      c:@F@CBLDart_CBLCollection_SetDocumentExpiration:
+        name: CBLDart_CBLCollection_SetDocumentExpiration
       c:@F@CBLDart_CBLDatabaseConfiguration_Default:
         name: CBLDart_CBLDatabaseConfiguration_Default
       c:@F@CBLDart_CBLDatabase_Close:
         name: CBLDart_CBLDatabase_Close
+      c:@F@CBLDart_CBLDatabase_CreateCollection:
+        name: CBLDart_CBLDatabase_CreateCollection
+      c:@F@CBLDart_CBLDatabase_CreateQuery:
+        name: CBLDart_CBLDatabase_CreateQuery
+      c:@F@CBLDart_CBLDatabase_DeleteCollection:
+        name: CBLDart_CBLDatabase_DeleteCollection
       c:@F@CBLDart_CBLDatabase_Open:
         name: CBLDart_CBLDatabase_Open
       c:@F@CBLDart_CBLDatabase_Release:
         name: CBLDart_CBLDatabase_Release
+      c:@F@CBLDart_CBLDatabase_Scope:
+        name: CBLDart_CBLDatabase_Scope
+      c:@F@CBLDart_CBLDocument_CreateWithID:
+        name: CBLDart_CBLDocument_CreateWithID
+      c:@F@CBLDart_CBLDocument_SetJSON:
+        name: CBLDart_CBLDocument_SetJSON
+      c:@F@CBLDart_CBLEncryptionKey_FromPassword:
+        name: CBLDart_CBLEncryptionKey_FromPassword
+      c:@F@CBLDart_CBLEndpoint_CreateWithURL:
+        name: CBLDart_CBLEndpoint_CreateWithURL
+      c:@F@CBLDart_CBLKeyPair_CreateWithPrivateKeyData:
+        name: CBLDart_CBLKeyPair_CreateWithPrivateKeyData
       c:@F@CBLDart_CBLLog_AddCallback:
         name: CBLDart_CBLLog_AddCallback
       c:@F@CBLDart_CBLLog_GetFileSink:
@@ -67,6 +109,8 @@ files:
         name: CBLDart_CBLLog_SetCallbackLevel
       c:@F@CBLDart_CBLLog_SetFileSink:
         name: CBLDart_CBLLog_SetFileSink
+      c:@F@CBLDart_CBLLog_SetFileSinkV2:
+        name: CBLDart_CBLLog_SetFileSinkV2
       c:@F@CBLDart_CBLQuery_AddChangeListener:
         name: CBLDart_CBLQuery_AddChangeListener
       c:@F@CBLDart_CBLReplicator_AddChangeListener:
@@ -75,10 +119,34 @@ files:
         name: CBLDart_CBLReplicator_AddDocumentReplicationListener
       c:@F@CBLDart_CBLReplicator_Create:
         name: CBLDart_CBLReplicator_Create
+      c:@F@CBLDart_CBLReplicator_IsDocumentPending:
+        name: CBLDart_CBLReplicator_IsDocumentPending
       c:@F@CBLDart_CBLReplicator_Release:
         name: CBLDart_CBLReplicator_Release
+      c:@F@CBLDart_CBLResultSet_ValueForKey:
+        name: CBLDart_CBLResultSet_ValueForKey
+      c:@F@CBLDart_CBLScope_Collection:
+        name: CBLDart_CBLScope_Collection
+      c:@F@CBLDart_CBLTLSIdentity_CreateIdentity:
+        name: CBLDart_CBLTLSIdentity_CreateIdentity
+      c:@F@CBLDart_CBLTLSIdentity_DeleteIdentityWithLabel:
+        name: CBLDart_CBLTLSIdentity_DeleteIdentityWithLabel
+      c:@F@CBLDart_CBLTLSIdentity_IdentityWithLabel:
+        name: CBLDart_CBLTLSIdentity_IdentityWithLabel
+      c:@F@CBLDart_CBLURLEndpointListener_Create:
+        name: CBLDart_CBLURLEndpointListener_Create
       c:@F@CBLDart_CBL_CopyDatabase:
         name: CBLDart_CBL_CopyDatabase
+      c:@F@CBLDart_CBL_DatabaseExists:
+        name: CBLDart_CBL_DatabaseExists
+      c:@F@CBLDart_CBL_DeleteDatabase:
+        name: CBLDart_CBL_DeleteDatabase
+      c:@F@CBLDart_CBL_EnableVectorSearch:
+        name: CBLDart_CBL_EnableVectorSearch
+      c:@F@CBLDart_CBL_LogMessage:
+        name: CBLDart_CBL_LogMessage
+      c:@F@CBLDart_CBL_UnregisterPredictiveModel:
+        name: CBLDart_CBL_UnregisterPredictiveModel
       c:@F@CBLDart_Completer_Complete:
         name: CBLDart_Completer_Complete
       c:@F@CBLDart_CpuSupportsAVX2:
@@ -91,20 +159,58 @@ files:
         name: CBLDart_FLArrayIterator_Next
       c:@F@CBLDart_FLArray_GetLoadedFLValue:
         name: CBLDart_FLArray_GetLoadedFLValue
+      c:@F@CBLDart_FLData_Dump:
+        name: CBLDart_FLData_Dump
       c:@F@CBLDart_FLDictIterator_Begin:
         name: CBLDart_FLDictIterator_Begin
       c:@F@CBLDart_FLDictIterator_Delete:
         name: CBLDart_FLDictIterator_Delete
       c:@F@CBLDart_FLDictIterator_Next:
         name: CBLDart_FLDictIterator_Next
+      c:@F@CBLDart_FLDictKey_Init:
+        name: CBLDart_FLDictKey_Init
+      c:@F@CBLDart_FLDict_Get:
+        name: CBLDart_FLDict_Get
       c:@F@CBLDart_FLDict_GetLoadedFLValue:
         name: CBLDart_FLDict_GetLoadedFLValue
+      c:@F@CBLDart_FLDoc_FromJSON:
+        name: CBLDart_FLDoc_FromJSON
+      c:@F@CBLDart_FLDoc_FromResultData:
+        name: CBLDart_FLDoc_FromResultData
+      c:@F@CBLDart_FLEncoder_ConvertJSON:
+        name: CBLDart_FLEncoder_ConvertJSON
       c:@F@CBLDart_FLEncoder_WriteArrayValue:
         name: CBLDart_FLEncoder_WriteArrayValue
+      c:@F@CBLDart_FLEncoder_WriteData:
+        name: CBLDart_FLEncoder_WriteData
+      c:@F@CBLDart_FLEncoder_WriteKey:
+        name: CBLDart_FLEncoder_WriteKey
+      c:@F@CBLDart_FLEncoder_WriteString:
+        name: CBLDart_FLEncoder_WriteString
+      c:@F@CBLDart_FLMutableDict_GetMutableArray:
+        name: CBLDart_FLMutableDict_GetMutableArray
+      c:@F@CBLDart_FLMutableDict_GetMutableDict:
+        name: CBLDart_FLMutableDict_GetMutableDict
+      c:@F@CBLDart_FLMutableDict_Remove:
+        name: CBLDart_FLMutableDict_Remove
+      c:@F@CBLDart_FLMutableDict_Set:
+        name: CBLDart_FLMutableDict_Set
       c:@F@CBLDart_FLSliceResult_ReleaseByBuf:
         name: CBLDart_FLSliceResult_ReleaseByBuf
       c:@F@CBLDart_FLSliceResult_RetainByBuf:
         name: CBLDart_FLSliceResult_RetainByBuf
+      c:@F@CBLDart_FLSlice_Compare:
+        name: CBLDart_FLSlice_Compare
+      c:@F@CBLDart_FLSlice_Copy:
+        name: CBLDart_FLSlice_Copy
+      c:@F@CBLDart_FLSlice_Equal:
+        name: CBLDart_FLSlice_Equal
+      c:@F@CBLDart_FLSlot_SetData:
+        name: CBLDart_FLSlot_SetData
+      c:@F@CBLDart_FLSlot_SetString:
+        name: CBLDart_FLSlot_SetString
+      c:@F@CBLDart_FLValue_FromData:
+        name: CBLDart_FLValue_FromData
       c:@F@CBLDart_GetCurrentIsolateId:
         name: CBLDart_GetCurrentIsolateId
       c:@F@CBLDart_GetLoadedFLValue:
@@ -139,6 +245,8 @@ files:
         name: CBLDart_LoadedDictKey
       c:@S@CBLDart_LoadedFLValue:
         name: CBLDart_LoadedFLValue
+      c:@S@CBLDart_ProxySettings:
+        name: CBLDart_ProxySettings
       c:@S@CBLDart_ReplicationCollection:
         name: CBLDart_ReplicationCollection
       c:@S@CBLDart_ReplicatorConfiguration:
@@ -153,12 +261,14 @@ files:
         name: _CBLDart_PredictiveModel
       c:@SA@CBLDart_CBLDatabaseConfiguration:
         name: CBLDart_CBLDatabaseConfiguration
+      c:@T@CBLEncryptionKey:
+        name: CBLEncryptionKey
       c:@T@CBLError:
         name: CBLError
       c:@T@CBLFileLogSink:
         name: CBLFileLogSink
-      c:@T@CBLProxySettings:
-        name: CBLProxySettings
+      c:@T@FLDictKey:
+        name: FLDictKey
       c:CBL+Dart.h@T@CBLDartExternalKeyDecrypt:
         name: CBLDartExternalKeyDecrypt
       c:CBL+Dart.h@T@CBLDartExternalKeyPublicKeyData:
@@ -184,26 +294,44 @@ files:
         name: CBLDart_PredictiveModel_PredictionSync
       c:CBL+Dart.h@T@CBLDart_PredictiveModel_Unregistered:
         name: CBLDart_PredictiveModel_Unregistered
+      c:CBLBase.h@T@CBLBlob:
+        name: CBLBlob
       c:CBLBase.h@T@CBLCert:
         name: CBLCert
       c:CBLBase.h@T@CBLCollection:
         name: CBLCollection
       c:CBLBase.h@T@CBLDatabase:
         name: CBLDatabase
+      c:CBLBase.h@T@CBLDocument:
+        name: CBLDocument
       c:CBLBase.h@T@CBLListenerToken:
         name: CBLListenerToken
       c:CBLBase.h@T@CBLQuery:
         name: CBLQuery
+      c:CBLBase.h@T@CBLQueryIndex:
+        name: CBLQueryIndex
       c:CBLBase.h@T@CBLReplicator:
         name: CBLReplicator
+      c:CBLBase.h@T@CBLResultSet:
+        name: CBLResultSet
+      c:CBLBase.h@T@CBLScope:
+        name: CBLScope
       c:CBLBlob.h@T@CBLBlobReadStream:
         name: CBLBlobReadStream
+      c:CBLBlob.h@T@CBLBlobWriteStream:
+        name: CBLBlobWriteStream
       c:CBLReplicator.h@T@CBLAuthenticator:
         name: CBLAuthenticator
       c:CBLReplicator.h@T@CBLEndpoint:
         name: CBLEndpoint
       c:CBLTLSIdentity.h@T@CBLKeyPair:
         name: CBLKeyPair
+      c:CBLTLSIdentity.h@T@CBLTLSIdentity:
+        name: CBLTLSIdentity
+      c:CBLURLEndpointListener.h@T@CBLListenerAuthenticator:
+        name: CBLListenerAuthenticator
+      c:CBLURLEndpointListener.h@T@CBLURLEndpointListener:
+        name: CBLURLEndpointListener
       c:FLSlice.h@T@FLSlice:
         name: FLSlice
       c:FLSlice.h@T@FLSliceResult:

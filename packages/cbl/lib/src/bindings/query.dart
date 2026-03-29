@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:ffi';
 
 import '../support/isolate.dart';
@@ -6,6 +7,7 @@ import 'cblite.dart' as cblite;
 import 'cblitedart.dart' as cblitedart;
 import 'fleece.dart';
 import 'global.dart';
+import 'slice.dart';
 import 'tracing.dart';
 import 'utils.dart';
 
@@ -61,18 +63,20 @@ final class QueryBindings {
     Pointer<cblite.CBLDatabase> db,
     CBLQueryLanguage language,
     String queryString,
-  ) => withGlobalArena(
-    () => nativeCallTracePoint(
-      TracedNativeCall.queryCreate,
-      () => cblite.CBLDatabase_CreateQuery(
+  ) {
+    final encoded = utf8.encode(queryString);
+    return nativeCallTracePoint(TracedNativeCall.queryCreate, () {
+      final capturedEncoded = encoded;
+      return cblitedart.CBLDart_CBLDatabase_CreateQuery(
         db,
         language.value,
-        queryString.makeGlobalFLString(),
+        capturedEncoded.address.cast(),
+        capturedEncoded.length,
         globalErrorPosition,
         globalCBLError,
-      ),
-    ).checkError(errorSource: queryString),
-  );
+      );
+    }).checkError(errorSource: queryString);
+  }
 
   static void setParameters(
     Pointer<cblite.CBLQuery> query,
@@ -121,15 +125,14 @@ final class QueryBindings {
     cblitedart.CBLDart_PredictiveModel_Unregistered unregistered,
   ) {
     ensureInitializedForCurrentIsolate();
-    return runWithSingleFLString(
-      name,
-      (flName) => cblitedart.CBLDart_PredictiveModel_New(
-        flName,
-        BaseBindings.isolateId,
-        predictionSync,
-        predictionAsync,
-        unregistered,
-      ),
+    final encoded = utf8.encode(name);
+    return cblitedart.CBLDart_PredictiveModel_New(
+      encoded.address.cast(),
+      encoded.length,
+      BaseBindings.isolateId,
+      predictionSync,
+      predictionAsync,
+      unregistered,
     );
   }
 
@@ -140,7 +143,11 @@ final class QueryBindings {
 
   static void unregisterPredictiveModel(String name) {
     ensureInitializedForCurrentIsolate();
-    runWithSingleFLString(name, cblite.CBL_UnregisterPredictiveModel);
+    final nameSlice = SliceResult.fromString(name);
+    cblitedart.CBLDart_CBL_UnregisterPredictiveModel(
+      nameSlice.buf,
+      nameSlice.size,
+    );
   }
 }
 
@@ -156,10 +163,14 @@ final class ResultSetBindings {
   static cblite.FLValue valueForKey(
     Pointer<cblite.CBLResultSet> resultSet,
     String key,
-  ) => runWithSingleFLString(
-    key,
-    (flKey) => cblite.CBLResultSet_ValueForKey(resultSet, flKey),
-  );
+  ) {
+    final encoded = utf8.encode(key);
+    return cblitedart.CBLDart_CBLResultSet_ValueForKey(
+      resultSet,
+      encoded.address.cast(),
+      encoded.length,
+    );
+  }
 
   static cblite.FLArray resultArray(Pointer<cblite.CBLResultSet> resultSet) =>
       cblite.CBLResultSet_ResultArray(resultSet);

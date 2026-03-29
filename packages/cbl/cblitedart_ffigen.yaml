@@ -60,6 +60,9 @@ functions:
       - CBLDart_PredictiveModel_Delete
       - CBLDart_ListenerPasswordAuthCallbackTrampoline
       - CBLDart_ListenerCertAuthCallbackTrampoline
+      # Wrappers that forward to cblite functions which may invoke callbacks.
+      - CBLDart_CBL_UnregisterPredictiveModel
+      - CBLDart_CBLURLEndpointListener_Create
 enums:
   as-int:
     include:

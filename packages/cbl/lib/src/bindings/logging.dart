@@ -8,7 +8,6 @@ import '../support/isolate.dart';
 import 'cblite.dart' as cblite;
 import 'cblitedart.dart' as cblitedart;
 import 'fleece.dart';
-import 'global.dart';
 import 'utils.dart';
 
 enum CBLLogDomain {
@@ -138,10 +137,12 @@ final class LoggingBindings {
     String message,
   ) {
     ensureInitializedForCurrentIsolate();
-    runWithSingleFLString(
-      message,
-      (flMessage) =>
-          cblite.CBL_LogMessage(domain.value, level.value, flMessage),
+    final encoded = utf8.encode(message);
+    cblitedart.CBLDart_CBL_LogMessage(
+      domain.value,
+      level.value,
+      encoded.address.cast(),
+      encoded.length,
     );
   }
 
@@ -174,9 +175,20 @@ final class LoggingBindings {
 
   static void setFileLogConfiguration(CBLLogFileConfiguration? config) {
     ensureInitializedForCurrentIsolate();
-    withGlobalArena(() {
-      cblitedart.CBLDart_CBLLog_SetFileSink(_logFileSink(config));
-    });
+    if (config == null) {
+      cblitedart.CBLDart_CBLLog_SetFileSink(nullptr);
+      return;
+    }
+
+    final encoded = utf8.encode(config.directory);
+    cblitedart.CBLDart_CBLLog_SetFileSinkV2(
+      config.level.value,
+      encoded.address.cast(),
+      encoded.length,
+      config.maxKeptFiles,
+      config.maxSize,
+      config.usePlainText,
+    );
   }
 
   static CBLLogFileConfiguration? getLogFileConfiguration() {
@@ -185,24 +197,5 @@ final class LoggingBindings {
         .toNullable()
         ?.ref
         .toCBLLogFileConfiguration();
-  }
-
-  static Pointer<cblite.CBLFileLogSink> _logFileSink(
-    CBLLogFileConfiguration? config,
-  ) {
-    if (config == null) {
-      return nullptr;
-    }
-
-    final result = globalArena<cblite.CBLFileLogSink>();
-
-    result.ref
-      ..level = config.level.value
-      ..directory = config.directory.toFLString()
-      ..maxKeptFiles = config.maxKeptFiles
-      ..maxSize = config.maxSize
-      ..usePlaintext = config.usePlainText;
-
-    return result;
   }
 }

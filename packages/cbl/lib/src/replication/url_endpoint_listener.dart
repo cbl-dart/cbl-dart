@@ -4,7 +4,14 @@ import 'dart:isolate';
 
 import '../bindings.dart';
 import '../bindings/cblite.dart' hide CBLLogDomain, CBLLogLevel;
-import '../bindings/cblitedart.dart' hide CBLCert, CBLCollection, FLSlice;
+import '../bindings/cblitedart.dart'
+    hide
+        CBLCert,
+        CBLCollection,
+        CBLListenerAuthenticator,
+        CBLTLSIdentity,
+        CBLURLEndpointListener,
+        FLSlice;
 import '../database.dart';
 import '../database/ffi_database.dart';
 import '../database/proxy_database.dart';

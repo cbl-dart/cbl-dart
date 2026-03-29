@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'dart:convert';
 import 'dart:ffi';
 import 'dart:math';
 
@@ -30,8 +31,8 @@ final class _DartStringDictKey extends DictKey {
 
 final class _OptimizedDictKey extends DictKey {
   factory _OptimizedDictKey(String key) {
-    final utf8StringSize = nativeUtf8StringEncoder.encodedAllocationSize(key);
-    final totalSize = _utf8StringStart + utf8StringSize;
+    final encoded = utf8.encode(key);
+    final totalSize = _utf8StringStart + encoded.length;
     final memory = SliceResult(totalSize);
 
     // TODO(blaugold): use + operator once we have min SDK 3.3
@@ -43,16 +44,11 @@ final class _OptimizedDictKey extends DictKey {
     // ignore: deprecated_member_use
     final utf8String = memoryBuffer.elementAt(_utf8StringStart);
 
-    final encodedString = nativeUtf8StringEncoder.encodeToBuffer(
-      key,
-      utf8String,
-      allocationSize: utf8StringSize,
-      end: key.length,
-    );
+    utf8String.asTypedList(encoded.length).setAll(0, encoded);
 
     final flStringRef = flString.ref
       ..buf = utf8String.cast()
-      ..size = encodedString.size;
+      ..size = encoded.length;
 
     DictKeyBindings.init(flDictKey.ref, flStringRef);
 

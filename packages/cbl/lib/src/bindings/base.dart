@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:ffi';
 import 'dart:io' as io;
 
@@ -9,7 +10,6 @@ import 'cblite_vector_search.dart' as vector_search;
 import 'cblitedart.dart' as cblitedart;
 import 'fleece.dart';
 import 'global.dart';
-import 'utils.dart';
 
 export 'cblite.dart' show CBLListenerToken;
 export 'cblitedart.dart' show CBLDart_Completer;
@@ -493,14 +493,12 @@ final class BaseBindings {
   static void enableVectorSearch() {
     if (vector_search.vectorSearchLibraryPath case final libraryPath?
         when vector_search.systemSupportsVectorSearch) {
-      runWithSingleFLString(io.File(libraryPath).parent.path, (
-        flLibraryDirectory,
-      ) {
-        cblite.CBL_EnableVectorSearch(
-          flLibraryDirectory,
-          globalCBLError,
-        ).checkError();
-      });
+      final encoded = utf8.encode(io.File(libraryPath).parent.path);
+      cblitedart.CBLDart_CBL_EnableVectorSearch(
+        encoded.address.cast(),
+        encoded.length,
+        globalCBLError,
+      ).checkError();
     }
   }
 

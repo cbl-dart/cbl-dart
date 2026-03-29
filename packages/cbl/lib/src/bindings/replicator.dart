@@ -303,11 +303,12 @@ final class ReplicatorBindings {
 
   static Pointer<cblite.CBLEndpoint> createEndpointWithUrl(String url) {
     ensureInitializedForCurrentIsolate();
-    return runWithSingleFLString(
-      url,
-      (flUrl) =>
-          cblite.CBLEndpoint_CreateWithURL(flUrl, globalCBLError).checkError(),
-    );
+    final urlEncoded = utf8.encode(url);
+    return cblitedart.CBLDart_CBLEndpoint_CreateWithURL(
+      urlEncoded.address.cast(),
+      urlEncoded.length,
+      globalCBLError,
+    ).checkError();
   }
 
   static Pointer<cblite.CBLEndpoint> createEndpointWithLocalDB(
@@ -323,11 +324,13 @@ final class ReplicatorBindings {
     String password,
   ) {
     ensureInitializedForCurrentIsolate();
-    return withGlobalArena(
-      () => cblite.CBLAuth_CreatePassword(
-        username.toFLString(),
-        password.toFLString(),
-      ),
+    final userEncoded = utf8.encode(username);
+    final pwEncoded = utf8.encode(password);
+    return cblitedart.CBLDart_CBLAuth_CreatePassword(
+      userEncoded.address.cast(),
+      userEncoded.length,
+      pwEncoded.address.cast(),
+      pwEncoded.length,
     );
   }
 
@@ -336,11 +339,21 @@ final class ReplicatorBindings {
     String? cookieName,
   ) {
     ensureInitializedForCurrentIsolate();
-    return withGlobalArena(
-      () => cblite.CBLAuth_CreateSession(
-        sessionID.toFLString(),
-        cookieName.toFLString(),
-      ),
+    final sidEncoded = utf8.encode(sessionID);
+    if (cookieName == null) {
+      return cblitedart.CBLDart_CBLAuth_CreateSession(
+        sidEncoded.address.cast(),
+        sidEncoded.length,
+        nullptr,
+        0,
+      );
+    }
+    final cnEncoded = utf8.encode(cookieName);
+    return cblitedart.CBLDart_CBLAuth_CreateSession(
+      sidEncoded.address.cast(),
+      sidEncoded.length,
+      cnEncoded.address.cast(),
+      cnEncoded.length,
     );
   }
 
@@ -421,15 +434,16 @@ final class ReplicatorBindings {
     Pointer<cblite.CBLReplicator> replicator,
     String docID,
     Pointer<cblite.CBLCollection> collection,
-  ) => runWithSingleFLString(
-    docID,
-    (flDocID) => cblite.CBLReplicator_IsDocumentPending2(
+  ) {
+    final docIDEncoded = utf8.encode(docID);
+    return cblitedart.CBLDart_CBLReplicator_IsDocumentPending(
       replicator,
-      flDocID,
+      docIDEncoded.address.cast(),
+      docIDEncoded.length,
       collection,
       globalCBLError,
-    ).checkError(),
-  );
+    ).checkError();
+  }
 
   static void addChangeListener(
     Pointer<cblite.CBLDatabase> db,
@@ -508,21 +522,41 @@ final class ReplicatorBindings {
     return configStruct;
   }
 
-  static Pointer<cblite.CBLProxySettings> _createProxySettingsStruct(
+  static Pointer<cblitedart.CBLDart_ProxySettings> _createProxySettingsStruct(
     CBLProxySettings? settings,
   ) {
     if (settings == null) {
       return nullptr;
     }
 
-    final settingsStruct = globalArena<cblite.CBLProxySettings>();
+    final settingsStruct = globalArena<cblitedart.CBLDart_ProxySettings>();
+
+    final (:buf, :size) = encodeStringToArena(settings.hostname, globalArena);
+    final passwordEncoded = encodeStringToArena(settings.password, globalArena);
 
     settingsStruct.ref
       ..type = settings.type.value
-      ..hostname = settings.hostname.toFLString()
-      ..port = settings.port
-      ..username = settings.username.toFLString()
-      ..password = settings.password.toFLString();
+      ..hostnameBuf = buf
+      ..hostnameSize = size
+      ..port = settings.port;
+
+    if (settings.username != null) {
+      final usernameEncoded = encodeStringToArena(
+        settings.username!,
+        globalArena,
+      );
+      settingsStruct.ref
+        ..usernameBuf = usernameEncoded.buf
+        ..usernameSize = usernameEncoded.size;
+    } else {
+      settingsStruct.ref
+        ..usernameBuf = nullptr
+        ..usernameSize = 0;
+    }
+
+    settingsStruct.ref
+      ..passwordBuf = passwordEncoded.buf
+      ..passwordSize = passwordEncoded.size;
 
     return settingsStruct;
   }

@@ -1,5 +1,8 @@
+import 'dart:convert';
 import 'dart:ffi';
 import 'dart:typed_data';
+
+import 'package:ffi/ffi.dart';
 
 import '../support/isolate.dart';
 import 'base.dart';
@@ -77,11 +80,13 @@ final class DatabaseBindings {
 
   static CBLEncryptionKey encryptionKeyFromPassword(String password) {
     ensureInitializedForCurrentIsolate();
+    final passwordEncoded = utf8.encode(password);
     return withGlobalArena(() {
       final key = globalArena<cblite.CBLEncryptionKey>();
-      if (!cblite.CBLEncryptionKey_FromPassword(
+      if (!cblitedart.CBLDart_CBLEncryptionKey_FromPassword(
         key,
-        password.makeGlobalFLString(),
+        passwordEncoded.address.cast(),
+        passwordEncoded.length,
       )) {
         throw createCouchbaseLiteException(
           domain: CBLErrorDomain.couchbaseLite,
@@ -100,10 +105,14 @@ final class DatabaseBindings {
     CBLDatabaseConfiguration? config,
   ) {
     ensureInitializedForCurrentIsolate();
+    final fromEncoded = utf8.encode(from);
+    final nameEncoded = utf8.encode(name);
     return withGlobalArena(
       () => cblitedart.CBLDart_CBL_CopyDatabase(
-        from.toFLString(),
-        name.toFLString(),
+        fromEncoded.address.cast(),
+        fromEncoded.length,
+        nameEncoded.address.cast(),
+        nameEncoded.length,
         _createConfig(config),
         globalCBLError,
       ).checkError(),
@@ -112,22 +121,43 @@ final class DatabaseBindings {
 
   static bool deleteDatabase(String name, String? inDirectory) {
     ensureInitializedForCurrentIsolate();
-    return withGlobalArena(
-      () => cblite.CBL_DeleteDatabase(
-        name.toFLString(),
-        inDirectory.toFLString(),
+    final nameEncoded = utf8.encode(name);
+    if (inDirectory == null) {
+      return cblitedart.CBLDart_CBL_DeleteDatabase(
+        nameEncoded.address.cast(),
+        nameEncoded.length,
+        nullptr,
+        0,
         globalCBLError,
-      ).checkError(),
-    );
+      ).checkError();
+    }
+    final dirEncoded = utf8.encode(inDirectory);
+    return cblitedart.CBLDart_CBL_DeleteDatabase(
+      nameEncoded.address.cast(),
+      nameEncoded.length,
+      dirEncoded.address.cast(),
+      dirEncoded.length,
+      globalCBLError,
+    ).checkError();
   }
 
   static bool databaseExists(String name, String? inDirectory) {
     ensureInitializedForCurrentIsolate();
-    return withGlobalArena(
-      () => cblite.CBL_DatabaseExists(
-        name.toFLString(),
-        inDirectory.toFLString(),
-      ),
+    final nameEncoded = utf8.encode(name);
+    if (inDirectory == null) {
+      return cblitedart.CBLDart_CBL_DatabaseExists(
+        nameEncoded.address.cast(),
+        nameEncoded.length,
+        nullptr,
+        0,
+      );
+    }
+    final dirEncoded = utf8.encode(inDirectory);
+    return cblitedart.CBLDart_CBL_DatabaseExists(
+      nameEncoded.address.cast(),
+      nameEncoded.length,
+      dirEncoded.address.cast(),
+      dirEncoded.length,
     );
   }
 
@@ -135,7 +165,9 @@ final class DatabaseBindings {
     ensureInitializedForCurrentIsolate();
     final config = cblitedart.CBLDart_CBLDatabaseConfiguration_Default();
     return CBLDatabaseConfiguration(
-      directory: config.directory.toDartString()!,
+      directory: config.directoryBuf.cast<Utf8>().toDartString(
+        length: config.directorySize,
+      ),
       fullSync: config.fullSync,
     );
   }
@@ -145,17 +177,18 @@ final class DatabaseBindings {
     CBLDatabaseConfiguration? config,
   ) {
     ensureInitializedForCurrentIsolate();
+    final nameEncoded = utf8.encode(name);
     return withGlobalArena(() {
-      final nameFlStr = name.toFLString();
       final cblConfig = _createConfig(config);
-      return nativeCallTracePoint(
-        TracedNativeCall.databaseOpen,
-        () => cblitedart.CBLDart_CBLDatabase_Open(
-          nameFlStr,
+      return nativeCallTracePoint(TracedNativeCall.databaseOpen, () {
+        final capturedName = nameEncoded;
+        return cblitedart.CBLDart_CBLDatabase_Open(
+          capturedName.address.cast(),
+          capturedName.length,
           cblConfig,
           globalCBLError,
-        ),
-      ).checkError();
+        );
+      }).checkError();
     });
   }
 
@@ -286,7 +319,10 @@ final class DatabaseBindings {
 
     final result = globalArena<cblitedart.CBLDart_CBLDatabaseConfiguration>();
 
-    result.ref.directory = config.directory.toFLString();
+    final (:buf, :size) = encodeStringToArena(config.directory, globalArena);
+    result.ref
+      ..directoryBuf = buf
+      ..directorySize = size;
 
     if (cblitedart.CBLDart_IsEnterprise()) {
       final key = globalArena<cblitedart.CBLDart_CBLEncryptionKey>();
