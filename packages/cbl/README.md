@@ -76,7 +76,7 @@ hooks:
       edition: enterprise
 ```
 
-## Native Libraries
+## Debug Symbols
 
 To assemble downloadable native libraries together with their debug-symbol
 files for Sentry uploads, run:
@@ -86,7 +86,7 @@ dart run cbl:cbl native-libraries assemble
 ```
 
 See the full guide at
-[cbl-dart.dev/native-libraries](https://cbl-dart.dev/native-libraries).
+[cbl-dart.dev/debug-symbols](https://cbl-dart.dev/debug-symbols).
 
 ## Related Packages
 

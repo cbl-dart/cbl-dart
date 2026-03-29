@@ -136,7 +136,7 @@ export default {
     },
     {
       type: 'doc',
-      id: 'native-libraries',
+      id: 'debug-symbols',
     },
     {
       type: 'category',
