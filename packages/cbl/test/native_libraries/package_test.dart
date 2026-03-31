@@ -1,21 +1,18 @@
 import 'dart:io';
 
-import 'package:cbl/src/install/package.dart';
+import 'package:cbl/src/native_libraries/package.dart';
 import 'package:test/test.dart';
 
 import '../utils.dart';
 
 void main() {
-  group('DatabasePackageConfig', () {
+  group('CblitePackageConfig', () {
     test('download packages ', () async {
       final tempCacheDir = tempTestDirectory();
       final loader = RemotePackageLoader(cacheDir: tempCacheDir.path);
       final configs = [
         for (final edition in Edition.values)
-          ...DatabasePackageConfig.all(
-            releases: {Library.cblite: '3.2.0', Library.cblitedart: '8.0.0'},
-            edition: edition,
-          ),
+          ...CblitePackageConfig.all(release: '3.2.0', edition: edition),
       ].withoutMacOSonDifferentHost;
       await Future.wait(configs.map(loader.load));
     });

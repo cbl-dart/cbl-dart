@@ -1,57 +1,57 @@
 import 'dart:io';
 
+import 'package:code_assets/code_assets.dart' hide LinkMode;
 import 'package:path/path.dart' as p;
 
 import 'utils.dart';
 
+export 'package:code_assets/code_assets.dart' show Architecture, OS;
+
+String get nativeLibrariesCacheDir =>
+    p.join(userCachesDir, 'cbl_native_libraries');
+
+String get downloadedPackagesCacheDir =>
+    p.join(nativeLibrariesCacheDir, 'downloads');
+
 /// A library that is distributed as part of cbl-dart.
 enum Library {
   cblite,
-  cblitedart,
   vectorSearch;
-
-  static const databaseLibraries = [cblite, cblitedart];
-
-  bool get isDatabaseLibrary => databaseLibraries.contains(this);
 
   String? packageRootDir(OS os, String version) => switch (this) {
     cblite => switch (os) {
       OS.android || OS.linux || OS.macOS || OS.windows => 'libcblite-$version',
       OS.iOS => null,
-    },
-    cblitedart => switch (os) {
-      OS.android ||
-      OS.linux ||
-      OS.macOS ||
-      OS.windows => 'libcblitedart-$version',
-      OS.iOS => null,
+      _ => throw UnsupportedError('Unsupported OS: $os'),
     },
     vectorSearch => null,
   };
 
   AppleFrameworkType? appleFrameworkType(OS os) => switch (this) {
-    cblite ||
-    cblitedart => os == OS.iOS ? AppleFrameworkType.xcframework : null,
+    cblite => os == OS.iOS ? AppleFrameworkType.xcframework : null,
     vectorSearch => switch (os) {
       OS.iOS => AppleFrameworkType.xcframework,
       OS.macOS => AppleFrameworkType.framework,
       OS.android || OS.linux || OS.windows => null,
+      _ => throw UnsupportedError('Unsupported OS: $os'),
     },
   };
 
   String? sharedLibrariesDir(OS os, Architecture architecture) =>
       switch (this) {
-        cblite || cblitedart => switch (os) {
+        cblite => switch (os) {
           OS.android => p.join('lib', architecture.androidTriple),
           OS.macOS => 'lib',
           OS.linux => p.join('lib', architecture.linuxTripple),
           OS.windows => 'bin',
           OS.iOS => null,
+          _ => throw UnsupportedError('Unsupported OS: $os'),
         },
         vectorSearch => switch (os) {
           OS.linux || OS.android => 'lib',
           OS.windows => 'bin',
           OS.iOS || OS.macOS => null,
+          _ => throw UnsupportedError('Unsupported OS: $os'),
         },
       };
 
@@ -60,11 +60,7 @@ enum Library {
       OS.linux || OS.android || OS.macOS => 'libcblite',
       OS.windows => 'cblite',
       OS.iOS => 'CouchbaseLite',
-    },
-    cblitedart => switch (os) {
-      OS.linux || OS.android || OS.macOS => 'libcblitedart',
-      OS.windows => 'cblitedart',
-      OS.iOS => 'CouchbaseLiteDart',
+      _ => throw UnsupportedError('Unsupported OS: $os'),
     },
     vectorSearch => switch (os) {
       OS.android => 'libCouchbaseLiteVectorSearch',
@@ -72,6 +68,7 @@ enum Library {
       OS.windows ||
       OS.macOS ||
       OS.iOS => 'CouchbaseLiteVectorSearch',
+      _ => throw UnsupportedError('Unsupported OS: $os'),
     },
   };
 }
@@ -89,42 +86,6 @@ enum ArchiveFormat {
     tarGz => 'tar.gz',
   };
 }
-
-/// An operating system.
-enum OS {
-  android,
-  iOS,
-  macOS,
-  linux,
-  windows;
-
-  static OS get current {
-    if (Platform.isAndroid) {
-      return android;
-    }
-
-    if (Platform.isIOS) {
-      return iOS;
-    }
-
-    if (Platform.isMacOS) {
-      return macOS;
-    }
-
-    if (Platform.isLinux) {
-      return linux;
-    }
-
-    if (Platform.isWindows) {
-      return windows;
-    }
-
-    throw UnsupportedError('Unsupported platform');
-  }
-}
-
-/// A CPU architecture.
-enum Architecture { ia32, x64, arm, arm64 }
 
 enum AppleFrameworkType {
   xcframework,
@@ -248,55 +209,81 @@ abstract class PackageLoader {
 
 final class RemotePackageLoader extends PackageLoader {
   RemotePackageLoader({String? cacheDir})
-    : cacheDir = cacheDir ?? _globalCacheDir;
-
-  static String get _globalCacheDir =>
-      p.join(userCachesDir, 'cbl_native_package');
+    : cacheDir = cacheDir ?? downloadedPackagesCacheDir;
 
   final String cacheDir;
 
   @override
-  Future<String> _packageDir(PackageConfig config) async {
-    final archiveBaseName = p.basenameWithoutExtension(
-      Uri.parse(config._archiveUrl).path,
-    );
-
-    final packageDir = p.join(cacheDir, archiveBaseName);
-
-    final packageDirectory = Directory(packageDir);
-    if (packageDirectory.existsSync()) {
-      return packageDir;
-    }
-
-    final cacheTempDir = Directory(p.join(cacheDir, '.temp'));
-    await cacheTempDir.create(recursive: true);
-
-    final tempDirectory = await cacheTempDir.createTemp();
-    try {
-      final archiveData = await downloadUrl(config._archiveUrl);
-      await unpackArchive(
-        archiveData,
-        format: config.archiveFormat,
-        outputDir: tempDirectory.path,
-      );
-      await config._postProcess(tempDirectory.path);
-      try {
-        await moveDirectory(tempDirectory, packageDirectory);
-      } on PathExistsException {
-        // Another process has already downloaded the archive.
-      }
-    } finally {
-      if (tempDirectory.existsSync()) {
-        await tempDirectory.delete(recursive: true);
-      }
-    }
-
-    return packageDir;
-  }
+  Future<String> _packageDir(PackageConfig config) => downloadAndUnpackToCache(
+    url: config._archiveUrl,
+    format: config.archiveFormat,
+    cacheDir: cacheDir,
+    postProcess: config._postProcess,
+  );
 }
 
-final class DatabasePackageConfig extends PackageConfig {
-  DatabasePackageConfig({
+/// Downloads an archive from [url], unpacks it into [cacheDir], and returns the
+/// resulting directory path. The directory name is derived from the archive URL
+/// basename. If the directory already exists, the download is skipped.
+Future<String> downloadAndUnpackToCache({
+  required String url,
+  required ArchiveFormat format,
+  required String cacheDir,
+  Future<void> Function(String packageDir)? postProcess,
+}) async {
+  final archiveBaseName = p.basenameWithoutExtension(Uri.parse(url).path);
+  final packageDir = p.join(cacheDir, archiveBaseName);
+  final packageDirectory = Directory(packageDir);
+  if (packageDirectory.existsSync()) {
+    return packageDir;
+  }
+
+  final cacheTempDir = Directory(p.join(cacheDir, '.temp'));
+  await cacheTempDir.create(recursive: true);
+
+  final tempDirectory = await cacheTempDir.createTemp();
+  try {
+    final archiveData = await downloadUrl(url);
+    await unpackArchive(
+      archiveData,
+      format: format,
+      outputDir: tempDirectory.path,
+    );
+    if (postProcess != null) {
+      await postProcess(tempDirectory.path);
+    }
+    try {
+      await moveDirectory(tempDirectory, packageDirectory);
+    } on PathExistsException {
+      // Another process has already downloaded the archive.
+    } on FileSystemException catch (e) {
+      if (!_concurrentCachePopulationDetected(e, packageDirectory)) {
+        rethrow;
+      }
+    }
+  } finally {
+    if (tempDirectory.existsSync()) {
+      await tempDirectory.delete(recursive: true);
+    }
+  }
+
+  return packageDir;
+}
+
+bool _concurrentCachePopulationDetected(
+  FileSystemException error,
+  Directory packageDirectory,
+) {
+  if (!packageDirectory.existsSync()) {
+    return false;
+  }
+
+  final errorCode = error.osError?.errorCode;
+  return errorCode == 17 || errorCode == 66;
+}
+
+final class CblitePackageConfig extends PackageConfig {
+  CblitePackageConfig({
     required super.library,
     required super.os,
     required super.architectures,
@@ -305,106 +292,75 @@ final class DatabasePackageConfig extends PackageConfig {
     required this.edition,
   });
 
-  static List<DatabasePackageConfig> all({
-    required Map<Library, String> releases,
+  static List<CblitePackageConfig> all({
+    required String release,
     required Edition edition,
-  }) {
-    for (final library in releases.keys) {
-      if (!library.isDatabaseLibrary) {
-        throw ArgumentError('$library is not a database library');
-      }
-    }
-
-    return [
-      for (final MapEntry(key: library, value: release)
-          in releases.entries) ...[
-        DatabasePackageConfig(
-          library: library,
-          os: OS.android,
-          architectures: [
-            Architecture.arm,
-            Architecture.arm64,
-            Architecture.ia32,
-            Architecture.x64,
-          ],
-          release: release,
-          archiveFormat: ArchiveFormat.zip,
-          edition: edition,
-        ),
-        DatabasePackageConfig(
-          library: library,
-          os: OS.iOS,
-          architectures: [Architecture.arm64, Architecture.x64],
-          release: release,
-          archiveFormat: ArchiveFormat.zip,
-          edition: edition,
-        ),
-        DatabasePackageConfig(
-          library: library,
-          os: OS.macOS,
-          architectures: [Architecture.arm64, Architecture.x64],
-          release: release,
-          archiveFormat: ArchiveFormat.zip,
-          edition: edition,
-        ),
-        DatabasePackageConfig(
-          library: library,
-          os: OS.linux,
-          architectures: [Architecture.x64],
-          release: release,
-          archiveFormat: ArchiveFormat.tarGz,
-          edition: edition,
-        ),
-        DatabasePackageConfig(
-          library: library,
-          os: OS.windows,
-          architectures: [Architecture.x64],
-          release: release,
-          archiveFormat: ArchiveFormat.zip,
-          edition: edition,
-        ),
+  }) => [
+    CblitePackageConfig(
+      library: Library.cblite,
+      os: OS.android,
+      architectures: [
+        Architecture.arm,
+        Architecture.arm64,
+        Architecture.ia32,
+        Architecture.x64,
       ],
-    ];
-  }
+      release: release,
+      archiveFormat: ArchiveFormat.zip,
+      edition: edition,
+    ),
+    CblitePackageConfig(
+      library: Library.cblite,
+      os: OS.iOS,
+      architectures: [Architecture.arm64, Architecture.x64],
+      release: release,
+      archiveFormat: ArchiveFormat.zip,
+      edition: edition,
+    ),
+    CblitePackageConfig(
+      library: Library.cblite,
+      os: OS.macOS,
+      architectures: [Architecture.arm64, Architecture.x64],
+      release: release,
+      archiveFormat: ArchiveFormat.zip,
+      edition: edition,
+    ),
+    CblitePackageConfig(
+      library: Library.cblite,
+      os: OS.linux,
+      architectures: [Architecture.x64],
+      release: release,
+      archiveFormat: ArchiveFormat.tarGz,
+      edition: edition,
+    ),
+    CblitePackageConfig(
+      library: Library.cblite,
+      os: OS.windows,
+      architectures: [Architecture.x64],
+      release: release,
+      archiveFormat: ArchiveFormat.zip,
+      edition: edition,
+    ),
+  ];
 
   final Edition edition;
 
   @override
-  String get _archiveUrl => switch (library) {
-    Library.cblite => Uri(
-      scheme: 'https',
-      host: 'packages.couchbase.com',
-      pathSegments: [
-        'releases',
+  String get _archiveUrl => Uri(
+    scheme: 'https',
+    host: 'packages.couchbase.com',
+    pathSegments: [
+      'releases',
+      'couchbase-lite-c',
+      release,
+      [
         'couchbase-lite-c',
+        edition.name,
         release,
-        [
-          'couchbase-lite-c',
-          edition.name,
-          release,
-          '$targetId.${archiveFormat.extension}',
-        ].join('-'),
-      ],
-    ).toString(),
-    Library.cblitedart => Uri(
-      scheme: 'https',
-      host: 'github.com',
-      pathSegments: [
-        'cbl-dart',
-        'cbl-dart',
-        'releases',
-        'download',
-        'libcblitedart-v$release',
-        [
-          'couchbase-lite-dart',
-          release,
-          edition.name,
-          '$targetId.${archiveFormat.extension}',
-        ].join('-'),
-      ],
-    ).toString(),
-    _ => throw UnsupportedError('$library'),
-  };
+        '$targetId.${archiveFormat.extension}',
+      ].join('-'),
+    ],
+  ).toString();
 }
 
 final class VectorSearchPackageConfig extends PackageConfig {
@@ -526,22 +482,28 @@ final class VectorSearchPackageConfig extends PackageConfig {
   }
 }
 
-extension on OS {
+extension NativeLibraryOSExtension on OS {
   String get couchbaseSdkName => switch (this) {
     OS.android => 'android',
+    OS.fuchsia => throw UnsupportedError('Unsupported OS: $this'),
     OS.iOS => 'ios',
     OS.linux => 'linux',
     OS.macOS => 'macos',
     OS.windows => 'windows',
+    _ => throw UnsupportedError('Unsupported OS: $this'),
   };
 }
 
-extension on Architecture {
+extension NativeLibraryArchitectureExtension on Architecture {
   String get couchbaseSdkName => switch (this) {
     Architecture.arm => 'arm',
     Architecture.arm64 => 'arm64',
     Architecture.ia32 => 'i686',
     Architecture.x64 => 'x86_64',
+    Architecture.riscv32 || Architecture.riscv64 => throw UnsupportedError(
+      'Unsupported architecture: $this',
+    ),
+    _ => throw UnsupportedError('Unsupported architecture: $this'),
   };
 
   String get androidTriple => switch (this) {
@@ -549,6 +511,10 @@ extension on Architecture {
     Architecture.arm64 => 'aarch64-linux-android',
     Architecture.ia32 => 'i686-linux-android',
     Architecture.x64 => 'x86_64-linux-android',
+    Architecture.riscv32 || Architecture.riscv64 => throw UnsupportedError(
+      'Unsupported architecture: $this',
+    ),
+    _ => throw UnsupportedError('Unsupported architecture: $this'),
   };
 
   String get linuxTripple => switch (this) {
@@ -556,5 +522,9 @@ extension on Architecture {
     Architecture.arm64 => 'aarch64-linux-gnu',
     Architecture.ia32 => 'i686-linux-gnu',
     Architecture.x64 => 'x86_64-linux-gnu',
+    Architecture.riscv32 || Architecture.riscv64 => throw UnsupportedError(
+      'Unsupported architecture: $this',
+    ),
+    _ => throw UnsupportedError('Unsupported architecture: $this'),
   };
 }

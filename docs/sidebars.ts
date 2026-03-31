@@ -135,6 +135,10 @@ export default {
       id: 'supported-platforms',
     },
     {
+      type: 'doc',
+      id: 'debug-symbols',
+    },
+    {
       type: 'category',
       label: 'References',
       collapsed: true,

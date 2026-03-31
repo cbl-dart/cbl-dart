@@ -1,0 +1,87 @@
+# Debug Symbols
+
+`cbl` ships a CLI command to assemble downloadable native libraries together
+with their matching debug-symbol artifacts for Sentry uploads:
+
+```sh
+dart run cbl:cbl native-libraries assemble
+```
+
+The assembled output is written to `build/cbl-native-libraries` by default.
+
+## Defaults
+
+The command reads `hooks.user_defines.cbl` from the nearest relevant
+`pubspec.yaml` and uses those values as defaults for:
+
+- `edition`
+- `vector_search`
+
+CLI flags override those defaults:
+
+```sh
+dart run cbl:cbl native-libraries assemble \
+  --edition=community \
+  --edition=enterprise \
+  --vector-search \
+  --output=build/native-libraries
+```
+
+## Hook-Built `libcblitedart`
+
+`libcblitedart` is built by the native build hook and always includes debug
+symbols for the target platform and architecture being built.
+
+The CLI command below does not rebuild or re-stage `libcblitedart`. It is
+focused on the downloadable native libraries that ship separately from the
+hook-built local library.
+
+## What Gets Assembled
+
+For each selected target, the command assembles:
+
+- `libcblite`
+- `CouchbaseLiteVectorSearch` when enabled and supported
+
+Downloaded artifacts are reused from a system-wide cache.
+
+Where possible, the command symlinks cached files into the assembled output.
+
+## Output Layout
+
+The output is grouped by edition, platform, architecture, and library:
+
+```text
+build/cbl-native-libraries/
+  community/
+    macos/
+      arm64/
+        cblite/
+  enterprise/
+    macos/
+      arm64/
+        cblite/
+        vector_search/
+```
+
+Each library directory contains the runtime library together with any matching
+debug-symbol companions that are available for that target.
+
+## Sentry Upload Workflow
+
+Build your app first so the hook-produced `libcblitedart` binary matches the
+artifact bundled into the app. Then validate the assembled downloadable
+libraries:
+
+```sh
+sentry-cli debug-files check build/cbl-native-libraries
+```
+
+Upload the full assembled directory in one invocation:
+
+```sh
+sentry-cli debug-files upload --wait build/cbl-native-libraries
+```
+
+You can also pass `-o` and `-p`, or configure `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`,
+and `SENTRY_PROJECT` through environment variables.

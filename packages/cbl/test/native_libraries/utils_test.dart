@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:cbl/src/install.dart';
+import 'package:cbl/src/native_libraries.dart';
 import 'package:test/test.dart';
 
 import '../utils.dart';

@@ -233,3 +233,59 @@ Future<void> moveDirectory(Directory from, Directory to) async {
   await to.parent.create(recursive: true);
   await from.rename(to.path);
 }
+
+Future<void> symlinkOrCopyFile(String source, String destination) async {
+  final sourcePath = p.absolute(source);
+  final destinationPath = p.absolute(destination);
+  await Directory(p.dirname(destinationPath)).create(recursive: true);
+
+  final destinationLink = Link(destinationPath);
+  try {
+    if (destinationLink.existsSync() || File(destinationPath).existsSync()) {
+      await _deleteIfExists(destinationPath);
+    }
+    await destinationLink.create(sourcePath, recursive: true);
+  } on FileSystemException {
+    await File(sourcePath).copy(destinationPath);
+  }
+}
+
+Future<void> symlinkOrCopyDirectory(String source, String destination) async {
+  final sourcePath = p.absolute(source);
+  final destinationPath = p.absolute(destination);
+  await Directory(p.dirname(destinationPath)).create(recursive: true);
+
+  final destinationLink = Link(destinationPath);
+  try {
+    if (destinationLink.existsSync() ||
+        Directory(destinationPath).existsSync()) {
+      await _deleteIfExists(destinationPath);
+    }
+    await destinationLink.create(sourcePath, recursive: true);
+  } on FileSystemException {
+    await copyDirectoryContents(
+      sourcePath,
+      destinationPath,
+      dereferenceLinks: true,
+    );
+  }
+}
+
+Future<void> _deleteIfExists(String path) async {
+  final file = File(path);
+  if (file.existsSync()) {
+    await file.delete();
+    return;
+  }
+
+  final directory = Directory(path);
+  if (directory.existsSync()) {
+    await directory.delete(recursive: true);
+    return;
+  }
+
+  final link = Link(path);
+  if (link.existsSync()) {
+    await link.delete();
+  }
+}
