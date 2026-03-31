@@ -214,19 +214,17 @@ final class RemotePackageLoader extends PackageLoader {
   final String cacheDir;
 
   @override
-  Future<String> _packageDir(PackageConfig config) =>
-      downloadAndUnpackToCache(
-        url: config._archiveUrl,
-        format: config.archiveFormat,
-        cacheDir: cacheDir,
-        postProcess: config._postProcess,
-      );
+  Future<String> _packageDir(PackageConfig config) => downloadAndUnpackToCache(
+    url: config._archiveUrl,
+    format: config.archiveFormat,
+    cacheDir: cacheDir,
+    postProcess: config._postProcess,
+  );
 }
 
-/// Downloads an archive from [url], unpacks it into [cacheDir], and returns
-/// the resulting directory path.  The directory name is derived from the
-/// archive URL basename.  If the directory already exists, the download is
-/// skipped.
+/// Downloads an archive from [url], unpacks it into [cacheDir], and returns the
+/// resulting directory path. The directory name is derived from the archive URL
+/// basename. If the directory already exists, the download is skipped.
 Future<String> downloadAndUnpackToCache({
   required String url,
   required ArchiveFormat format,
@@ -258,6 +256,10 @@ Future<String> downloadAndUnpackToCache({
       await moveDirectory(tempDirectory, packageDirectory);
     } on PathExistsException {
       // Another process has already downloaded the archive.
+    } on FileSystemException catch (e) {
+      if (!_concurrentCachePopulationDetected(e, packageDirectory)) {
+        rethrow;
+      }
     }
   } finally {
     if (tempDirectory.existsSync()) {
@@ -266,6 +268,18 @@ Future<String> downloadAndUnpackToCache({
   }
 
   return packageDir;
+}
+
+bool _concurrentCachePopulationDetected(
+  FileSystemException error,
+  Directory packageDirectory,
+) {
+  if (!packageDirectory.existsSync()) {
+    return false;
+  }
+
+  final errorCode = error.osError?.errorCode;
+  return errorCode == 17 || errorCode == 66;
 }
 
 final class CblitePackageConfig extends PackageConfig {

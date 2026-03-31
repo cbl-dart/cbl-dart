@@ -131,6 +131,8 @@ Future<void> assembleCblite({
   await assembleRuntimeAndSymbols(
     libraryFile: cblite.libraryFile.toFilePath(),
     targetDir: libraryDir.path,
+    os: os,
+    architecture: architecture,
     symbolsDir: cblite.symbolsDir,
     extraFiles: os == OS.windows
         ? [
@@ -191,12 +193,17 @@ Future<void> assembleVectorSearch({
       if (entity is File && entity.path.endsWith('.lib')) {
         extraFiles.add(entity.path);
       }
+      if (entity is File && entity.path.endsWith('.pdb')) {
+        extraFiles.add(entity.path);
+      }
     }
   }
 
   await assembleRuntimeAndSymbols(
     libraryFile: libraryFile.toFilePath(),
     targetDir: libraryDir.path,
+    os: os,
+    architecture: architecture,
     symbolsDir: symbolsDir,
     extraFiles: extraFiles,
     mode: mode,
@@ -206,13 +213,17 @@ Future<void> assembleVectorSearch({
 Future<void> assembleRuntimeAndSymbols({
   required String libraryFile,
   required String targetDir,
+  required OS os,
+  required Architecture architecture,
   required String? symbolsDir,
   required List<String> extraFiles,
   required StageMode mode,
 }) async {
-  await stagePath(
-    source: libraryFile,
-    destination: p.join(targetDir, p.basename(libraryFile)),
+  await stageAssemblyLibraryFile(
+    libraryFile: libraryFile,
+    targetDir: targetDir,
+    os: os,
+    architecture: architecture,
     mode: mode,
   );
 
@@ -251,6 +262,38 @@ Future<void> assembleRuntimeAndSymbols({
       mode: mode,
     );
   }
+}
+
+Future<void> stageAssemblyLibraryFile({
+  required String libraryFile,
+  required String targetDir,
+  required OS os,
+  required Architecture architecture,
+  required StageMode mode,
+}) async {
+  final destination = p.join(targetDir, p.basename(libraryFile));
+
+  if (os == OS.macOS || os == OS.iOS) {
+    final thinnedLibrary = await lipoThin(
+      Uri.file(libraryFile),
+      targetArchitecture: architecture,
+      outputDir: Uri.file(targetDir),
+    );
+    final thinnedLibraryFile = thinnedLibrary.toFilePath();
+
+    if (thinnedLibraryFile == destination) {
+      return;
+    }
+
+    await stagePath(
+      source: thinnedLibraryFile,
+      destination: destination,
+      mode: StageMode.copy,
+    );
+    return;
+  }
+
+  await stagePath(source: libraryFile, destination: destination, mode: mode);
 }
 
 Future<void> stagePath({
