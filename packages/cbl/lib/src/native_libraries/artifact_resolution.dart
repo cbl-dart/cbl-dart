@@ -5,7 +5,6 @@ import 'package:path/path.dart' as p;
 
 import 'package.dart';
 import 'target_matrix.dart';
-import 'utils.dart';
 
 const cbliteRelease = '4.0.3';
 const vectorSearchRelease = '2.0.0';
@@ -116,39 +115,12 @@ Future<String?> downloadSymbolsArchive({
     return null;
   }
 
-  final archiveUrl = archive.$1;
-  final archiveFormat = archive.$2;
-  final archiveBaseName = p.basenameWithoutExtension(
-    Uri.parse(archiveUrl).path,
+  final (archiveUrl, archiveFormat) = archive;
+  return downloadAndUnpackToCache(
+    url: archiveUrl,
+    format: archiveFormat,
+    cacheDir: downloadedPackagesCacheDir,
   );
-  final packageDir = p.join(downloadedPackagesCacheDir, archiveBaseName);
-  final packageDirectory = Directory(packageDir);
-  if (packageDirectory.existsSync()) {
-    return packageDir;
-  }
-
-  final cacheTempDir = Directory(p.join(downloadedPackagesCacheDir, '.temp'));
-  await cacheTempDir.create(recursive: true);
-  final tempDirectory = await cacheTempDir.createTemp();
-  try {
-    final archiveData = await downloadUrl(archiveUrl);
-    await unpackArchive(
-      archiveData,
-      format: archiveFormat,
-      outputDir: tempDirectory.path,
-    );
-    try {
-      await moveDirectory(tempDirectory, packageDirectory);
-    } on PathExistsException {
-      // Another process has already downloaded the archive.
-    }
-  } finally {
-    if (tempDirectory.existsSync()) {
-      await tempDirectory.delete(recursive: true);
-    }
-  }
-
-  return packageDir;
 }
 
 (String, ArchiveFormat)? cbliteSymbolsArchive({

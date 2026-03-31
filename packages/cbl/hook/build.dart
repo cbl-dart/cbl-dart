@@ -46,18 +46,12 @@ Future<void> buildHook(BuildInput input, BuildOutputBuilder output) async {
     ),
   );
 
-  final cblitedartOutput = BuildOutputBuilder();
-  await native.buildCblitedartAsset(
+  final cblitedartBinary = await native.buildCblitedart(
     input: input,
-    output: cblitedartOutput,
     cbliteIncludeDir: cblite.includeDir,
     cbliteFrameworkSearchPath: cblite.frameworkSearchPath,
     edition: edition,
   );
-  final cblitedartAsset = cblitedartOutput.build().assets.code.singleWhere(
-    (asset) => asset.id == 'package:cbl/src/bindings/cblitedart.dart',
-  );
-  final cblitedartBinary = File.fromUri(cblitedartAsset.file!);
   final cblitedartDest = p.join(libDir, p.basename(cblitedartBinary.path));
   await cblitedartBinary.copy(cblitedartDest);
   output.assets.code.add(

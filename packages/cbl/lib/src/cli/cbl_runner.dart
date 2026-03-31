@@ -53,7 +53,7 @@ Future<void> runCblCli(List<String> args) async {
   final request = applyCliOverrides(defaults, parsed);
   final plan = resolveNativeLibrariesPlan(request);
 
-  for (final resolvedTarget in plan.targets) {
+  await Future.wait(plan.targets.map((resolvedTarget) async {
     final target = resolvedTarget.target;
     final targetDir = resolvedTarget.outputDirectory(plan.outputDirectory);
     await Directory(targetDir).create(recursive: true);
@@ -78,7 +78,7 @@ Future<void> runCblCli(List<String> args) async {
         mode: StageMode.symlink,
       );
     }
-  }
+  }));
 }
 
 void _printUsage(ArgParser parser) {

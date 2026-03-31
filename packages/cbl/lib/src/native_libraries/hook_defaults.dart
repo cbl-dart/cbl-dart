@@ -18,15 +18,19 @@ final class NativeLibraryDefaults {
   final Directory? baseDirectory;
 }
 
-Edition parseEdition(String value) => switch (value) {
+Edition? tryParseEdition(String value) => switch (value) {
   'community' => Edition.community,
   'enterprise' => Edition.enterprise,
-  _ => throw ArgumentError.value(
-    value,
-    'value',
-    'edition must be "community" or "enterprise"',
-  ),
+  _ => null,
 };
+
+Edition parseEdition(String value) =>
+    tryParseEdition(value) ??
+    (throw ArgumentError.value(
+      value,
+      'value',
+      'edition must be "community" or "enterprise"',
+    ));
 
 void validateNativeLibraryConfiguration({
   required Set<Edition> editions,
@@ -152,13 +156,10 @@ File? _findRelevantPubspec(Directory startDirectory) {
 
 Edition _parseEditionUserDefine(Object value) {
   final stringValue = value.toString();
-  return switch (stringValue) {
-    'community' => Edition.community,
-    'enterprise' => Edition.enterprise,
-    _ => throw BuildError(
-      message:
-          'edition must be "community" or "enterprise", '
-          'got "$stringValue".',
-    ),
-  };
+  return tryParseEdition(stringValue) ??
+      (throw BuildError(
+        message:
+            'edition must be "community" or "enterprise", '
+            'got "$stringValue".',
+      ));
 }

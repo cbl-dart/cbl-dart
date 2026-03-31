@@ -10,6 +10,14 @@ import 'utils.dart';
 
 enum StageMode { copy, symlink }
 
+String _lipoArchName(Architecture architecture) => switch (architecture) {
+  Architecture.arm64 => 'arm64',
+  Architecture.x64 => 'x86_64',
+  _ => throw BuildError(
+    message: 'Unsupported architecture for lipo: $architecture',
+  ),
+};
+
 Future<Uri> stageCblite(
   ({Uri libPath, String includeDir}) cblite, {
   required String stagingDir,
@@ -20,18 +28,11 @@ Future<Uri> stageCblite(
 
   switch (targetOS) {
     case OS.macOS:
-      final arch = switch (targetArchitecture) {
-        Architecture.arm64 => 'arm64',
-        Architecture.x64 => 'x86_64',
-        _ => throw BuildError(
-          message: 'Unsupported macOS architecture: $targetArchitecture',
-        ),
-      };
       final outputFile = p.join(stagingDir, 'libcblite.dylib');
       final result = await Process.run('lipo', [
         libFile,
         '-thin',
-        arch,
+        _lipoArchName(targetArchitecture),
         '-output',
         outputFile,
       ]);
@@ -58,28 +59,15 @@ Future<Uri> stageCblite(
       await File(importLib).copy(p.join(stagingDir, 'cblite.lib'));
       return Uri.file(dllDest);
     case OS.iOS:
-      final iosArch = switch (targetArchitecture) {
-        Architecture.arm64 => 'arm64',
-        Architecture.x64 => 'x86_64',
-        _ => throw BuildError(
-          message: 'Unsupported iOS architecture: $targetArchitecture',
-        ),
-      };
       final dest = p.join(stagingDir, 'CouchbaseLite');
-      final universal = await isUniversalBinary(libFile);
-      if (universal) {
-        final result = await Process.run('lipo', [
-          libFile,
-          '-thin',
-          iosArch,
-          '-output',
-          dest,
-        ]);
-        if (result.exitCode != 0) {
-          throw BuildError(
-            message: 'lipo thin failed for iOS: ${result.stderr}',
-          );
-        }
+      final thinned = await lipoThin(
+        cblite.libPath,
+        targetArchitecture: targetArchitecture,
+        outputDir: Uri.file(stagingDir),
+      );
+      if (thinned != cblite.libPath) {
+        // lipoThin wrote to outputDir; rename to expected filename.
+        await File(thinned.toFilePath()).rename(dest);
       } else {
         await File(libFile).copy(dest);
       }
@@ -94,14 +82,7 @@ Future<Uri> lipoThin(
   required Architecture targetArchitecture,
   required Uri outputDir,
 }) async {
-  final arch = switch (targetArchitecture) {
-    Architecture.arm64 => 'arm64',
-    Architecture.x64 => 'x86_64',
-    _ => throw BuildError(
-      message: 'Unsupported macOS architecture: $targetArchitecture',
-    ),
-  };
-
+  final arch = _lipoArchName(targetArchitecture);
   final inputFile = libPath.toFilePath();
   final universal = await isUniversalBinary(inputFile);
   if (!universal) {
@@ -272,61 +253,41 @@ Future<void> assembleRuntimeAndSymbols({
   }
 }
 
-Future<void> stageDirectoryContents({
-  required String sourceDir,
-  required String destinationDir,
-  required StageMode mode,
-}) async {
-  final source = Directory(sourceDir);
-  if (!source.existsSync()) {
-    return;
-  }
-
-  await Directory(destinationDir).create(recursive: true);
-  for (final entity in source.listSync()) {
-    await stagePath(
-      source: entity.path,
-      destination: p.join(destinationDir, p.basename(entity.path)),
-      mode: mode,
-    );
-  }
-}
-
 Future<void> stagePath({
   required String source,
   required String destination,
   required StageMode mode,
 }) async {
-  if (File(source).existsSync()) {
-    switch (mode) {
-      case StageMode.copy:
-        await File(source).copy(destination);
-      case StageMode.symlink:
-        await symlinkOrCopyFile(source, destination);
-    }
-    return;
-  }
-
-  if (Directory(source).existsSync()) {
-    switch (mode) {
-      case StageMode.copy:
-        await copyDirectoryContents(
-          source,
-          destination,
-          dereferenceLinks: true,
-        );
-      case StageMode.symlink:
-        await symlinkOrCopyDirectory(source, destination);
-    }
-    return;
-  }
-
-  if (Link(source).existsSync()) {
-    final resolvedSource = Link(source).resolveSymbolicLinksSync();
-    await stagePath(
-      source: resolvedSource,
-      destination: destination,
-      mode: mode,
-    );
+  final stat = FileStat.statSync(source);
+  switch (stat.type) {
+    case FileSystemEntityType.file:
+      switch (mode) {
+        case StageMode.copy:
+          await File(source).copy(destination);
+        case StageMode.symlink:
+          await symlinkOrCopyFile(source, destination);
+      }
+    case FileSystemEntityType.directory:
+      switch (mode) {
+        case StageMode.copy:
+          await copyDirectoryContents(
+            source,
+            destination,
+            dereferenceLinks: true,
+          );
+        case StageMode.symlink:
+          await symlinkOrCopyDirectory(source, destination);
+      }
+    case FileSystemEntityType.link:
+      final resolvedSource = Link(source).resolveSymbolicLinksSync();
+      await stagePath(
+        source: resolvedSource,
+        destination: destination,
+        mode: mode,
+      );
+    case FileSystemEntityType.notFound:
+    case FileSystemEntityType.pipe:
+    case FileSystemEntityType.unixDomainSock:
+      break;
   }
 }

@@ -18,9 +18,6 @@ final class AssembledLibraryTarget {
   final OS os;
   final Architecture architecture;
   final IOSSdk? iOSSdk;
-
-  String get cacheKeySuffix =>
-      [os.name, architecture.name, if (iOSSdk != null) iOSSdk!.type].join('-');
 }
 
 final class NativeLibraryRequest {
@@ -106,9 +103,9 @@ NativeLibraryRequest applyCliOverrides(
 ResolvedNativeLibrariesPlan resolveNativeLibrariesPlan(
   NativeLibraryRequest request,
 ) {
-  validateNativeLibraryRequest(request);
-
   final platforms = request.platforms ?? {currentHostOS()};
+  _validateNativeLibraryRequest(request, platforms);
+
   final targets = <ResolvedNativeLibraryTarget>[];
   for (final edition in request.editions) {
     for (final platform in platforms) {
@@ -139,13 +136,15 @@ ResolvedNativeLibrariesPlan resolveNativeLibrariesPlan(
   );
 }
 
-void validateNativeLibraryRequest(NativeLibraryRequest request) {
+void _validateNativeLibraryRequest(
+  NativeLibraryRequest request,
+  Set<OS> platforms,
+) {
   validateNativeLibraryConfiguration(
     editions: request.editions,
     vectorSearch: request.vectorSearch,
   );
 
-  final platforms = request.platforms ?? {currentHostOS()};
   for (final platform in platforms) {
     final supportedArchitectures = supportedArchitecturesForAssembly(platform);
     final requestedArchitectures =

@@ -7,9 +7,11 @@ import 'package:path/path.dart' as p;
 
 import 'package.dart';
 
-Future<void> buildCblitedartAsset({
+/// Builds libcblitedart from source and returns the compiled binary as a
+/// [File].  The caller is responsible for staging the binary and registering
+/// the code asset.
+Future<File> buildCblitedart({
   required BuildInput input,
-  required BuildOutputBuilder output,
   required String cbliteIncludeDir,
   String? cbliteFrameworkSearchPath,
   required Edition edition,
@@ -47,7 +49,13 @@ Future<void> buildCblitedartAsset({
     std: 'c++17',
     cppLinkStdLib: targetOS == OS.android ? 'c++_static' : null,
   );
-  await builder.run(input: input, output: output);
+
+  final tempOutput = BuildOutputBuilder();
+  await builder.run(input: input, output: tempOutput);
+  final asset = tempOutput.build().assets.code.singleWhere(
+    (asset) => asset.id == 'package:cbl/src/bindings/cblitedart.dart',
+  );
+  return File.fromUri(asset.file!);
 }
 
 Iterable<FileSystemEntity> findDebugCompanions(File binaryFile) sync* {

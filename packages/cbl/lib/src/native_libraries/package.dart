@@ -214,43 +214,58 @@ final class RemotePackageLoader extends PackageLoader {
   final String cacheDir;
 
   @override
-  Future<String> _packageDir(PackageConfig config) async {
-    final archiveBaseName = p.basenameWithoutExtension(
-      Uri.parse(config._archiveUrl).path,
-    );
-
-    final packageDir = p.join(cacheDir, archiveBaseName);
-
-    final packageDirectory = Directory(packageDir);
-    if (packageDirectory.existsSync()) {
-      return packageDir;
-    }
-
-    final cacheTempDir = Directory(p.join(cacheDir, '.temp'));
-    await cacheTempDir.create(recursive: true);
-
-    final tempDirectory = await cacheTempDir.createTemp();
-    try {
-      final archiveData = await downloadUrl(config._archiveUrl);
-      await unpackArchive(
-        archiveData,
+  Future<String> _packageDir(PackageConfig config) =>
+      downloadAndUnpackToCache(
+        url: config._archiveUrl,
         format: config.archiveFormat,
-        outputDir: tempDirectory.path,
+        cacheDir: cacheDir,
+        postProcess: config._postProcess,
       );
-      await config._postProcess(tempDirectory.path);
-      try {
-        await moveDirectory(tempDirectory, packageDirectory);
-      } on PathExistsException {
-        // Another process has already downloaded the archive.
-      }
-    } finally {
-      if (tempDirectory.existsSync()) {
-        await tempDirectory.delete(recursive: true);
-      }
-    }
+}
 
+/// Downloads an archive from [url], unpacks it into [cacheDir], and returns
+/// the resulting directory path.  The directory name is derived from the
+/// archive URL basename.  If the directory already exists, the download is
+/// skipped.
+Future<String> downloadAndUnpackToCache({
+  required String url,
+  required ArchiveFormat format,
+  required String cacheDir,
+  Future<void> Function(String packageDir)? postProcess,
+}) async {
+  final archiveBaseName = p.basenameWithoutExtension(Uri.parse(url).path);
+  final packageDir = p.join(cacheDir, archiveBaseName);
+  final packageDirectory = Directory(packageDir);
+  if (packageDirectory.existsSync()) {
     return packageDir;
   }
+
+  final cacheTempDir = Directory(p.join(cacheDir, '.temp'));
+  await cacheTempDir.create(recursive: true);
+
+  final tempDirectory = await cacheTempDir.createTemp();
+  try {
+    final archiveData = await downloadUrl(url);
+    await unpackArchive(
+      archiveData,
+      format: format,
+      outputDir: tempDirectory.path,
+    );
+    if (postProcess != null) {
+      await postProcess(tempDirectory.path);
+    }
+    try {
+      await moveDirectory(tempDirectory, packageDirectory);
+    } on PathExistsException {
+      // Another process has already downloaded the archive.
+    }
+  } finally {
+    if (tempDirectory.existsSync()) {
+      await tempDirectory.delete(recursive: true);
+    }
+  }
+
+  return packageDir;
 }
 
 final class CblitePackageConfig extends PackageConfig {
