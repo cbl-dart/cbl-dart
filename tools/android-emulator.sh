@@ -23,6 +23,23 @@ emulatorName="cbl-dart"
 emulatorPort=5554
 serialName="emulator-$emulatorPort"
 appBundleId="com.terwesten.gabriel.cbl_e2e_tests_flutter"
+sdkmanager=""
+avdmanager=""
+
+for dir in "$ANDROID_HOME"/cmdline-tools/*/bin; do
+    if [[ -x "$dir/sdkmanager" ]]; then
+        sdkmanager="$dir/sdkmanager"
+        avdmanager="$dir/avdmanager"
+        if [[ "$dir" == */latest/* ]]; then
+            break
+        fi
+    fi
+done
+
+if [[ -z "$sdkmanager" || -z "$avdmanager" ]]; then
+    echo "Could not find sdkmanager/avdmanager in $ANDROID_HOME/cmdline-tools/*/bin."
+    exit 1
+fi
 
 # === Usage ===================================================================
 
@@ -92,28 +109,28 @@ function createAndStart() {
 
     sudo apt-get install libpulse0
 
-    yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses
+    yes | "$sdkmanager" --licenses
 
     # Install emulator if not already present.
     if [[ ! -d "$ANDROID_HOME/emulator" ]]; then
         echo "Installing emulator..."
-        "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" emulator
+        "$sdkmanager" emulator
     fi
 
     # Install system image.
     systemImage="system-images;android-$apiLevel;default;x86_64"
     echo "Installing system image '$systemImage' ..."
-    "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "$systemImage"
+    "$sdkmanager" "$systemImage"
 
     # Install platform tools if not already present.
     if [[ ! -d "$ANDROID_HOME/platform-tools" ]]; then
         echo "Installing platform tools..."
-        "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" platform-tools
+        "$sdkmanager" platform-tools
     fi
 
     # Create emulator.
     echo "Creating emulator..."
-    "$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager" create avd \
+    "$avdmanager" create avd \
         --name "$emulatorName" \
         --package "$systemImage" \
         --device "$device"
