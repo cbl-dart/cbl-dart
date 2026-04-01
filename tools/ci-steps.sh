@@ -384,6 +384,16 @@ function runE2ETests() {
         # flag, which we need to collect logs from devices.
         local noBuildFlag=""
         if [ "$didExplicitBuild" = true ]; then noBuildFlag="--no-build"; fi
+
+        if [ "$targetOs" = "Android" ] && [ -d "$ANDROID_HOME/build-tools" ]; then
+            local latestBuildToolsDir
+            latestBuildToolsDir=$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -n 1)
+            if [ -n "$latestBuildToolsDir" ]; then
+                echo "Adding Android build tools to PATH: $latestBuildToolsDir"
+                export PATH="$latestBuildToolsDir:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$PATH"
+            fi
+        fi
+
         flutter drive \
             -d "$device" \
             $DART_DEFINES \

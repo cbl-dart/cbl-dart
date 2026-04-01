@@ -7,10 +7,10 @@ set -e
 if [[ -z "${ANDROID_HOME}" ]]; then
     case "$(uname)" in
     Darwin)
-        ANDROID_HOME="~/Library/Android/sdk"
+        ANDROID_HOME="$HOME/Library/Android/sdk"
         ;;
     Linux)
-        ANDROID_HOME="~/Android/Sdk"
+        ANDROID_HOME="$HOME/Android/Sdk"
         ;;
     *)
         echo "The environment variable ANDROID_HOME needs to be set"
@@ -23,6 +23,31 @@ emulatorName="cbl-dart"
 emulatorPort=5554
 serialName="emulator-$emulatorPort"
 appBundleId="com.terwesten.gabriel.cbl_e2e_tests_flutter"
+androidUserHome="${ANDROID_USER_HOME:-$HOME/.android}"
+androidAvdHome="${ANDROID_AVD_HOME:-$androidUserHome/avd}"
+emulatorPartitionSizeMb="${ANDROID_EMULATOR_PARTITION_SIZE_MB:-2048}"
+sdkmanager=""
+avdmanager=""
+
+export ANDROID_USER_HOME="$androidUserHome"
+export ANDROID_AVD_HOME="$androidAvdHome"
+
+mkdir -p "$ANDROID_USER_HOME" "$ANDROID_AVD_HOME"
+
+for dir in "$ANDROID_HOME"/cmdline-tools/*/bin; do
+    if [[ -x "$dir/sdkmanager" ]]; then
+        sdkmanager="$dir/sdkmanager"
+        avdmanager="$dir/avdmanager"
+        if [[ "$dir" == */latest/* ]]; then
+            break
+        fi
+    fi
+done
+
+if [[ -z "$sdkmanager" || -z "$avdmanager" ]]; then
+    echo "Could not find sdkmanager/avdmanager in $ANDROID_HOME/cmdline-tools/*/bin."
+    exit 1
+fi
 
 # === Usage ===================================================================
 
@@ -63,6 +88,45 @@ function requireOption() {
     fi
 }
 
+function waitForEmulatorToBecomeReady() {
+    local emulatorPid="$1"
+    local timeoutSeconds=600
+    local startTime=$SECONDS
+
+    while true; do
+        if ! kill -0 "$emulatorPid" >/dev/null 2>&1; then
+            echo "Emulator process exited before becoming ready."
+            echo "Emulator logs:"
+            cat ./emulator-logs.txt || true
+            return 1
+        fi
+
+        if "$ANDROID_HOME/platform-tools/adb" -s "$serialName" get-state >/dev/null 2>&1; then
+            local bootCompleted
+            bootCompleted=$("$ANDROID_HOME/platform-tools/adb" -s "$serialName" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')
+            local bootAnimation
+            bootAnimation=$("$ANDROID_HOME/platform-tools/adb" -s "$serialName" shell getprop init.svc.bootanim 2>/dev/null | tr -d '\r')
+
+            if [[ "$bootCompleted" == "1" && "$bootAnimation" == "stopped" ]]; then
+                "$ANDROID_HOME/platform-tools/adb" -s "$serialName" shell input keyevent 82 >/dev/null 2>&1 || true
+                echo "Emulator is ready"
+                return 0
+            fi
+        fi
+
+        if ((SECONDS - startTime >= timeoutSeconds)); then
+            echo "Timed out waiting for emulator to become ready after ${timeoutSeconds}s."
+            echo "Known AVDs:"
+            "$ANDROID_HOME/emulator/emulator" -list-avds || true
+            echo "Emulator logs:"
+            cat ./emulator-logs.txt || true
+            return 1
+        fi
+
+        sleep 5
+    done
+}
+
 # === Command implementations =================================================
 
 function createAndStart() {
@@ -92,50 +156,62 @@ function createAndStart() {
 
     sudo apt-get install libpulse0
 
-    yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses
+    yes | "$sdkmanager" --licenses
 
     # Install emulator if not already present.
     if [[ ! -d "$ANDROID_HOME/emulator" ]]; then
         echo "Installing emulator..."
-        "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" emulator
+        "$sdkmanager" emulator
     fi
 
     # Install system image.
     systemImage="system-images;android-$apiLevel;default;x86_64"
     echo "Installing system image '$systemImage' ..."
-    "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "$systemImage"
+    "$sdkmanager" "$systemImage"
 
     # Install platform tools if not already present.
     if [[ ! -d "$ANDROID_HOME/platform-tools" ]]; then
         echo "Installing platform tools..."
-        "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" platform-tools
+        "$sdkmanager" platform-tools
     fi
 
     # Create emulator.
     echo "Creating emulator..."
-    "$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager" create avd \
+    rm -rf \
+        "$ANDROID_AVD_HOME/$emulatorName.avd" \
+        "$ANDROID_AVD_HOME/$emulatorName.ini" \
+        "$ANDROID_USER_HOME/$emulatorName.ini"
+    printf 'no\n' | "$avdmanager" create avd \
+        --force \
         --name "$emulatorName" \
         --package "$systemImage" \
         --device "$device"
 
+    if ! "$ANDROID_HOME/emulator/emulator" -list-avds | grep -Fx "$emulatorName" >/dev/null; then
+        echo "Failed to create emulator '$emulatorName'."
+        echo "Known AVDs:"
+        "$ANDROID_HOME/emulator/emulator" -list-avds || true
+        exit 1
+    fi
+
     # Start emulator.
-    echo "Staring emulator..."
+    echo "Starting emulator..."
     "$ANDROID_HOME/emulator/emulator" \
         -avd "$emulatorName" \
         -port "$emulatorPort" \
         -no-window \
         -no-audio \
         -no-boot-anim \
-        -partition-size 4096 \
+        -partition-size "$emulatorPartitionSizeMb" \
         >./emulator-logs.txt 2>&1 &
+    local emulatorPid=$!
 
     sleep 10
     cat ./emulator-logs.txt
 
     # Wait for emulator to become ready.
     echo "Waiting for emulator to become ready..."
-    "$ANDROID_HOME/platform-tools/adb" -s "$serialName" wait-for-device
-    echo "Emulator is ready"
+    waitForEmulatorToBecomeReady "$emulatorPid"
 }
 
 function setupReversePort() {

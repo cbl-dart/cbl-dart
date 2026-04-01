@@ -19,6 +19,7 @@ env:
 
 jobs:
   formatting-dart:
+    if: github.event_name != 'pull_request'
     name: Formatting - Dart
     timeout-minutes: 10
     runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu
@@ -51,6 +52,7 @@ jobs:
         run: git diff
 
   formatting-clang:
+    if: github.event_name != 'pull_request'
     name: Formatting - Clang
     timeout-minutes: 10
     runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu
@@ -66,6 +68,7 @@ jobs:
           check-path: "packages/cbl/native/couchbase-lite-dart"
 
   analyze-dart:
+    if: github.event_name != 'pull_request'
     name: Analyze Dart code
     timeout-minutes: 10
     runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu
@@ -94,6 +97,7 @@ jobs:
         run: melos analyze
 
   publish-dry-run:
+    if: github.event_name != 'pull_request'
     name: Publish dry run
     timeout-minutes: 10
     strategy:
@@ -124,6 +128,7 @@ jobs:
         run: dart pub publish --dry-run
 
   test-dart-unit:
+    if: github.event_name != 'pull_request'
     name: Dart unit tests
     timeout-minutes: 15
     strategy:
@@ -211,35 +216,34 @@ jobs:
     timeout-minutes: 25
     strategy:
       fail-fast: false
-      matrix:
-        embedder: [standalone, flutter]
-        os:
-          - iOS
-          - macOS
-          - Android
-          - Ubuntu
-          - Windows
-        test_platform: [""]
-        include:
-          # `vm-asan` currently requires the raw Dart SDK from the `main`
-          # channel, so we run it as an extra standalone Ubuntu matrix leg.
-          - embedder: standalone
-            os: Ubuntu
-            test_platform: vm-asan
-        exclude:
-          - embedder: standalone
-            os: iOS
-          - embedder: standalone
-            os: Android
-          # TODO: Re-enable once migrated from Warp to GitHub Actions runners.
-          - embedder: flutter
-            os: iOS
+      # PRs are temporarily narrowed to the Android Flutter leg while
+      # validating the RunsOn migration.
+      matrix: >-
+        ${{
+          fromJSON(
+            github.event_name == 'pull_request'
+            && '{"embedder":["flutter"],"os":["Android"],"test_platform":[""]}'
+            || '{
+              "embedder":["standalone","flutter"],
+              "os":["iOS","macOS","Android","Ubuntu","Windows"],
+              "test_platform":[""],
+              "include":[
+                {"embedder":"standalone","os":"Ubuntu","test_platform":"vm-asan"}
+              ],
+              "exclude":[
+                {"embedder":"standalone","os":"iOS"},
+                {"embedder":"standalone","os":"Android"},
+                {"embedder":"flutter","os":"iOS"}
+              ]
+            }'
+          )
+        }}
     runs-on: >-
       ${{ matrix.os == 'macOS' && matrix.embedder == 'standalone' && 'macos-15'
        || fromJSON(format('{{
         "iOS":"warp-macos-15-arm64-6x",
         "macOS":"macos-15",
-        "Android":"blacksmith-4vcpu-ubuntu-2204",
+        "Android":"runs-on={0}/family=m8+c8/cpu=4/image=ubuntu22-full-x64/extras=s3-cache/nested-virt",
         "Ubuntu":"runs-on={0}/runner=ubuntu22-4cpu",
         "Windows":"windows-2025"
       }}', github.run_id))[matrix.os] }}
@@ -258,9 +262,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Select Java 17
+      - name: Setup Java
         if: ${{ matrix.os == 'Android' }}
-        run: echo "JAVA_HOME=$JAVA_HOME_17_X64" >> $GITHUB_ENV
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Android SDK
+        if: ${{ matrix.os == 'Android' }}
+        uses: android-actions/setup-android@v3
 
       - name: Install Android Native Toolchain
         if: ${{ matrix.os == 'Android' }}
