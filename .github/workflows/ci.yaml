@@ -212,34 +212,32 @@ jobs:
           ./tools/ci-steps.sh uploadCoverageData "unit.${{ matrix.package }}"
 
   test-e2e:
-    if: github.event_name != 'pull_request' || matrix.os == 'Android'
     name: E2E tests
     timeout-minutes: 25
     strategy:
       fail-fast: false
-      matrix:
-        embedder: [standalone, flutter]
-        os:
-          - iOS
-          - macOS
-          - Android
-          - Ubuntu
-          - Windows
-        test_platform: [""]
-        include:
-          # `vm-asan` currently requires the raw Dart SDK from the `main`
-          # channel, so we run it as an extra standalone Ubuntu matrix leg.
-          - embedder: standalone
-            os: Ubuntu
-            test_platform: vm-asan
-        exclude:
-          - embedder: standalone
-            os: iOS
-          - embedder: standalone
-            os: Android
-          # TODO: Re-enable once migrated from Warp to GitHub Actions runners.
-          - embedder: flutter
-            os: iOS
+      # PRs are temporarily narrowed to the Android Flutter leg while
+      # validating the RunsOn migration.
+      matrix: >-
+        ${{
+          fromJSON(
+            github.event_name == 'pull_request'
+            && '{"embedder":["flutter"],"os":["Android"],"test_platform":[""]}'
+            || '{
+              "embedder":["standalone","flutter"],
+              "os":["iOS","macOS","Android","Ubuntu","Windows"],
+              "test_platform":[""],
+              "include":[
+                {"embedder":"standalone","os":"Ubuntu","test_platform":"vm-asan"}
+              ],
+              "exclude":[
+                {"embedder":"standalone","os":"iOS"},
+                {"embedder":"standalone","os":"Android"},
+                {"embedder":"flutter","os":"iOS"}
+              ]
+            }'
+          )
+        }}
     runs-on: >-
       ${{ matrix.os == 'macOS' && matrix.embedder == 'standalone' && 'macos-15'
        || fromJSON(format('{{
