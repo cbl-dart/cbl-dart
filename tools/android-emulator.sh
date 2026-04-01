@@ -25,6 +25,7 @@ serialName="emulator-$emulatorPort"
 appBundleId="com.terwesten.gabriel.cbl_e2e_tests_flutter"
 androidUserHome="${ANDROID_USER_HOME:-$HOME/.android}"
 androidAvdHome="${ANDROID_AVD_HOME:-$androidUserHome/avd}"
+emulatorPartitionSizeMb="${ANDROID_EMULATOR_PARTITION_SIZE_MB:-2048}"
 sdkmanager=""
 avdmanager=""
 
@@ -88,10 +89,18 @@ function requireOption() {
 }
 
 function waitForEmulatorToBecomeReady() {
+    local emulatorPid="$1"
     local timeoutSeconds=600
     local startTime=$SECONDS
 
     while true; do
+        if ! kill -0 "$emulatorPid" >/dev/null 2>&1; then
+            echo "Emulator process exited before becoming ready."
+            echo "Emulator logs:"
+            cat ./emulator-logs.txt || true
+            return 1
+        fi
+
         if "$ANDROID_HOME/platform-tools/adb" -s "$serialName" get-state >/dev/null 2>&1; then
             local bootCompleted
             bootCompleted=$("$ANDROID_HOME/platform-tools/adb" -s "$serialName" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')
@@ -193,15 +202,16 @@ function createAndStart() {
         -no-window \
         -no-audio \
         -no-boot-anim \
-        -partition-size 4096 \
+        -partition-size "$emulatorPartitionSizeMb" \
         >./emulator-logs.txt 2>&1 &
+    local emulatorPid=$!
 
     sleep 10
     cat ./emulator-logs.txt
 
     # Wait for emulator to become ready.
     echo "Waiting for emulator to become ready..."
-    waitForEmulatorToBecomeReady
+    waitForEmulatorToBecomeReady "$emulatorPid"
 }
 
 function setupReversePort() {
