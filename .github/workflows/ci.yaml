@@ -262,9 +262,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Select Java 17
+      - name: Setup Java
         if: ${{ matrix.os == 'Android' }}
-        run: echo "JAVA_HOME=$JAVA_HOME_17_X64" >> $GITHUB_ENV
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Android SDK
+        if: ${{ matrix.os == 'Android' }}
+        uses: android-actions/setup-android@v3
 
       - name: Install Android Native Toolchain
         if: ${{ matrix.os == 'Android' }}
