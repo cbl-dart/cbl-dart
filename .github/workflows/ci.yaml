@@ -463,7 +463,7 @@ jobs:
         uses: codecov/codecov-action@v5
         with:
           directory: coverage-artifacts/unit.runtime.vm.platform.ubuntu
-          flags: unit,runtime.vm,platform.ubuntu
+          flags: unit.runtime.vm.platform.ubuntu
           override_branch: ${{ env.CODECOV_BRANCH }}
           fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -474,7 +474,7 @@ jobs:
         uses: codecov/codecov-action@v5
         with:
           directory: coverage-artifacts/unit.runtime.vm.platform.macos
-          flags: unit,runtime.vm,platform.macos
+          flags: unit.runtime.vm.platform.macos
           override_branch: ${{ env.CODECOV_BRANCH }}
           fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -485,7 +485,7 @@ jobs:
         uses: codecov/codecov-action@v5
         with:
           directory: coverage-artifacts/unit.runtime.vm.platform.windows
-          flags: unit,runtime.vm,platform.windows
+          flags: unit.runtime.vm.platform.windows
           override_branch: ${{ env.CODECOV_BRANCH }}
           fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -496,7 +496,7 @@ jobs:
         uses: codecov/codecov-action@v5
         with:
           directory: coverage-artifacts/e2e.runtime.vm.platform.ubuntu
-          flags: e2e,runtime.vm,platform.ubuntu
+          flags: e2e.runtime.vm.platform.ubuntu
           override_branch: ${{ env.CODECOV_BRANCH }}
           fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -507,7 +507,7 @@ jobs:
         uses: codecov/codecov-action@v5
         with:
           directory: coverage-artifacts/e2e.runtime.vm.platform.macos
-          flags: e2e,runtime.vm,platform.macos
+          flags: e2e.runtime.vm.platform.macos
           override_branch: ${{ env.CODECOV_BRANCH }}
           fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -518,7 +518,7 @@ jobs:
         uses: codecov/codecov-action@v5
         with:
           directory: coverage-artifacts/e2e.runtime.vm.platform.windows
-          flags: e2e,runtime.vm,platform.windows
+          flags: e2e.runtime.vm.platform.windows
           override_branch: ${{ env.CODECOV_BRANCH }}
           fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}
