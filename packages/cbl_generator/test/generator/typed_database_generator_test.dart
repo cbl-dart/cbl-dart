@@ -4,12 +4,16 @@ import 'package:logging/logging.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:test/test.dart';
 
+import 'generator_test_utils.dart';
+
 late TestReaderWriter readerWriter;
 
 void main() {
-  setUp(() async {
-    readerWriter = TestReaderWriter(rootPackage: _testPkg);
-    await readerWriter.testing.loadIsolateSources();
+  setUpAll(() async {
+    readerWriter = await createGeneratorTestReaderWriter(
+      rootPackage: _testPkg,
+      label: 'typed_database shared reader',
+    );
   });
 
   test('annotated declaration is not a class', () async {
@@ -28,7 +32,7 @@ class A {
   });
 
   test('database without types', () async {
-    await testBuilder(
+    await runGeneratorTestBuilder(
       TypedDatabaseBuilder(),
       {
         _testLibId: _testLibContent(r'''
@@ -37,8 +41,8 @@ class $A {
 }
 '''),
       },
+      label: 'typed_database database without types',
       readerWriter: readerWriter,
-      packageConfig: (await PackageAssetReader.currentIsolate()).packageConfig,
       outputs: {
         _genPartId: _typedDatabaseGeneratorContent(r'''
 class A extends $A {
@@ -106,13 +110,20 @@ Future<void> _expectBadSource(String source, [Object? messageMatcher]) async {
     }
   }
 
-  await testBuilder(
-    TypedDatabaseBuilder(),
-    {_testLibId: _testLibContent(source)},
-    onLog: captureError,
-    readerWriter: readerWriter,
-    packageConfig: (await PackageAssetReader.currentIsolate()).packageConfig,
-  );
+  final assetStem = uniqueGeneratorAssetStem('typed_database_bad_source');
+  final sourceAsset = '$_testPkg|lib/$assetStem.dart';
+
+  try {
+    await runGeneratorTestBuilder(
+      TypedDatabaseBuilder(),
+      {sourceAsset: _testLibContent(source)},
+      label: 'typed_database bad source',
+      onLog: captureError,
+      readerWriter: readerWriter,
+    );
+  } finally {
+    deleteGeneratorTestAsset(readerWriter, sourceAsset);
+  }
 
   await expectLater(errorMessage, effectiveMatcher ?? isNotNull);
 }

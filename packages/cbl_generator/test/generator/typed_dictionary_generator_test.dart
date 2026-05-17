@@ -4,12 +4,16 @@ import 'package:logging/logging.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:test/test.dart';
 
+import 'generator_test_utils.dart';
+
 late TestReaderWriter readerWriter;
 
 void main() {
-  setUp(() async {
-    readerWriter = TestReaderWriter(rootPackage: _testPkg);
-    await readerWriter.testing.loadIsolateSources();
+  setUpAll(() async {
+    readerWriter = await createGeneratorTestReaderWriter(
+      rootPackage: _testPkg,
+      label: 'typed_dictionary shared reader',
+    );
   });
 
   test('annotated element is not a class', () async {
@@ -68,7 +72,7 @@ abstract class A with _$A {
   });
 
   test('class without fields', () async {
-    await testBuilder(
+    await runGeneratorTestBuilder(
       TypedDataBuilder(),
       {
         _testLibId: _testLibContent(r'''
@@ -78,8 +82,8 @@ abstract class A with _$A {
 }
 '''),
       },
+      label: 'typed_dictionary class without fields',
       readerWriter: readerWriter,
-      packageConfig: (await PackageAssetReader.currentIsolate()).packageConfig,
       outputs: {
         _genPartId: _typedDictionaryGeneratorContent(r'''
 mixin _$A implements TypedDictionaryObject<MutableA> {}
@@ -137,7 +141,7 @@ abstract class A with _$A {
   });
 
   test('class with String field', () async {
-    await testBuilder(
+    await runGeneratorTestBuilder(
       TypedDataBuilder(),
       {
         _testLibId: _testLibContent(r'''
@@ -147,8 +151,8 @@ abstract class A with _$A {
 }
 '''),
       },
+      label: 'typed_dictionary class with String field',
       readerWriter: readerWriter,
-      packageConfig: (await PackageAssetReader.currentIsolate()).packageConfig,
       outputs: {
         _genPartId: _typedDictionaryGeneratorContent(r'''
 mixin _$A implements TypedDictionaryObject<MutableA> {
@@ -334,11 +338,14 @@ const _genPartFileName = '$_testLib.cbl.type.g.dart';
 const _testLibId = '$_testPkg|$_testLibFileName';
 const _genPartId = '$_testPkg|$_genPartFileName';
 
-String _testLibContent(String content) =>
+String _testLibContent(
+  String content, {
+  String partFileName = _genPartFileName,
+}) =>
     '''
 import 'package:cbl/cbl.dart';
 
-part '$_genPartFileName';
+part '$partFileName';
 
 $content''';
 
@@ -377,13 +384,26 @@ Future<void> _expectBadSource(String source, [Object? messageMatcher]) async {
     }
   }
 
-  await testBuilder(
-    TypedDataBuilder(),
-    {_testLibId: _testLibContent(source)},
-    onLog: captureError,
-    readerWriter: readerWriter,
-    packageConfig: (await PackageAssetReader.currentIsolate()).packageConfig,
-  );
+  final assetStem = uniqueGeneratorAssetStem('typed_dictionary_bad_source');
+  final assetName = assetStem.split('/').last;
+  final sourceAsset = '$_testPkg|lib/$assetStem.dart';
+
+  try {
+    await runGeneratorTestBuilder(
+      TypedDataBuilder(),
+      {
+        sourceAsset: _testLibContent(
+          source,
+          partFileName: '$assetName.cbl.type.g.dart',
+        ),
+      },
+      label: 'typed_dictionary bad source',
+      onLog: captureError,
+      readerWriter: readerWriter,
+    );
+  } finally {
+    deleteGeneratorTestAsset(readerWriter, sourceAsset);
+  }
 
   await expectLater(errorMessage, effectiveMatcher ?? isNotNull);
 }
