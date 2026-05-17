@@ -709,13 +709,20 @@ function uploadCoverageData() {
     esac
 
     # Upload coverage data
-    ./codecov \
-        --verbose \
-        upload-process \
-        --fail-on-error \
-        --flag "$flags" \
-        --file "$testPackageDir/coverage/lcov.info" \
+    local codecovArgs=(
+        --verbose
+        upload-process
+        --fail-on-error
+        --flag "$flags"
+        --file "$testPackageDir/coverage/lcov.info"
         --commit-sha "$GITHUB_SHA"
+    )
+
+    if [[ -n "${CODECOV_BRANCH:-}" ]]; then
+        codecovArgs+=(--branch "$CODECOV_BRANCH")
+    fi
+
+    ./codecov "${codecovArgs[@]}"
 }
 
 "$@"
