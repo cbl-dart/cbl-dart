@@ -78,7 +78,9 @@ final class DatabaseBindings {
   static CBLEncryptionKey encryptionKeyFromPassword(String password) {
     ensureInitializedForCurrentIsolate();
     return withGlobalArena(() {
-      final key = globalArena<cblite.CBLEncryptionKey>();
+      final key = zeroedGlobalArena<cblite.CBLEncryptionKey>(
+        sizeOf<cblite.CBLEncryptionKey>(),
+      );
       if (!cblite.CBLEncryptionKey_FromPassword(
         key,
         password.makeGlobalFLString(),
@@ -215,7 +217,9 @@ final class DatabaseBindings {
     CBLEncryptionKey? key,
   ) {
     withGlobalArena(() {
-      final keyStruct = globalArena<cblite.CBLEncryptionKey>();
+      final keyStruct = zeroedGlobalArena<cblite.CBLEncryptionKey>(
+        sizeOf<cblite.CBLEncryptionKey>(),
+      );
       _writeEncryptionKey(keyStruct.ref, from: key);
       cblite.CBLDatabase_ChangeEncryptionKey(
         db,
@@ -253,6 +257,10 @@ final class DatabaseBindings {
     cblite.CBLEncryptionKey to, {
     CBLEncryptionKey? from,
   }) {
+    for (var i = 0; i < cblite.kCBLEncryptionKeySizeAES256; i++) {
+      to.bytes[i] = 0;
+    }
+
     if (from == null) {
       to.algorithm = cblite.kCBLEncryptionNone;
       return;
@@ -284,12 +292,17 @@ final class DatabaseBindings {
       return nullptr;
     }
 
-    final result = globalArena<cblitedart.CBLDart_CBLDatabaseConfiguration>();
+    final result =
+        zeroedGlobalArena<cblitedart.CBLDart_CBLDatabaseConfiguration>(
+          sizeOf<cblitedart.CBLDart_CBLDatabaseConfiguration>(),
+        );
 
     result.ref.directory = config.directory.toFLString();
 
     if (cblitedart.CBLDart_IsEnterprise()) {
-      final key = globalArena<cblitedart.CBLDart_CBLEncryptionKey>();
+      final key = zeroedGlobalArena<cblitedart.CBLDart_CBLEncryptionKey>(
+        sizeOf<cblitedart.CBLDart_CBLEncryptionKey>(),
+      );
       _writeEncryptionKey(
         key.cast<cblite.CBLEncryptionKey>().ref,
         from: config.encryptionKey,

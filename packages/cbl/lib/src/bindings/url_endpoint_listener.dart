@@ -59,7 +59,10 @@ final class UrlEndpointListenerBindings {
   }) {
     ensureInitializedForCurrentIsolate();
     return withGlobalArena(() {
-      final config = globalArena<cblite.CBLURLEndpointListenerConfiguration>();
+      final config =
+          zeroedGlobalArena<cblite.CBLURLEndpointListenerConfiguration>(
+            sizeOf<cblite.CBLURLEndpointListenerConfiguration>(),
+          );
 
       final collectionsArray = globalArena<Pointer<cblite.CBLCollection>>(
         collections.length,

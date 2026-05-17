@@ -194,7 +194,9 @@ final class LoggingBindings {
       return nullptr;
     }
 
-    final result = globalArena<cblite.CBLFileLogSink>();
+    final result = zeroedGlobalArena<cblite.CBLFileLogSink>(
+      sizeOf<cblite.CBLFileLogSink>(),
+    );
 
     result.ref
       ..level = config.level.value

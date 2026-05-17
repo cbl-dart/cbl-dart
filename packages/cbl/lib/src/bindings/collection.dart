@@ -261,7 +261,9 @@ final class CollectionBindings {
   static Pointer<cblitedart.CBLDart_CBLIndexSpec> _createIndexSpec(
     CBLIndexSpec spec,
   ) {
-    final result = globalArena<cblitedart.CBLDart_CBLIndexSpec>();
+    final result = zeroedGlobalArena<cblitedart.CBLDart_CBLIndexSpec>(
+      sizeOf<cblitedart.CBLDart_CBLIndexSpec>(),
+    );
     final ref = result.ref
       ..type = spec.type.value
       ..expressionLanguage = spec.expressionLanguage.value
