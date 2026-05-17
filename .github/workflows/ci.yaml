@@ -376,24 +376,19 @@ jobs:
 
       - name: Collect coverage data
         # Disabled until we figure out how to get coverage data from flutter tests
-        if: ${{ always() && steps.run-tests.outcome != 'skipped' && matrix.embedder != 'flutter' }}
+        if: ${{ always() && steps.run-tests.outcome != 'skipped' && matrix.embedder != 'flutter' && matrix.test_platform == '' }}
         shell: bash
         env:
           ALLOW_MISSING_COVERAGE: ${{ steps.run-tests.outcome == 'success' && 'false' || 'true' }}
         run: |
-          coverageGroup="e2e.runtime.vm.platform.$CODECOV_PLATFORM"
-          if [ "${DART_TEST_PLATFORM:-}" = "vm-asan" ]; then
-            coverageGroup="e2e.runtime.vm.sanitizer.asan.platform.$CODECOV_PLATFORM"
-          fi
-
-          ./tools/ci-steps.sh collectCoverageData "e2e.cbl.${{ matrix.embedder }}.${{ matrix.os }}${{ matrix.test_platform && format('.{0}', matrix.test_platform) || '' }}" "$coverageGroup"
+          ./tools/ci-steps.sh collectCoverageData "e2e.cbl.${{ matrix.embedder }}.${{ matrix.os }}" "e2e.runtime.vm.platform.$CODECOV_PLATFORM"
 
       - name: Upload coverage artifact
         # Disabled until we figure out how to get coverage data from flutter tests
-        if: ${{ always() && hashFiles('coverage-artifacts/**') != '' && matrix.embedder != 'flutter' }}
+        if: ${{ always() && hashFiles('coverage-artifacts/**') != '' && matrix.embedder != 'flutter' && matrix.test_platform == '' }}
         uses: actions/upload-artifact@v7
         with:
-          name: coverage-e2e-cbl-${{ matrix.embedder }}-${{ matrix.os }}${{ matrix.test_platform && format('-{0}', matrix.test_platform) || '' }}
+          name: coverage-e2e-cbl-${{ matrix.embedder }}-${{ matrix.os }}
           path: coverage-artifacts
 
   upload-coverage:
@@ -524,17 +519,6 @@ jobs:
         with:
           directory: coverage-artifacts/e2e.runtime.vm.platform.windows
           flags: e2e,runtime.vm,platform.windows
-          override_branch: ${{ env.CODECOV_BRANCH }}
-          fail_ci_if_error: true
-          token: ${{ secrets.CODECOV_TOKEN }}
-          verbose: true
-
-      - name: Upload Ubuntu VM ASAN E2E coverage
-        if: ${{ hashFiles('coverage-artifacts/e2e.runtime.vm.sanitizer.asan.platform.ubuntu/**') != '' }}
-        uses: codecov/codecov-action@v5
-        with:
-          directory: coverage-artifacts/e2e.runtime.vm.sanitizer.asan.platform.ubuntu
-          flags: e2e,runtime.vm,sanitizer.asan,platform.ubuntu
           override_branch: ${{ env.CODECOV_BRANCH }}
           fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}

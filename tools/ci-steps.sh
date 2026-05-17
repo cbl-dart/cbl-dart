@@ -184,6 +184,68 @@ function _printAndroidState() {
     echo "=== End Android device state ==="
 }
 
+function _printAndroidDriveHeartbeat() {
+    if [[ "$targetOs" != "Android" || -z "${ANDROID_HOME:-}" ]]; then
+        return 0
+    fi
+
+    local adb="$ANDROID_HOME/platform-tools/adb"
+
+    echo "=== Android flutter drive heartbeat $(date -u '+%Y-%m-%dT%H:%M:%SZ') ==="
+    "$adb" devices -l 2>&1 || true
+    "$adb" -s "emulator-5554" get-state 2>&1 || true
+    "$adb" -s "emulator-5554" shell getprop sys.boot_completed 2>&1 || true
+    "$adb" -s "emulator-5554" shell getprop dev.bootcomplete 2>&1 || true
+    "$adb" -s "emulator-5554" shell pidof "$testAppBundleId" 2>&1 || true
+    "$adb" -s "emulator-5554" shell cmd package list packages "$testAppBundleId" 2>&1 || true
+    "$adb" -s "emulator-5554" shell dumpsys activity top 2>&1 | head -n 80 || true
+    "$adb" -s "emulator-5554" logcat -d -t 120 2>&1 || true
+    pgrep -af 'flutter|adb|gradle|java|qemu' || true
+    echo "=== End Android flutter drive heartbeat ==="
+}
+
+function _runFlutterDrive() {
+    local driveVerboseFlag="${1:-}"
+    local dartDefineArgs=()
+    read -r -a dartDefineArgs <<< "$DART_DEFINES"
+
+    local flutterDriveCommand=(
+        flutter drive
+        -d "$device"
+        "${dartDefineArgs[@]}"
+    )
+    [ -n "$noBuildFlag" ] && flutterDriveCommand+=("$noBuildFlag")
+    flutterDriveCommand+=(
+        --keep-app-running
+        --driver test_driver/integration_test.dart
+        --target integration_test/e2e_test.dart
+    )
+    [ -n "$driveVerboseFlag" ] && flutterDriveCommand+=("$driveVerboseFlag")
+
+    if [ "$targetOs" != "Android" ]; then
+        "${flutterDriveCommand[@]}"
+        return
+    fi
+
+    "${flutterDriveCommand[@]}" &
+
+    local drivePid=$!
+    local driveStatus=0
+    local secondsSinceHeartbeat=0
+
+    while kill -0 "$drivePid" 2>/dev/null; do
+        sleep 10
+        secondsSinceHeartbeat=$((secondsSinceHeartbeat + 10))
+        if [ "$secondsSinceHeartbeat" -ge 60 ] && kill -0 "$drivePid" 2>/dev/null; then
+            _printAndroidDriveHeartbeat
+            secondsSinceHeartbeat=0
+        fi
+    done
+
+    wait "$drivePid" || driveStatus=$?
+    return "$driveStatus"
+}
+
 function runE2ETests() {
     requireEnvVar EMBEDDER
     requireEnvVar TARGET_OS
@@ -196,11 +258,13 @@ function runE2ETests() {
         cd "$testPackageDir"
 
         export ENABLE_TIME_BOMB=true
-        testCommand="dart test -r expanded -j 1 --coverage coverage/dart"
+        testCommand="dart test -r expanded -j 1"
 
         if [[ -n "${DART_TEST_PLATFORM:-}" ]]; then
             testCommand="$testCommand -p $DART_TEST_PLATFORM"
             _prepareStandaloneSanitizerNativeAssets
+        else
+            testCommand="$testCommand --coverage coverage/dart"
         fi
 
         case "$targetOs" in
@@ -261,6 +325,10 @@ function runE2ETests() {
 
         local verboseFlag=""
         if isDebug; then verboseFlag="-v"; fi
+        local driveVerboseFlag="$verboseFlag"
+        if [ "$targetOs" = "Android" ]; then
+            driveVerboseFlag="-v"
+        fi
 
         # Build the app explicitly when needed:
         # - iOS: always, because we need the bundle for simulator readiness
@@ -406,14 +474,7 @@ function runE2ETests() {
         if [ "$didExplicitBuild" = true ]; then noBuildFlag="--no-build"; fi
         _printAndroidState
         echo "=== Running Flutter drive for $targetOs ==="
-        flutter drive \
-            -d "$device" \
-            $DART_DEFINES \
-            $noBuildFlag \
-            --keep-app-running \
-            --driver test_driver/integration_test.dart \
-            --target integration_test/e2e_test.dart \
-            $verboseFlag
+        _runFlutterDrive "$driveVerboseFlag"
         echo "=== Finished Flutter drive for $targetOs ==="
         ;;
     esac
