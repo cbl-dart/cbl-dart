@@ -768,6 +768,21 @@ function formatCoverageData() {
     esac
 }
 
+function _hasCoverageInput() {
+    case "$embedder" in
+    standalone)
+        [ -d "$testPackageDir/coverage/dart" ] && \
+            find "$testPackageDir/coverage/dart" -type f | grep -q .
+        ;;
+    flutter)
+        [ -f "$testPackageDir/coverage/lcov.info" ]
+        ;;
+    *)
+        return 1
+        ;;
+    esac
+}
+
 # Collects coverage data in a repository-root artifact directory.
 #
 # The first parameter is the unique upload name.
@@ -776,11 +791,35 @@ function collectCoverageData() {
     local uploadName="$1"
     local flags="$2"
     local artifactDir="${COVERAGE_ARTIFACTS_DIR:-coverage-artifacts}"
+    local allowMissing="${ALLOW_MISSING_COVERAGE:-false}"
 
-    formatCoverageData
+    if ! _hasCoverageInput; then
+        echo "Did not find coverage input for $uploadName"
+        if [ "$allowMissing" = true ]; then
+            return 0
+        fi
+        return 1
+    fi
+
+    if ! formatCoverageData; then
+        echo "Failed to format coverage data for $uploadName"
+        if [ "$allowMissing" = true ]; then
+            return 0
+        fi
+        return 1
+    fi
+
+    local lcovFile="$testPackageDir/coverage/lcov.info"
+    if [ ! -f "$lcovFile" ]; then
+        echo "Did not find formatted coverage data at $lcovFile"
+        if [ "$allowMissing" = true ]; then
+            return 0
+        fi
+        return 1
+    fi
 
     mkdir -p "$artifactDir/$flags"
-    cp "$testPackageDir/coverage/lcov.info" "$artifactDir/$flags/$uploadName.lcov.info"
+    cp "$lcovFile" "$artifactDir/$flags/$uploadName.lcov.info"
 }
 
 "$@"

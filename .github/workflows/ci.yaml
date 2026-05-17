@@ -196,15 +196,20 @@ jobs:
         run: ./tools/ci-steps.sh checkBuildRunnerOutput
 
       - name: Run tests
+        id: run-tests
         shell: bash
         run: ./tools/ci-steps.sh runUnitTests
 
       - name: Collect coverage data
+        if: ${{ always() && steps.run-tests.outcome != 'skipped' }}
         shell: bash
+        env:
+          ALLOW_MISSING_COVERAGE: ${{ steps.run-tests.outcome == 'success' && 'false' || 'true' }}
         run: |
           ./tools/ci-steps.sh collectCoverageData "unit.${{ matrix.package }}.${{ matrix.os }}" "unit.${{ matrix.package }}"
 
       - name: Upload coverage artifact
+        if: ${{ always() && hashFiles('coverage-artifacts/**') != '' }}
         uses: actions/upload-artifact@v7
         with:
           name: coverage-unit-${{ matrix.package }}-${{ matrix.os }}
@@ -337,6 +342,7 @@ jobs:
         run: ./tools/ci-steps.sh startVirtualDevices
 
       - name: Run tests
+        id: run-tests
         timeout-minutes: 20
         shell: bash
         run: ./tools/ci-steps.sh runE2ETests
@@ -356,14 +362,16 @@ jobs:
 
       - name: Collect coverage data
         # Disabled until we figure out how to get coverage data from flutter tests
-        if: ${{ matrix.embedder != 'flutter' && matrix.test_platform == '' }}
+        if: ${{ always() && steps.run-tests.outcome != 'skipped' && matrix.embedder != 'flutter' && matrix.test_platform == '' }}
         shell: bash
+        env:
+          ALLOW_MISSING_COVERAGE: ${{ steps.run-tests.outcome == 'success' && 'false' || 'true' }}
         run: |
           ./tools/ci-steps.sh collectCoverageData "e2e.cbl.${{ matrix.embedder }}.${{ matrix.os }}" "e2e.cbl.${{ matrix.embedder }}.${{ matrix.os }}"
 
       - name: Upload coverage artifact
         # Disabled until we figure out how to get coverage data from flutter tests
-        if: ${{ matrix.embedder != 'flutter' && matrix.test_platform == '' }}
+        if: ${{ always() && hashFiles('coverage-artifacts/**') != '' && matrix.embedder != 'flutter' && matrix.test_platform == '' }}
         uses: actions/upload-artifact@v7
         with:
           name: coverage-e2e-cbl-${{ matrix.embedder }}-${{ matrix.os }}
@@ -379,7 +387,15 @@ jobs:
       - publish-dry-run
       - test-dart-unit
       - test-e2e
-    if: ${{ always() && !cancelled() && needs.test-dart-unit.result == 'success' && needs.test-e2e.result == 'success' }}
+    if: >-
+      ${{
+        always() &&
+        !cancelled() &&
+        (
+          github.event_name == 'pull_request' ||
+          (needs.test-dart-unit.result == 'success' && needs.test-e2e.result == 'success')
+        )
+      }}
     runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu
     env:
       CODECOV_BRANCH: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository && github.event.pull_request.head.label || github.head_ref || github.ref_name }}
@@ -390,12 +406,24 @@ jobs:
 
       - name: Download coverage artifacts
         uses: actions/download-artifact@v7
+        continue-on-error: true
         with:
           pattern: coverage-*
           path: coverage-artifacts
           merge-multiple: true
 
+      - name: Detect downloaded coverage
+        id: coverage
+        shell: bash
+        run: |
+          if [ -d coverage-artifacts ] && find coverage-artifacts -type f -name '*.lcov.info' | grep -q .; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Upload cbl unit coverage
+        if: ${{ hashFiles('coverage-artifacts/unit.cbl/**') != '' }}
         uses: codecov/codecov-action@v5
         with:
           directory: coverage-artifacts/unit.cbl
@@ -407,6 +435,7 @@ jobs:
           verbose: true
 
       - name: Upload cbl_sentry unit coverage
+        if: ${{ hashFiles('coverage-artifacts/unit.cbl_sentry/**') != '' }}
         uses: codecov/codecov-action@v5
         with:
           directory: coverage-artifacts/unit.cbl_sentry
@@ -418,6 +447,7 @@ jobs:
           verbose: true
 
       - name: Upload cbl_generator unit coverage
+        if: ${{ hashFiles('coverage-artifacts/unit.cbl_generator/**') != '' }}
         uses: codecov/codecov-action@v5
         with:
           directory: coverage-artifacts/unit.cbl_generator
@@ -429,6 +459,7 @@ jobs:
           verbose: true
 
       - name: Upload macOS standalone E2E coverage
+        if: ${{ hashFiles('coverage-artifacts/e2e.cbl.standalone.macOS/**') != '' }}
         uses: codecov/codecov-action@v5
         with:
           directory: coverage-artifacts/e2e.cbl.standalone.macOS
@@ -440,6 +471,7 @@ jobs:
           verbose: true
 
       - name: Upload Ubuntu standalone E2E coverage
+        if: ${{ hashFiles('coverage-artifacts/e2e.cbl.standalone.Ubuntu/**') != '' }}
         uses: codecov/codecov-action@v5
         with:
           directory: coverage-artifacts/e2e.cbl.standalone.Ubuntu
@@ -451,6 +483,7 @@ jobs:
           verbose: true
 
       - name: Upload Windows standalone E2E coverage
+        if: ${{ hashFiles('coverage-artifacts/e2e.cbl.standalone.Windows/**') != '' }}
         uses: codecov/codecov-action@v5
         with:
           directory: coverage-artifacts/e2e.cbl.standalone.Windows
@@ -462,6 +495,7 @@ jobs:
           verbose: true
 
       - name: Send Codecov notifications
+        if: ${{ steps.coverage.outputs.found == 'true' }}
         uses: codecov/codecov-action@v5
         with:
           run_command: send-notifications
