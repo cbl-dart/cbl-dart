@@ -422,6 +422,28 @@ jobs:
             echo "found=false" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Prepare Codecov reports
+        if: ${{ steps.coverage.outputs.found == 'true' }}
+        shell: bash
+        run: |
+          for flagDir in coverage-artifacts/*; do
+            [ -d "$flagDir" ] || continue
+
+            reportsFile="$(mktemp)"
+            find "$flagDir" -maxdepth 1 -type f -name '*.lcov.info' | sort > "$reportsFile"
+            [ -s "$reportsFile" ] || {
+              rm -f "$reportsFile"
+              continue
+            }
+
+            reportCount="$(wc -l < "$reportsFile" | tr -d ' ')"
+            printf 'Preparing %s from %s report(s)\n' "$flagDir/lcov.info" "$reportCount"
+            while IFS= read -r report; do
+              cat "$report"
+            done < "$reportsFile" > "$flagDir/lcov.info"
+            rm -f "$reportsFile"
+          done
+
       - name: Upload cbl unit coverage
         if: ${{ hashFiles('coverage-artifacts/unit.cbl/**') != '' }}
         uses: codecov/codecov-action@v5
