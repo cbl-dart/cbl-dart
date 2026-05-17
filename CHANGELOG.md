@@ -15,6 +15,36 @@ Packages with breaking changes:
 
 Packages with other changes:
 
+ - [`cbl` - `v4.0.0-dev.8`](#cbl---v400-dev8)
+ - [`cbl_generator` - `v0.4.0-dev.8`](#cbl_generator---v040-dev8)
+ - [`cbl_sentry` - `v3.0.0-dev.8`](#cbl_sentry---v300-dev8)
+
+Packages with dependency updates only:
+
+> Packages listed below depend on other packages in this workspace that have had changes. Their versions have been incremented to bump the minimum dependency versions of the packages they depend upon in this project.
+
+ - `cbl_generator` - `v0.4.0-dev.8`
+ - `cbl_sentry` - `v3.0.0-dev.8`
+
+---
+
+#### `cbl` - `v4.0.0-dev.8`
+
+ - **REFACTOR**(cbl): Harden outbound FFI struct initialization ([#953](https://github.com/cbl-dart/cbl-dart/issues/953)). ([9b0805a3](https://github.com/cbl-dart/cbl-dart/commit/9b0805a390ad88e024a5b626f472938114ad0915))
+
+
+## 2026-05-17
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
  - [`cbl` - `v4.0.0-dev.7`](#cbl---v400-dev7)
  - [`cbl_generator` - `v0.4.0-dev.7`](#cbl_generator---v040-dev7)
  - [`cbl_sentry` - `v3.0.0-dev.7`](#cbl_sentry---v300-dev7)

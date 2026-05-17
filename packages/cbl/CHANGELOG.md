@@ -1,3 +1,7 @@
+## 4.0.0-dev.8
+
+ - **REFACTOR**(cbl): Harden outbound FFI struct initialization ([#953](https://github.com/cbl-dart/cbl-dart/issues/953)). ([9b0805a3](https://github.com/cbl-dart/cbl-dart/commit/9b0805a390ad88e024a5b626f472938114ad0915))
+
 ## 4.0.0-dev.7
 
  - **REFACTOR**(cbl): enterprise gating to use capability-based messages ([#937](https://github.com/cbl-dart/cbl-dart/issues/937)). ([42a4f856](https://github.com/cbl-dart/cbl-dart/commit/42a4f85691e39b7465f1d2a2825339ded3949e2b))
