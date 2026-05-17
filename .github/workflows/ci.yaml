@@ -223,7 +223,7 @@ jobs:
 
   test-e2e:
     name: E2E tests
-    timeout-minutes: 35
+    timeout-minutes: 25
     strategy:
       fail-fast: false
       matrix:
@@ -469,7 +469,6 @@ jobs:
         with:
           directory: coverage-artifacts/unit.runtime.vm.platform.ubuntu
           flags: unit,runtime.vm,platform.ubuntu
-          name: unit.runtime.vm.platform.ubuntu
           override_branch: ${{ env.CODECOV_BRANCH }}
           fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -481,7 +480,6 @@ jobs:
         with:
           directory: coverage-artifacts/unit.runtime.vm.platform.macos
           flags: unit,runtime.vm,platform.macos
-          name: unit.runtime.vm.platform.macos
           override_branch: ${{ env.CODECOV_BRANCH }}
           fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -493,7 +491,6 @@ jobs:
         with:
           directory: coverage-artifacts/unit.runtime.vm.platform.windows
           flags: unit,runtime.vm,platform.windows
-          name: unit.runtime.vm.platform.windows
           override_branch: ${{ env.CODECOV_BRANCH }}
           fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -505,7 +502,6 @@ jobs:
         with:
           directory: coverage-artifacts/e2e.runtime.vm.platform.ubuntu
           flags: e2e,runtime.vm,platform.ubuntu
-          name: e2e.runtime.vm.platform.ubuntu
           override_branch: ${{ env.CODECOV_BRANCH }}
           fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -517,7 +513,6 @@ jobs:
         with:
           directory: coverage-artifacts/e2e.runtime.vm.platform.macos
           flags: e2e,runtime.vm,platform.macos
-          name: e2e.runtime.vm.platform.macos
           override_branch: ${{ env.CODECOV_BRANCH }}
           fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -529,7 +524,6 @@ jobs:
         with:
           directory: coverage-artifacts/e2e.runtime.vm.platform.windows
           flags: e2e,runtime.vm,platform.windows
-          name: e2e.runtime.vm.platform.windows
           override_branch: ${{ env.CODECOV_BRANCH }}
           fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -541,7 +535,6 @@ jobs:
         with:
           directory: coverage-artifacts/e2e.runtime.vm.sanitizer.asan.platform.ubuntu
           flags: e2e,runtime.vm,sanitizer.asan,platform.ubuntu
-          name: e2e.runtime.vm.sanitizer.asan.platform.ubuntu
           override_branch: ${{ env.CODECOV_BRANCH }}
           fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}

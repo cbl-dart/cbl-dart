@@ -10,6 +10,13 @@ codecov:
     # only after every report has been uploaded.
     manual_trigger: true
 
+flag_management:
+  default_rules:
+    # Missing flags can be carried forward from the base commit. This keeps
+    # partial PR uploads useful when a matrix leg fails before producing
+    # coverage, while the failed CI leg still reports the actual failure.
+    carryforward: true
+
 component_management:
   individual_components:
     - component_id: cbl
