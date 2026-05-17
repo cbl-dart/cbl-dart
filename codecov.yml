@@ -6,7 +6,9 @@ ignore:
 
 codecov:
   notify:
-    after_n_builds: 2
+    # Coverage uploads are aggregated in CI and notifications are triggered
+    # only after every report has been uploaded.
+    manual_trigger: true
 
 coverage:
   status:

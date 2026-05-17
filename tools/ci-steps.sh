@@ -672,17 +672,11 @@ function checkBuildRunnerOutput() {
     exit 1
 }
 
-# Uploads coverage data to codecov.
-#
-# The first and only parameter is a comma separated list of flags to be
-# associated with the uploaded coverage data.
-function uploadCoverageData() {
+# Formats coverage data as lcov.
+function formatCoverageData() {
     requireEnvVar EMBEDDER
     requireEnvVar TEST_PACKAGE
 
-    local flags="$1"
-
-    # Format coverage data as lcov
     case "$embedder" in
     standalone)
         ./tools/coverage.sh dartToLcov "$testPackageDir"
@@ -692,37 +686,21 @@ function uploadCoverageData() {
         # location.
         ;;
     esac
+}
 
-    # Install codecov uploader
-    case "$OSTYPE" in
-    linux*)
-        retry 3 10 curl --fail -Os https://cli.codecov.io/latest/linux/codecov
-        chmod +x codecov
-        ;;
-    darwin*)
-        retry 3 10 curl --fail -Os https://cli.codecov.io/latest/macos/codecov
-        chmod +x codecov
-        ;;
-    mingw* | msys* | cygwin*)
-        retry 3 10 curl --fail -Os https://cli.codecov.io/latest/windows/codecov.exe
-        ;;
-    esac
+# Collects coverage data in a repository-root artifact directory.
+#
+# The first parameter is the unique upload name.
+# The second parameter is a comma separated list of Codecov flags.
+function collectCoverageData() {
+    local uploadName="$1"
+    local flags="$2"
+    local artifactDir="${COVERAGE_ARTIFACTS_DIR:-coverage-artifacts}"
 
-    # Upload coverage data
-    local codecovArgs=(
-        --verbose
-        upload-process
-        --fail-on-error
-        --flag "$flags"
-        --file "$testPackageDir/coverage/lcov.info"
-        --commit-sha "$GITHUB_SHA"
-    )
+    formatCoverageData
 
-    if [[ -n "${CODECOV_BRANCH:-}" ]]; then
-        codecovArgs+=(--branch "$CODECOV_BRANCH")
-    fi
-
-    ./codecov "${codecovArgs[@]}"
+    mkdir -p "$artifactDir/$flags"
+    cp "$testPackageDir/coverage/lcov.info" "$artifactDir/$flags/$uploadName.lcov.info"
 }
 
 "$@"
