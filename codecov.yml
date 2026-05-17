@@ -10,6 +10,21 @@ codecov:
     # only after every report has been uploaded.
     manual_trigger: true
 
+component_management:
+  individual_components:
+    - component_id: cbl
+      name: cbl
+      paths:
+        - packages/cbl/lib/**
+    - component_id: cbl_sentry
+      name: cbl_sentry
+      paths:
+        - packages/cbl_sentry/lib/**
+    - component_id: cbl_generator
+      name: cbl_generator
+      paths:
+        - packages/cbl_generator/lib/**
+
 coverage:
   status:
     project:

@@ -196,13 +196,11 @@ function runE2ETests() {
         cd "$testPackageDir"
 
         export ENABLE_TIME_BOMB=true
-        testCommand="dart test -r expanded -j 1"
+        testCommand="dart test -r expanded -j 1 --coverage coverage/dart"
 
         if [[ -n "${DART_TEST_PLATFORM:-}" ]]; then
             testCommand="$testCommand -p $DART_TEST_PLATFORM"
             _prepareStandaloneSanitizerNativeAssets
-        else
-            testCommand="$testCommand --coverage coverage/dart"
         fi
 
         case "$targetOs" in
@@ -786,10 +784,10 @@ function _hasCoverageInput() {
 # Collects coverage data in a repository-root artifact directory.
 #
 # The first parameter is the unique upload name.
-# The second parameter is a comma separated list of Codecov flags.
+# The second parameter is the coverage artifact group.
 function collectCoverageData() {
     local uploadName="$1"
-    local flags="$2"
+    local artifactGroup="$2"
     local artifactDir="${COVERAGE_ARTIFACTS_DIR:-coverage-artifacts}"
     local allowMissing="${ALLOW_MISSING_COVERAGE:-false}"
 
@@ -818,8 +816,8 @@ function collectCoverageData() {
         return 1
     fi
 
-    mkdir -p "$artifactDir/$flags"
-    cp "$lcovFile" "$artifactDir/$flags/$uploadName.lcov.info"
+    mkdir -p "$artifactDir/$artifactGroup"
+    cp "$lcovFile" "$artifactDir/$artifactGroup/$uploadName.lcov.info"
 }
 
 "$@"

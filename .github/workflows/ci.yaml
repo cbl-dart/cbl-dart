@@ -140,6 +140,12 @@ jobs:
             embedder: standalone
             os: Windows
     env:
+      CODECOV_PLATFORM: >-
+        ${{ fromJSON('{
+          "Ubuntu":"ubuntu",
+          "macOS":"macos",
+          "Windows":"windows"
+        }')[matrix.os] }}
       EMBEDDER: ${{ matrix.embedder }}
       TARGET_OS: ${{ matrix.os }}
       TEST_PACKAGE: ${{ matrix.package }}
@@ -206,7 +212,7 @@ jobs:
         env:
           ALLOW_MISSING_COVERAGE: ${{ steps.run-tests.outcome == 'success' && 'false' || 'true' }}
         run: |
-          ./tools/ci-steps.sh collectCoverageData "unit.${{ matrix.package }}.${{ matrix.os }}" "unit.${{ matrix.package }}"
+          ./tools/ci-steps.sh collectCoverageData "unit.${{ matrix.package }}.${{ matrix.os }}" "unit.runtime.vm.platform.$CODECOV_PLATFORM"
 
       - name: Upload coverage artifact
         if: ${{ always() && hashFiles('coverage-artifacts/**') != '' }}
@@ -253,6 +259,14 @@ jobs:
         "Windows":"windows-2025"
       }}', github.run_id))[matrix.os] }}
     env:
+      CODECOV_PLATFORM: >-
+        ${{ fromJSON('{
+          "iOS":"ios",
+          "macOS":"macos",
+          "Android":"android",
+          "Ubuntu":"ubuntu",
+          "Windows":"windows"
+        }')[matrix.os] }}
       EMBEDDER: ${{ matrix.embedder }}
       TARGET_OS: ${{ matrix.os }}
       DART_TEST_PLATFORM: ${{ matrix.test_platform }}
@@ -362,19 +376,24 @@ jobs:
 
       - name: Collect coverage data
         # Disabled until we figure out how to get coverage data from flutter tests
-        if: ${{ always() && steps.run-tests.outcome != 'skipped' && matrix.embedder != 'flutter' && matrix.test_platform == '' }}
+        if: ${{ always() && steps.run-tests.outcome != 'skipped' && matrix.embedder != 'flutter' }}
         shell: bash
         env:
           ALLOW_MISSING_COVERAGE: ${{ steps.run-tests.outcome == 'success' && 'false' || 'true' }}
         run: |
-          ./tools/ci-steps.sh collectCoverageData "e2e.cbl.${{ matrix.embedder }}.${{ matrix.os }}" "e2e.cbl.${{ matrix.embedder }}.${{ matrix.os }}"
+          coverageGroup="e2e.runtime.vm.platform.$CODECOV_PLATFORM"
+          if [ "${DART_TEST_PLATFORM:-}" = "vm-asan" ]; then
+            coverageGroup="e2e.runtime.vm.sanitizer.asan.platform.$CODECOV_PLATFORM"
+          fi
+
+          ./tools/ci-steps.sh collectCoverageData "e2e.cbl.${{ matrix.embedder }}.${{ matrix.os }}${{ matrix.test_platform && format('.{0}', matrix.test_platform) || '' }}" "$coverageGroup"
 
       - name: Upload coverage artifact
         # Disabled until we figure out how to get coverage data from flutter tests
-        if: ${{ always() && hashFiles('coverage-artifacts/**') != '' && matrix.embedder != 'flutter' && matrix.test_platform == '' }}
+        if: ${{ always() && hashFiles('coverage-artifacts/**') != '' && matrix.embedder != 'flutter' }}
         uses: actions/upload-artifact@v7
         with:
-          name: coverage-e2e-cbl-${{ matrix.embedder }}-${{ matrix.os }}
+          name: coverage-e2e-cbl-${{ matrix.embedder }}-${{ matrix.os }}${{ matrix.test_platform && format('-{0}', matrix.test_platform) || '' }}
           path: coverage-artifacts
 
   upload-coverage:
@@ -444,73 +463,85 @@ jobs:
             rm -f "$reportsFile"
           done
 
-      - name: Upload cbl unit coverage
-        if: ${{ hashFiles('coverage-artifacts/unit.cbl/**') != '' }}
+      - name: Upload Ubuntu VM unit coverage
+        if: ${{ hashFiles('coverage-artifacts/unit.runtime.vm.platform.ubuntu/**') != '' }}
         uses: codecov/codecov-action@v5
         with:
-          directory: coverage-artifacts/unit.cbl
-          flags: unit.cbl
-          name: unit.cbl
+          directory: coverage-artifacts/unit.runtime.vm.platform.ubuntu
+          flags: unit,runtime.vm,platform.ubuntu
+          name: unit.runtime.vm.platform.ubuntu
           override_branch: ${{ env.CODECOV_BRANCH }}
           fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}
           verbose: true
 
-      - name: Upload cbl_sentry unit coverage
-        if: ${{ hashFiles('coverage-artifacts/unit.cbl_sentry/**') != '' }}
+      - name: Upload macOS VM unit coverage
+        if: ${{ hashFiles('coverage-artifacts/unit.runtime.vm.platform.macos/**') != '' }}
         uses: codecov/codecov-action@v5
         with:
-          directory: coverage-artifacts/unit.cbl_sentry
-          flags: unit.cbl_sentry
-          name: unit.cbl_sentry
+          directory: coverage-artifacts/unit.runtime.vm.platform.macos
+          flags: unit,runtime.vm,platform.macos
+          name: unit.runtime.vm.platform.macos
           override_branch: ${{ env.CODECOV_BRANCH }}
           fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}
           verbose: true
 
-      - name: Upload cbl_generator unit coverage
-        if: ${{ hashFiles('coverage-artifacts/unit.cbl_generator/**') != '' }}
+      - name: Upload Windows VM unit coverage
+        if: ${{ hashFiles('coverage-artifacts/unit.runtime.vm.platform.windows/**') != '' }}
         uses: codecov/codecov-action@v5
         with:
-          directory: coverage-artifacts/unit.cbl_generator
-          flags: unit.cbl_generator
-          name: unit.cbl_generator
+          directory: coverage-artifacts/unit.runtime.vm.platform.windows
+          flags: unit,runtime.vm,platform.windows
+          name: unit.runtime.vm.platform.windows
           override_branch: ${{ env.CODECOV_BRANCH }}
           fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}
           verbose: true
 
-      - name: Upload macOS standalone E2E coverage
-        if: ${{ hashFiles('coverage-artifacts/e2e.cbl.standalone.macOS/**') != '' }}
+      - name: Upload Ubuntu VM E2E coverage
+        if: ${{ hashFiles('coverage-artifacts/e2e.runtime.vm.platform.ubuntu/**') != '' }}
         uses: codecov/codecov-action@v5
         with:
-          directory: coverage-artifacts/e2e.cbl.standalone.macOS
-          flags: e2e.cbl.standalone.macOS
-          name: e2e.cbl.standalone.macOS
+          directory: coverage-artifacts/e2e.runtime.vm.platform.ubuntu
+          flags: e2e,runtime.vm,platform.ubuntu
+          name: e2e.runtime.vm.platform.ubuntu
           override_branch: ${{ env.CODECOV_BRANCH }}
           fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}
           verbose: true
 
-      - name: Upload Ubuntu standalone E2E coverage
-        if: ${{ hashFiles('coverage-artifacts/e2e.cbl.standalone.Ubuntu/**') != '' }}
+      - name: Upload macOS VM E2E coverage
+        if: ${{ hashFiles('coverage-artifacts/e2e.runtime.vm.platform.macos/**') != '' }}
         uses: codecov/codecov-action@v5
         with:
-          directory: coverage-artifacts/e2e.cbl.standalone.Ubuntu
-          flags: e2e.cbl.standalone.Ubuntu
-          name: e2e.cbl.standalone.Ubuntu
+          directory: coverage-artifacts/e2e.runtime.vm.platform.macos
+          flags: e2e,runtime.vm,platform.macos
+          name: e2e.runtime.vm.platform.macos
           override_branch: ${{ env.CODECOV_BRANCH }}
           fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}
           verbose: true
 
-      - name: Upload Windows standalone E2E coverage
-        if: ${{ hashFiles('coverage-artifacts/e2e.cbl.standalone.Windows/**') != '' }}
+      - name: Upload Windows VM E2E coverage
+        if: ${{ hashFiles('coverage-artifacts/e2e.runtime.vm.platform.windows/**') != '' }}
         uses: codecov/codecov-action@v5
         with:
-          directory: coverage-artifacts/e2e.cbl.standalone.Windows
-          flags: e2e.cbl.standalone.Windows
-          name: e2e.cbl.standalone.Windows
+          directory: coverage-artifacts/e2e.runtime.vm.platform.windows
+          flags: e2e,runtime.vm,platform.windows
+          name: e2e.runtime.vm.platform.windows
+          override_branch: ${{ env.CODECOV_BRANCH }}
+          fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+          verbose: true
+
+      - name: Upload Ubuntu VM ASAN E2E coverage
+        if: ${{ hashFiles('coverage-artifacts/e2e.runtime.vm.sanitizer.asan.platform.ubuntu/**') != '' }}
+        uses: codecov/codecov-action@v5
+        with:
+          directory: coverage-artifacts/e2e.runtime.vm.sanitizer.asan.platform.ubuntu
+          flags: e2e,runtime.vm,sanitizer.asan,platform.ubuntu
+          name: e2e.runtime.vm.sanitizer.asan.platform.ubuntu
           override_branch: ${{ env.CODECOV_BRANCH }}
           fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}
