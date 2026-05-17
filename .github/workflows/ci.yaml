@@ -212,7 +212,7 @@ jobs:
 
   test-e2e:
     name: E2E tests
-    timeout-minutes: 25
+    timeout-minutes: 35
     strategy:
       fail-fast: false
       matrix:
@@ -343,11 +343,12 @@ jobs:
 
       - name: Collect test results
         if: failure()
+        timeout-minutes: 8
         shell: bash
         run: ./tools/ci-steps.sh collectTestResults
 
       - name: Upload test results
-        if: failure()
+        if: ${{ failure() && hashFiles('test-results/**') != '' }}
         uses: actions/upload-artifact@v7
         with:
           name: test-results-${{ matrix.os }}-${{ matrix.embedder }}${{ matrix.test_platform && format('-{0}', matrix.test_platform) || '' }}

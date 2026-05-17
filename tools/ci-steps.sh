@@ -171,6 +171,19 @@ function _prepareStandaloneSanitizerNativeAssets() {
     export LD_PRELOAD="$(IFS=:; echo "${preloadLibs[*]}")"
 }
 
+function _printAndroidState() {
+    if [[ "$targetOs" != "Android" || -z "${ANDROID_HOME:-}" ]]; then
+        return 0
+    fi
+
+    echo "=== Android device state ==="
+    "$ANDROID_HOME/platform-tools/adb" devices -l 2>&1 || true
+    "$ANDROID_HOME/platform-tools/adb" -s "emulator-5554" shell getprop sys.boot_completed 2>&1 || true
+    "$ANDROID_HOME/platform-tools/adb" -s "emulator-5554" shell getprop dev.bootcomplete 2>&1 || true
+    "$ANDROID_HOME/platform-tools/adb" -s "emulator-5554" shell cmd package list packages "$testAppBundleId" 2>&1 || true
+    echo "=== End Android device state ==="
+}
+
 function runE2ETests() {
     requireEnvVar EMBEDDER
     requireEnvVar TARGET_OS
@@ -254,6 +267,8 @@ function runE2ETests() {
         # Build the app explicitly when needed:
         # - iOS: always, because we need the bundle for simulator readiness
         #   checks before flutter drive.
+        # - Android: always, so Gradle/build hangs are visible separately from
+        #   device launch and driver waits.
         # - Debug mode: always, so we can inspect the bundle afterwards.
         # Otherwise, let flutter drive handle the build implicitly.
         local buildTarget
@@ -270,10 +285,17 @@ function runE2ETests() {
         iOS) buildFlags="--simulator --no-codesign" ;;
         esac
         local didExplicitBuild=false
-        if [ "$targetOs" = "iOS" ] || isDebug; then
+        if [ "$targetOs" = "iOS" ] || [ "$targetOs" = "Android" ] || isDebug; then
             echo "=== Building Flutter app for $targetOs ==="
-            flutter build "$buildTarget" --debug $buildFlags $verboseFlag $DART_DEFINES 2>&1
+            flutter build "$buildTarget" \
+                --debug \
+                --target integration_test/e2e_test.dart \
+                $buildFlags \
+                $verboseFlag \
+                $DART_DEFINES \
+                2>&1
             didExplicitBuild=true
+            echo "=== Finished building Flutter app for $targetOs ==="
         fi
 
         if isDebug; then
@@ -384,6 +406,8 @@ function runE2ETests() {
         # flag, which we need to collect logs from devices.
         local noBuildFlag=""
         if [ "$didExplicitBuild" = true ]; then noBuildFlag="--no-build"; fi
+        _printAndroidState
+        echo "=== Running Flutter drive for $targetOs ==="
         flutter drive \
             -d "$device" \
             $DART_DEFINES \
@@ -392,6 +416,7 @@ function runE2ETests() {
             --driver test_driver/integration_test.dart \
             --target integration_test/e2e_test.dart \
             $verboseFlag
+        echo "=== Finished Flutter drive for $targetOs ==="
         ;;
     esac
 }
@@ -451,7 +476,14 @@ function _collectCrashReportsAndroid() {
         echo "Android emulator is not reachable, skipping bugreport collection"
         return 0
     fi
-    ./tools/android-emulator.sh bugreport -o "$testResultsDir"
+
+    if command -v timeout >/dev/null 2>&1; then
+        timeout 90s ./tools/android-emulator.sh bugreport -o "$testResultsDir" || \
+            echo "Android bugreport collection failed or timed out"
+    else
+        ./tools/android-emulator.sh bugreport -o "$testResultsDir" || \
+            echo "Android bugreport collection failed"
+    fi
 }
 
 function _collectCblLogsStandalone() {
@@ -510,9 +542,52 @@ function _collectCblLogsAndroid() {
         echo "Android emulator is not reachable, skipping app data collection"
         return 0
     fi
-    ./tools/android-emulator.sh copyAppData
+    ./tools/android-emulator.sh copyAppData || {
+        echo "Android app data collection failed"
+        return 0
+    }
     zip -r appData.zip appData
     mv appData.zip "$testResultsDir"
+}
+
+function _collectAndroidDiagnostics() {
+    echo "Collecting Android diagnostics"
+
+    local outputDir="$testResultsDir/android"
+    mkdir -p "$outputDir"
+
+    if [[ -n "${ANDROID_HOME:-}" ]]; then
+        "$ANDROID_HOME/platform-tools/adb" devices -l >"$outputDir/adb-devices.txt" 2>&1 || true
+    fi
+
+    if ! _isAndroidEmulatorReachable; then
+        echo "Android emulator is not reachable, skipping emulator diagnostics"
+        return 0
+    fi
+
+    ./tools/android-emulator.sh diagnostics -o "$outputDir" || \
+        echo "Android diagnostics collection failed"
+}
+
+function _collectProcessList() {
+    local name="${1:-processes}"
+
+    echo "Collecting process list"
+    ps -ef >"$testResultsDir/$name.txt" 2>&1 || true
+}
+
+function _collectGradleDiagnostics() {
+    echo "Collecting Gradle diagnostics"
+
+    local outputDir="$testResultsDir/gradle"
+    mkdir -p "$outputDir"
+
+    if [[ -d "$HOME/.gradle/daemon" ]]; then
+        tar -czf "$outputDir/daemon-logs.tar.gz" -C "$HOME/.gradle" daemon 2>&1 || \
+            echo "Gradle daemon log collection failed"
+    else
+        echo "No Gradle daemon directory found"
+    fi
 }
 
 function _collectCblLogsLinux() {
@@ -591,11 +666,14 @@ function collectTestResults() {
     requireEnvVar TARGET_OS
     requireEnvVar TEST_PACKAGE
 
-    mkdir "$testResultsDir"
+    mkdir -p "$testResultsDir"
+
+    _collectProcessList processes-before-wait
 
     # Wait for crash reports/core dumps.
     sleep 60
 
+    _collectProcessList processes-after-wait
     _collectCouchbaseServerLogs
     _collectSyncGatewayLogs
 
@@ -629,6 +707,8 @@ function collectTestResults() {
             _collectCblLogsIosSimulator
             ;;
         Android)
+            _collectGradleDiagnostics
+            _collectAndroidDiagnostics
             _collectCrashReportsAndroid
             _collectCblLogsAndroid
             ;;
