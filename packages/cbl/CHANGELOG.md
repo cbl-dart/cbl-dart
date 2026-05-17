@@ -1,3 +1,9 @@
+## 4.0.0-dev.7
+
+ - **REFACTOR**(cbl): enterprise gating to use capability-based messages ([#937](https://github.com/cbl-dart/cbl-dart/issues/937)). ([42a4f856](https://github.com/cbl-dart/cbl-dart/commit/42a4f85691e39b7465f1d2a2825339ded3949e2b))
+ - **FIX**(cbl): add algorithm include ([#949](https://github.com/cbl-dart/cbl-dart/issues/949)). ([1d650903](https://github.com/cbl-dart/cbl-dart/commit/1d65090346d17080e5381a2d8c2f6495ec7c5f4b))
+ - **FIX**(cbl): fullSync FFI config initialization and re-enable Linux replication tests ([#943](https://github.com/cbl-dart/cbl-dart/issues/943)). ([7eec48e5](https://github.com/cbl-dart/cbl-dart/commit/7eec48e5b9c3ab5acc4a50a5a6ac5af731c0c4ec))
+
 ## 4.0.0-dev.6
 
  - **FIX**(cbl): align DefaultConflictResolver with native timestamp-based logic ([#934](https://github.com/cbl-dart/cbl-dart/issues/934)). ([13c33230](https://github.com/cbl-dart/cbl-dart/commit/13c332305ce68e4a3a168ad24127cab57d78c9d8))

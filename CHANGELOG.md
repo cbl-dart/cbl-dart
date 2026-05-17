@@ -3,6 +3,38 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2026-05-17
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`cbl` - `v4.0.0-dev.7`](#cbl---v400-dev7)
+ - [`cbl_generator` - `v0.4.0-dev.7`](#cbl_generator---v040-dev7)
+ - [`cbl_sentry` - `v3.0.0-dev.7`](#cbl_sentry---v300-dev7)
+
+Packages with dependency updates only:
+
+> Packages listed below depend on other packages in this workspace that have had changes. Their versions have been incremented to bump the minimum dependency versions of the packages they depend upon in this project.
+
+ - `cbl_generator` - `v0.4.0-dev.7`
+ - `cbl_sentry` - `v3.0.0-dev.7`
+
+---
+
+#### `cbl` - `v4.0.0-dev.7`
+
+ - **REFACTOR**(cbl): enterprise gating to use capability-based messages ([#937](https://github.com/cbl-dart/cbl-dart/issues/937)). ([42a4f856](https://github.com/cbl-dart/cbl-dart/commit/42a4f85691e39b7465f1d2a2825339ded3949e2b))
+ - **FIX**(cbl): add algorithm include ([#949](https://github.com/cbl-dart/cbl-dart/issues/949)). ([1d650903](https://github.com/cbl-dart/cbl-dart/commit/1d65090346d17080e5381a2d8c2f6495ec7c5f4b))
+ - **FIX**(cbl): fullSync FFI config initialization and re-enable Linux replication tests ([#943](https://github.com/cbl-dart/cbl-dart/issues/943)). ([7eec48e5](https://github.com/cbl-dart/cbl-dart/commit/7eec48e5b9c3ab5acc4a50a5a6ac5af731c0c4ec))
+
+
 ## 2026-03-24
 
 ### Changes
