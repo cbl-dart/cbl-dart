@@ -79,6 +79,7 @@ abstract class A with _$A {
 '''),
       },
       readerWriter: readerWriter,
+      packageConfig: (await PackageAssetReader.currentIsolate()).packageConfig,
       outputs: {
         _genPartId: _typedDictionaryGeneratorContent(r'''
 mixin _$A implements TypedDictionaryObject<MutableA> {}
@@ -147,6 +148,7 @@ abstract class A with _$A {
 '''),
       },
       readerWriter: readerWriter,
+      packageConfig: (await PackageAssetReader.currentIsolate()).packageConfig,
       outputs: {
         _genPartId: _typedDictionaryGeneratorContent(r'''
 mixin _$A implements TypedDictionaryObject<MutableA> {
@@ -380,6 +382,7 @@ Future<void> _expectBadSource(String source, [Object? messageMatcher]) async {
     {_testLibId: _testLibContent(source)},
     onLog: captureError,
     readerWriter: readerWriter,
+    packageConfig: (await PackageAssetReader.currentIsolate()).packageConfig,
   );
 
   await expectLater(errorMessage, effectiveMatcher ?? isNotNull);

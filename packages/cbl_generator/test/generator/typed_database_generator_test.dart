@@ -38,6 +38,7 @@ class $A {
 '''),
       },
       readerWriter: readerWriter,
+      packageConfig: (await PackageAssetReader.currentIsolate()).packageConfig,
       outputs: {
         _genPartId: _typedDatabaseGeneratorContent(r'''
 class A extends $A {
@@ -110,6 +111,7 @@ Future<void> _expectBadSource(String source, [Object? messageMatcher]) async {
     {_testLibId: _testLibContent(source)},
     onLog: captureError,
     readerWriter: readerWriter,
+    packageConfig: (await PackageAssetReader.currentIsolate()).packageConfig,
   );
 
   await expectLater(errorMessage, effectiveMatcher ?? isNotNull);
