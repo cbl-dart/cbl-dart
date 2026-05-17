@@ -47,6 +47,28 @@ The protocol is optimized for throughput, so document delivery order is not
 guaranteed. Avoid application logic that depends on a particular arrival order
 in replication callbacks.
 
+## Version Compatibility
+
+Couchbase Lite for Dart v4 uses version vectors for document versioning and
+replication. Because of that architecture change, v4 clients require Sync
+Gateway 4.0 or later. Attempts to sync with older Sync Gateway versions fail
+with a replication error.
+
+When Sync Gateway 4.0 participates in Couchbase Server XDCR interoperability,
+Couchbase Server 7.6.6 or later is required. Couchbase Lite 3.x clients can
+still sync with Sync Gateway 4.0, but they do not support the cluster-switching
+capabilities that v4 clients gain from version vectors.
+
+For peer-to-peer sync, both peers must run Couchbase Lite v4. Sync between a v4
+peer and a 3.x peer is not supported. See
+[Active-Passive Peer-to-Peer Sync](./peer-to-peer/websocket.mdx) for the
+listener and active peer setup.
+
+For more background, see Couchbase's
+[Version Vectors](https://docs.couchbase.com/couchbase-lite/current/c/version-vectors.html)
+documentation and the
+[Sync Gateway 4.0 compatibility notes](https://docs.couchbase.com/sync-gateway/current/whatsnew.html#compatibility).
+
 ## Scopes and Collections
 
 The local collections configured in the replicator must also exist in Sync

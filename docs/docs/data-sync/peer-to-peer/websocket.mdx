@@ -77,6 +77,16 @@ configuration in [Basic Setup](#basic-setup).
 For the step-by-step listener and replicator setup for this transport mode, see
 [Passive Peer](./passive-peer.mdx) and [Active Peer](./active-peer.mdx).
 
+### Version Compatibility
+
+Peer-to-peer sync with Couchbase Lite for Dart v4 requires Couchbase Lite v4 on
+both sides of the connection. A v4 active peer cannot sync with a Couchbase Lite
+3.x listener, and a v4 listener cannot sync with a 3.x active peer.
+
+This requirement comes from Couchbase Lite 4's move from revision trees to
+version vectors. For server-based sync compatibility, see
+[Data Sync using Sync Gateway](../replication.mdx#version-compatibility).
+
 ## Features
 
 Couchbase Lite for Dart's Peer-to-Peer synchronization solution provides support
