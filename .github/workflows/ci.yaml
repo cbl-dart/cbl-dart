@@ -140,6 +140,12 @@ jobs:
             embedder: standalone
             os: Windows
     env:
+      CODECOV_PLATFORM: >-
+        ${{ fromJSON('{
+          "Ubuntu":"ubuntu",
+          "macOS":"macos",
+          "Windows":"windows"
+        }')[matrix.os] }}
       EMBEDDER: ${{ matrix.embedder }}
       TARGET_OS: ${{ matrix.os }}
       TEST_PACKAGE: ${{ matrix.package }}
@@ -196,16 +202,24 @@ jobs:
         run: ./tools/ci-steps.sh checkBuildRunnerOutput
 
       - name: Run tests
+        id: run-tests
         shell: bash
         run: ./tools/ci-steps.sh runUnitTests
 
-      - name: Upload coverage data
-        env:
-          CODECOV_BRANCH: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository && github.event.pull_request.head.label || github.head_ref || github.ref_name }}
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      - name: Collect coverage data
+        if: ${{ always() && steps.run-tests.outcome != 'skipped' }}
         shell: bash
+        env:
+          ALLOW_MISSING_COVERAGE: ${{ steps.run-tests.outcome == 'success' && 'false' || 'true' }}
         run: |
-          ./tools/ci-steps.sh uploadCoverageData "unit.${{ matrix.package }}"
+          ./tools/ci-steps.sh collectCoverageData "unit.${{ matrix.package }}.${{ matrix.os }}" "unit.runtime.vm.platform.$CODECOV_PLATFORM"
+
+      - name: Upload coverage artifact
+        if: ${{ always() && hashFiles('coverage-artifacts/**') != '' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage-unit-${{ matrix.package }}-${{ matrix.os }}
+          path: coverage-artifacts
 
   test-e2e:
     name: E2E tests
@@ -245,6 +259,14 @@ jobs:
         "Windows":"windows-2025"
       }}', github.run_id))[matrix.os] }}
     env:
+      CODECOV_PLATFORM: >-
+        ${{ fromJSON('{
+          "iOS":"ios",
+          "macOS":"macos",
+          "Android":"android",
+          "Ubuntu":"ubuntu",
+          "Windows":"windows"
+        }')[matrix.os] }}
       EMBEDDER: ${{ matrix.embedder }}
       TARGET_OS: ${{ matrix.os }}
       DART_TEST_PLATFORM: ${{ matrix.test_platform }}
@@ -261,7 +283,7 @@ jobs:
 
       - name: Select Java 17
         if: ${{ matrix.os == 'Android' }}
-        run: echo "JAVA_HOME=$JAVA_HOME_17_X64" >> $GITHUB_ENV
+        run: echo "JAVA_HOME=$JAVA_HOME_17_X64" >> "$GITHUB_ENV"
 
       - name: Install Android Native Toolchain
         if: ${{ matrix.os == 'Android' }}
@@ -334,28 +356,180 @@ jobs:
         run: ./tools/ci-steps.sh startVirtualDevices
 
       - name: Run tests
+        id: run-tests
         timeout-minutes: 20
         shell: bash
         run: ./tools/ci-steps.sh runE2ETests
 
       - name: Collect test results
         if: failure()
+        timeout-minutes: 8
         shell: bash
         run: ./tools/ci-steps.sh collectTestResults
 
       - name: Upload test results
-        if: failure()
+        if: ${{ failure() && hashFiles('test-results/**') != '' }}
         uses: actions/upload-artifact@v7
         with:
           name: test-results-${{ matrix.os }}-${{ matrix.embedder }}${{ matrix.test_platform && format('-{0}', matrix.test_platform) || '' }}
           path: test-results
 
-      - name: Upload coverage data
+      - name: Collect coverage data
         # Disabled until we figure out how to get coverage data from flutter tests
-        if: ${{ matrix.embedder != 'flutter' && matrix.test_platform == '' }}
+        if: ${{ always() && steps.run-tests.outcome != 'skipped' && matrix.embedder != 'flutter' && matrix.test_platform == '' }}
+        shell: bash
         env:
-          CODECOV_BRANCH: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository && github.event.pull_request.head.label || github.head_ref || github.ref_name }}
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+          ALLOW_MISSING_COVERAGE: ${{ steps.run-tests.outcome == 'success' && 'false' || 'true' }}
+        run: |
+          ./tools/ci-steps.sh collectCoverageData "e2e.cbl.${{ matrix.embedder }}.${{ matrix.os }}" "e2e.runtime.vm.platform.$CODECOV_PLATFORM"
+
+      - name: Upload coverage artifact
+        # Disabled until we figure out how to get coverage data from flutter tests
+        if: ${{ always() && hashFiles('coverage-artifacts/**') != '' && matrix.embedder != 'flutter' && matrix.test_platform == '' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage-e2e-cbl-${{ matrix.embedder }}-${{ matrix.os }}
+          path: coverage-artifacts
+
+  upload-coverage:
+    name: Upload coverage
+    timeout-minutes: 10
+    needs:
+      - formatting-dart
+      - formatting-clang
+      - analyze-dart
+      - publish-dry-run
+      - test-dart-unit
+      - test-e2e
+    if: >-
+      ${{
+        always() &&
+        !cancelled() &&
+        (
+          github.event_name == 'pull_request' ||
+          (needs.test-dart-unit.result == 'success' && needs.test-e2e.result == 'success')
+        )
+      }}
+    runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu
+    env:
+      CODECOV_BRANCH: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository && github.event.pull_request.head.label || github.head_ref || github.ref_name }}
+    steps:
+      - uses: runs-on/action@v2
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Download coverage artifacts
+        uses: actions/download-artifact@v7
+        continue-on-error: true
+        with:
+          pattern: coverage-*
+          path: coverage-artifacts
+          merge-multiple: true
+
+      - name: Detect downloaded coverage
+        id: coverage
         shell: bash
         run: |
-          ./tools/ci-steps.sh uploadCoverageData "e2e.cbl.${{ matrix.embedder }}.${{ matrix.os }}"
+          if [ -d coverage-artifacts ] && find coverage-artifacts -type f -name '*.lcov.info' | grep -q .; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Prepare Codecov reports
+        if: ${{ steps.coverage.outputs.found == 'true' }}
+        shell: bash
+        run: |
+          for flagDir in coverage-artifacts/*; do
+            [ -d "$flagDir" ] || continue
+
+            reportsFile="$(mktemp)"
+            find "$flagDir" -maxdepth 1 -type f -name '*.lcov.info' | sort > "$reportsFile"
+            [ -s "$reportsFile" ] || {
+              rm -f "$reportsFile"
+              continue
+            }
+
+            reportCount="$(wc -l < "$reportsFile" | tr -d ' ')"
+            printf 'Preparing %s from %s report(s)\n' "$flagDir/lcov.info" "$reportCount"
+            while IFS= read -r report; do
+              cat "$report"
+            done < "$reportsFile" > "$flagDir/lcov.info"
+            rm -f "$reportsFile"
+          done
+
+      - name: Upload Ubuntu VM unit coverage
+        if: ${{ hashFiles('coverage-artifacts/unit.runtime.vm.platform.ubuntu/**') != '' }}
+        uses: codecov/codecov-action@v5
+        with:
+          directory: coverage-artifacts/unit.runtime.vm.platform.ubuntu
+          flags: unit,runtime.vm,platform.ubuntu
+          override_branch: ${{ env.CODECOV_BRANCH }}
+          fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+          verbose: true
+
+      - name: Upload macOS VM unit coverage
+        if: ${{ hashFiles('coverage-artifacts/unit.runtime.vm.platform.macos/**') != '' }}
+        uses: codecov/codecov-action@v5
+        with:
+          directory: coverage-artifacts/unit.runtime.vm.platform.macos
+          flags: unit,runtime.vm,platform.macos
+          override_branch: ${{ env.CODECOV_BRANCH }}
+          fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+          verbose: true
+
+      - name: Upload Windows VM unit coverage
+        if: ${{ hashFiles('coverage-artifacts/unit.runtime.vm.platform.windows/**') != '' }}
+        uses: codecov/codecov-action@v5
+        with:
+          directory: coverage-artifacts/unit.runtime.vm.platform.windows
+          flags: unit,runtime.vm,platform.windows
+          override_branch: ${{ env.CODECOV_BRANCH }}
+          fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+          verbose: true
+
+      - name: Upload Ubuntu VM E2E coverage
+        if: ${{ hashFiles('coverage-artifacts/e2e.runtime.vm.platform.ubuntu/**') != '' }}
+        uses: codecov/codecov-action@v5
+        with:
+          directory: coverage-artifacts/e2e.runtime.vm.platform.ubuntu
+          flags: e2e,runtime.vm,platform.ubuntu
+          override_branch: ${{ env.CODECOV_BRANCH }}
+          fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+          verbose: true
+
+      - name: Upload macOS VM E2E coverage
+        if: ${{ hashFiles('coverage-artifacts/e2e.runtime.vm.platform.macos/**') != '' }}
+        uses: codecov/codecov-action@v5
+        with:
+          directory: coverage-artifacts/e2e.runtime.vm.platform.macos
+          flags: e2e,runtime.vm,platform.macos
+          override_branch: ${{ env.CODECOV_BRANCH }}
+          fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+          verbose: true
+
+      - name: Upload Windows VM E2E coverage
+        if: ${{ hashFiles('coverage-artifacts/e2e.runtime.vm.platform.windows/**') != '' }}
+        uses: codecov/codecov-action@v5
+        with:
+          directory: coverage-artifacts/e2e.runtime.vm.platform.windows
+          flags: e2e,runtime.vm,platform.windows
+          override_branch: ${{ env.CODECOV_BRANCH }}
+          fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+          verbose: true
+
+      - name: Send Codecov notifications
+        if: ${{ steps.coverage.outputs.found == 'true' }}
+        uses: codecov/codecov-action@v5
+        with:
+          run_command: send-notifications
+          override_branch: ${{ env.CODECOV_BRANCH }}
+          fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+          verbose: true

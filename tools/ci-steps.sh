@@ -171,6 +171,81 @@ function _prepareStandaloneSanitizerNativeAssets() {
     export LD_PRELOAD="$(IFS=:; echo "${preloadLibs[*]}")"
 }
 
+function _printAndroidState() {
+    if [[ "$targetOs" != "Android" || -z "${ANDROID_HOME:-}" ]]; then
+        return 0
+    fi
+
+    echo "=== Android device state ==="
+    "$ANDROID_HOME/platform-tools/adb" devices -l 2>&1 || true
+    "$ANDROID_HOME/platform-tools/adb" -s "emulator-5554" shell getprop sys.boot_completed 2>&1 || true
+    "$ANDROID_HOME/platform-tools/adb" -s "emulator-5554" shell getprop dev.bootcomplete 2>&1 || true
+    "$ANDROID_HOME/platform-tools/adb" -s "emulator-5554" shell cmd package list packages "$testAppBundleId" 2>&1 || true
+    echo "=== End Android device state ==="
+}
+
+function _printAndroidDriveHeartbeat() {
+    if [[ "$targetOs" != "Android" || -z "${ANDROID_HOME:-}" ]]; then
+        return 0
+    fi
+
+    local adb="$ANDROID_HOME/platform-tools/adb"
+
+    echo "=== Android flutter drive heartbeat $(date -u '+%Y-%m-%dT%H:%M:%SZ') ==="
+    "$adb" devices -l 2>&1 || true
+    "$adb" -s "emulator-5554" get-state 2>&1 || true
+    "$adb" -s "emulator-5554" shell getprop sys.boot_completed 2>&1 || true
+    "$adb" -s "emulator-5554" shell getprop dev.bootcomplete 2>&1 || true
+    "$adb" -s "emulator-5554" shell pidof "$testAppBundleId" 2>&1 || true
+    "$adb" -s "emulator-5554" shell cmd package list packages "$testAppBundleId" 2>&1 || true
+    "$adb" -s "emulator-5554" shell dumpsys activity top 2>&1 | head -n 80 || true
+    "$adb" -s "emulator-5554" logcat -d -t 120 2>&1 || true
+    pgrep -af 'flutter|adb|gradle|java|qemu' || true
+    echo "=== End Android flutter drive heartbeat ==="
+}
+
+function _runFlutterDrive() {
+    local driveVerboseFlag="${1:-}"
+    local dartDefineArgs=()
+    read -r -a dartDefineArgs <<< "$DART_DEFINES"
+
+    local flutterDriveCommand=(
+        flutter drive
+        -d "$device"
+        "${dartDefineArgs[@]}"
+    )
+    [ -n "$noBuildFlag" ] && flutterDriveCommand+=("$noBuildFlag")
+    flutterDriveCommand+=(
+        --keep-app-running
+        --driver test_driver/integration_test.dart
+        --target integration_test/e2e_test.dart
+    )
+    [ -n "$driveVerboseFlag" ] && flutterDriveCommand+=("$driveVerboseFlag")
+
+    if [ "$targetOs" != "Android" ]; then
+        "${flutterDriveCommand[@]}"
+        return
+    fi
+
+    "${flutterDriveCommand[@]}" &
+
+    local drivePid=$!
+    local driveStatus=0
+    local secondsSinceHeartbeat=0
+
+    while kill -0 "$drivePid" 2>/dev/null; do
+        sleep 10
+        secondsSinceHeartbeat=$((secondsSinceHeartbeat + 10))
+        if [ "$secondsSinceHeartbeat" -ge 60 ] && kill -0 "$drivePid" 2>/dev/null; then
+            _printAndroidDriveHeartbeat
+            secondsSinceHeartbeat=0
+        fi
+    done
+
+    wait "$drivePid" || driveStatus=$?
+    return "$driveStatus"
+}
+
 function runE2ETests() {
     requireEnvVar EMBEDDER
     requireEnvVar TARGET_OS
@@ -250,10 +325,16 @@ function runE2ETests() {
 
         local verboseFlag=""
         if isDebug; then verboseFlag="-v"; fi
+        local driveVerboseFlag="$verboseFlag"
+        if [ "$targetOs" = "Android" ]; then
+            driveVerboseFlag="-v"
+        fi
 
         # Build the app explicitly when needed:
         # - iOS: always, because we need the bundle for simulator readiness
         #   checks before flutter drive.
+        # - Android: always, so Gradle/build hangs are visible separately from
+        #   device launch and driver waits.
         # - Debug mode: always, so we can inspect the bundle afterwards.
         # Otherwise, let flutter drive handle the build implicitly.
         local buildTarget
@@ -270,10 +351,17 @@ function runE2ETests() {
         iOS) buildFlags="--simulator --no-codesign" ;;
         esac
         local didExplicitBuild=false
-        if [ "$targetOs" = "iOS" ] || isDebug; then
+        if [ "$targetOs" = "iOS" ] || [ "$targetOs" = "Android" ] || isDebug; then
             echo "=== Building Flutter app for $targetOs ==="
-            flutter build "$buildTarget" --debug $buildFlags $verboseFlag $DART_DEFINES 2>&1
+            flutter build "$buildTarget" \
+                --debug \
+                --target integration_test/e2e_test.dart \
+                $buildFlags \
+                $verboseFlag \
+                $DART_DEFINES \
+                2>&1
             didExplicitBuild=true
+            echo "=== Finished building Flutter app for $targetOs ==="
         fi
 
         if isDebug; then
@@ -384,14 +472,10 @@ function runE2ETests() {
         # flag, which we need to collect logs from devices.
         local noBuildFlag=""
         if [ "$didExplicitBuild" = true ]; then noBuildFlag="--no-build"; fi
-        flutter drive \
-            -d "$device" \
-            $DART_DEFINES \
-            $noBuildFlag \
-            --keep-app-running \
-            --driver test_driver/integration_test.dart \
-            --target integration_test/e2e_test.dart \
-            $verboseFlag
+        _printAndroidState
+        echo "=== Running Flutter drive for $targetOs ==="
+        _runFlutterDrive "$driveVerboseFlag"
+        echo "=== Finished Flutter drive for $targetOs ==="
         ;;
     esac
 }
@@ -451,7 +535,14 @@ function _collectCrashReportsAndroid() {
         echo "Android emulator is not reachable, skipping bugreport collection"
         return 0
     fi
-    ./tools/android-emulator.sh bugreport -o "$testResultsDir"
+
+    if command -v timeout >/dev/null 2>&1; then
+        timeout 90s ./tools/android-emulator.sh bugreport -o "$testResultsDir" || \
+            echo "Android bugreport collection failed or timed out"
+    else
+        ./tools/android-emulator.sh bugreport -o "$testResultsDir" || \
+            echo "Android bugreport collection failed"
+    fi
 }
 
 function _collectCblLogsStandalone() {
@@ -510,9 +601,52 @@ function _collectCblLogsAndroid() {
         echo "Android emulator is not reachable, skipping app data collection"
         return 0
     fi
-    ./tools/android-emulator.sh copyAppData
+    ./tools/android-emulator.sh copyAppData || {
+        echo "Android app data collection failed"
+        return 0
+    }
     zip -r appData.zip appData
     mv appData.zip "$testResultsDir"
+}
+
+function _collectAndroidDiagnostics() {
+    echo "Collecting Android diagnostics"
+
+    local outputDir="$testResultsDir/android"
+    mkdir -p "$outputDir"
+
+    if [[ -n "${ANDROID_HOME:-}" ]]; then
+        "$ANDROID_HOME/platform-tools/adb" devices -l >"$outputDir/adb-devices.txt" 2>&1 || true
+    fi
+
+    if ! _isAndroidEmulatorReachable; then
+        echo "Android emulator is not reachable, skipping emulator diagnostics"
+        return 0
+    fi
+
+    ./tools/android-emulator.sh diagnostics -o "$outputDir" || \
+        echo "Android diagnostics collection failed"
+}
+
+function _collectProcessList() {
+    local name="${1:-processes}"
+
+    echo "Collecting process list"
+    ps -ef >"$testResultsDir/$name.txt" 2>&1 || true
+}
+
+function _collectGradleDiagnostics() {
+    echo "Collecting Gradle diagnostics"
+
+    local outputDir="$testResultsDir/gradle"
+    mkdir -p "$outputDir"
+
+    if [[ -d "$HOME/.gradle/daemon" ]]; then
+        tar -czf "$outputDir/daemon-logs.tar.gz" -C "$HOME/.gradle" daemon 2>&1 || \
+            echo "Gradle daemon log collection failed"
+    else
+        echo "No Gradle daemon directory found"
+    fi
 }
 
 function _collectCblLogsLinux() {
@@ -591,11 +725,14 @@ function collectTestResults() {
     requireEnvVar TARGET_OS
     requireEnvVar TEST_PACKAGE
 
-    mkdir "$testResultsDir"
+    mkdir -p "$testResultsDir"
+
+    _collectProcessList processes-before-wait
 
     # Wait for crash reports/core dumps.
     sleep 60
 
+    _collectProcessList processes-after-wait
     _collectCouchbaseServerLogs
     _collectSyncGatewayLogs
 
@@ -629,6 +766,8 @@ function collectTestResults() {
             _collectCblLogsIosSimulator
             ;;
         Android)
+            _collectGradleDiagnostics
+            _collectAndroidDiagnostics
             _collectCrashReportsAndroid
             _collectCblLogsAndroid
             ;;
@@ -672,17 +811,11 @@ function checkBuildRunnerOutput() {
     exit 1
 }
 
-# Uploads coverage data to codecov.
-#
-# The first and only parameter is a comma separated list of flags to be
-# associated with the uploaded coverage data.
-function uploadCoverageData() {
+# Formats coverage data as lcov.
+function formatCoverageData() {
     requireEnvVar EMBEDDER
     requireEnvVar TEST_PACKAGE
 
-    local flags="$1"
-
-    # Format coverage data as lcov
     case "$embedder" in
     standalone)
         ./tools/coverage.sh dartToLcov "$testPackageDir"
@@ -692,37 +825,60 @@ function uploadCoverageData() {
         # location.
         ;;
     esac
+}
 
-    # Install codecov uploader
-    case "$OSTYPE" in
-    linux*)
-        retry 3 10 curl --fail -Os https://cli.codecov.io/latest/linux/codecov
-        chmod +x codecov
+function _hasCoverageInput() {
+    case "$embedder" in
+    standalone)
+        [ -d "$testPackageDir/coverage/dart" ] && \
+            find "$testPackageDir/coverage/dart" -type f | grep -q .
         ;;
-    darwin*)
-        retry 3 10 curl --fail -Os https://cli.codecov.io/latest/macos/codecov
-        chmod +x codecov
+    flutter)
+        [ -f "$testPackageDir/coverage/lcov.info" ]
         ;;
-    mingw* | msys* | cygwin*)
-        retry 3 10 curl --fail -Os https://cli.codecov.io/latest/windows/codecov.exe
+    *)
+        return 1
         ;;
     esac
+}
 
-    # Upload coverage data
-    local codecovArgs=(
-        --verbose
-        upload-process
-        --fail-on-error
-        --flag "$flags"
-        --file "$testPackageDir/coverage/lcov.info"
-        --commit-sha "$GITHUB_SHA"
-    )
+# Collects coverage data in a repository-root artifact directory.
+#
+# The first parameter is the unique upload name.
+# The second parameter is the coverage artifact group.
+function collectCoverageData() {
+    local uploadName="$1"
+    local artifactGroup="$2"
+    local artifactDir="${COVERAGE_ARTIFACTS_DIR:-coverage-artifacts}"
+    local allowMissing="${ALLOW_MISSING_COVERAGE:-false}"
 
-    if [[ -n "${CODECOV_BRANCH:-}" ]]; then
-        codecovArgs+=(--branch "$CODECOV_BRANCH")
+    if ! _hasCoverageInput; then
+        echo "Did not find coverage input for $uploadName"
+        if [ "$allowMissing" = true ]; then
+            return 0
+        fi
+        return 1
     fi
 
-    ./codecov "${codecovArgs[@]}"
+    if ! formatCoverageData; then
+        echo "Failed to format coverage data for $uploadName"
+        if [ "$allowMissing" = true ]; then
+            return 0
+        fi
+        return 1
+    fi
+
+    local lcovFile="$testPackageDir/coverage/lcov.info"
+    if [ ! -f "$lcovFile" ]; then
+        echo "Did not find formatted coverage data at $lcovFile"
+        if [ "$allowMissing" = true ]; then
+            return 0
+        fi
+        return 1
+    fi
+
+    mkdir -p "$artifactDir/$artifactGroup"
+    cp "$lcovFile" "$artifactDir/$artifactGroup/$uploadName.lcov.info"
 }
 
 "$@"
