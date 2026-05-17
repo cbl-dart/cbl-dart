@@ -19,6 +19,26 @@ Couchbase Lite for Dart requires Dart SDK `^3.10.0`.
 |    Linux | >= Ubuntu 20.04 x86_64 |
 |  Windows | >= 10 x86_64           |
 
+## Sync compatibility
+
+Couchbase Lite for Dart v4 uses Couchbase Lite 4's version vector architecture.
+Plan sync deployments around these requirements:
+
+- Sync Gateway 4.0 or later is required for Couchbase Lite for Dart v4 clients.
+  Older Sync Gateway versions are not supported.
+- Couchbase Server 7.6.6 or later is required when using XDCR interoperability
+  with Sync Gateway 4.0.
+- Peer-to-peer sync requires Couchbase Lite v4 on both sides of the connection.
+  Syncing with Couchbase Lite 3.x peers is not supported.
+- Couchbase Lite 3.x clients can still sync with Sync Gateway 4.0, but they do
+  not support v4 cluster-switching behavior.
+- Database upgrades to version vectors are one-way. After a database is opened
+  by Couchbase Lite for Dart v4, Couchbase Lite 3.x cannot open it again.
+
+For more detail, see
+[Data Sync using Sync Gateway](./data-sync/replication.mdx#version-compatibility)
+and the [v3 to v4 migration guide](./migration-v3-to-v4.mdx).
+
 ## Default database directory
 
 When opening a database without specifying a directory, Couchbase Lite uses

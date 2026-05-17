@@ -3,6 +3,8 @@ description: Migrating from Couchbase Lite for Dart v3 to v4
 related_content:
   - name: Install
     url: /install
+  - name: Data Sync
+    url: /data-sync/replication
   - name: Vector Search
     url: /search/vector-search
 ---
@@ -16,6 +18,30 @@ powered by
 [Dart native assets](https://dart.dev/interop/c-interop#native-assets). Native
 libraries are now downloaded and compiled automatically by the Dart build system
 — no manual setup or separate platform packages are needed.
+
+Version 4 also adopts Couchbase Lite 4's version vector architecture. Version
+vectors replace revision trees for document versioning, synchronization, and
+conflict resolution. This is a one-way database migration: once a database has
+been opened and upgraded by Couchbase Lite for Dart v4, it cannot be opened
+again by Couchbase Lite 3.x.
+
+If your application synchronizes data, upgrade the server and peer environment
+before rolling out v4 clients:
+
+- Sync Gateway 4.0 or later is required. Couchbase Lite for Dart v4 cannot sync
+  with earlier Sync Gateway versions.
+- Couchbase Server 7.6.6 or later is required when using XDCR interoperability
+  with Sync Gateway 4.0.
+- Peer-to-peer sync requires Couchbase Lite v4 on both sides. Syncing a v4 peer
+  with a 3.x peer is not supported.
+- Existing Couchbase Lite 3.x clients can still sync with Sync Gateway 4.0, but
+  they do not support the cluster-switching capabilities introduced by the v4
+  version vector model.
+
+For more detail, see Couchbase's
+[Version Vectors](https://docs.couchbase.com/couchbase-lite/current/c/version-vectors.html)
+documentation and the
+[Sync Gateway 4.0 compatibility notes](https://docs.couchbase.com/sync-gateway/current/whatsnew.html#compatibility).
 
 ## Package changes
 
@@ -535,41 +561,44 @@ No manual steps are required.
      `import 'package:cbl/cbl.dart'`.
    - Replace `import 'package:cbl_dart/cbl_dart.dart'` with
      `import 'package:cbl/cbl.dart'`.
-6. **Remove initialization**: Remove calls to `CouchbaseLiteFlutter.init()` or
+6. **Plan sync compatibility**: upgrade Sync Gateway to 4.0 or later before v4
+   clients sync, use Couchbase Server 7.6.6 or later for XDCR interoperability
+   with Sync Gateway 4.0, and keep peer-to-peer sync between v4 peers.
+7. **Remove initialization**: Remove calls to `CouchbaseLiteFlutter.init()` or
    `CouchbaseLiteDart.init(...)`. Initialization is no longer required. If you
    customized the default database directory via the `filesDir` parameter, use
    `api|Database.defaultDirectory` instead.
-7. **Enable vector search** (if needed) via `pubspec.yaml` config and an
+8. **Enable vector search** (if needed) via `pubspec.yaml` config and an
    explicit call to `api|Extension.enableVectorSearch`.
-8. **Rename `langauge`** to `language` on `FullTextIndex`.
-9. **Update certificate fields** on `ReplicatorConfiguration` — wrap
-   `pinnedServerCertificate` bytes with `DerData` or `PemData`, and
-   `trustedRootCertificates` bytes with `PemData`.
-10. **Update `MutableDocument` constructors** — replace `MutableDocument()` with
+9. **Rename `langauge`** to `language` on `FullTextIndex`.
+10. **Update certificate fields** on `ReplicatorConfiguration` — wrap
+    `pinnedServerCertificate` bytes with `DerData` or `PemData`, and
+    `trustedRootCertificates` bytes with `PemData`.
+11. **Update `MutableDocument` constructors** — replace `MutableDocument()` with
     `MutableDocument({})` and `MutableDocument.withId(id, data)` with
     `MutableDocument(id: id, data)`.
-11. **Rename `maxRotateCount`** to `maxKeptFiles` in any `LogFileConfiguration`
+12. **Rename `maxRotateCount`** to `maxKeptFiles` in any `LogFileConfiguration`
     usage.
-12. **Update query result checks** that compare boolean expressions against `1`
+13. **Update query result checks** that compare boolean expressions against `1`
     or `0` — they now return `true`/`false`.
-13. **Remove hardcoded revision IDs** — revision IDs are no longer
+14. **Remove hardcoded revision IDs** — revision IDs are no longer
     deterministic.
-14. **Review conflict resolution logic** — `DefaultConflictResolver` now uses
+15. **Review conflict resolution logic** — `DefaultConflictResolver` now uses
     timestamp comparison instead of revision ID comparison.
-15. **Update conflict handling** — `saveDocument` and `deleteDocument` with
+16. **Update conflict handling** — `saveDocument` and `deleteDocument` with
     `failOnConflict` now throw `DatabaseException` instead of returning `false`.
-16. **Migrate Database document/index/listener APIs** to use `defaultCollection`
+17. **Migrate Database document/index/listener APIs** to use `defaultCollection`
     methods instead.
-17. **Migrate ReplicatorConfiguration** — replace `database` parameter with
+18. **Migrate ReplicatorConfiguration** — replace `database` parameter with
     `addCollection`, move `channels`/`documentIds`/filters/resolvers into
     `CollectionConfiguration`.
-18. **Migrate Replicator pending document APIs** — replace
+19. **Migrate Replicator pending document APIs** — replace
     `pendingDocumentIds`/`isDocumentPending` with
     `pendingDocumentIdsInCollection`/`isDocumentPendingInCollection`.
-19. **Replace `DataSource.database(db)`** with
+20. **Replace `DataSource.database(db)`** with
     `DataSource.collection(collection)`.
-20. **Replace `InvalidJsonException`** with `FleeceException`.
-21. **Remove `TracingDelegate` usage** — the tracing API has been removed from
+21. **Replace `InvalidJsonException`** with `FleeceException`.
+22. **Remove `TracingDelegate` usage** — the tracing API has been removed from
     the public API.
-22. **Run your app** — native libraries will be built automatically on first
+23. **Run your app** — native libraries will be built automatically on first
     run.
