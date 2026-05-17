@@ -201,6 +201,7 @@ jobs:
 
       - name: Upload coverage data
         env:
+          CODECOV_BRANCH: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository && github.event.pull_request.head.label || github.head_ref || github.ref_name }}
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         shell: bash
         run: |
@@ -353,6 +354,7 @@ jobs:
         # Disabled until we figure out how to get coverage data from flutter tests
         if: ${{ matrix.embedder != 'flutter' && matrix.test_platform == '' }}
         env:
+          CODECOV_BRANCH: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository && github.event.pull_request.head.label || github.head_ref || github.ref_name }}
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         shell: bash
         run: |
