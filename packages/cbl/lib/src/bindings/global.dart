@@ -8,6 +8,12 @@ import 'slice.dart';
 
 final globalArena = Arena(cachedSliceResultAllocator);
 
+Pointer<T> zeroedGlobalArena<T extends NativeType>(int byteCount) {
+  final result = globalArena.allocate<T>(byteCount);
+  result.cast<Uint8>().asTypedList(byteCount).fillRange(0, byteCount, 0);
+  return result;
+}
+
 T withGlobalArena<T>(T Function() f) {
   try {
     return f();
