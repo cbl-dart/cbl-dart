@@ -41,6 +41,7 @@ targetOs="$TARGET_OS"
 testPackage="$TEST_PACKAGE"
 testPackageDir="packages/$testPackage"
 testAppBundleId="com.terwesten.gabriel.cblE2eTestsFlutter"
+androidTestAppBundleId="com.terwesten.gabriel.cbl_e2e_tests_flutter"
 iosVersion="18-6"
 iosDevice="iPhone 16"
 androidVersion="27"
@@ -109,7 +110,9 @@ function startVirtualDevices() {
         ./tools/apple-simulator.sh start -o "iOS-$iosVersion" -d "$iosDevice"
         ;;
     Android)
+        _printAndroidHostDiagnostics
         ./tools/android-emulator.sh createAndStart -a "$androidVersion" -d "$androidDevice"
+        _resetAndroidAdbServer
         ./tools/android-emulator.sh setupReversePort 4984
         ./tools/android-emulator.sh setupReversePort 4985
         ;;
@@ -177,11 +180,82 @@ function _printAndroidState() {
     fi
 
     echo "=== Android device state ==="
-    "$ANDROID_HOME/platform-tools/adb" devices -l 2>&1 || true
-    "$ANDROID_HOME/platform-tools/adb" -s "emulator-5554" shell getprop sys.boot_completed 2>&1 || true
-    "$ANDROID_HOME/platform-tools/adb" -s "emulator-5554" shell getprop dev.bootcomplete 2>&1 || true
-    "$ANDROID_HOME/platform-tools/adb" -s "emulator-5554" shell cmd package list packages "$testAppBundleId" 2>&1 || true
+    _runAndroidProbe "adb devices" 10s "$ANDROID_HOME/platform-tools/adb" devices -l
+    _runAndroidProbe "adb get-state" 10s "$ANDROID_HOME/platform-tools/adb" -s "emulator-5554" get-state
+    _runAndroidShellProbe "sys.boot_completed" 10s getprop sys.boot_completed
+    _runAndroidShellProbe "dev.bootcomplete" 10s getprop dev.bootcomplete
+    _runAndroidShellProbe "package manager ping" 10s cmd package list packages "$androidTestAppBundleId"
     echo "=== End Android device state ==="
+}
+
+function _runWithTimeout() {
+    local timeoutDuration="$1"
+    shift
+
+    if command -v timeout >/dev/null 2>&1; then
+        timeout "$timeoutDuration" "$@"
+    elif command -v gtimeout >/dev/null 2>&1; then
+        gtimeout "$timeoutDuration" "$@"
+    else
+        "$@"
+    fi
+}
+
+function _runAndroidProbe() {
+    local label="$1"
+    local timeoutDuration="$2"
+    shift 2
+
+    echo "--- $label ---"
+    if ! _runWithTimeout "$timeoutDuration" "$@" 2>&1; then
+        echo "$label failed or timed out after $timeoutDuration"
+    fi
+}
+
+function _runAndroidShellProbe() {
+    local label="$1"
+    local timeoutDuration="$2"
+    shift 2
+
+    _runAndroidProbe "$label" "$timeoutDuration" \
+        "$ANDROID_HOME/platform-tools/adb" -s "emulator-5554" shell "$@"
+}
+
+function _printAndroidHostDiagnostics() {
+    if [[ "$targetOs" != "Android" || -z "${ANDROID_HOME:-}" ]]; then
+        return 0
+    fi
+
+    local adb="$ANDROID_HOME/platform-tools/adb"
+    local emulator="$ANDROID_HOME/emulator/emulator"
+
+    echo "=== Android host diagnostics ==="
+    _runAndroidProbe "uname" 10s uname -a
+    _runAndroidProbe "cpu" 10s sh -c 'nproc; lscpu | sed -n "1,30p"'
+    _runAndroidProbe "memory" 10s free -m
+    _runAndroidProbe "kvm device" 10s ls -l /dev/kvm
+    _runAndroidProbe "adb version" 10s "$adb" version
+    _runAndroidProbe "adb server-status" 10s "$adb" server-status
+    if [ -x "$emulator" ]; then
+        _runAndroidProbe "emulator version" 10s "$emulator" -version
+        _runAndroidProbe "emulator accel check" 10s "$emulator" -accel-check
+    fi
+    echo "=== End Android host diagnostics ==="
+}
+
+function _resetAndroidAdbServer() {
+    if [[ "$targetOs" != "Android" || -z "${ANDROID_HOME:-}" ]]; then
+        return 0
+    fi
+
+    local adb="$ANDROID_HOME/platform-tools/adb"
+
+    echo "=== Resetting Android ADB server ==="
+    _runAndroidProbe "adb kill-server" 10s "$adb" kill-server
+    _runAndroidProbe "adb start-server" 10s "$adb" start-server
+    _runAndroidProbe "adb wait-for-device after reset" 60s "$adb" -s "emulator-5554" wait-for-device
+    _runAndroidProbe "adb devices after reset" 20s "$adb" devices -l
+    echo "=== End Android ADB server reset ==="
 }
 
 function _printAndroidDriveHeartbeat() {
@@ -192,14 +266,16 @@ function _printAndroidDriveHeartbeat() {
     local adb="$ANDROID_HOME/platform-tools/adb"
 
     echo "=== Android flutter drive heartbeat $(date -u '+%Y-%m-%dT%H:%M:%SZ') ==="
-    "$adb" devices -l 2>&1 || true
-    "$adb" -s "emulator-5554" get-state 2>&1 || true
-    "$adb" -s "emulator-5554" shell getprop sys.boot_completed 2>&1 || true
-    "$adb" -s "emulator-5554" shell getprop dev.bootcomplete 2>&1 || true
-    "$adb" -s "emulator-5554" shell pidof "$testAppBundleId" 2>&1 || true
-    "$adb" -s "emulator-5554" shell cmd package list packages "$testAppBundleId" 2>&1 || true
-    "$adb" -s "emulator-5554" shell dumpsys activity top 2>&1 | head -n 80 || true
-    "$adb" -s "emulator-5554" logcat -d -t 120 2>&1 || true
+    _runAndroidProbe "adb devices" 10s "$adb" devices -l
+    _runAndroidProbe "adb get-state" 10s "$adb" -s "emulator-5554" get-state
+    _runAndroidShellProbe "sys.boot_completed" 10s getprop sys.boot_completed
+    _runAndroidShellProbe "dev.bootcomplete" 10s getprop dev.bootcomplete
+    _runAndroidShellProbe "package manager ping" 10s cmd package list packages "$androidTestAppBundleId"
+    _runAndroidShellProbe "app process" 10s pidof "$androidTestAppBundleId"
+    _runAndroidShellProbe "activity top" 10s dumpsys activity top
+    _runAndroidShellProbe "package state" 10s dumpsys package "$androidTestAppBundleId"
+    _runAndroidProbe "recent logcat" 15s "$adb" -s "emulator-5554" logcat -d -t 160 -v threadtime
+    _runAndroidProbe "adb server sockets" 10s ss -tanp
     pgrep -af 'flutter|adb|gradle|java|qemu' || true
     echo "=== End Android flutter drive heartbeat ==="
 }
@@ -474,7 +550,13 @@ function runE2ETests() {
         if [ "$didExplicitBuild" = true ]; then noBuildFlag="--no-build"; fi
         _printAndroidState
         echo "=== Running Flutter drive for $targetOs ==="
-        _runFlutterDrive "$driveVerboseFlag"
+        local driveStatus=0
+        _runFlutterDrive "$driveVerboseFlag" || driveStatus=$?
+        if [ "$driveStatus" -ne 0 ]; then
+            echo "Flutter drive failed with exit code $driveStatus"
+            _printAndroidDriveHeartbeat
+            return "$driveStatus"
+        fi
         echo "=== Finished Flutter drive for $targetOs ==="
         ;;
     esac
@@ -527,7 +609,9 @@ function _collectCrashReportsLinuxFlutter() {
 }
 
 function _isAndroidEmulatorReachable() {
-    "$ANDROID_HOME/platform-tools/adb" -s "emulator-5554" get-state 2>/dev/null | grep -q "device"
+    local adbState
+    adbState="$(_runWithTimeout 10s "$ANDROID_HOME/platform-tools/adb" -s "emulator-5554" get-state 2>/dev/null || true)"
+    [[ "$adbState" == "device" ]]
 }
 
 function _collectCrashReportsAndroid() {
@@ -536,13 +620,8 @@ function _collectCrashReportsAndroid() {
         return 0
     fi
 
-    if command -v timeout >/dev/null 2>&1; then
-        timeout 90s ./tools/android-emulator.sh bugreport -o "$testResultsDir" || \
-            echo "Android bugreport collection failed or timed out"
-    else
-        ./tools/android-emulator.sh bugreport -o "$testResultsDir" || \
-            echo "Android bugreport collection failed"
-    fi
+    _runWithTimeout 90s ./tools/android-emulator.sh bugreport -o "$testResultsDir" || \
+        echo "Android bugreport collection failed or timed out"
 }
 
 function _collectCblLogsStandalone() {
@@ -601,7 +680,7 @@ function _collectCblLogsAndroid() {
         echo "Android emulator is not reachable, skipping app data collection"
         return 0
     fi
-    ./tools/android-emulator.sh copyAppData || {
+    _runWithTimeout 45s ./tools/android-emulator.sh copyAppData || {
         echo "Android app data collection failed"
         return 0
     }
@@ -616,8 +695,32 @@ function _collectAndroidDiagnostics() {
     mkdir -p "$outputDir"
 
     if [[ -n "${ANDROID_HOME:-}" ]]; then
-        "$ANDROID_HOME/platform-tools/adb" devices -l >"$outputDir/adb-devices.txt" 2>&1 || true
+        local adb="$ANDROID_HOME/platform-tools/adb"
+        local emulator="$ANDROID_HOME/emulator/emulator"
+
+        _runWithTimeout 10s "$adb" version >"$outputDir/adb-version.txt" 2>&1 || \
+            echo "adb version failed or timed out" >>"$outputDir/adb-version.txt"
+        _runWithTimeout 10s "$adb" server-status >"$outputDir/adb-server-status.txt" 2>&1 || \
+            echo "adb server-status failed or timed out" >>"$outputDir/adb-server-status.txt"
+        _runWithTimeout 10s "$adb" devices -l >"$outputDir/adb-devices.txt" 2>&1 || \
+            echo "adb devices failed or timed out" >>"$outputDir/adb-devices.txt"
+
+        if [ -x "$emulator" ]; then
+            _runWithTimeout 10s "$emulator" -version >"$outputDir/emulator-version.txt" 2>&1 || \
+                echo "emulator -version failed or timed out" >>"$outputDir/emulator-version.txt"
+            _runWithTimeout 10s "$emulator" -accel-check >"$outputDir/emulator-accel-check.txt" 2>&1 || \
+                echo "emulator -accel-check failed or timed out" >>"$outputDir/emulator-accel-check.txt"
+        fi
     fi
+
+    ps -ef >"$outputDir/host-processes.txt" 2>&1 || true
+    uname -a >"$outputDir/host-uname.txt" 2>&1 || true
+    nproc >"$outputDir/host-cpu-count.txt" 2>&1 || true
+    lscpu >"$outputDir/host-cpu.txt" 2>&1 || true
+    ls -l /dev/kvm >"$outputDir/host-kvm.txt" 2>&1 || true
+    df -h >"$outputDir/host-disk.txt" 2>&1 || true
+    free -m >"$outputDir/host-memory.txt" 2>&1 || true
+    ss -tanp >"$outputDir/host-sockets.txt" 2>&1 || true
 
     if ! _isAndroidEmulatorReachable; then
         echo "Android emulator is not reachable, skipping emulator diagnostics"
