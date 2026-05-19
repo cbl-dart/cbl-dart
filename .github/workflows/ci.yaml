@@ -93,6 +93,42 @@ jobs:
       - name: Analyze Dart code
         run: melos analyze
 
+  analyze-dart-boundary-versions:
+    name: Analyze Dart code with ${{ matrix.dependency-bound.name }} dependencies
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        dependency-bound:
+          - name: lowest
+            pub-command: downgrade
+          - name: highest
+            pub-command: upgrade
+    runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu
+    steps:
+      - uses: runs-on/action@v2
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Flutter
+        uses: ./.github/actions/setup-flutter
+        with:
+          channel: ${{ env.flutter-channel }}
+          cache: true
+          pub-cache-hash-pattern: pubspec.lock
+
+      - name: Resolve ${{ matrix.dependency-bound.name }} dependencies
+        run: dart pub ${{ matrix.dependency-bound.pub-command }}
+
+      - name: Bootstrap repository
+        shell: bash
+        run: dart run melos bootstrap
+
+      - name: Analyze Dart code
+        run: dart run melos analyze
+
   publish-dry-run:
     name: Publish dry run
     timeout-minutes: 10
@@ -398,6 +434,7 @@ jobs:
       - formatting-dart
       - formatting-clang
       - analyze-dart
+      - analyze-dart-boundary-versions
       - publish-dry-run
       - test-dart-unit
       - test-e2e

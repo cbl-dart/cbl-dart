@@ -78,10 +78,29 @@ The build hook at `packages/cbl/hook/build.dart` handles native dependencies:
 Edition and features are configured in the workspace root `pubspec.yaml` under
 `hooks.user_defines.cbl`.
 
-## Commits
+## Pull Requests & Commits
 
-Use [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/). Scope to
-the package when changes are limited to one, e.g. `feat(cbl): ...`.
+Pull request titles must use
+[conventional commit](https://www.conventionalcommits.org/en/v1.0.0/) messages
+that are understood by Melos. PRs are squash merged, so the PR title becomes the
+commit message that drives release notes and versioning.
+
+Use the format `<type>[optional scope][!]: <description>`, e.g.
+`feat(cbl): ...`, `fix: ...`, or `feat(cbl)!: ...`. Scope to the package when
+changes are limited to one. Because the PR title is the release-driving commit
+message, prefer `!` in the title for breaking changes.
+
+Melos uses the following PR title types for automatic versioning:
+
+- `feat` — minor version bump.
+- `fix`, `bug`, `perf`, `refactor`, `revert`, `docs` — patch version bump.
+- Any of the above with `!` after the type or scope — major version bump.
+
+Other conventional commit types, such as `chore`, `ci`, `test`, `build`, and
+`style`, are valid conventional commits but do not trigger a Melos version bump.
+Use them only when the PR should not cause a package release.
+
+Commits on PR branches do not need to use any specific message format.
 
 ## Pre-Commit Hooks (lefthook)
 
