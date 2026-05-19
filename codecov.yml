@@ -1,8 +1,8 @@
 ignore:
   # Ignore all test code
-  - 'packages/**/test'
-  - 'packages/**/integration_test'
-  - 'packages/cbl_e2e_tests'
+  - 'packages/.*/test/.*'
+  - 'packages/.*/integration_test/.*'
+  - 'packages/cbl_e2e_tests/.*'
 
 codecov:
   notify:
@@ -12,10 +12,23 @@ codecov:
 
 flag_management:
   default_rules:
-    # Missing flags can be carried forward from the base commit. This keeps
-    # partial PR uploads useful when a matrix leg fails before producing
-    # coverage, while the failed CI leg still reports the actual failure.
-    carryforward: true
+    # Do not carry forward stale flags after upload names change.
+    carryforward: false
+  individual_flags:
+    # Current CI coverage uploads may be carried forward when a matrix leg
+    # fails before producing coverage.
+    - name: unit.runtime.vm.platform.ubuntu
+      carryforward: true
+    - name: unit.runtime.vm.platform.macos
+      carryforward: true
+    - name: unit.runtime.vm.platform.windows
+      carryforward: true
+    - name: e2e.runtime.vm.platform.ubuntu
+      carryforward: true
+    - name: e2e.runtime.vm.platform.macos
+      carryforward: true
+    - name: e2e.runtime.vm.platform.windows
+      carryforward: true
 
 component_management:
   individual_components:
