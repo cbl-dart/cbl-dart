@@ -13,7 +13,7 @@ extension DirectoryExt on Directory {
   }
 
   Future<void> reset() async {
-    if (await exists()) {
+    if (existsSync()) {
       await delete(recursive: true);
     }
     await create(recursive: true);
