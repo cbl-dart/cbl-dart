@@ -694,10 +694,10 @@ packages:
     dependency: transitive
     description:
       name: sentry
-      sha256: "605ad1f6f1ae5b72018cbe8fc20f490fa3bd53e58882e5579566776030d8c8c1"
+      sha256: f04095a25ff02b202a914174c73ec309570aa93d61098cb4a0a9e715b4aaa465
       url: "https://pub.dev"
     source: hosted
-    version: "9.14.0"
+    version: "9.20.0"
   shelf:
     dependency: transitive
     description:
