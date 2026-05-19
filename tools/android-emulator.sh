@@ -22,7 +22,7 @@ fi
 emulatorName="cbl-dart"
 emulatorPort=5554
 serialName="emulator-$emulatorPort"
-appBundleId="com.terwesten.gabriel.cbl_e2e_tests_flutter"
+androidTestAppId="com.terwesten.gabriel.cbl_e2e_tests_flutter"
 
 # === Usage ===================================================================
 
@@ -72,6 +72,45 @@ function adbForEmulator() {
     "$ANDROID_HOME/platform-tools/adb" -s "$serialName" "$@"
 }
 
+function runWithTimeout() {
+    local timeoutDuration="$1"
+    shift
+
+    if command -v timeout >/dev/null 2>&1; then
+        timeout "$timeoutDuration" "$@"
+    elif command -v gtimeout >/dev/null 2>&1; then
+        gtimeout "$timeoutDuration" "$@"
+    else
+        "$@"
+    fi
+}
+
+function collectDiagnostic() {
+    local outputFile="$1"
+    local timeoutDuration="$2"
+    shift 2
+
+    {
+        printf 'Command:'
+        printf ' %q' "$@"
+        printf '\n\n'
+    } >"$outputFile"
+
+    if ! runWithTimeout "$timeoutDuration" "$@" >>"$outputFile" 2>&1; then
+        echo >>"$outputFile"
+        echo "Command failed or timed out after $timeoutDuration" >>"$outputFile"
+    fi
+}
+
+function collectAdbDiagnostic() {
+    local outputFile="$1"
+    local timeoutDuration="$2"
+    shift 2
+
+    collectDiagnostic "$outputFile" "$timeoutDuration" \
+        "$ANDROID_HOME/platform-tools/adb" -s "$serialName" "$@"
+}
+
 function waitForBootProperty() {
     local property="$1"
     local expected="$2"
@@ -82,7 +121,9 @@ function waitForBootProperty() {
 
     while [[ $elapsed -lt $timeoutSeconds ]]; do
         local value
-        value="$(adbForEmulator shell getprop "$property" 2>/dev/null | tr -d '\r')"
+        value="$(runWithTimeout 10s \
+            "$ANDROID_HOME/platform-tools/adb" -s "$serialName" shell getprop "$property" \
+            2>/dev/null | tr -d '\r' || true)"
 
         if [[ "$value" == "$expected" ]]; then
             echo "$property is $expected"
@@ -104,7 +145,9 @@ function waitForPackageManager() {
     echo "Waiting for Android package manager..."
 
     while [[ $elapsed -lt $timeoutSeconds ]]; do
-        if adbForEmulator shell cmd package list packages >/dev/null 2>&1; then
+        if runWithTimeout 10s \
+            "$ANDROID_HOME/platform-tools/adb" -s "$serialName" shell cmd package list packages \
+            >/dev/null 2>&1; then
             echo "Android package manager is ready"
             return 0
         fi
@@ -119,11 +162,13 @@ function waitForPackageManager() {
 
 function waitForEmulatorReady() {
     echo "Waiting for emulator to become ready..."
-    adbForEmulator wait-for-device
+    runWithTimeout 180s "$ANDROID_HOME/platform-tools/adb" -s "$serialName" wait-for-device
     waitForBootProperty sys.boot_completed 1 180
     waitForBootProperty dev.bootcomplete 1 180
     waitForPackageManager 180
-    adbForEmulator shell input keyevent 82 >/dev/null 2>&1 || true
+    runWithTimeout 10s \
+        "$ANDROID_HOME/platform-tools/adb" -s "$serialName" shell input keyevent 82 \
+        >/dev/null 2>&1 || true
     "$ANDROID_HOME/platform-tools/adb" devices -l
     echo "Emulator is ready"
 }
@@ -205,7 +250,8 @@ function setupReversePort() {
     requireOption -p PORT "$port"
 
     echo "Setting up reverse socket connect for port $port"
-    adbForEmulator reverse "tcp:$1" "tcp:$1"
+    runWithTimeout 10s \
+        "$ANDROID_HOME/platform-tools/adb" -s "$serialName" reverse "tcp:$port" "tcp:$port"
 }
 
 function diagnostics() {
@@ -226,11 +272,46 @@ function diagnostics() {
 
     mkdir -p "$outputDirectory"
 
-    "$ANDROID_HOME/platform-tools/adb" devices -l >"$outputDirectory/adb-devices.txt" 2>&1 || true
-    adbForEmulator shell getprop >"$outputDirectory/getprop.txt" 2>&1 || true
-    adbForEmulator shell dumpsys activity processes >"$outputDirectory/dumpsys-activity-processes.txt" 2>&1 || true
-    adbForEmulator shell dumpsys package "$appBundleId" >"$outputDirectory/dumpsys-package.txt" 2>&1 || true
-    adbForEmulator logcat -d -v threadtime >"$outputDirectory/logcat.txt" 2>&1 || true
+    collectDiagnostic "$outputDirectory/adb-version.txt" 10s \
+        "$ANDROID_HOME/platform-tools/adb" version
+    collectDiagnostic "$outputDirectory/adb-server-status.txt" 10s \
+        "$ANDROID_HOME/platform-tools/adb" server-status
+    collectDiagnostic "$outputDirectory/adb-devices.txt" 10s \
+        "$ANDROID_HOME/platform-tools/adb" devices -l
+    collectDiagnostic "$outputDirectory/emulator-version.txt" 10s \
+        "$ANDROID_HOME/emulator/emulator" -version
+    collectDiagnostic "$outputDirectory/emulator-accel-check.txt" 10s \
+        "$ANDROID_HOME/emulator/emulator" -accel-check
+    collectDiagnostic "$outputDirectory/kvm-device.txt" 10s \
+        ls -l /dev/kvm
+    collectAdbDiagnostic "$outputDirectory/adb-get-state.txt" 10s \
+        get-state
+    collectAdbDiagnostic "$outputDirectory/getprop.txt" 20s \
+        shell getprop
+    collectAdbDiagnostic "$outputDirectory/package-list.txt" 15s \
+        shell cmd package list packages -f
+    collectAdbDiagnostic "$outputDirectory/dumpsys-package-app.txt" 20s \
+        shell dumpsys package "$androidTestAppId"
+    collectAdbDiagnostic "$outputDirectory/dumpsys-package-manager.txt" 20s \
+        shell dumpsys package
+    collectAdbDiagnostic "$outputDirectory/dumpsys-activity-processes.txt" 20s \
+        shell dumpsys activity processes
+    collectAdbDiagnostic "$outputDirectory/dumpsys-activity-top.txt" 15s \
+        shell dumpsys activity top
+    collectAdbDiagnostic "$outputDirectory/dumpsys-activity-services.txt" 15s \
+        shell dumpsys activity services
+    collectAdbDiagnostic "$outputDirectory/ps.txt" 10s \
+        shell ps
+    collectAdbDiagnostic "$outputDirectory/top.txt" 10s \
+        shell top -b -n 1
+    collectAdbDiagnostic "$outputDirectory/disk.txt" 10s \
+        shell df
+    collectAdbDiagnostic "$outputDirectory/logcat-main.txt" 25s \
+        logcat -d -v threadtime
+    collectAdbDiagnostic "$outputDirectory/logcat-events.txt" 25s \
+        logcat -b events -d -v threadtime
+    collectAdbDiagnostic "$outputDirectory/dmesg.txt" 10s \
+        shell dmesg
 
     if [[ -f ./emulator-logs.txt ]]; then
         cp -a ./emulator-logs.txt "$outputDirectory/"
@@ -265,8 +346,8 @@ function bugreport() {
 }
 
 function copyAppData() {
-    adbForEmulator shell "run-as $appBundleId cp -r /data/data/$appBundleId /mnt/sdcard"
-    adbForEmulator pull "/mnt/sdcard/$appBundleId" "appData"
+    adbForEmulator shell "run-as $androidTestAppId cp -r /data/data/$androidTestAppId /mnt/sdcard"
+    adbForEmulator pull "/mnt/sdcard/$androidTestAppId" "appData"
 }
 
 # === Parse command ===========================================================
