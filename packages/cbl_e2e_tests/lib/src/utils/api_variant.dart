@@ -37,7 +37,7 @@ void apiTest(
   variantTest(
     description,
     body,
-    variants: [api, isolate, if (variants != null) ...variants],
+    variants: [api, isolate, ...?variants],
     skip: skip,
   );
 }
