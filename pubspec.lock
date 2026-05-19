@@ -173,10 +173,10 @@ packages:
     dependency: transitive
     description:
       name: cli_launcher
-      sha256: "2537f76d731ad8349a28e66b567d1902a7df97e623e42fed02b32c74948c0574"
+      sha256: "35cf15a3ffaeb9c11849eaa0afba761bb76dceb42d050532bfd3e1299c9748cd"
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.2+2"
+    version: "0.3.3+1"
   cli_util:
     dependency: transitive
     description:
@@ -470,10 +470,10 @@ packages:
     dependency: "direct dev"
     description:
       name: melos
-      sha256: "7dcc4444d79b538ab8353bb38308f97e90b032984f75e8fd516fedfe8160b35e"
+      sha256: "6dfe6cdf24863ef125bfe75d6b7b1eb192430570a27722e539a453f2cf9704e7"
       url: "https://pub.dev"
     source: hosted
-    version: "7.4.0"
+    version: "7.7.0"
   meta:
     dependency: "direct overridden"
     description:
