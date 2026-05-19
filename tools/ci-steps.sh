@@ -40,8 +40,8 @@ embedder="$EMBEDDER"
 targetOs="$TARGET_OS"
 testPackage="$TEST_PACKAGE"
 testPackageDir="packages/$testPackage"
-testAppBundleId="com.terwesten.gabriel.cblE2eTestsFlutter"
-androidTestAppBundleId="com.terwesten.gabriel.cbl_e2e_tests_flutter"
+appleTestAppBundleId="com.terwesten.gabriel.cblE2eTestsFlutter"
+androidTestAppId="com.terwesten.gabriel.cbl_e2e_tests_flutter"
 iosVersion="18-6"
 iosDevice="iPhone 16"
 androidVersion="27"
@@ -184,7 +184,7 @@ function _printAndroidState() {
     _runAndroidProbe "adb get-state" 10s "$ANDROID_HOME/platform-tools/adb" -s "emulator-5554" get-state
     _runAndroidShellProbe "sys.boot_completed" 10s getprop sys.boot_completed
     _runAndroidShellProbe "dev.bootcomplete" 10s getprop dev.bootcomplete
-    _runAndroidShellProbe "package manager ping" 10s cmd package list packages "$androidTestAppBundleId"
+    _runAndroidShellProbe "package manager ping" 10s cmd package list packages "$androidTestAppId"
     echo "=== End Android device state ==="
 }
 
@@ -231,9 +231,27 @@ function _printAndroidHostDiagnostics() {
 
     echo "=== Android host diagnostics ==="
     _runAndroidProbe "uname" 10s uname -a
-    _runAndroidProbe "cpu" 10s sh -c 'nproc; lscpu | sed -n "1,30p"'
-    _runAndroidProbe "memory" 10s free -m
-    _runAndroidProbe "kvm device" 10s ls -l /dev/kvm
+    if command -v nproc >/dev/null 2>&1; then
+        _runAndroidProbe "cpu count" 10s nproc
+    elif command -v sysctl >/dev/null 2>&1; then
+        _runAndroidProbe "cpu count" 10s sysctl -n hw.ncpu
+    fi
+    if command -v lscpu >/dev/null 2>&1; then
+        _runAndroidProbe "cpu" 10s sh -c 'lscpu | sed -n "1,30p"'
+    elif command -v sysctl >/dev/null 2>&1; then
+        _runAndroidProbe "cpu" 10s sh -c 'sysctl -n machdep.cpu.brand_string 2>/dev/null; sysctl hw.physicalcpu hw.logicalcpu 2>/dev/null'
+    fi
+    if command -v free >/dev/null 2>&1; then
+        _runAndroidProbe "memory" 10s free -m
+    elif command -v vm_stat >/dev/null 2>&1; then
+        _runAndroidProbe "memory" 10s vm_stat
+    fi
+    echo "--- kvm device ---"
+    if [ -e /dev/kvm ]; then
+        ls -l /dev/kvm 2>&1 || true
+    else
+        echo "/dev/kvm not present"
+    fi
     _runAndroidProbe "adb version" 10s "$adb" version
     _runAndroidProbe "adb server-status" 10s "$adb" server-status
     if [ -x "$emulator" ]; then
@@ -270,10 +288,10 @@ function _printAndroidDriveHeartbeat() {
     _runAndroidProbe "adb get-state" 10s "$adb" -s "emulator-5554" get-state
     _runAndroidShellProbe "sys.boot_completed" 10s getprop sys.boot_completed
     _runAndroidShellProbe "dev.bootcomplete" 10s getprop dev.bootcomplete
-    _runAndroidShellProbe "package manager ping" 10s cmd package list packages "$androidTestAppBundleId"
-    _runAndroidShellProbe "app process" 10s pidof "$androidTestAppBundleId"
+    _runAndroidShellProbe "package manager ping" 10s cmd package list packages "$androidTestAppId"
+    _runAndroidShellProbe "app process" 10s pidof "$androidTestAppId"
     _runAndroidShellProbe "activity top" 10s dumpsys activity top
-    _runAndroidShellProbe "package state" 10s dumpsys package "$androidTestAppBundleId"
+    _runAndroidShellProbe "package state" 10s dumpsys package "$androidTestAppId"
     _runAndroidProbe "recent logcat" 15s "$adb" -s "emulator-5554" logcat -d -t 160 -v threadtime
     _runAndroidProbe "adb server sockets" 10s ss -tanp
     pgrep -af 'flutter|adb|gradle|java|qemu' || true
@@ -521,7 +539,7 @@ function runE2ETests() {
                         xcrun simctl install "$simId" "$appBundle" 2>&1 || true
 
                         echo "--- Test-launching app ---"
-                        xcrun simctl launch --terminate-running-process "$simId" "$testAppBundleId" 2>&1 || true
+                        xcrun simctl launch --terminate-running-process "$simId" "$appleTestAppBundleId" 2>&1 || true
                         sleep 5
 
                         echo "--- Checking if app process is alive ---"
@@ -531,7 +549,7 @@ function runE2ETests() {
                         find ~/Library/Logs/DiagnosticReports -name "Runner*" -newer "$appBundle" 2>/dev/null || echo "No crash logs"
 
                         echo "--- Terminate pre-launch ---"
-                        xcrun simctl terminate "$simId" "$testAppBundleId" 2>/dev/null || true
+                        xcrun simctl terminate "$simId" "$appleTestAppBundleId" 2>/dev/null || true
                         sleep 2
                     fi
                 fi
@@ -654,7 +672,7 @@ function _collectCblLogsIosSimulator() {
     ./tools/apple-simulator.sh copyData \
         -o "iOS-$iosVersion" \
         -d "$iosDevice" \
-        -b "$testAppBundleId" \
+        -b "$appleTestAppBundleId" \
         -f "Library/Caches/cbl_flutter/logs" \
         -t "$testResultsDir"
 }
@@ -662,7 +680,7 @@ function _collectCblLogsIosSimulator() {
 function _collectCblLogsMacOS() {
     echo "Collecting Couchbase Lite logs from macOS app"
 
-    local appDataContainer="$HOME/Library/Containers/$testAppBundleId/Data"
+    local appDataContainer="$HOME/Library/Containers/$appleTestAppBundleId/Data"
     local cblLogsDir="$appDataContainer/Library/Caches/cbl_flutter/logs"
 
     if [ ! -e "$cblLogsDir" ]; then
@@ -715,12 +733,35 @@ function _collectAndroidDiagnostics() {
 
     ps -ef >"$outputDir/host-processes.txt" 2>&1 || true
     uname -a >"$outputDir/host-uname.txt" 2>&1 || true
-    nproc >"$outputDir/host-cpu-count.txt" 2>&1 || true
-    lscpu >"$outputDir/host-cpu.txt" 2>&1 || true
-    ls -l /dev/kvm >"$outputDir/host-kvm.txt" 2>&1 || true
+    if command -v nproc >/dev/null 2>&1; then
+        nproc >"$outputDir/host-cpu-count.txt" 2>&1 || true
+    elif command -v sysctl >/dev/null 2>&1; then
+        sysctl -n hw.ncpu >"$outputDir/host-cpu-count.txt" 2>&1 || true
+    fi
+    if command -v lscpu >/dev/null 2>&1; then
+        lscpu >"$outputDir/host-cpu.txt" 2>&1 || true
+    elif command -v sysctl >/dev/null 2>&1; then
+        {
+            sysctl -n machdep.cpu.brand_string 2>/dev/null
+            sysctl hw.physicalcpu hw.logicalcpu 2>/dev/null
+        } >"$outputDir/host-cpu.txt" 2>&1 || true
+    fi
+    if [ -e /dev/kvm ]; then
+        ls -l /dev/kvm >"$outputDir/host-kvm.txt" 2>&1 || true
+    else
+        echo "/dev/kvm not present" >"$outputDir/host-kvm.txt"
+    fi
     df -h >"$outputDir/host-disk.txt" 2>&1 || true
-    free -m >"$outputDir/host-memory.txt" 2>&1 || true
-    ss -tanp >"$outputDir/host-sockets.txt" 2>&1 || true
+    if command -v free >/dev/null 2>&1; then
+        free -m >"$outputDir/host-memory.txt" 2>&1 || true
+    elif command -v vm_stat >/dev/null 2>&1; then
+        vm_stat >"$outputDir/host-memory.txt" 2>&1 || true
+    fi
+    if command -v ss >/dev/null 2>&1; then
+        ss -tanp >"$outputDir/host-sockets.txt" 2>&1 || true
+    elif command -v netstat >/dev/null 2>&1; then
+        netstat -an >"$outputDir/host-sockets.txt" 2>&1 || true
+    fi
 
     if ! _isAndroidEmulatorReachable; then
         echo "Android emulator is not reachable, skipping emulator diagnostics"

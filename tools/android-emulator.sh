@@ -22,7 +22,7 @@ fi
 emulatorName="cbl-dart"
 emulatorPort=5554
 serialName="emulator-$emulatorPort"
-appBundleId="com.terwesten.gabriel.cbl_e2e_tests_flutter"
+androidTestAppId="com.terwesten.gabriel.cbl_e2e_tests_flutter"
 
 # === Usage ===================================================================
 
@@ -291,7 +291,7 @@ function diagnostics() {
     collectAdbDiagnostic "$outputDirectory/package-list.txt" 15s \
         shell cmd package list packages -f
     collectAdbDiagnostic "$outputDirectory/dumpsys-package-app.txt" 20s \
-        shell dumpsys package "$appBundleId"
+        shell dumpsys package "$androidTestAppId"
     collectAdbDiagnostic "$outputDirectory/dumpsys-package-manager.txt" 20s \
         shell dumpsys package
     collectAdbDiagnostic "$outputDirectory/dumpsys-activity-processes.txt" 20s \
@@ -346,8 +346,8 @@ function bugreport() {
 }
 
 function copyAppData() {
-    adbForEmulator shell "run-as $appBundleId cp -r /data/data/$appBundleId /mnt/sdcard"
-    adbForEmulator pull "/mnt/sdcard/$appBundleId" "appData"
+    adbForEmulator shell "run-as $androidTestAppId cp -r /data/data/$androidTestAppId /mnt/sdcard"
+    adbForEmulator pull "/mnt/sdcard/$androidTestAppId" "appData"
 }
 
 # === Parse command ===========================================================
