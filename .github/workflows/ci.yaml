@@ -18,8 +18,45 @@ env:
   flutter-channel: stable
 
 jobs:
+  detect-changes:
+    name: Detect changed files
+    timeout-minutes: 5
+    runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu
+    outputs:
+      code: ${{ steps.changed-files.outputs.code }}
+    steps:
+      - uses: runs-on/action@v2
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Detect code changes
+        id: changed-files
+        shell: bash
+        run: |
+          if [[ "$GITHUB_EVENT_NAME" != "pull_request" ]]; then
+            echo "code=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git diff --name-only HEAD^1 HEAD^2 > changed-files.txt
+
+          code=false
+          while IFS= read -r file; do
+            [[ -z "$file" ]] && continue
+            if [[ "$file" != docs/* ]]; then
+              code=true
+              break
+            fi
+          done < changed-files.txt
+
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+
   formatting-dart:
     name: Formatting - Dart
+    needs: detect-changes
+    if: needs.detect-changes.outputs.code == 'true'
     timeout-minutes: 10
     runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu
     steps:
@@ -52,6 +89,8 @@ jobs:
 
   formatting-clang:
     name: Formatting - Clang
+    needs: detect-changes
+    if: needs.detect-changes.outputs.code == 'true'
     timeout-minutes: 10
     runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu
     steps:
@@ -67,6 +106,8 @@ jobs:
 
   analyze-dart:
     name: Analyze Dart code
+    needs: detect-changes
+    if: needs.detect-changes.outputs.code == 'true'
     timeout-minutes: 10
     runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu
     steps:
@@ -95,6 +136,7 @@ jobs:
 
   analyze-dart-boundary-versions:
     name: Analyze Dart code with ${{ matrix.dependency-bound.name }} dependencies
+    needs: detect-changes
     timeout-minutes: 10
     strategy:
       fail-fast: false
@@ -106,13 +148,20 @@ jobs:
             pub-command: upgrade
     runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu
     steps:
+      - name: Skip code analysis
+        if: needs.detect-changes.outputs.code != 'true'
+        run: echo "Only docs changed; skipping code analysis."
+
       - uses: runs-on/action@v2
+        if: needs.detect-changes.outputs.code == 'true'
       - name: Checkout repository
+        if: needs.detect-changes.outputs.code == 'true'
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
       - name: Setup Flutter
+        if: needs.detect-changes.outputs.code == 'true'
         uses: ./.github/actions/setup-flutter
         with:
           channel: ${{ env.flutter-channel }}
@@ -120,17 +169,21 @@ jobs:
           pub-cache-hash-pattern: pubspec.lock
 
       - name: Resolve ${{ matrix.dependency-bound.name }} dependencies
+        if: needs.detect-changes.outputs.code == 'true'
         run: dart pub ${{ matrix.dependency-bound.pub-command }}
 
       - name: Bootstrap repository
+        if: needs.detect-changes.outputs.code == 'true'
         shell: bash
         run: dart run melos bootstrap
 
       - name: Analyze Dart code
+        if: needs.detect-changes.outputs.code == 'true'
         run: dart run melos analyze
 
   publish-dry-run:
     name: Publish dry run
+    needs: detect-changes
     timeout-minutes: 10
     strategy:
       fail-fast: false
@@ -138,11 +191,18 @@ jobs:
         package: [cbl, cbl_sentry, cbl_generator]
     runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu
     steps:
+      - name: Skip publish dry run
+        if: needs.detect-changes.outputs.code != 'true'
+        run: echo "Only docs changed; skipping publish dry run."
+
       - uses: runs-on/action@v2
+        if: needs.detect-changes.outputs.code == 'true'
       - name: Checkout repository
+        if: needs.detect-changes.outputs.code == 'true'
         uses: actions/checkout@v6
 
       - name: Setup Flutter
+        if: needs.detect-changes.outputs.code == 'true'
         uses: ./.github/actions/setup-flutter
         with:
           channel: ${{ env.flutter-channel }}
@@ -150,17 +210,21 @@ jobs:
           pub-cache-hash-pattern: pubspec.lock
 
       - name: Get dependencies
+        if: needs.detect-changes.outputs.code == 'true'
         run: dart pub get
 
       - name: Bootstrap repository
+        if: needs.detect-changes.outputs.code == 'true'
         run: dart run melos bootstrap
 
       - name: Publish dry run
+        if: needs.detect-changes.outputs.code == 'true'
         working-directory: packages/${{ matrix.package }}
         run: dart pub publish --dry-run
 
   test-dart-unit:
     name: Dart unit tests
+    needs: detect-changes
     timeout-minutes: 15
     strategy:
       fail-fast: false
@@ -192,33 +256,39 @@ jobs:
         "Windows":"windows-2025"
       }}', github.run_id))[matrix.os] }}
     steps:
+      - name: Skip unit tests
+        if: needs.detect-changes.outputs.code != 'true'
+        run: echo "Only docs changed; skipping unit tests."
+
       - uses: runs-on/action@v2
-        if: runner.os == 'Linux'
+        if: needs.detect-changes.outputs.code == 'true' && runner.os == 'Linux'
       - name: Checkout repository
+        if: needs.detect-changes.outputs.code == 'true'
         uses: actions/checkout@v6
 
       - name: Install Linux cross-compilation toolchain
-        if: runner.os == 'Linux'
+        if: needs.detect-changes.outputs.code == 'true' && runner.os == 'Linux'
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
 
       - name: Setup Java
-        if: runner.os == 'Linux' && matrix.package == 'cbl'
+        if: needs.detect-changes.outputs.code == 'true' && runner.os == 'Linux' && matrix.package == 'cbl'
         uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "17"
 
       - name: Setup Android SDK
-        if: runner.os == 'Linux' && matrix.package == 'cbl'
+        if: needs.detect-changes.outputs.code == 'true' && runner.os == 'Linux' && matrix.package == 'cbl'
         uses: android-actions/setup-android@v3
 
       - name: Install Android NDK
-        if: runner.os == 'Linux' && matrix.package == 'cbl'
+        if: needs.detect-changes.outputs.code == 'true' && runner.os == 'Linux' && matrix.package == 'cbl'
         run: ./tools/android-sdk.sh installNativeToolchain
 
       - name: Setup Flutter
+        if: needs.detect-changes.outputs.code == 'true'
         uses: ./.github/actions/setup-flutter
         with:
           channel: ${{ env.flutter-channel }}
@@ -226,24 +296,27 @@ jobs:
           pub-cache-hash-pattern: pubspec.lock
 
       - name: Get dependencies
+        if: needs.detect-changes.outputs.code == 'true'
         run: dart pub get
 
       - name: Bootstrap repository
+        if: needs.detect-changes.outputs.code == 'true'
         shell: bash
         run: dart run melos bootstrap
 
       - name: Run build_runner
-        if: ${{ matrix.package == 'cbl_generator' }}
+        if: needs.detect-changes.outputs.code == 'true' && matrix.package == 'cbl_generator'
         shell: bash
         run: ./tools/ci-steps.sh checkBuildRunnerOutput
 
       - name: Run tests
+        if: needs.detect-changes.outputs.code == 'true'
         id: run-tests
         shell: bash
         run: ./tools/ci-steps.sh runUnitTests
 
       - name: Collect coverage data
-        if: ${{ always() && steps.run-tests.outcome != 'skipped' }}
+        if: ${{ always() && needs.detect-changes.outputs.code == 'true' && steps.run-tests.outcome != 'skipped' }}
         shell: bash
         env:
           ALLOW_MISSING_COVERAGE: ${{ steps.run-tests.outcome == 'success' && 'false' || 'true' }}
@@ -251,7 +324,7 @@ jobs:
           ./tools/ci-steps.sh collectCoverageData "unit.${{ matrix.package }}.${{ matrix.os }}" "unit.runtime.vm.platform.$CODECOV_PLATFORM"
 
       - name: Upload coverage artifact
-        if: ${{ always() && hashFiles('coverage-artifacts/**') != '' }}
+        if: ${{ always() && needs.detect-changes.outputs.code == 'true' && hashFiles('coverage-artifacts/**') != '' }}
         uses: actions/upload-artifact@v7
         with:
           name: coverage-unit-${{ matrix.package }}-${{ matrix.os }}
@@ -259,6 +332,7 @@ jobs:
 
   test-e2e:
     name: E2E tests
+    needs: detect-changes
     timeout-minutes: 25
     strategy:
       fail-fast: false
@@ -312,43 +386,49 @@ jobs:
           "flutter":"cbl_e2e_tests_flutter"
         }')[matrix.embedder] }}
     steps:
+      - name: Skip E2E tests
+        if: needs.detect-changes.outputs.code != 'true'
+        run: echo "Only docs changed; skipping E2E tests."
+
       - uses: runs-on/action@v2
-        if: runner.os == 'Linux'
+        if: needs.detect-changes.outputs.code == 'true' && runner.os == 'Linux'
       - name: Checkout repository
+        if: needs.detect-changes.outputs.code == 'true'
         uses: actions/checkout@v6
 
       - name: Select Java 17
-        if: ${{ matrix.os == 'Android' }}
+        if: needs.detect-changes.outputs.code == 'true' && matrix.os == 'Android'
         run: echo "JAVA_HOME=$JAVA_HOME_17_X64" >> "$GITHUB_ENV"
 
       - name: Install Android Native Toolchain
-        if: ${{ matrix.os == 'Android' }}
+        if: needs.detect-changes.outputs.code == 'true' && matrix.os == 'Android'
         run: ./tools/android-sdk.sh installNativeToolchain
 
       - name: Install Android App Build Dependencies
-        if: ${{ matrix.os == 'Android' }}
+        if: needs.detect-changes.outputs.code == 'true' && matrix.os == 'Android'
         run: ./tools/android-sdk.sh installAppBuildDeps
 
       - name: Setup Gradle
-        if: ${{ matrix.os == 'Android' }}
+        if: needs.detect-changes.outputs.code == 'true' && matrix.os == 'Android'
         uses: gradle/actions/setup-gradle@v5
         with:
           cache-read-only: false
 
       - name: Cache apt packages
-        if: matrix.os == 'Ubuntu' && matrix.embedder == 'flutter'
+        if: needs.detect-changes.outputs.code == 'true' && matrix.os == 'Ubuntu' && matrix.embedder == 'flutter'
         uses: actions/cache@v5
         with:
           path: /var/cache/apt/archives
           key: apt-flutter-linux-desktop-${{ runner.os }}
 
       - name: Install Flutter Linux Desktop dependencies
-        if: matrix.os == 'Ubuntu' && matrix.embedder == 'flutter'
+        if: needs.detect-changes.outputs.code == 'true' && matrix.os == 'Ubuntu' && matrix.embedder == 'flutter'
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends clang cmake ninja-build pkg-config libgtk-3-dev lld llvm
 
       - name: Setup Flutter
+        if: needs.detect-changes.outputs.code == 'true'
         uses: ./.github/actions/setup-flutter
         with:
           channel: ${{ env.flutter-channel }}
@@ -357,25 +437,27 @@ jobs:
           cache-provider: ${{ (matrix.os == 'iOS' && matrix.embedder == 'flutter') && 'warp' || 'github' }}
 
       - name: Setup Dart SDK
-        if: matrix.test_platform == 'vm-asan'
+        if: needs.detect-changes.outputs.code == 'true' && matrix.test_platform == 'vm-asan'
         uses: dart-lang/setup-dart@v1
         with:
           sdk: main
           flavor: raw
 
       - name: Enable Flutter native assets
-        if: matrix.embedder == 'flutter'
+        if: needs.detect-changes.outputs.code == 'true' && matrix.embedder == 'flutter'
         run: flutter config --enable-native-assets
 
       - name: Get dependencies
+        if: needs.detect-changes.outputs.code == 'true'
         run: dart pub get
 
       - name: Bootstrap repository
+        if: needs.detect-changes.outputs.code == 'true'
         shell: bash
         run: dart run melos bootstrap
 
       - name: Cache Android emulator
-        if: matrix.os == 'Android'
+        if: needs.detect-changes.outputs.code == 'true' && matrix.os == 'Android'
         uses: actions/cache@v5
         with:
           path: |
@@ -383,28 +465,30 @@ jobs:
           key: android-system-image-27-x86_64-v2
 
       - name: Start Couchbase services
+        if: needs.detect-changes.outputs.code == 'true'
         shell: bash
         run: ./tools/ci-steps.sh startCouchbaseServices
 
       - name: Start virtual devices
-        if: matrix.embedder == 'flutter'
+        if: needs.detect-changes.outputs.code == 'true' && matrix.embedder == 'flutter'
         shell: bash
         run: ./tools/ci-steps.sh startVirtualDevices
 
       - name: Run tests
+        if: needs.detect-changes.outputs.code == 'true'
         id: run-tests
         timeout-minutes: 20
         shell: bash
         run: ./tools/ci-steps.sh runE2ETests
 
       - name: Collect test results
-        if: failure()
+        if: needs.detect-changes.outputs.code == 'true' && failure()
         timeout-minutes: 8
         shell: bash
         run: ./tools/ci-steps.sh collectTestResults
 
       - name: Upload test results
-        if: ${{ failure() && hashFiles('test-results/**') != '' }}
+        if: ${{ needs.detect-changes.outputs.code == 'true' && failure() && hashFiles('test-results/**') != '' }}
         uses: actions/upload-artifact@v7
         with:
           name: test-results-${{ matrix.os }}-${{ matrix.embedder }}${{ matrix.test_platform && format('-{0}', matrix.test_platform) || '' }}
@@ -412,7 +496,7 @@ jobs:
 
       - name: Collect coverage data
         # Disabled until we figure out how to get coverage data from flutter tests
-        if: ${{ always() && steps.run-tests.outcome != 'skipped' && matrix.embedder != 'flutter' && matrix.test_platform == '' }}
+        if: ${{ always() && needs.detect-changes.outputs.code == 'true' && steps.run-tests.outcome != 'skipped' && matrix.embedder != 'flutter' && matrix.test_platform == '' }}
         shell: bash
         env:
           ALLOW_MISSING_COVERAGE: ${{ steps.run-tests.outcome == 'success' && 'false' || 'true' }}
@@ -421,7 +505,7 @@ jobs:
 
       - name: Upload coverage artifact
         # Disabled until we figure out how to get coverage data from flutter tests
-        if: ${{ always() && hashFiles('coverage-artifacts/**') != '' && matrix.embedder != 'flutter' && matrix.test_platform == '' }}
+        if: ${{ always() && needs.detect-changes.outputs.code == 'true' && hashFiles('coverage-artifacts/**') != '' && matrix.embedder != 'flutter' && matrix.test_platform == '' }}
         uses: actions/upload-artifact@v7
         with:
           name: coverage-e2e-cbl-${{ matrix.embedder }}-${{ matrix.os }}
@@ -431,6 +515,7 @@ jobs:
     name: Upload coverage
     timeout-minutes: 10
     needs:
+      - detect-changes
       - formatting-dart
       - formatting-clang
       - analyze-dart
@@ -442,6 +527,7 @@ jobs:
       ${{
         always() &&
         !cancelled() &&
+        needs.detect-changes.outputs.code == 'true' &&
         (
           github.event_name == 'pull_request' ||
           (needs.test-dart-unit.result == 'success' && needs.test-e2e.result == 'success')
