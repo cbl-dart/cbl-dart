@@ -73,6 +73,21 @@ void main() {
     );
   });
 
+  test('is a no-op when no code assets are requested', () async {
+    // Regression test for https://github.com/cbl-dart/cbl-dart/issues/973.
+    // The native assets system invokes the build hook during a discovery phase
+    // with an empty `build_asset_types` (so `buildCodeAssets` is false). In
+    // that case `input.config.code` is unavailable, so the hook — which only
+    // produces code assets — must not access it and must produce no assets.
+    final output = await _runBuildHookDirect(
+      targetOS: OS.linux,
+      targetArchitecture: Architecture.x64,
+      setupCodeAssets: false,
+    );
+
+    expect(output.assets.encodedAssets, isEmpty);
+  });
+
   final hostTarget = _hostTarget();
 
   test(
@@ -283,7 +298,7 @@ _HostTarget? _hostTarget() {
   return (os: os, arch: arch);
 }
 
-Future<void> _runBuildHookDirect({
+Future<BuildOutput> _runBuildHookDirect({
   required OS targetOS,
   required Architecture targetArchitecture,
   PackageUserDefines? userDefines,
@@ -291,6 +306,11 @@ Future<void> _runBuildHookDirect({
   int targetIOSVersion = 17,
   int targetMacOSVersion = 13,
   int targetAndroidNdkApi = 30,
+  // When false, the code asset extension is not set up on the build input,
+  // simulating the native assets discovery phase where no code assets are
+  // requested (`build_asset_types` is empty and `input.config.code` is
+  // unavailable).
+  bool setupCodeAssets = true,
 }) async {
   final tempDir = await Directory.systemTemp.createTemp();
 
@@ -314,28 +334,32 @@ Future<void> _runBuildHookDirect({
       ..setupBuildInput()
       ..config.setupBuild(linkingEnabled: false);
 
-    CodeAssetExtension(
-      linkModePreference: LinkModePreference.dynamic,
-      targetArchitecture: targetArchitecture,
-      targetOS: targetOS,
-      iOS: targetOS == OS.iOS
-          ? IOSCodeConfig(
-              targetSdk: targetIOSSdk,
-              targetVersion: targetIOSVersion,
-            )
-          : null,
-      macOS: targetOS == OS.macOS
-          ? MacOSCodeConfig(targetVersion: targetMacOSVersion)
-          : null,
-      android: targetOS == OS.android
-          ? AndroidCodeConfig(targetNdkApi: targetAndroidNdkApi)
-          : null,
-    ).setupBuildInput(inputBuilder);
+    if (setupCodeAssets) {
+      CodeAssetExtension(
+        linkModePreference: LinkModePreference.dynamic,
+        targetArchitecture: targetArchitecture,
+        targetOS: targetOS,
+        iOS: targetOS == OS.iOS
+            ? IOSCodeConfig(
+                targetSdk: targetIOSSdk,
+                targetVersion: targetIOSVersion,
+              )
+            : null,
+        macOS: targetOS == OS.macOS
+            ? MacOSCodeConfig(targetVersion: targetMacOSVersion)
+            : null,
+        android: targetOS == OS.android
+            ? AndroidCodeConfig(targetNdkApi: targetAndroidNdkApi)
+            : null,
+      ).setupBuildInput(inputBuilder);
+    }
 
     final input = inputBuilder.build();
     final output = BuildOutputBuilder();
 
     await hook.buildHook(input, output);
+
+    return output.build();
   } finally {
     tempDir.deleteSync(recursive: true);
   }
