@@ -34,6 +34,15 @@ Future<void> buildHook(BuildInput input, BuildOutputBuilder output) async {
     );
   }
 
+  // The native assets system invokes build hooks for asset types it wants to
+  // discover, which excludes code assets during the initial discovery phase
+  // (e.g. on a cold `flutter run`/`flutter build`). When code assets are not
+  // requested, `input.config.code` is unavailable and accessing it throws. This
+  // hook only produces code assets, so it must be a no-op in that case.
+  if (!input.config.buildCodeAssets) {
+    return;
+  }
+
   final targetOS = input.config.code.targetOS;
   final targetArchitecture = input.config.code.targetArchitecture;
 
