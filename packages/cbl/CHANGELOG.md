@@ -1,3 +1,7 @@
+## 4.0.0-dev.9
+
+ - **FIX**(cbl): make build hook a no-op when no code assets are requested ([#977](https://github.com/cbl-dart/cbl-dart/issues/977)). ([a2cb82e0](https://github.com/cbl-dart/cbl-dart/commit/a2cb82e02cc3eebbdac261ae91af7e2d3b6b3c1e))
+
 ## 4.0.0-dev.8
 
  - **REFACTOR**(cbl): Harden outbound FFI struct initialization ([#953](https://github.com/cbl-dart/cbl-dart/issues/953)). ([9b0805a3](https://github.com/cbl-dart/cbl-dart/commit/9b0805a390ad88e024a5b626f472938114ad0915))

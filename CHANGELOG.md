@@ -3,6 +3,36 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2026-06-16
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`cbl` - `v4.0.0-dev.9`](#cbl---v400-dev9)
+ - [`cbl_generator` - `v0.4.0-dev.9`](#cbl_generator---v040-dev9)
+ - [`cbl_sentry` - `v3.0.0-dev.9`](#cbl_sentry---v300-dev9)
+
+Packages with dependency updates only:
+
+> Packages listed below depend on other packages in this workspace that have had changes. Their versions have been incremented to bump the minimum dependency versions of the packages they depend upon in this project.
+
+ - `cbl_generator` - `v0.4.0-dev.9`
+ - `cbl_sentry` - `v3.0.0-dev.9`
+
+---
+
+#### `cbl` - `v4.0.0-dev.9`
+
+ - **FIX**(cbl): make build hook a no-op when no code assets are requested ([#977](https://github.com/cbl-dart/cbl-dart/issues/977)). ([a2cb82e0](https://github.com/cbl-dart/cbl-dart/commit/a2cb82e02cc3eebbdac261ae91af7e2d3b6b3c1e))
+
+
 ## 2026-05-17
 
 ### Changes
