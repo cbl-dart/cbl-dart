@@ -18,5 +18,11 @@ Please make sure to update tests as appropriate.
 
 Read [CONTRIBUTING] to get started developing.
 
+## Acknowledgements
+
+The CI workflows of this project run on GitHub Actions runners provisioned by
+[RunsOn](https://runs-on.com), which generously provides a free license for
+this open source project.
+
 [contributing]: ./CONTRIBUTING.md
 [docs]: https://cbl-dart.dev
