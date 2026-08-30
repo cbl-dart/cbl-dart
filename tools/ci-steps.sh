@@ -144,35 +144,19 @@ function _prepareStandaloneSanitizerNativeAssets() {
 
     # `dart test -p vm-asan` compiles test suites to native executables, but
     # that execution path does not currently wire native (code) assets into the
-    # generated process. The build hooks still materialize the native libraries
-    # when a test suite is built, so build them here and preload them to satisfy
-    # `@Native`/`@ffi.DefaultAsset`'s fallback to process symbol lookup.
-    #
-    # Building the native assets requires actually compiling a test suite;
-    # `dart test --help` no longer triggers the build hooks. Compile the
-    # placeholder empty test to run the build hooks without running the real
-    # suite. It exits non-zero because the file contains no tests, so ignore its
-    # exit status — a genuine build failure surfaces below when no libraries are
-    # found.
-    dart test test/empty_test.dart >/dev/null 2>&1 || true
+    # generated process. Build a CLI bundle for the placeholder test so that
+    # the build and link hooks copy the native libraries to a stable output
+    # directory. A regular `dart test` build only keeps them in an internal
+    # hooks_runner cache in recent Dart SDKs.
+    local nativeAssetsOutput="$PWD/.dart_tool/standalone_sanitizer_native_assets"
+    dart build cli \
+        --target=test/empty_test.dart \
+        --output="$nativeAssetsOutput"
 
-    # With pub workspaces, recent Dart SDKs create the flat native-asset `lib`
-    # directory at the workspace root rather than in the package directory.
-    # Probe both locations and use the first that contains the libraries so the
-    # step keeps working regardless of which layout the SDK uses.
-    local nativeLibDir=""
-    local candidate
-    for candidate in "$workspaceDir/.dart_tool/lib" "$PWD/.dart_tool/lib"; do
-        if find "$candidate" -maxdepth 1 -type f -name 'libcblitedart.so*' \
-            2>/dev/null | grep -q .; then
-            nativeLibDir="$candidate"
-            break
-        fi
-    done
-
-    if [ -z "$nativeLibDir" ]; then
-        echo "No native libraries found to preload in" \
-            "$workspaceDir/.dart_tool/lib or $PWD/.dart_tool/lib"
+    local nativeLibDir="$nativeAssetsOutput/bundle/lib"
+    if ! find "$nativeLibDir" -maxdepth 1 -type f -name 'libcblitedart.so*' \
+        2>/dev/null | grep -q .; then
+        echo "No native libraries found to preload in $nativeLibDir"
         exit 1
     fi
 
