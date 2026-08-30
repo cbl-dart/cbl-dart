@@ -69,7 +69,9 @@ melos:
 
     test:unit:
       description: Runs unit tests (non-e2e).
-      exec: dart test
+      run: dart test
+      exec:
+        concurrency: 1
       packageFilters:
         scope:
           - cbl
