@@ -35,9 +35,8 @@ dependency_overrides:
   # Keep the entire workspace on that test runner so the standalone sanitizer
   # CI leg can resolve compatible dependencies without carving Flutter out of
   # the workspace.
-  test: 1.31.0
-  test_api: 0.7.11
-  test_core: 0.6.17
+  test: ^1.31.1
+  test_api: 0.7.12
 
 melos:
   repository: https://github.com/cbl-dart/cbl-dart

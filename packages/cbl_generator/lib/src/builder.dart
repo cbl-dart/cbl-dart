@@ -1,16 +1,14 @@
-import 'package:build/build.dart';
 import 'package:meta/meta.dart';
 import 'package:source_gen/source_gen.dart';
 
 import 'generator.dart';
 
 final class TypedDataBuilder extends PartBuilder {
-  TypedDataBuilder({BuilderOptions? options})
+  TypedDataBuilder({super.options})
     : super(
         [TypedDocumentGenerator(), TypedDictionaryGenerator()],
         '.cbl.type.g.dart',
         header: header,
-        options: options,
       );
 
   static const _ignoredLints = [
@@ -32,12 +30,11 @@ final class TypedDataBuilder extends PartBuilder {
 }
 
 final class TypedDatabaseBuilder extends LibraryBuilder {
-  TypedDatabaseBuilder({BuilderOptions? options})
+  TypedDatabaseBuilder({super.options})
     : super(
         TypedDatabaseGenerator(),
         generatedExtension: '.cbl.database.g.dart',
         header: header,
-        options: options,
       );
 
   static const _ignoredLints = [
