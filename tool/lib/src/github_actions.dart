@@ -84,11 +84,8 @@ final class JobStats {
   JobStats({required this.name});
 
   final String name;
-  // ignore: omit_obvious_property_types
   int totalRuns = 0;
-  // ignore: omit_obvious_property_types
   int successes = 0;
-  // ignore: omit_obvious_property_types
   int failures = 0;
   final recentFailures = <JobFailure>[];
 

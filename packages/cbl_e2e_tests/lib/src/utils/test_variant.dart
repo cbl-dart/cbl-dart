@@ -43,8 +43,8 @@ final class EnumVariant<T extends Enum> extends TestVariant<T> {
   EnumVariant(
     List<T> values, {
     String? name,
-    VariantIsCompatible<T>? isCompatible,
-    int order = 0,
+    super.isCompatible,
+    super.order = 0,
   }) : assert(values.isNotEmpty),
        super(
          name ??
@@ -53,8 +53,6 @@ final class EnumVariant<T extends Enum> extends TestVariant<T> {
                (match) => match.group(0)!.toLowerCase(),
              ),
          values: values,
-         isCompatible: isCompatible,
-         order: order,
        );
 
   @override

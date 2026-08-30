@@ -13,7 +13,6 @@ class MockSpan implements ISentrySpan {
   final SpanId? transactionParentSpanId;
 
   @override
-  // ignore: omit_obvious_property_types
   bool finished = false;
 
   final String operation;
