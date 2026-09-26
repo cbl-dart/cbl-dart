@@ -35,7 +35,7 @@ jobs:
           pub-cache-hash-pattern: pubspec.lock
 
       - name: Setup Melos
-        run: dart pub global activate melos
+        run: dart pub global activate melos 7.7.0
 
       - name: Install daco
         run: dart pub global activate daco
@@ -84,7 +84,7 @@ jobs:
           pub-cache-hash-pattern: pubspec.lock
 
       - name: Setup Melos
-        run: dart pub global activate melos
+        run: dart pub global activate melos 7.7.0
 
       - name: Bootstrap repository
         shell: bash
@@ -213,6 +213,8 @@ jobs:
       - name: Setup Android SDK
         if: runner.os == 'Linux' && matrix.package == 'cbl'
         uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
 
       - name: Install Android NDK
         if: runner.os == 'Linux' && matrix.package == 'cbl'
@@ -371,8 +373,16 @@ jobs:
         run: dart pub get
 
       - name: Bootstrap repository
+        if: matrix.test_platform != 'vm-asan'
         shell: bash
         run: dart run melos bootstrap
+
+      - name: Bootstrap repository with Dart main
+        if: matrix.test_platform == 'vm-asan'
+        shell: bash
+        run: |
+          dart pub global activate melos 7.7.0
+          "$PUB_CACHE/bin/melos" bootstrap
 
       - name: Cache Android emulator
         if: matrix.os == 'Android'

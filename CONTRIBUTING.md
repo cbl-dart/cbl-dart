@@ -43,7 +43,7 @@ configured via `hooks.user_defines.cbl` in the workspace root `pubspec.yaml`.
 - Flutter (stable)
 - melos
   ```shell
-  flutter pub global activate melos
+  flutter pub global activate melos 7.7.0
   ```
 - [lefthook](https://github.com/evilmartians/lefthook) (Git hooks manager)
   ```shell
