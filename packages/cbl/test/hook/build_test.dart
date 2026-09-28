@@ -272,7 +272,7 @@ void main() {
 }
 
 /// Expected vector search dependency DLLs per Windows architecture.
-const _windowsVectorSearchDeps = <Architecture, List<String>>{
+final _windowsVectorSearchDeps = <Architecture, List<String>>{
   Architecture.x64: ['libomp140.x86_64.dll'],
   Architecture.arm64: ['libomp140.arm64.dll'],
 };
