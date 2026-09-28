@@ -35,7 +35,7 @@ jobs:
           pub-cache-hash-pattern: pubspec.lock
 
       - name: Setup Melos
-        run: dart pub global activate melos 7.7.0
+        run: dart pub global activate melos 7.8.1
 
       - name: Install daco
         run: dart pub global activate daco
@@ -84,7 +84,7 @@ jobs:
           pub-cache-hash-pattern: pubspec.lock
 
       - name: Setup Melos
-        run: dart pub global activate melos 7.7.0
+        run: dart pub global activate melos 7.8.1
 
       - name: Bootstrap repository
         shell: bash
@@ -381,7 +381,7 @@ jobs:
         if: matrix.test_platform == 'vm-asan'
         shell: bash
         run: |
-          dart pub global activate melos 7.7.0
+          dart pub global activate melos 7.8.1
           "$PUB_CACHE/bin/melos" bootstrap
 
       - name: Cache Android emulator
