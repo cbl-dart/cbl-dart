@@ -46,7 +46,7 @@ jobs:
           pub-cache-hash-pattern: pubspec.lock
 
       - name: Setup Melos
-        run: dart pub global activate melos 7.8.1
+        run: dart pub global activate melos 7.7.0
 
       - name: Bootstrap repository
         shell: bash
