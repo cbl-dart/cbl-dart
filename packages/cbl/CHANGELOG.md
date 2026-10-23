@@ -1,3 +1,8 @@
+## 4.0.0-dev.10
+
+ - **FIX**(cbl): support hooks and code_assets 2 ([#985](https://github.com/cbl-dart/cbl-dart/issues/985)). ([97b54e5a](https://github.com/cbl-dart/cbl-dart/commit/97b54e5aad08ac48c2afb04ce850e2cccb9aeb80))
+ - Retain support for hooks and code_assets 1.x without increasing the minimum Dart SDK version.
+
 ## 4.0.0-dev.9
 
  - **FIX**(cbl): make build hook a no-op when no code assets are requested ([#977](https://github.com/cbl-dart/cbl-dart/issues/977)). ([a2cb82e0](https://github.com/cbl-dart/cbl-dart/commit/a2cb82e02cc3eebbdac261ae91af7e2d3b6b3c1e))
