@@ -2,6 +2,7 @@
 
  - **FIX**(cbl): support hooks and code_assets 2 ([#985](https://github.com/cbl-dart/cbl-dart/issues/985)). ([97b54e5a](https://github.com/cbl-dart/cbl-dart/commit/97b54e5aad08ac48c2afb04ce850e2cccb9aeb80))
  - Retain support for hooks and code_assets 1.x without increasing the minimum Dart SDK version.
+ - **FIX**(cbl): preserve safe framework symlink chains during archive extraction and recover incomplete vector-search caches ([#988](https://github.com/cbl-dart/cbl-dart/pull/988)).
 
 ## 4.0.0-dev.9
 
