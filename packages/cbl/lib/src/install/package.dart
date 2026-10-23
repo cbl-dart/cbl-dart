@@ -263,7 +263,13 @@ final class RemotePackageLoader extends PackageLoader {
       Uri.parse(config._archiveUrl).path,
     );
 
-    final packageDir = p.join(cacheDir, archiveBaseName);
+    // archive 4.5 may have cached this XCFramework without its framework
+    // symlinks. Use a new location instead of reusing or deleting that cache.
+    final cacheName =
+        config.library == Library.vectorSearch && config.os == OS.iOS
+        ? '$archiveBaseName-symlinks-v2'
+        : archiveBaseName;
+    final packageDir = p.join(cacheDir, cacheName);
 
     final packageDirectory = Directory(packageDir);
     if (packageDirectory.existsSync()) {
