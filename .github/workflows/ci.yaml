@@ -129,6 +129,24 @@ jobs:
       - name: Analyze Dart code
         run: dart run melos analyze
 
+  test-hook-compatibility:
+    name: Hook compatibility (${{ matrix.sdk }}, ${{ matrix.dependencies }})
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        sdk: [3.10.0, stable]
+        dependencies: [legacy, hooks2, code2, latest]
+    runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu
+    steps:
+      - uses: runs-on/action@v2
+      - uses: actions/checkout@v6
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: ${{ matrix.sdk }}
+      - name: Build native assets and run database round trip
+        run: bash tools/test-hook-compatibility.sh ${{ matrix.dependencies }}
+
   publish-dry-run:
     name: Publish dry run
     timeout-minutes: 10
