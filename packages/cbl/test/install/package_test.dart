@@ -68,6 +68,39 @@ void main() {
       skip: Platform.isWindows,
     );
 
+    test(
+      'does not reuse legacy vector-search xcframework extractions',
+      () async {
+        final cache = tempTestDirectory();
+        final legacy = Directory(
+          '${cache.path}/couchbase-lite-vector-search_xcframework_1.0.0',
+        )..createSync();
+        final legacyMarker = File('${legacy.path}/incomplete')
+          ..writeAsStringSync('legacy');
+        final loader = RemotePackageLoader(cacheDir: cache.path);
+        final config = VectorSearchPackageConfig(
+          os: OS.iOS,
+          architectures: [Architecture.arm64, Architecture.x64],
+          release: '1.0.0',
+        );
+        final package = await loader.load(config);
+        expect(package.packageDir, isNot(legacy.path));
+        expect(legacyMarker.readAsStringSync(), 'legacy');
+        expect(
+          File(
+            '${package.appleFrameworkDir}/macos-arm64_x86_64/'
+            'CouchbaseLiteVectorSearch.framework/CouchbaseLiteVectorSearch',
+          ).existsSync(),
+          isTrue,
+        );
+        final marker = File('${package.packageDir}/cached')
+          ..writeAsStringSync('cached');
+        expect((await loader.load(config)).packageDir, package.packageDir);
+        expect(marker.readAsStringSync(), 'cached');
+      },
+      skip: Platform.isWindows,
+    );
+
     test('package layout', () async {
       final loader = RemotePackageLoader();
       final packageConfigs = VectorSearchPackageConfig.all(
