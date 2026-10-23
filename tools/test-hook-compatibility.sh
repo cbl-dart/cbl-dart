@@ -55,4 +55,3 @@ cd "$app_dir"
 dart pub get
 dart pub deps --style=compact
 dart run main.dart
-
