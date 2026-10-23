@@ -170,7 +170,7 @@ Future<void> _unpackZipArchive(Uint8List archiveData, String outputDir) async {
     file.content;
   }
 
-  await extractArchiveToDisk(archive, outputDir);
+  await _extractArchiveWithLinks(archive, outputDir);
 }
 
 Future<void> _unpackTarGzArchive(
@@ -182,7 +182,76 @@ Future<void> _unpackTarGzArchive(
   // ignore: prefer_const_constructors
   final tarArchiveData = GZipDecoder().decodeBytes(archiveData, verify: true);
   final archive = TarDecoder().decodeBytes(tarArchiveData, verify: true);
-  await extractArchiveToDisk(archive, outputDir);
+  await _extractArchiveWithLinks(archive, outputDir);
+}
+
+// archive 4.5 rejects links through other links, including the standard
+// Binary -> Versions/Current/Binary, Versions/Current -> A framework layout.
+// Extract files first so none can be written through an archive-created link.
+Future<void> _extractArchiveWithLinks(Archive archive, String outputDir) async {
+  final files = Archive();
+  final links = <ArchiveFile>[];
+  for (final entry in archive) {
+    if (entry.isSymbolicLink) {
+      links.add(entry);
+    } else {
+      files.addFile(entry);
+    }
+  }
+  await extractArchiveToDisk(files, outputDir);
+
+  final root = await Directory(outputDir).resolveSymbolicLinks();
+  // Resolve chains in dependency order, independently of archive entry order.
+  // Unresolvable (including dangling and cyclic) links are left out.
+  var remaining = links;
+  while (remaining.isNotEmpty) {
+    final deferred = <ArchiveFile>[];
+    for (final entry in remaining) {
+      final target = entry.symbolicLink!;
+      final linkPath = p.normalize(p.join(root, entry.name));
+      if (p.isAbsolute(entry.name) ||
+          p.isAbsolute(target) ||
+          !p.isWithin(root, linkPath) ||
+          !p.isWithin(root, p.normalize(p.join(p.dirname(linkPath), target))) ||
+          FileSystemEntity.typeSync(linkPath, followLinks: false) !=
+              FileSystemEntityType.notFound) {
+        continue;
+      }
+
+      // A link's own parent must not traverse a link. Never create directories
+      // through an existing link, even if its final destination is inside root.
+      var parent = p.dirname(linkPath);
+      var parentIsLink = false;
+      while (parent != root) {
+        if (FileSystemEntity.isLinkSync(parent)) {
+          parentIsLink = true;
+          break;
+        }
+        parent = p.dirname(parent);
+      }
+      if (parentIsLink) {
+        continue;
+      }
+
+      await Directory(p.dirname(linkPath)).create(recursive: true);
+      final targetPath = p.join(p.dirname(linkPath), target);
+      final String resolvedTarget;
+      try {
+        resolvedTarget = await File(targetPath).resolveSymbolicLinks();
+      } on FileSystemException {
+        deferred.add(entry);
+        continue;
+      }
+      if (!p.isWithin(root, resolvedTarget)) {
+        continue;
+      }
+      await Link(linkPath).create(target, recursive: true);
+    }
+    if (deferred.length == remaining.length) {
+      break;
+    }
+    remaining = deferred;
+  }
 }
 
 /// Copies [sourceDir] to [destinationDir].
