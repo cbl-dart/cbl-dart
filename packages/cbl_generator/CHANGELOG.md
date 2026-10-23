@@ -1,3 +1,8 @@
+## 0.4.0-dev.10
+
+ - **FIX**: restore CI compatibility with Flutter 3.47 ([#981](https://github.com/cbl-dart/cbl-dart/issues/981)). ([ec7ec8c1](https://github.com/cbl-dart/cbl-dart/commit/ec7ec8c146ab27f888d3675da3fa24c84a199c71))
+ - Update the cbl dependency to ^4.0.0-dev.10.
+
 ## 0.4.0-dev.9
 
  - Update a dependency to the latest release.

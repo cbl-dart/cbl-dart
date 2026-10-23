@@ -3,6 +3,40 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2026-10-23
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`cbl` - `v4.0.0-dev.10`](#cbl---v400-dev10)
+ - [`cbl_generator` - `v0.4.0-dev.10`](#cbl_generator---v040-dev10)
+ - [`cbl_sentry` - `v3.0.0-dev.10`](#cbl_sentry---v300-dev10)
+
+---
+
+#### `cbl` - `v4.0.0-dev.10`
+
+ - **FIX**(cbl): support hooks and code_assets 2 ([#985](https://github.com/cbl-dart/cbl-dart/issues/985)). ([97b54e5a](https://github.com/cbl-dart/cbl-dart/commit/97b54e5aad08ac48c2afb04ce850e2cccb9aeb80))
+ - Retain support for hooks and code_assets 1.x without increasing the minimum Dart SDK version.
+
+#### `cbl_generator` - `v0.4.0-dev.10`
+
+ - **FIX**: restore CI compatibility with Flutter 3.47 ([#981](https://github.com/cbl-dart/cbl-dart/issues/981)). ([ec7ec8c1](https://github.com/cbl-dart/cbl-dart/commit/ec7ec8c146ab27f888d3675da3fa24c84a199c71))
+ - Update the cbl dependency to ^4.0.0-dev.10.
+
+#### `cbl_sentry` - `v3.0.0-dev.10`
+
+ - **FIX**: restore CI compatibility with Flutter 3.47 ([#981](https://github.com/cbl-dart/cbl-dart/issues/981)). ([ec7ec8c1](https://github.com/cbl-dart/cbl-dart/commit/ec7ec8c146ab27f888d3675da3fa24c84a199c71))
+ - Update the cbl dependency to ^4.0.0-dev.10.
+
+
 ## 2026-06-16
 
 ### Changes
