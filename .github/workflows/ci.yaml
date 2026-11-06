@@ -3,23 +3,37 @@ name: CI
 on:
   push:
     branches:
-      - main
+      - release/3.x
     paths-ignore:
       - docs/**
   pull_request:
     paths-ignore:
       - docs/**
-  schedule:
-    - cron: '0 0 * * *'
+  workflow_dispatch:
+    inputs:
+      toolchain:
+        description:
+          '`pinned` uses the Flutter and Dart versions below, `latest` the
+          newest stable releases.'
+        type: choice
+        options:
+          - pinned
+          - latest
+        default: pinned
 
 concurrency:
-  group: ${{ github.ref }}
+  group: ${{ github.ref }}-${{ inputs.toolchain }}
   cancel-in-progress: true
 
 env:
-  flutter-channel: stable
-  dart-version-stable: stable
-  dart-version-beta: beta
+  # The 3.x branch builds with fixed toolchains so that new Flutter and Dart
+  # releases do not break CI for unrelated changes. Update them deliberately.
+  flutter-version:
+    ${{ inputs.toolchain != 'latest' && '3.47.9' || '' }}
+  dart-version-stable:
+    ${{ inputs.toolchain != 'latest' && '3.13.7' || 'stable' }}
+  daco-version: 0.5.1
+  melos-version: 6.3.2
 
 jobs:
   formatting-dart:
@@ -31,15 +45,17 @@ jobs:
 
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
+        with:
+          sdk: ${{ env.dart-version-stable }}
 
       - name: Setup Melos
-        run: dart pub global activate melos
+        run: dart pub global activate melos ${{ env.melos-version }}
 
       - name: Setup cbd
         run: melos activate:cbd
 
       - name: Install daco
-        run: dart pub global activate daco
+        run: dart pub global activate daco ${{ env.daco-version }}
 
       - name: Get dependencies
         run: dart pub get
@@ -69,11 +85,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        dart: [stable, beta]
-    # continue-on-error: ${{ matrix.dart != 'stable' }}
-    # TODO: Require analysis to pass for stable once Dart SDK issue is fixed
-    # https://github.com/dart-lang/sdk/issues/56561
-    continue-on-error: true
+        dart: [stable]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -83,7 +95,8 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: ${{ env.flutter-channel }}
+          channel: stable
+          flutter-version: ${{ env.flutter-version }}
 
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
@@ -91,7 +104,7 @@ jobs:
           sdk: ${{ env[format('dart-version-{0}', matrix.dart)] }}
 
       - name: Setup Melos
-        run: dart pub global activate melos
+        run: dart pub global activate melos ${{ env.melos-version }}
 
       - name: Setup cbd
         run: melos activate:cbd
@@ -112,7 +125,7 @@ jobs:
       fail-fast: false
       matrix:
         package: [cbl, cbl_sentry, cbl_generator]
-        dart: [stable, beta]
+        dart: [stable]
         embedder: [standalone]
         os: [Ubuntu]
     env:
@@ -128,7 +141,8 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: ${{ env.flutter-channel }}
+          channel: stable
+          flutter-version: ${{ env.flutter-version }}
 
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
@@ -136,7 +150,7 @@ jobs:
           sdk: ${{ env[format('dart-version-{0}', matrix.dart)] }}
 
       - name: Setup Melos
-        run: dart pub global activate melos
+        run: dart pub global activate melos ${{ env.melos-version }}
 
       - name: Bootstrap repository
         env:
@@ -233,7 +247,8 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: ${{ env.flutter-channel }}
+          channel: stable
+          flutter-version: ${{ env.flutter-version }}
 
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
@@ -242,7 +257,7 @@ jobs:
           sdk: ${{ env.dart-version-stable }}
 
       - name: Setup Melos
-        run: dart pub global activate melos
+        run: dart pub global activate melos ${{ env.melos-version }}
 
       - name: Bootstrap repository
         env:
@@ -342,10 +357,11 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: ${{ env.flutter-channel }}
+          channel: stable
+          flutter-version: ${{ env.flutter-version }}
 
       - name: Setup Melos
-        run: dart pub global activate melos
+        run: dart pub global activate melos ${{ env.melos-version }}
 
       - name: Setup cbd
         run: melos activate:cbd
@@ -417,7 +433,8 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: ${{ env.flutter-channel }}
+          channel: stable
+          flutter-version: ${{ env.flutter-version }}
 
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
@@ -425,7 +442,7 @@ jobs:
           sdk: ${{ env[format('dart-version-{0}', matrix.dart)] }}
 
       - name: Setup Melos
-        run: dart pub global activate melos
+        run: dart pub global activate melos ${{ env.melos-version }}
 
       - name: Bootstrap repository
         env:
@@ -477,9 +494,12 @@ jobs:
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.flutter-version }}
 
       - name: Setup Melos
-        run: dart pub global activate melos
+        run: dart pub global activate melos ${{ env.melos-version }}
 
       - name: Setup CBL Dart dev tools
         run: melos run activate:cbd
