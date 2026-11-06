@@ -79,7 +79,9 @@ final class DatabaseBindings extends Bindings {
 
   CBLEncryptionKey encryptionKeyFromPassword(String password) =>
       withGlobalArena(() {
-        final key = globalArena<cblite_lib.CBLEncryptionKey>();
+        final key = zeroedGlobalArena<cblite_lib.CBLEncryptionKey>(
+          sizeOf<cblite_lib.CBLEncryptionKey>(),
+        );
         if (!cblite.CBLEncryptionKey_FromPassword(
           key,
           password.makeGlobalFLString(),
@@ -200,7 +202,9 @@ final class DatabaseBindings extends Bindings {
     CBLEncryptionKey? key,
   ) {
     withGlobalArena(() {
-      final keyStruct = globalArena<cblite_lib.CBLEncryptionKey>();
+      final keyStruct = zeroedGlobalArena<cblite_lib.CBLEncryptionKey>(
+        sizeOf<cblite_lib.CBLEncryptionKey>(),
+      );
       _writeEncryptionKey(keyStruct.ref, from: key);
       cblite.CBLDatabase_ChangeEncryptionKey(
         db,
@@ -238,6 +242,10 @@ final class DatabaseBindings extends Bindings {
     cblite_lib.CBLEncryptionKey to, {
     CBLEncryptionKey? from,
   }) {
+    for (var i = 0; i < cblite_lib.kCBLEncryptionKeySizeAES256; i++) {
+      to.bytes[i] = 0;
+    }
+
     if (from == null) {
       to.algorithm = cblite_lib.kCBLEncryptionNone;
       return;
@@ -270,18 +278,24 @@ final class DatabaseBindings extends Bindings {
     }
 
     final result =
-        globalArena<cblitedart_lib.CBLDart_CBLDatabaseConfiguration>();
+        zeroedGlobalArena<cblitedart_lib.CBLDart_CBLDatabaseConfiguration>(
+          sizeOf<cblitedart_lib.CBLDart_CBLDatabaseConfiguration>(),
+        );
 
     result.ref.directory = config.directory.toFLString();
 
     if (libraries.enterpriseEdition) {
-      final key = globalArena<cblitedart_lib.CBLDart_CBLEncryptionKey>();
+      final key = zeroedGlobalArena<cblitedart_lib.CBLDart_CBLEncryptionKey>(
+        sizeOf<cblitedart_lib.CBLDart_CBLEncryptionKey>(),
+      );
       _writeEncryptionKey(
         key.cast<cblite_lib.CBLEncryptionKey>().ref,
         from: config.encryptionKey,
       );
       result.ref.encryptionKey = key.ref;
     }
+
+    result.ref.fullSync = config.fullSync;
 
     return result;
   }
