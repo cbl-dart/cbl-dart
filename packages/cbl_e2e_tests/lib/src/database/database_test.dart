@@ -42,11 +42,13 @@ void main() {
     });
 
     apiTest('copy', () async {
-      final source = await openTestDatabase();
+      final source = await openTestDatabase(tearDown: false);
+      final sourcePath = source.path!;
+      await source.close();
       final directory = databaseDirectoryForTest();
 
       await copyDatabase(
-        from: source.path!,
+        from: sourcePath,
         name: 'copy',
         config: DatabaseConfiguration(directory: directory),
       );
@@ -54,15 +56,32 @@ void main() {
       expect(await databaseExists('copy', directory: directory), isTrue);
     });
 
-    apiTest('copy without trailing path separator in from path', () async {
-      // https://github.com/cbl-dart/cbl-dart/issues/444
+    apiTest('copy fails while source database is open', () async {
       final source = await openTestDatabase();
       final directory = databaseDirectoryForTest();
 
-      expect(source.path, endsWith(p.separator));
+      await expectLater(
+        () => copyDatabase(
+          from: source.path!,
+          name: 'copy',
+          config: DatabaseConfiguration(directory: directory),
+        ),
+        throwsA(isA<DatabaseException>()),
+      );
+      expect(await databaseExists('copy', directory: directory), isFalse);
+    });
+
+    apiTest('copy without trailing path separator in from path', () async {
+      // https://github.com/cbl-dart/cbl-dart/issues/444
+      final source = await openTestDatabase(tearDown: false);
+      final sourcePath = source.path!;
+      await source.close();
+      final directory = databaseDirectoryForTest();
+
+      expect(sourcePath, endsWith(p.separator));
 
       await copyDatabase(
-        from: source.path!.substring(0, source.path!.length - 1),
+        from: sourcePath.substring(0, sourcePath.length - 1),
         name: 'copy',
         config: DatabaseConfiguration(directory: directory),
       );
