@@ -64,7 +64,7 @@ CBL_REFCOUNTED(CBLDocument*, Document);
     @{
     The type `CBLDocument*` without a `const` qualifier refers to a _mutable_ document instance.
     A mutable document exposes its properties as a mutable dictionary, so you can change them
-    in place and then call \ref CBLDatabase_SaveDocument to persist the changes.
+    in place and then call \ref CBLCollection_SaveDocument to persist the changes.
  */
 
 /** Creates a new, empty document in memory, with a randomly-generated unique ID.
@@ -131,7 +131,7 @@ CBLCollection* _cbl_nullable CBLDocument_Collection(const CBLDocument*) CBLAPI;
 FLDict CBLDocument_Properties(const CBLDocument*) CBLAPI;
 
 /** Returns a mutable document's properties as a mutable dictionary.
-    You may modify this dictionary and then call \ref CBLDatabase_SaveDocument to persist the changes.
+    You may modify this dictionary and then call \ref CBLCollection_SaveDocument to persist the changes.
     @note  The dictionary object is owned by the document; you do not need to release it.
     @note  Every call to this function returns the same mutable collection. This is the
            same collection returned by \ref CBLDocument_Properties.
@@ -143,7 +143,7 @@ FLDict CBLDocument_Properties(const CBLDocument*) CBLAPI;
 FLMutableDict CBLDocument_MutableProperties(CBLDocument*) CBLAPI;
 
 /** Sets a mutable document's properties.
-    Call \ref CBLDatabase_SaveDocument to persist the changes.
+    Call \ref CBLCollection_SaveDocument to persist the changes.
     @note  The dictionary object will be retained by the document. You are responsible for
            releasing any retained reference(s) you have to it. */
 void CBLDocument_SetProperties(CBLDocument*,

@@ -36,7 +36,7 @@ CBL_CAPI_BEGIN
     Undefined Behavior will result, possibly including crashes or overwriting the stack.
     @param domain  The log domain to associate this message with.
     @param level  The severity of the message. If this is lower than the current minimum level for the domain
-                 (as set by \ref CBLLog_SetConsoleLevel), nothing is logged.
+                 (as set by \ref CBLLogSinks_SetConsole), nothing is logged.
     @param format  A `printf`-style format string. `%` characters in this string introduce parameters,
                  and corresponding arguments must follow.
     @warning  <b>Deprecated :</b> No alternative for this function and this function will be removed in the future release. */
@@ -47,7 +47,7 @@ void CBL_Log(CBLLogDomain domain,
 /** Writes a pre-formatted message to the log, exactly as given.
     @param domain  The log domain to associate this message with.
     @param level  The severity of the message. If this is lower than the current minimum level for the domain
-                 (as set by \ref CBLLog_SetConsoleLevel), nothing is logged.
+                 (as set by \ref CBLLogSinks_SetConsole), nothing is logged.
     @param message  The exact message to write to the log.
     @warning  <b>Deprecated :</b> No alternative for this function and this function will be removed in the future release.*/
 void CBL_LogMessage(CBLLogDomain domain,

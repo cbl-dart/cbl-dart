@@ -18,15 +18,16 @@
 
 #pragma once
 #include "cbl++/Document.hh"
+#include "cbl++/TLSIdentity.hh"
 #include "cbl/CBLReplicator.h"
 #include "cbl/CBLDefaults.h"
 #include <functional>
+#include <optional>
 #include <string>
+#include <string_view>
 #include <vector>
 #include <unordered_map>
 
-// VOLATILE API: Couchbase Lite C++ API is not finalized, and may change in
-// future releases.
 
 CBL_ASSUME_NONNULL_BEGIN
 
@@ -42,11 +43,10 @@ namespace cbl {
             The port can be omitted; it defaults to 80 for `ws` and 443 for `wss`.
             For example: `wss://example.org/dbname`.
             @param url  The url. */
-        static Endpoint urlEndpoint(slice url) {
+        static Endpoint urlEndpoint(std::string_view url) {
             CBLError error {};
-            auto endpoint = CBLEndpoint_CreateWithURL(url, &error);
-            if (!endpoint)
-                throw error;
+            auto endpoint = CBLEndpoint_CreateWithURL(slice(url), &error);
+            internal::check(endpoint, error);
             return Endpoint(endpoint);
         }
         
@@ -78,16 +78,28 @@ namespace cbl {
     class Authenticator {
     public:
         /** Creates a basic authenticator authenticator using username/password credentials. */
-        static Authenticator basicAuthenticator(slice username, slice password) {
-            return Authenticator(CBLAuth_CreatePassword(username, password));
+        static Authenticator basicAuthenticator(std::string_view username, std::string_view password) {
+            return Authenticator(CBLAuth_CreatePassword(slice(username), slice(password)));
         }
 
         /** Creates a sesssion authenticator using a Couchbase Sync Gateway login session identifier,
-            and optionally a cookie name (pass NULL for the default.) */
-        static Authenticator sessionAuthenticator(slice sessionId, slice cookieName) {
-            return Authenticator(CBLAuth_CreateSession(sessionId, cookieName));
+            and optionally a cookie name. */
+        static Authenticator sessionAuthenticator(std::string_view sessionId, std::optional<std::string_view> cookieName =std::nullopt) {
+            slice cname;
+            if ( cookieName ) cname = *cookieName;
+            return Authenticator(CBLAuth_CreateSession(slice(sessionId), cname));
         }
-        
+
+#ifdef COUCHBASE_ENTERPRISE
+        /** Creates a certificate authenticator using a TLS client identity. (Enterprise Edition only.) */
+        static Authenticator certificateAuthenticator(const TLSIdentity& identity) {
+            if ( !identity ) {
+                throw Error{kCBLDomain, kCBLErrorInvalidParameter, "identity must not be empty"};
+            }
+            return Authenticator(CBLAuth_CreateCertificate(identity.ref()));
+        }
+#endif
+
     protected:
         friend class ReplicatorConfiguration;
         
@@ -101,7 +113,7 @@ namespace cbl {
                 CBLAuth_Free(r);
             });
         }
-        
+
         std::shared_ptr<CBLAuthenticator> _ref;
     };
 
@@ -109,11 +121,50 @@ namespace cbl {
     using ReplicationFilter = std::function<bool(Document, CBLDocumentFlags flags)>;
 
     /** Replication Conflict Resolver Function Callback. */
-    using ConflictResolver = std::function<Document(slice docID,
+    using ConflictResolver = std::function<Document(std::string_view docID,
                                                     const Document localDoc,
                                                     const Document remoteDoc)>;
 
-    /** The collection and the configuration that can be configured specifically for the replication. */
+#ifdef COUCHBASE_ENTERPRISE
+    /** Result returned by a \ref PropertyEncryptor callback. */
+    struct EncryptionResult {
+        fleece::alloc_slice ciphertext;          ///< Encrypted data. Empty = skip (results in a crypto error).
+        std::optional<std::string> algorithm;   ///< Optional algorithm name. Default: "CB_MOBILE_CUSTOM".
+        std::optional<std::string> keyID;       ///< Optional key identifier.
+        CBLError error {};              ///< Optional error. Non-zero aborts replication for this doc.
+    };
+
+    /** Result returned by a \ref PropertyDecryptor callback. */
+    struct DecryptionResult {
+        fleece::alloc_slice plaintext;  ///< Decrypted data. Empty = leave property in encrypted form.
+        CBLError error {};              ///< Optional error. Non-zero aborts replication for this doc.
+    };
+
+    /** Property Encryptor Function Callback. (Enterprise Edition only.)
+        Called by the push replicator for each encryptable property in a document. */
+    using PropertyEncryptor = std::function<EncryptionResult(
+        fleece::slice scope,
+        fleece::slice collection,
+        fleece::slice documentID,
+        fleece::Dict properties,
+        fleece::slice keyPath,
+        fleece::slice input)>;
+
+    /** Property Decryptor Function Callback. (Enterprise Edition only.)
+        Called by the pull replicator for each encrypted property in a document. */
+    using PropertyDecryptor = std::function<DecryptionResult(
+        fleece::slice scope,
+        fleece::slice collection,
+        fleece::slice documentID,
+        fleece::Dict properties,
+        fleece::slice keyPath,
+        fleece::slice input,
+        std::optional<std::string_view> algorithm,
+        std::optional<std::string_view> keyID)>;
+#endif
+
+    /** A collection to replicate, along with its collection-specific replication settings
+        such as filters and a conflict resolver. */
     class CollectionConfiguration {
     public:
         /** Creates CollectionConfiguration with the collection. */
@@ -220,14 +271,27 @@ namespace cbl {
             This option is disabled by default, which means that the parent-domain cookies are not permitted
             to save by default. */
         bool acceptParentDomainCookies      = kCBLDefaultReplicatorAcceptParentCookies;
-        
+
         //-- TLS settings:
         /** An X.509 cert (PEM or DER) to "pin" for TLS connections. The pinned cert will be evaluated against any certs
             in a cert chain, and the cert chain will be valid only if the cert chain contains the pinned cert. */
         std::string pinnedServerCertificate;
         /** Set of anchor certs (PEM format). */
         std::string trustedRootCertificates;
-        
+#ifdef COUCHBASE_ENTERPRISE
+        /** Accept only self-signed server certificates; any other certificates are rejected.
+            (Enterprise Edition only.) */
+        bool acceptOnlySelfSignedServerCertificate = false;
+#endif
+
+#ifdef COUCHBASE_ENTERPRISE
+        //-- Property Encryption (Enterprise Edition only):
+        /** Optional callback to encrypt encryptable properties during push replication. */
+        PropertyEncryptor documentPropertyEncryptor;
+        /** Optional callback to decrypt encrypted properties during pull replication. */
+        PropertyDecryptor documentPropertyDecryptor;
+#endif
+
     protected:
         friend class Replicator;
         
@@ -255,6 +319,9 @@ namespace cbl {
                 conf.pinnedServerCertificate = slice(pinnedServerCertificate);
             if (!trustedRootCertificates.empty())
                 conf.trustedRootCertificates = slice(trustedRootCertificates);
+#ifdef COUCHBASE_ENTERPRISE
+            conf.acceptOnlySelfSignedServerCertificate = acceptOnlySelfSignedServerCertificate;
+#endif
             return conf;
         }
         
@@ -263,7 +330,7 @@ namespace cbl {
         std::vector<CollectionConfiguration> _collections;
     };
 
-    /** Replicator for replicating documents in collections in local database and targeted database. */
+    /** A replicator that syncs documents between a local database's collections and a target database. */
     class Replicator : private RefCounted {
     public:
         /** Creates a new replicator using the specified config. */
@@ -272,22 +339,23 @@ namespace cbl {
             // Get the current configured collections and populate one for the
             // default collection if the config is configured with the database:
             auto collections = config.collections();
-            
-            // Created a shared collection map. The pointer of the collection map will be
-            // used as a context.
-            _collectionMap = std::shared_ptr<CollectionToReplCollectionMap>(new CollectionToReplCollectionMap());
-            
+
+            // Create a shared context. Its pointer is passed as the C-level context so
+            // that all captureless C callbacks (filters, conflict resolver, encryptor,
+            // decryptor) can reach both the collection map and the crypto functions.
+            _context = std::make_shared<ReplicatorContext>();
+
             // Get base C config:
             CBLReplicatorConfiguration c_config = config;
-            
+
             // Construct C replication collections to set to the c_config:
             std::vector<CBLCollectionConfiguration> colConfigs;
             for (int i = 0; i < collections.size(); i++) {
                 CollectionConfiguration& col = collections[i];
-                
+
                 CBLCollectionConfiguration colConfig {};
                 colConfig.collection = col.collection().ref();
-                
+
                 if (!col.channels.empty()) {
                     colConfig.channels = col.channels;
                 }
@@ -301,21 +369,21 @@ namespace cbl {
                                               CBLDocument* cDoc,
                                               CBLDocumentFlags flags) -> bool {
                         auto doc = Document(cDoc);
-                        auto map = (CollectionToReplCollectionMap*)context;
-                        return map->find(doc.collection())->second.pushFilter(doc, flags);
+                        auto ctx = (ReplicatorContext*)context;
+                        return ctx->collectionMap.find(doc.collection())->second.pushFilter(doc, flags);
                     };
                 }
-                
+
                 if (col.pullFilter) {
                     colConfig.pullFilter = [](void* context,
                                               CBLDocument* cDoc,
                                               CBLDocumentFlags flags) -> bool {
                         auto doc = Document(cDoc);
-                        auto map = (CollectionToReplCollectionMap*)context;
-                        return map->find(doc.collection())->second.pullFilter(doc, flags);
+                        auto ctx = (ReplicatorContext*)context;
+                        return ctx->collectionMap.find(doc.collection())->second.pullFilter(doc, flags);
                     };
                 }
-                
+
                 if (col.conflictResolver) {
                     colConfig.conflictResolver = [](void* context,
                                                     FLString docID,
@@ -325,11 +393,11 @@ namespace cbl {
                         auto localDoc = Document(cLocalDoc);
                         auto remoteDoc = Document(cRemoteDoc);
                         auto collection = localDoc ? localDoc.collection() : remoteDoc.collection();
-                        
-                        auto map = (CollectionToReplCollectionMap*)context;
-                        auto resolved = map->find(collection)->second.
-                            conflictResolver(slice(docID), localDoc, remoteDoc);
-                        
+
+                        auto ctx = (ReplicatorContext*)context;
+                        auto resolved = ctx->collectionMap.find(collection)->second.
+                            conflictResolver((std::string_view)slice(docID), localDoc, remoteDoc);
+
                         auto ref = resolved.ref();
                         if (ref && ref != cLocalDoc && ref != cRemoteDoc) {
                             CBLDocument_Retain(ref);
@@ -338,16 +406,62 @@ namespace cbl {
                     };
                 }
                 colConfigs.push_back(colConfig);
-                _collectionMap->insert({col.collection(), col});
+                _context->collectionMap.insert({col.collection(), col});
             }
-            
+
             c_config.collections = colConfigs.data();
             c_config.collectionCount = colConfigs.size();
-            c_config.context = _collectionMap.get();
-            
+            c_config.context = _context.get();
+
+#ifdef COUCHBASE_ENTERPRISE
+            if (config.documentPropertyEncryptor) {
+                _context->encryptor = config.documentPropertyEncryptor;
+                c_config.documentPropertyEncryptor = [](void* context,
+                                                        FLString scope,
+                                                        FLString collection,
+                                                        FLString documentID,
+                                                        FLDict properties,
+                                                        FLString keyPath,
+                                                        FLSlice input,
+                                                        FLStringResult* algorithm,
+                                                        FLStringResult* keyID,
+                                                        CBLError* error) -> FLSliceResult {
+                    auto ctx = (ReplicatorContext*)context;
+                    auto r = ctx->encryptor(scope, collection, documentID, properties, keyPath, input);
+                    if (error)     *error     = r.error;
+                    if (algorithm) *algorithm = r.algorithm ? FLStringResult(slice(*r.algorithm)) : FLStringResult{};
+                    if (keyID)     *keyID     = r.keyID ? FLStringResult(slice(*r.keyID)) : FLStringResult{};
+                    return FLSliceResult(r.ciphertext);
+                };
+            }
+
+            if (config.documentPropertyDecryptor) {
+                _context->decryptor = config.documentPropertyDecryptor;
+                c_config.documentPropertyDecryptor = [](void* context,
+                                                        FLString scope,
+                                                        FLString collection,
+                                                        FLString documentID,
+                                                        FLDict properties,
+                                                        FLString keyPath,
+                                                        FLSlice input,
+                                                        FLString algorithm,
+                                                        FLString keyID,
+                                                        CBLError* error) -> FLSliceResult {
+                    auto ctx = (ReplicatorContext*)context;
+                    auto toOpt = [](FLString s) -> std::optional<std::string_view> {
+                        return s.buf ? std::optional<std::string_view>{{(const char*)s.buf, s.size}} : std::nullopt;
+                    };
+                    auto r = ctx->decryptor(scope, collection, documentID, properties, keyPath, input,
+                                            toOpt(algorithm), toOpt(keyID));
+                    if (error) *error = r.error;
+                    return FLSliceResult(r.plaintext);
+                };
+            }
+#endif
+
             CBLError error {};
             _ref = (CBLRefCounted*) CBLReplicator_Create(&c_config, &error);
-            check(_ref, error);
+            internal::check(_ref, error);
         }
 
         /** Starts a replicator, asynchronously. Does nothing if it's already started.
@@ -380,7 +494,12 @@ namespace cbl {
 
         /** Returns the replicator's current status. */
         CBLReplicatorStatus status() const  {return CBLReplicator_Status(ref());}
-        
+
+        /** Returns the ID used to correlate the replication session with the remote endpoint.
+            This value is intended for logging and diagnostics, and is an empty string until the
+            replicator receives a correlation ID from the remote endpoint. */
+        std::string correlationID() const  {return internal::asString(CBLReplicator_CorrelationID(ref()));}
+
         /** Indicates which documents in the given collection have local changes that have not yet been
             pushed to the server by this replicator. This is of course a snapshot, that will go out of date
             as the replicator makes progress and/or documents are saved locally.
@@ -392,22 +511,22 @@ namespace cbl {
         fleece::Dict pendingDocumentIDs(Collection& collection) const {
             CBLError error;
             fleece::Dict result = CBLReplicator_PendingDocumentIDs(ref(), collection.ref(), &error);
-            check(result != nullptr, error);
+            internal::check(result != nullptr, error);
             return result;
         }
         
         /** Indicates whether the document with the given ID in the given collection has local changes
             that have not yet been pushed to the server by this replicator.
          
-            This is equivalent to, but faster than, calling \ref Replicator::pendingDocumentIDs(Collection& collection) and
+            This is equivalent to, but faster than, calling \ref Replicator::pendingDocumentIDs and
             checking whether the result contains \p docID. See that function's documentation for details.
             @note A `false` result means the document is not pending, _or_ there was an error.
                   To tell the difference, compare the error code to zero.
             @warning If the given collection is not part of the replication, an error will be thrown. */
-        bool isDocumentPending(fleece::slice docID, Collection& collection) const {
+        bool isDocumentPending(std::string_view docID, Collection& collection) const {
             CBLError error;
-            bool pending = CBLReplicator_IsDocumentPending(ref(), docID, collection.ref(), &error);
-            check(pending || error.code == 0, error);
+            bool pending = CBLReplicator_IsDocumentPending(ref(), slice(docID), collection.ref(), &error);
+            internal::check(pending || error.code == 0, error);
             return pending;
         }
         
@@ -461,36 +580,58 @@ namespace cbl {
         }
         
         using CollectionToReplCollectionMap = std::unordered_map<Collection, CollectionConfiguration>;
-        std::shared_ptr<CollectionToReplCollectionMap> _collectionMap;
+
+        struct ReplicatorContext {
+            CollectionToReplCollectionMap collectionMap;
+#ifdef COUCHBASE_ENTERPRISE
+            PropertyEncryptor encryptor;
+            PropertyDecryptor decryptor;
+#endif
+        };
+        std::shared_ptr<ReplicatorContext> _context;
         
         CBL_REFCOUNTED_WITHOUT_COPY_MOVE_BOILERPLATE(Replicator, RefCounted, CBLReplicator)
         
     public:
+        /** Copy constructor. Both `*this` and `other` refer to the same underlying
+            \ref CBLReplicator handle (its refcount is incremented) and share the
+            collection-configuration map. */
         Replicator(const Replicator &other) noexcept
         :RefCounted(other)
-        ,_collectionMap(other._collectionMap)
+        ,_context(other._context)
         { }
-        
+
+        /** Move constructor. Takes over `other`'s \ref CBLReplicator handle and
+            collection-configuration map, leaving `other` empty. */
         Replicator(Replicator &&other) noexcept
         :RefCounted((RefCounted&&)other)
-        ,_collectionMap(std::move(other._collectionMap))
+        ,_context(std::move(other._context))
         { }
-        
+
+        /** Copy assignment. Releases the currently-referenced handle (if any), then
+            makes `*this` refer to the same \ref CBLReplicator as `other` (refcount
+            incremented) and share its collection-configuration map. */
         Replicator& operator=(const Replicator &other) noexcept {
             RefCounted::operator=(other);
-            _collectionMap = other._collectionMap;
+            _context = other._context;
             return *this;
         }
-        
+
+        /** Move assignment. Releases the currently-referenced handle (if any), then
+            takes over `other`'s \ref CBLReplicator handle and collection-configuration
+            map; `other` is left empty. */
         Replicator& operator=(Replicator &&other) noexcept {
             RefCounted::operator=((RefCounted&&)other);
-            _collectionMap = std::move(other._collectionMap);
+            _context = std::move(other._context);
             return *this;
         }
         
+        /** Releases the underlying C \ref CBLReplicator and drops the C++ collection-configuration
+            map. After this call the object is empty (its \ref Replicator::operator bool() const
+            returns false). */
         void clear() {
             RefCounted::clear();
-            _collectionMap.reset();
+            _context.reset();
         }
     };
 }

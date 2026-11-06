@@ -24,19 +24,21 @@
 #include "cbl/CBLQuery.h"
 #include "cbl/CBLLog.h"
 #include "cbl/CBLScope.h"
+#include "fleece/Fleece.hh"
 #include "fleece/Mutable.hh"
 #include <exception>
 #include <functional>
 #include <mutex>
+#include <optional>
 #include <string>
+#include <string_view>
 #include <vector>
 
-// VOLATILE API: Couchbase Lite C++ API is not finalized, and may change in
-// future releases.
 
 CBL_ASSUME_NONNULL_BEGIN
 
 namespace cbl {
+    class Blob;
     class Collection;
     class Document;
     class MutableDocument;
@@ -48,47 +50,124 @@ namespace cbl {
 
     
 #ifdef COUCHBASE_ENTERPRISE
-    /** ENTERPRISE EDITION ONLY
-     
-        Couchbase Lite  Extension. */
+    /** Manages Couchbase Lite extensions, such as the Vector Search extension.
+        \note ENTERPRISE EDITION ONLY */
     class Extension {
     public:
         /** Enables Vector Search extension by specifying the extension path to search for the Vector Search extension library.
             This function must be called before opening a database that intends to use the vector search extension.
             @param path The file system path of the directory that contains the Vector Search extension library.
             @note Must be called before opening a database that intends to use the vector search extension. */
-        static void enableVectorSearch(slice path) {
+        static void enableVectorSearch(std::string_view path) {
             CBLError error {};
-            RefCounted::check(CBL_EnableVectorSearch(path, &error), error);
+            internal::check(CBL_EnableVectorSearch(slice(path), &error), error);
         }
     };
+
+    /** Alias for the C \ref CBLEncryptionAlgorithm enum identifying an encryption algorithm. */
+    using EncryptionAlgorithm = CBLEncryptionAlgorithm;
+    /** Alias for the C \ref CBLEncryptionKeySize enum giving the required key size for an algorithm. */
+    using EncryptionKeySize   = CBLEncryptionKeySize;
+
+    /** A database encryption key, used in \ref DatabaseConfiguration to open or create an
+        encrypted database.
+        \note ENTERPRISE EDITION ONLY */
+    class EncryptionKey : public CBLEncryptionKey {
+    public:
+        /** Creates an empty key (algorithm \ref kCBLEncryptionNone, i.e. no encryption). */
+        EncryptionKey()
+        : CBLEncryptionKey()
+        {}
+
+        /** Creates a key from an existing C \ref CBLEncryptionKey.
+            @param k  The C encryption key to copy. */
+        EncryptionKey(const CBLEncryptionKey& k)
+        : CBLEncryptionKey(k)
+        {}
+
+        /** Derives an AES-256 key from a password.
+            @param password  The password to derive the key from.
+            @param old  If true, uses the legacy (SHA-1-based) derivation; otherwise uses the
+                        current (SHA-256-based) derivation. Pass true only to open databases
+                        created with the older algorithm. */
+        EncryptionKey(std::string_view password, bool old = false) {
+            if ( old ) CBLEncryptionKey_FromPasswordOld(this, slice(password));
+            else CBLEncryptionKey_FromPassword(this, slice(password));
+        }
+
+        /** Assigns from an existing C \ref CBLEncryptionKey. */
+        EncryptionKey& operator=(const CBLEncryptionKey& k) {
+            CBLEncryptionKey::operator=(k);
+            return *this;
+        }
+    };
+
 #endif
 
-    /** Couchbase Lite Database. */
+    /** Database configuration options. */
+    class DatabaseConfiguration {
+    public:
+        std::string      directory;      ///< The parent directory of the database
+    #ifdef COUCHBASE_ENTERPRISE
+        EncryptionKey encryptionKey;     ///< The database's encryption key (if any)
+    #endif
+        /** As Couchbase Lite normally configures its databases, There is a very
+            small (though non-zero) chance that a power failure at just the wrong
+            time could cause the most recently committed transaction's changes to
+            be lost. This would cause the database to appear as it did immediately
+            before that transaction.
+
+            Setting this mode true ensures that an operating system crash or
+            power failure will not cause the loss of any data.  FULL synchronous
+            is very safe but it is also dramatically slower. */
+        bool fullSync{false};
+
+        /** Constructs a configuration from a C \ref CBLDatabaseConfiguration, copying the
+            directory and (in EE) encryption key out of it.
+            @param cblConfig  The C configuration to copy from. */
+        DatabaseConfiguration(const CBLDatabaseConfiguration& cblConfig) {
+            directory = ((slice)cblConfig.directory).asString();
+#ifdef COUCHBASE_ENTERPRISE
+            encryptionKey = cblConfig.encryptionKey;
+#endif
+            fullSync = cblConfig.fullSync;
+        }
+
+        /** Default constructor: empty directory, no encryption, full-sync off. */
+        DatabaseConfiguration() = default;
+
+        /** Returns a configuration initialized with the default settings (default directory,
+            no encryption, full-sync off). */
+        static DatabaseConfiguration defaultConfiguration() {
+            return CBLDatabaseConfiguration_Default();
+        }
+    };
+
+    /** A Couchbase Lite database, which is a container for collections of documents. */
     class Database : private RefCounted {
     public:
         // Static database-file operations:
 
         /** Returns true if a database with the given name exists in the given directory.
             @param name  The database name (without the ".cblite2" extension.)
-            @param inDirectory  The directory containing the database. If NULL, `name` must be an
-                               absolute or relative path to the database. */
-        static bool exists(slice name,
-                           slice inDirectory)
-        {
-            return CBL_DatabaseExists(name, inDirectory);
+            @param inDirectory  The directory containing the database. If not provided, `name` must be an
+                absolute or relative path to the database. */
+        static bool exists(std::string_view name, std::optional<std::string_view> inDirectory=std::nullopt) {
+            slice inDir;
+            if ( inDirectory ) inDir = slice(*inDirectory);
+            return CBL_DatabaseExists(slice(name), inDir);
         }
 
         /** Copies a database file to a new location, and assigns it a new internal UUID to distinguish
             it from the original database when replicating.
             @param fromPath  The full filesystem path to the original database (including extension).
             @param toName  The new database name (without the ".cblite2" extension.) */
-        static void copyDatabase(slice fromPath,
-                                 slice toName)
+        static void copyDatabase(std::string_view fromPath,
+                                 std::string_view toName)
         {
             CBLError error;
-            check( CBL_CopyDatabase(fromPath, toName,
-                                    nullptr, &error), error );
+            internal::check( CBL_CopyDatabase(slice(fromPath), slice(toName),
+                                              nullptr, &error), error );
         }
 
         /** Copies a database file to a new location, and assigns it a new internal UUID to distinguish
@@ -96,27 +175,32 @@ namespace cbl {
             @param fromPath  The full filesystem path to the original database (including extension).
             @param toName  The new database name (without the ".cblite2" extension.)
             @param config  The database configuration (directory and encryption option.) */
-        static void copyDatabase(slice fromPath,
-                                 slice toName,
-                                 const CBLDatabaseConfiguration& config)
+        static void copyDatabase(std::string_view fromPath,
+                                 std::string_view toName,
+                                 const DatabaseConfiguration& config)
         {
             CBLError error;
-            check( CBL_CopyDatabase(fromPath, toName,
-                                    &config, &error), error );
+            CBLDatabaseConfiguration cblConfig{
+                (slice)config.directory,
+#ifdef COUCHBASE_ENTERPRISE
+                config.encryptionKey,
+#endif
+                config.fullSync
+            };
+            internal::check( CBL_CopyDatabase(slice(fromPath), slice(toName),
+                                              &cblConfig, &error), error );
         }
 
         /** Deletes a database file. If the database file is open, an error will be thrown.
             @param name  The database name (without the ".cblite2" extension.)
-            @param inDirectory  The directory containing the database. If NULL, `name` must be an
-                                absolute or relative path to the database. */
-        static void deleteDatabase(slice name,
-                                   slice inDirectory)
-        {
+            @param inDirectory  The directory containing the database(optional), If not provided, `name` must be an
+                absolute or relative path to the database. */
+        static void deleteDatabase(std::string_view name, std::optional<std::string_view> inDirectory =std::nullopt) {
             CBLError error;
-            if (!CBL_DeleteDatabase(name,
-                                    inDirectory,
-                                    &error) && error.code != 0)
-                check(false, error);
+            slice inDir;
+            if ( inDirectory ) inDir = slice(*inDirectory);
+            if (!CBL_DeleteDatabase(slice(name), inDir, &error) && error.code != 0)
+                internal::check(false, error);
         }
 
         // Lifecycle:
@@ -125,7 +209,7 @@ namespace cbl {
             It's OK to open the same database file multiple times. Each \ref Database instance is
             independent of the others (and must be separately closed and released.)
             @param name  The database name (without the ".cblite2" extension.) */
-        Database(slice name) {
+        Database(std::string_view name) {
             open(name, nullptr);
         }
 
@@ -134,41 +218,88 @@ namespace cbl {
             independent of the others (and must be separately closed and released.)
             @param name  The database name (without the ".cblite2" extension.)
             @param config  The database configuration (directory and encryption option.) */
-        Database(slice name,
-                 const CBLDatabaseConfiguration& config)
+        Database(std::string_view name,
+                 const DatabaseConfiguration& config)
         {
-            open(name, &config);
+            CBLDatabaseConfiguration cblConfig{
+                (slice)config.directory,
+#ifdef COUCHBASE_ENTERPRISE
+                config.encryptionKey,
+#endif
+                config.fullSync
+            };
+            open(name, &cblConfig);
         }
 
         /** Closes an open database. */
         void close() {
             CBLError error;
-            check(CBLDatabase_Close(ref(), &error), error);
+            internal::check(CBLDatabase_Close(ref(), &error), error);
         }
 
         /** Closes and deletes a database. */
         void deleteDatabase() {
             CBLError error;
-            check(CBLDatabase_Delete(ref(), &error), error);
+            internal::check(CBLDatabase_Delete(ref(), &error), error);
         }
         
         /** Performs database maintenance.
             @param type  The database maintenance type. */
         void performMaintenance(CBLMaintenanceType type) {
             CBLError error;
-            check(CBLDatabase_PerformMaintenance(ref(), type, &error), error);
+            internal::check(CBLDatabase_PerformMaintenance(ref(), type, &error), error);
         }
+
+#ifdef COUCHBASE_ENTERPRISE
+        /** Encrypts or decrypts a database, or changes its encryption key.
+
+            If \p newKey is NULL, or its \p algorithm is \ref kCBLEncryptionNone, the database will be decrypted.
+            Otherwise the database will be encrypted with that key; if it was already encrypted, it will be
+            re-encrypted with the new key. */
+        void changeEncryptionKey(const EncryptionKey* _cbl_nullable newKey) {
+            CBLError error{};
+            internal::check(CBLDatabase_ChangeEncryptionKey(ref(), newKey, &error), error);
+        }
+#endif
 
         // Accessors:
         
         /** Returns the database's name. */
-        std::string name() const                        {return asString(CBLDatabase_Name(ref()));}
+        std::string name() const                        {return internal::asString(CBLDatabase_Name(ref()));}
         
         /** Returns the database's full filesystem path, or an empty string if the database is closed or deleted. */
-        std::string path() const                        {return asString(CBLDatabase_Path(ref()));}
+        std::string path() const                        {return internal::asString(CBLDatabase_Path(ref()));}
         
         /** Returns the database's configuration, as given when it was opened. */
-        CBLDatabaseConfiguration config() const         {return CBLDatabase_Config(ref());}
+        DatabaseConfiguration config() const            {return CBLDatabase_Config(ref());}
+
+        /** Get a \ref Blob from the database using the \ref Blob properties.
+
+            The \ref Blob properties is a blob's metadata containing two required fields
+            which are a special marker property `"@type":"blob"`, and property `digest` whose value
+            is a hex SHA-1 digest of the blob's data. The other optional properties are `length` and
+            `content_type`. To obtain the \ref Blob properties from a \ref Blob,
+            call \ref Blob::properties function.
+
+            @param properties   The properties for getting the \ref Blob object.
+            @return  The \ref Blob, or a falsy Blob if no blob with the given digest exists.
+            @throws cbl::Error  On a database error (such as malformed blob properties). Note a
+                    non-existent blob is not an error — that returns a falsy Blob rather than throwing. */
+        inline Blob getBlob(fleece::Dict properties) const;
+
+        /** Save a new \ref Blob object into the database without associating it with
+            any documents. The properties of the saved \ref Blob object will include
+            information necessary for referencing the \ref Blob object in the properties
+            of the document to be saved into the database.
+
+            Normally you do not need to use this function unless you are in the situation
+            (e.g. developing javascript binding) that you cannot retain the \ref CBLBlob
+            object until the document containing the \ref CBLBlob object is successfully
+            saved into the database.
+            \note The saved \ref Blob objects that are not associated with any documents
+                  will be removed from the database when compacting the database.
+            @param blob The Blob to save. */
+        inline void saveBlob(const Blob& blob);
 
         // Collections:
         
@@ -179,7 +310,7 @@ namespace cbl {
         fleece::MutableArray getScopeNames() const {
             CBLError error {};
             FLMutableArray flNames = CBLDatabase_ScopeNames(ref(), &error);
-            check(flNames, error);
+            internal::check(error.code == 0, error);
             fleece::MutableArray names(flNames);
             FLMutableArray_Release(flNames);
             return names;
@@ -188,10 +319,10 @@ namespace cbl {
         /** Returns the names of all collections in the scope.
             @param scopeName  The name of the scope.
             @return The names of all collections in the scope, or throws if an error occurred. */
-        fleece::MutableArray getCollectionNames(slice scopeName =kCBLDefaultScopeName) const {
+        fleece::MutableArray getCollectionNames(std::string_view scopeName = (std::string_view)slice(kCBLDefaultScopeName)) const {
             CBLError error {};
-            FLMutableArray flNames = CBLDatabase_CollectionNames(ref(), scopeName, &error);
-            check(flNames, error);
+            FLMutableArray flNames = CBLDatabase_CollectionNames(ref(), slice(scopeName), &error);
+            internal::check(error.code == 0, error);
             fleece::MutableArray names(flNames);
             FLMutableArray_Release(flNames);
             return names;
@@ -199,10 +330,12 @@ namespace cbl {
         
         /** Returns the existing collection with the given name and scope.
             @param collectionName  The name of the collection.
-            @param scopeName  The name of the scope.
-            @return A \ref Collection instance, or NULL if the collection doesn't exist, or throws if an error occurred. */
-        inline Collection getCollection(slice collectionName, slice scopeName =kCBLDefaultScopeName) const;
-        
+            @param scopeName  The name of the scope (optional). If not supplied, the default scope name will be used.
+            @return The \ref Collection, or a falsy Collection if it doesn't exist.
+            @throws cbl::Error  On a database error. Note a non-existent collection is not an
+                    error — that returns a falsy Collection rather than throwing. */
+        inline Collection getCollection(std::string_view collectionName, std::optional<std::string_view> scopeName = std::nullopt) const;
+
         /** Create a new collection.
             The naming rules of the collections and scopes are as follows:
                 - Must be between 1 and 251 characters in length.
@@ -211,24 +344,26 @@ namespace cbl {
                 - Both scope and collection names are case sensitive.
             @note If the collection already exists, the existing collection will be returned.
             @param collectionName  The name of the collection.
-            @param scopeName  The name of the scope.
-            @return A \ref Collection instance, or throws if an error occurred. */
-        inline Collection createCollection(slice collectionName, slice scopeName =kCBLDefaultScopeName);
+            @param scopeName  The name of the scope (optional).  If not supplied, the default scope name will be used.
+            @return A \ref Collection instance. */
+        inline Collection createCollection(std::string_view collectionName, std::optional<std::string_view> scopeName =std::nullopt);
         
         /** Delete an existing collection.
             @note The default collection cannot be deleted.
             @param collectionName  The name of the collection.
-            @param scopeName  The name of the scope. */
-        inline void deleteCollection(slice collectionName, slice scopeName =kCBLDefaultScopeName) {
+            @param scopeName  The name of the scope (optional). If not supplied, the default scope name will be used. */
+        void deleteCollection(std::string_view collectionName, std::optional<std::string_view> scopeName =std::nullopt) {
             CBLError error {};
-            check(CBLDatabase_DeleteCollection(ref(), collectionName, scopeName, &error), error);
+            slice sname = scopeName.value_or(slice(kCBLDefaultScopeName));
+            if ( scopeName ) sname = *scopeName;
+            internal::check(CBLDatabase_DeleteCollection(ref(), slice(collectionName), sname, &error), error);
         }
-        
+
         /** Returns the default collection. */
         inline Collection getDefaultCollection() const;
         
         // Query:
-        
+
         /** Creates a new query by compiling the input string.
             This is fast, but not instantaneous. If you need to run the same query many times, keep the
             \ref Query object around instead of compiling it each time. If you need to run related queries
@@ -239,7 +374,7 @@ namespace cbl {
                     [N1QL](https://docs.couchbase.com/server/4.0/n1ql/n1ql-language-reference/index.html).
             @param queryString  The query string.
             @return  The new query object. */
-        inline Query createQuery(CBLQueryLanguage language, slice queryString);
+        inline Query createQuery(QueryLanguage language, std::string_view queryString);
 
         // Notifications:
         
@@ -262,7 +397,9 @@ namespace cbl {
         }
         
         // Destructors:
-        
+
+        /** Releases the underlying database handle. The database remains open if other
+            \ref Database references to it exist. */
         ~Database() {
             clear();
         }
@@ -274,14 +411,14 @@ namespace cbl {
         CBL_REFCOUNTED_WITHOUT_COPY_MOVE_BOILERPLATE(Database, RefCounted, CBLDatabase)
 
     private:
-        void open(slice& name, const CBLDatabaseConfiguration* _cbl_nullable config) {
+        void open(std::string_view name, const CBLDatabaseConfiguration* _cbl_nullable config) {
             CBLError error {};
-            _ref = (CBLRefCounted*)CBLDatabase_Open(name, config, &error);
-            check(_ref != nullptr, error);
+            _ref = (CBLRefCounted*)CBLDatabase_Open(slice(name), config, &error);
+            internal::check(_ref != nullptr, error);
             
             _notificationReadyCallbackAccess = std::make_shared<NotificationsReadyCallbackAccess>();
         }
-        
+
         class NotificationsReadyCallbackAccess {
         public:
             void setCallback(NotificationsReadyCallback callback) {
@@ -306,28 +443,42 @@ namespace cbl {
         std::shared_ptr<NotificationsReadyCallbackAccess> _notificationReadyCallbackAccess;
         
     public:
+        /** Copy constructor. Both `*this` and `other` refer to the same underlying
+            \ref CBLDatabase handle (its refcount is incremented) and share the
+            buffered-notification callback state. */
         Database(const Database &other) noexcept
         :RefCounted(other)
         ,_notificationReadyCallbackAccess(other._notificationReadyCallbackAccess)
         { }
-        
+
+        /** Move constructor. Takes over `other`'s \ref CBLDatabase handle and
+            buffered-notification callback state, leaving `other` empty. */
         Database(Database &&other) noexcept
         :RefCounted((RefCounted&&)other)
         ,_notificationReadyCallbackAccess(std::move(other._notificationReadyCallbackAccess))
         { }
-        
+
+        /** Copy assignment. Releases the currently-referenced handle (if any), then
+            makes `*this` refer to the same \ref CBLDatabase as `other` (refcount
+            incremented) and share its buffered-notification callback state. */
         Database& operator=(const Database &other) noexcept {
             RefCounted::operator=(other);
             _notificationReadyCallbackAccess = other._notificationReadyCallbackAccess;
             return *this;
         }
-        
+
+        /** Move assignment. Releases the currently-referenced handle (if any), then
+            takes over `other`'s \ref CBLDatabase handle and buffered-notification
+            callback state; `other` is left empty. */
         Database& operator=(Database &&other) noexcept {
             RefCounted::operator=((RefCounted&&)other);
             _notificationReadyCallbackAccess = std::move(other._notificationReadyCallbackAccess);
             return *this;
         }
         
+        /** Releases the underlying C \ref CBLDatabase handle and drops the buffered-notification
+            callback. After this call the object is empty (its `operator bool` returns false).
+            @note Other \ref Database references to the same database file remain valid. */
         void clear() {
             // Reset _notificationReadyCallbackAccess the releasing the _ref to
             // ensure that CBLDatabase is deleted before _notificationReadyCallbackAccess.
@@ -349,9 +500,12 @@ namespace cbl {
         :Transaction(db.ref())
         { }
 
+        /** Begins a batch operation on the given C database handle. Provided for callers
+            that hold a raw \ref CBLDatabase pointer rather than a C++ \ref Database wrapper.
+            @param db  The database to begin a transaction on. */
         explicit Transaction (CBLDatabase *db) {
-            CBLError error;
-            RefCounted::check(CBLDatabase_BeginTransaction(db, &error), error);
+            CBLError error{};
+            internal::check(CBLDatabase_BeginTransaction(db, &error), error);
             _db = db;
         }
 
@@ -361,6 +515,7 @@ namespace cbl {
         /** Ends the transaction, rolling back changes. */
         void abort()    {end(false);}
 
+        /** Ends the transaction, rolling back any changes that have not been committed. */
         ~Transaction()  {end(false);}
 
     private:
@@ -377,7 +532,7 @@ namespace cbl {
                         CBL_Log(kCBLLogDomainDatabase, kCBLLogWarning,
                                 "Transaction::end failed, while handling an exception");
                     else
-                        RefCounted::check(false, error);
+                        internal::check(false, error);
                 }
             }
         }

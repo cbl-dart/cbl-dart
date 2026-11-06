@@ -568,6 +568,8 @@ files:
         name: CBLReplicator_AddDocumentReplicationListener
       c:@F@CBLReplicator_Config:
         name: CBLReplicator_Config
+      c:@F@CBLReplicator_CorrelationID:
+        name: CBLReplicator_CorrelationID
       c:@F@CBLReplicator_Create:
         name: CBLReplicator_Create
       c:@F@CBLReplicator_IsDocumentPending:
@@ -1268,8 +1270,6 @@ files:
         name: kCBLDefaultCollectionName
       c:@kCBLDefaultDatabaseFullSync:
         name: kCBLDefaultDatabaseFullSync
-      c:@kCBLDefaultDatabaseMmapDisabled:
-        name: kCBLDefaultDatabaseMmapDisabled
       c:@kCBLDefaultFileLogSinkMaxKeptFiles:
         name: kCBLDefaultFileLogSinkMaxKeptFiles
       c:@kCBLDefaultFileLogSinkMaxSize:

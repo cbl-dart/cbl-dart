@@ -117,7 +117,8 @@ FLSliceResult CBLError_Message(const CBLError* _cbl_nullable outError) CBLAPI;
 
 
 /** \defgroup other_types   Other Types
-     @{ */
+     @{
+    Timestamps and other miscellaneous types and functions. */
 
 /** A date/time representation used for document expiration (and in date/time queries.)
     Measured in milliseconds since the Unix epoch (1/1/1970, midnight UTC.) */
@@ -152,7 +153,7 @@ typedef struct CBLRefCounted CBLRefCounted;
 
 /** Increments an object's reference-count.
     Usually you'll call one of the type-safe synonyms specific to the object type,
-    like \ref CBLDatabase_Retain` */
+    like \ref CBLDatabase_Retain. */
 CBLRefCounted* CBL_Retain(CBLRefCounted* _cbl_nullable) CBLAPI;
 
 /** Decrements an object's reference-count, freeing the object if the count hits zero.
@@ -177,25 +178,25 @@ void CBL_DumpInstances(void) CBLAPI;
 
 
 
-/** \defgroup database  Database
+/** \addtogroup database
      @{ */
 /** A connection to an open database. */
 typedef struct CBLDatabase   CBLDatabase;
 /** @} */
 
-/** \defgroup scope  Scope
+/** \addtogroup scope
      @{ */
 /** A  collection's scope. */
 typedef struct CBLScope CBLScope;
 /** @} */
 
-/** \defgroup collection  Collection
+/** \addtogroup collection
      @{ */
 /** A collection, a document container. */
 typedef struct CBLCollection    CBLCollection;
 /** @} */
 
-/** \defgroup documents  Documents
+/** \addtogroup documents
      @{ */
 /** An in-memory copy of a document.
     CBLDocument objects can be mutable or immutable. Immutable objects are referenced by _const_
@@ -204,13 +205,13 @@ typedef struct CBLCollection    CBLCollection;
 typedef struct CBLDocument   CBLDocument;
 /** @} */
 
-/** \defgroup blobs Blobs
+/** \addtogroup blobs
      @{ */
 /** A binary data value associated with a \ref CBLDocument. */
 typedef struct CBLBlob      CBLBlob;
 /** @} */
 
-/** \defgroup query  Query
+/** \addtogroup query
      @{ */
 /** A compiled database query. */
 typedef struct CBLQuery      CBLQuery;
@@ -219,7 +220,7 @@ typedef struct CBLQuery      CBLQuery;
 typedef struct CBLResultSet  CBLResultSet;
 /** @} */
 
-/** \defgroup index  Index
+/** \addtogroup index
      @{ */
 /** A query index. */
 typedef struct CBLQueryIndex      CBLQueryIndex;
@@ -229,7 +230,7 @@ typedef struct CBLIndexUpdater      CBLIndexUpdater;
 #endif
 /** @} */
 
-/** \defgroup replication  Replication
+/** \addtogroup replication
      @{ */
 /** A background task that syncs a \ref CBLDatabase with a remote server or peer. */
 typedef struct CBLReplicator CBLReplicator;
@@ -237,7 +238,7 @@ typedef struct CBLReplicator CBLReplicator;
 
 #ifdef COUCHBASE_ENTERPRISE
 
-/** \defgroup encryptables Encryptables
+/** \addtogroup encryptables
      @{ */
 /** An encryptable value. The encryptable values will be encrypted by a push replicator via the
     specified property encryptor callback when the document is push to the remote server.

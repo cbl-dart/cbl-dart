@@ -26,8 +26,6 @@
 #include <string>
 #include <vector>
 
-// VOLATILE API: Couchbase Lite C++ API is not finalized, and may change in
-// future releases.
 
 CBL_ASSUME_NONNULL_BEGIN
 
@@ -40,11 +38,81 @@ namespace cbl {
     class VectorIndexConfiguration;
 
     /** Conflict handler used when saving a document. */
-    using CollectionConflictHandler = std::function<bool(MutableDocument documentBeingSaved,
-                                                         Document conflictingDocument)>;
+    using CollectionConflictHandler  = std::function<bool(MutableDocument documentBeingSaved,
+                                                          Document conflictingDocument)>;
+    /** Configuration for creating a value index, which indexes the values of one or more
+        document properties. */
+    struct ValueIndexConfiguration {
+        /** The language used in the expressions (Required). */
+        QueryLanguage expressionLanguage;
+
+        /** The expressions describing each column of the index (Required).
+            The expressions could be specified in a JSON Array or in N1QL syntax
+            using comma delimiter, depending on expressionLanguage. */
+        std::string expressions;
+
+        /** A predicate expression defining conditions for indexing documents.
+            Only documents satisfying the predicate are included, enabling partial indexes.
+            The expression can be JSON or N1QL/SQL++ syntax, depending on expressionLanguage. */
+        std::string where;
+    };
+
+    /** Configuration for creating a full-text index, which enables full-text search in queries. */
+    struct FullTextIndexConfiguration {
+        /** The language used in the expressions (Required). */
+        QueryLanguage expressionLanguage;
+
+        /** The expressions describing each coloumn of the index (Required).
+            The expressions could be specified in a JSON Array or in N1QL syntax
+            using comma delimiter, depending on expressionLanguage. */
+        std::string expressions;
+
+        /** Should diacritical marks (accents) be ignored?
+            Defaults to  \ref kCBLDefaultFullTextIndexIgnoreAccents.
+            Generally this should be left `false` for non-English text. */
+        bool ignoreAccents;
+
+        /** The dominant language. Setting this enables word stemming, i.e.
+            matching different cases of the same word ("big" and "bigger", for instance) and ignoring
+            common "stop-words" ("the", "a", "of", etc.)
+
+            Can be an ISO-639 language code or a lowercase (English) language name; supported
+            languages are: da/danish, nl/dutch, en/english, fi/finnish, fr/french, de/german,
+            hu/hungarian, it/italian, no/norwegian, pt/portuguese, ro/romanian, ru/russian,
+            es/spanish, sv/swedish, tr/turkish.
+
+            If left null,  or set to an unrecognized language, no language-specific behaviors
+            such as stemming and stop-word removal occur. */
+        std::string language;
+
+        /** A predicate expression defining conditions for indexing documents.
+            Only documents satisfying the predicate are included, enabling partial indexes.
+            The expression can be JSON or N1QL/SQL++ syntax, depending on expressionLanguage. */
+        std::string where;
+    };
+
+    /** Array Index Configuration for indexing property values within arrays
+        in documents, intended for use with the UNNEST query. */
+    struct ArrayIndexConfiguration {
+        /** The language used in the expressions (Required). */
+        QueryLanguage expressionLanguage;
+
+        /** Path to the array, which can be nested to be indexed (Required).
+            Use "[]" to represent a property that is an array of each nested array level.
+            For a single array or the last level array, the "[]" is optional. For instance,
+            use "contacts[].phones" to specify an array of phones within each contact. */
+        std::string path;
+
+        /** Optional expressions representing the values within the array to be
+            indexed. The expressions could be specified in a JSON Array or in N1QL syntax
+            using comma delimiter, depending on expressionLanguage.
+            If the array specified by the path contains scalar values, the expressions
+            should be left unset or set to null. */
+        std::string expressions;
+    };
 
     /**
-     A Collection class represent a collection which is a container for documents.
+     A Collection is a container for documents within a database.
      A collection can be thought as a table in the relational database. Each collection belongs to
      a scope which is simply a namespce, and has a name which is unique within its scope.
      
@@ -65,15 +133,15 @@ namespace cbl {
         // Accessors:
         
         /** The collection's name. */
-        std::string name() const                        {return asString(CBLCollection_Name(ref()));}
+        std::string name() const                        {return internal::asString(CBLCollection_Name(ref()));}
         
         /** The collection's fully qualified name in the '<scope-name>.<collection-name>' format. */
-        std::string fullName() const                    {return asString(CBLCollection_FullName(ref()));}
+        std::string fullName() const                    {return internal::asString(CBLCollection_FullName(ref()));}
         
         /** The scope's name. */
         std::string scopeName() const {
             auto scope = CBLCollection_Scope(ref());
-            auto scopeName = asString(CBLScope_Name(scope));
+            auto scopeName = internal::asString(CBLScope_Name(scope));
             CBLScope_Release(scope);
             return scopeName;
         }
@@ -89,14 +157,18 @@ namespace cbl {
         /** Reads a document from the collection in an immutable form.
             @note If you are reading the document in order to make changes to it, call \ref Collection::getMutableDocument() instead.
             @param docID  The ID of the document.
-            @return A new \ref Document instance, or NULL if the doc doesn't exist, or throws if an error occurred. */
-        inline Document getDocument(slice docID) const;
+            @return A new \ref Document instance, or a falsy Document if the doc doesn't exist.
+            @throws cbl::Error  On a database error. Note a non-existent document is not an
+                    error — that returns a falsy Document rather than throwing. */
+        inline Document getDocument(std::string_view docID) const;
         
         /** Reads a document from the collection in mutable form that can be updated and saved.
-            (This function is otherwise identical to \ref Collection::getDocument(slice docID).)
+            (This function is otherwise identical to \ref Collection::getDocument.)
             @param docID  The ID of the document.
-            @return A new \ref Document instance, or NULL if the doc doesn't exist, or throws if an error occurred. */
-        inline MutableDocument getMutableDocument(slice docID) const;
+            @return A new \ref Document instance, or a falsy Document if the doc doesn't exist.
+            @throws cbl::Error  On a database error. Note a non-existent document is not an
+                    error — that returns a falsy Document rather than throwing. */
+        inline MutableDocument getMutableDocument(std::string_view docID) const;
 
         /** Saves a (mutable) document to the collection.
             @warning If a newer revision has been saved since \p doc was loaded, it will be overwritten by
@@ -139,31 +211,31 @@ namespace cbl {
         /** Purges a document from the collection. This removes all traces of the document.
             Purges are _not_ replicated. If the document is changed on a server, it will be re-created
             when pulled.
-            @note If you don't have the document in memory already, \ref purgeDocument(slice docID) is a simpler shortcut.
+            @note If you don't have the document in memory already, \ref purgeDocument(std::string_view docID) is a simpler shortcut.
             @param doc  The document to purge. */
         inline void purgeDocument(Document &doc);
-        
+
         /** Purges a document by its ID from the collection.
             @param docID  The document ID to purge.
             @return True if the document was purged, false if it doesn't exist. */
-        bool purgeDocument(slice docID) {
+        bool purgeDocument(std::string_view docID) {
             CBLError error;
-            bool purged = CBLCollection_PurgeDocumentByID(ref(), docID, &error);
-            if (!purged && error.code != 0)
-                throw error;
+            bool purged = CBLCollection_PurgeDocumentByID(ref(), slice(docID), &error);
+            if ( !purged && !(error.domain == kCBLDomain && error.code == kCBLErrorNotFound) )
+                internal::check(false, error);
             return purged;
         }
         
         /** Returns the time, if any, at which a given document in the collection will expire and be purged.
-            Documents don't normally expire; you have to call \ref Collection::setDocumentExpiration(slice docID, time_t expiration)
+            Documents don't normally expire; you have to call \ref Collection::setDocumentExpiration(std::string_view docID, time_t expiration)
             to set a document's expiration time.
             @param docID  The ID of the document.
             @return The expiration time as a CBLTimestamp (milliseconds since Unix epoch),
-                  or 0 if the document does not have an expiration */
-        time_t getDocumentExpiration(slice docID) const {
+                  or 0 if the document does not have an expiration. */
+        time_t getDocumentExpiration(std::string_view docID) const {
             CBLError error;
-            time_t exp = CBLCollection_GetDocumentExpiration(ref(), docID, &error);
-            check(exp >= 0, error);
+            time_t exp = CBLCollection_GetDocumentExpiration(ref(), slice(docID), &error);
+            internal::check(exp >= 0, error);
             return exp;
         }
 
@@ -171,11 +243,11 @@ namespace cbl {
             @param docID  The ID of the document.
             @param expiration  The expiration time as a CBLTimestamp (milliseconds since Unix epoch),
                               or 0 if the document should never expire. */
-        void setDocumentExpiration(slice docID, time_t expiration) {
+        void setDocumentExpiration(std::string_view docID, time_t expiration) {
             CBLError error;
-            check(CBLCollection_SetDocumentExpiration(ref(), docID, expiration, &error), error);
+            internal::check(CBLCollection_SetDocumentExpiration(ref(), slice(docID), expiration, &error), error);
         }
-        
+
         // Indexes:
 
         /** Creates a value index in the collection.
@@ -184,9 +256,13 @@ namespace cbl {
             If a non-identical index with that name already exists, it is deleted and re-created.
             @param name  The index name.
             @param config  The value index config. */
-        void createValueIndex(slice name, CBLValueIndexConfiguration config) {
+        void createValueIndex(std::string_view name, ValueIndexConfiguration config) {
             CBLError error;
-            check(CBLCollection_CreateValueIndex(ref(), name, config, &error), error);
+            internal::check(CBLCollection_CreateValueIndex(ref(), slice(name), {
+                config.expressionLanguage,
+                slice(config.expressions),
+                slice(config.where)
+            }, &error), error);
         }
         
         /** Creates a full-text index in the collection.
@@ -195,51 +271,60 @@ namespace cbl {
             If a non-identical index with that name already exists, it is deleted and re-created.
             @param name  The index name.
             @param config  The full-text index config. */
-        void createFullTextIndex(slice name, CBLFullTextIndexConfiguration config) {
+        void createFullTextIndex(std::string_view name, FullTextIndexConfiguration config) {
             CBLError error;
-            check(CBLCollection_CreateFullTextIndex(ref(), name, config, &error), error);
+            internal::check(CBLCollection_CreateFullTextIndex(ref(), slice(name), {
+                config.expressionLanguage,
+                slice(config.expressions),
+                config.ignoreAccents,
+                slice(config.language),
+                slice(config.where)
+            }, &error), error);
         }
-        
+
         /** Creates an array index for use with UNNEST queries in the collection.
             Indexes are persistent.
             If an identical index with that name already exists, nothing happens (and no error is returned.)
             If a non-identical index with that name already exists, it is deleted and re-created.
             @param name  The index name.
             @param config  The array index config. */
-        void createArrayIndex(slice name, CBLArrayIndexConfiguration config) {
+        void createArrayIndex(std::string_view name, ArrayIndexConfiguration config) {
             CBLError error;
-            check(CBLCollection_CreateArrayIndex(ref(), name, config, &error), error);
+            internal::check(CBLCollection_CreateArrayIndex(ref(), slice(name), {
+                config.expressionLanguage,
+                slice(config.path),
+                slice(config.expressions)
+            }, &error), error);
         }
-        
+
 #ifdef COUCHBASE_ENTERPRISE
-        /** ENTERPRISE EDITION ONLY
-         
-            Creatres a vector index in the collection.
+        /** Creates a vector index in the collection.
             If an identical index with that name already exists, nothing happens (and no error is returned.)
             If a non-identical index with that name already exists, it is deleted and re-created.
+            \note ENTERPRISE EDITION ONLY
             @param name  The index name.
             @param config  The vector index config. */
-        inline void createVectorIndex(slice name, const VectorIndexConfiguration &config);
+        inline void createVectorIndex(std::string_view name, VectorIndexConfiguration config);
 #endif
 
         /** Deletes an index given its name from the collection. */
-        void deleteIndex(slice name) {
+        void deleteIndex(std::string_view name) {
             CBLError error;
-            check(CBLCollection_DeleteIndex(ref(), name, &error), error);
+            internal::check(CBLCollection_DeleteIndex(ref(), slice(name), &error), error);
         }
 
         /** Returns the names of the indexes in the collection, as a Fleece array of strings. */
         fleece::RetainedArray getIndexNames() {
-            CBLError error;
+            CBLError error{};
             FLMutableArray flNames = CBLCollection_GetIndexNames(ref(), &error);
-            check(flNames, error);
+            internal::check(error.code == 0, error);
             fleece::RetainedArray names(flNames);
             FLArray_Release(flNames);
             return names;
         }
         
-        /** Get an index by name. If the index doesn't exist, the NULL QueryIndex object will be returned. */
-        inline QueryIndex getIndex(slice name);
+        /** Get an index by name. If the index doesn't exist, a falsy QueryIndex object will be returned. */
+        inline QueryIndex getIndex(std::string_view name);
         
         // Listeners:
         
@@ -264,19 +349,18 @@ namespace cbl {
             @param docID  The ID of the document to observe.
             @param callback  The callback to be invoked.
             @return A Change Listener Token. Call \ref ListenerToken::remove() method to remove the listener. */
-        [[nodiscard]] CollectionDocumentChangeListener addDocumentChangeListener(slice docID,
+        [[nodiscard]] CollectionDocumentChangeListener addDocumentChangeListener(std::string_view docID,
                                                                                  CollectionDocumentChangeListener::Callback callback)
         {
             auto l = CollectionDocumentChangeListener(callback);
-            l.setToken( CBLCollection_AddDocumentChangeListener(ref(), docID, &_callDocListener, l.context()) );
+            l.setToken( CBLCollection_AddDocumentChangeListener(ref(), slice(docID), &_callDocListener, l.context()) );
             return l;
         }
         
     protected:
-        
+
         static Collection adopt(const CBLCollection* _cbl_nullable d, CBLError *error) {
-            if (!d && error->code != 0)
-                throw *error;
+            internal::check(d != nullptr || error->code == 0, *error);
             Collection col;
             col._ref = (CBLRefCounted*)d;
             return col;
@@ -326,9 +410,9 @@ namespace cbl {
         slice& docID()                              {return _docID;}
 
         /** Internal API. */
-        DocumentChange(Collection collection, slice docID)
+        DocumentChange(Collection collection, std::string_view docID)
         :_collection(std::move(collection))
-        ,_docID(std::move(docID))
+        ,_docID(slice(docID))
         { }
         
     private:
@@ -339,14 +423,16 @@ namespace cbl {
 
     // Database method bodies:
 
-    inline Collection Database::getCollection(slice collectionName, slice scopeName) const {
+    inline Collection Database::getCollection(std::string_view collectionName, std::optional<std::string_view> optScopeName) const {
         CBLError error {};
-        return Collection::adopt(CBLDatabase_Collection(ref(), collectionName, scopeName, &error), &error) ;
+        slice scopeName = optScopeName.value_or(slice(kCBLDefaultScopeName));
+        return Collection::adopt(CBLDatabase_Collection(ref(), slice(collectionName), slice(scopeName), &error), &error) ;
     }
 
-    inline Collection Database::createCollection(slice collectionName, slice scopeName) {
+    inline Collection Database::createCollection(std::string_view collectionName, std::optional<std::string_view> optScopeName) {
         CBLError error {};
-        return Collection::adopt(CBLDatabase_CreateCollection(ref(), collectionName, scopeName, &error), &error) ;
+        slice scopeName = optScopeName.value_or(slice(kCBLDefaultScopeName));
+        return Collection::adopt(CBLDatabase_CreateCollection(ref(), slice(collectionName), scopeName, &error), &error) ;
     }
 
     inline Collection Database::getDefaultCollection() const {

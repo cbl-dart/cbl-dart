@@ -796,6 +796,11 @@ external CBLReplicatorStatus CBLReplicator_Status(
   ffi.Pointer<CBLReplicator> arg0,
 );
 
+@ffi.Native<NativeCBLReplicator_CorrelationID>(isLeaf: true)
+external FLStringResult CBLReplicator_CorrelationID(
+  ffi.Pointer<CBLReplicator> arg0,
+);
+
 @ffi.Native<NativeCBLReplicator_PendingDocumentIDs>(isLeaf: true)
 external FLDict CBLReplicator_PendingDocumentIDs(
   ffi.Pointer<CBLReplicator> arg0,
@@ -848,9 +853,6 @@ external ffi.Pointer<CBLCert> CBLReplicator_ServerCertificate(
 
 @ffi.Native<ffi.Bool>()
 external final bool kCBLDefaultDatabaseFullSync;
-
-@ffi.Native<ffi.Bool>()
-external final bool kCBLDefaultDatabaseMmapDisabled;
 
 @ffi.Native<ffi.Bool>()
 external final bool kCBLDefaultLogFileUsePlaintext;
@@ -3460,6 +3462,10 @@ typedef NativeCBLReplicator_Status =
     CBLReplicatorStatus Function(ffi.Pointer<CBLReplicator>);
 typedef DartCBLReplicator_Status =
     CBLReplicatorStatus Function(ffi.Pointer<CBLReplicator>);
+typedef NativeCBLReplicator_CorrelationID =
+    FLStringResult Function(ffi.Pointer<CBLReplicator>);
+typedef DartCBLReplicator_CorrelationID =
+    FLStringResult Function(ffi.Pointer<CBLReplicator>);
 typedef NativeCBLReplicator_PendingDocumentIDs =
     FLDict Function(
       ffi.Pointer<CBLReplicator>,
@@ -5185,15 +5191,15 @@ const int kCBLLogDomainMaskListener = 16;
 
 const int kCBLLogDomainMaskAll = 255;
 
-const String CBLITE_VERSION = '4.0.3';
+const String CBLITE_VERSION = '4.1.2';
 
-const int CBLITE_VERSION_NUMBER = 4000003;
+const int CBLITE_VERSION_NUMBER = 4001002;
 
-const int CBLITE_BUILD_NUMBER = 3;
+const int CBLITE_BUILD_NUMBER = 2;
 
-const String CBLITE_SOURCE_ID = '7e2083f+21f4b49';
+const String CBLITE_SOURCE_ID = '659d349+3762862';
 
-const String CBLITE_BUILD_TIMESTAMP = '2026-02-06T22:41:33Z';
+const String CBLITE_BUILD_TIMESTAMP = '2026-09-03T04:48:50Z';
 
 const String HOTLEVEL = 'Ofast';
 

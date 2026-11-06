@@ -16,8 +16,6 @@
 // limitations under the License.
 //
 
-// VOLATILE API: Couchbase Lite C++ API is not finalized, and may change in
-// future releases.
 
 #ifdef COUCHBASE_ENTERPRISE
 
@@ -29,9 +27,13 @@
 CBL_ASSUME_NONNULL_BEGIN
 
 namespace cbl {
-    /** ENTERPRISE EDITION ONLY
-     
-        Vector Encoding  Type*/
+    /** The distance metric used by a vector index to measure the similarity of vectors.
+        \note ENTERPRISE EDITION ONLY */
+    using DistanceMetric = CBLDistanceMetric;
+
+    /** Vector encoding type to use in a \ref VectorIndexConfiguration, for reducing the
+        size of the stored vectors.
+        \note ENTERPRISE EDITION ONLY */
     class VectorEncoding {
     public:
         /** Creates a no-encoding type to use in VectorIndexConfiguration; 4 bytes per dimension, no data loss.
@@ -55,6 +57,8 @@ namespace cbl {
             return VectorEncoding(CBLVectorEncoding_CreateProductQuantizer(subquantizers, bits));
         }
         
+        /** Deleted: a VectorEncoding must be constructed via one of the named factories
+            (\ref none, \ref scalarQuantizer, \ref productQuantizer). */
         VectorEncoding() = delete;
         
     protected:
@@ -72,9 +76,9 @@ namespace cbl {
         std::shared_ptr<CBLVectorEncoding> _ref;
     };
 
-    /** ENTERPRISE EDITION ONLY
-     
-        Vector Index Configuration. */
+    /** Configuration for creating a vector index, which enables searching documents
+        by vector similarity.
+        \note ENTERPRISE EDITION ONLY */
     class VectorIndexConfiguration {
     public:
         /** Creates the VectorIndexConfiguration. 
@@ -91,10 +95,10 @@ namespace cbl {
             @param centroids    The number of centroids which is the number buckets to partition the vectors in the index.
                               @note The recommended number of centroids is the square root of the number of vectors to be indexed,
                               and the maximum number of centroids supported is 64,000. */
-        VectorIndexConfiguration(CBLQueryLanguage expressionLanguage, slice expression,
+        VectorIndexConfiguration(CBLQueryLanguage expressionLanguage, std::string_view expression,
                                  unsigned dimensions, unsigned centroids)
         :_exprLang(expressionLanguage)
-        ,_expr(expression)
+        ,_expr(slice(expression))
         ,_dimensions(dimensions)
         ,_centroids(centroids)
         { }
@@ -102,16 +106,16 @@ namespace cbl {
         //-- Accessors:
         
         /** The language used in the expressions.  */
-        CBLQueryLanguage expressionLanguage() const         {return _exprLang;}
+        QueryLanguage expressionLanguage() const         {return _exprLang;}
         
         /** The expression. */
-        slice expression() const                            {return _expr;}
+        slice expression() const                         {return _expr;}
         
         /** The number of vector dimensions. */
-        unsigned dimensions() const                         {return _dimensions;}
+        unsigned dimensions() const                      {return _dimensions;}
         
         /** The number of centroids. */
-        unsigned centroids() const                          {return _centroids;}
+        unsigned centroids() const                       {return _centroids;}
         
         /** The boolean flag indicating that index is lazy or not. The default value is false.
          
@@ -129,7 +133,7 @@ namespace cbl {
         VectorEncoding encoding = VectorEncoding::scalarQuantizer(kCBLSQ8);
         
         /** Distance Metric type. The default value is squared euclidean distance.  */
-        CBLDistanceMetric metric = kCBLDistanceMetricEuclideanSquared;
+        DistanceMetric metric = kCBLDistanceMetricEuclideanSquared;
         
         /** The minimum number of vectors for training the index.
             The default value is zero, meaning that minTrainingSize will be determined based on
@@ -155,32 +159,40 @@ namespace cbl {
             The default value is zero, meaning that the numProbes will be determined based on
             the number of centroids. */
         unsigned numProbes = 0;
-        
+
     protected:
         friend Collection;
-        
-        /** To  CBLVectorIndexConfiguration */
-        operator CBLVectorIndexConfiguration() const {
-            CBLVectorIndexConfiguration config { _exprLang, _expr, _dimensions, _centroids };
-            config.isLazy = isLazy;
-            config.encoding = encoding.ref();
-            config.metric = metric;
-            config.minTrainingSize = minTrainingSize;
-            config.maxTrainingSize = maxTrainingSize;
-            config.numProbes = numProbes;
-            return config;
-        }
-            
+
     private:
-        CBLQueryLanguage _exprLang;
-        slice _expr;
-        unsigned _dimensions;
-        unsigned _centroids;
+        /** Builds a transient CBLVectorIndexConfiguration referencing this object's data
+            and passes it to `f`. The C config is only valid while `f` is executing. */
+        template <typename F>
+        decltype(auto) withCConfig(F&& f) const {
+            CBLVectorIndexConfiguration cConfig {
+                _exprLang, slice(_expr), _dimensions, _centroids
+            };
+            cConfig.isLazy   = isLazy;
+            cConfig.encoding = encoding.ref();
+            cConfig.metric   = metric;
+            cConfig.minTrainingSize = minTrainingSize;
+            cConfig.maxTrainingSize = maxTrainingSize;
+            cConfig.numProbes = numProbes;
+            return std::forward<F>(f)(cConfig);
+        }
+
+        QueryLanguage _exprLang;
+        std::string   _expr;
+        unsigned      _dimensions;
+        unsigned      _centroids;
     };
 
-    void Collection::createVectorIndex(slice name, const VectorIndexConfiguration &config) {
-        CBLError error {};
-        check(CBLCollection_CreateVectorIndex(ref(), name, config, &error), error);
+    void Collection::createVectorIndex(std::string_view name, VectorIndexConfiguration config) {
+        config.withCConfig([this, name](const CBLVectorIndexConfiguration& cConfig) {
+            CBLError error;
+            internal::check(
+                CBLCollection_CreateVectorIndex(ref(), slice(name), cConfig, &error),
+                error);
+        });
     }
 }
 
