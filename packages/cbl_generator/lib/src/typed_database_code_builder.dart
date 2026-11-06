@@ -85,13 +85,15 @@ final class TypeDataBaseCodeBuilder {
             }
           })
           .join(', ');
+      // The registry would default the value to the registered Dart type
+      // name (e.g. 'UserDocument'), but the type value must be the name of
+      // the annotated class (e.g. 'User'), so always write it explicitly.
+      final value = typeMatcher.value ?? object.annotatedClassName;
       _code
         ..writeln('typeMatcher: const ValueTypeMatcher(')
-        ..writeln('path: [$pathLiteral],');
-      if (typeMatcher.value != null) {
-        _code.writeln('value: ${escapeDartString(typeMatcher.value!)},');
-      }
-      _code.writeln('),');
+        ..writeln('path: [$pathLiteral],')
+        ..writeln('value: ${escapeDartString(value)},')
+        ..writeln('),');
     }
 
     _code.writeln('),');
