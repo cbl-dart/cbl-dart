@@ -1045,7 +1045,14 @@ final class FfiKeyPair implements KeyPair, Finalizable {
     }
     try {
       return await delegate.publicKeyData() != null;
-    } on Object {
+    } on Object catch (error, stackTrace) {
+      LoggingBindings.logMessage(
+        CBLLogDomain.listener,
+        CBLLogLevel.error,
+        'Exception in ExternalKeyPairDelegate.publicKeyData:\n'
+        '$error\n'
+        '$stackTrace',
+      );
       return false;
     }
   }
