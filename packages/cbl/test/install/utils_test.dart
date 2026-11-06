@@ -1,7 +1,8 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:archive/archive_io.dart';
+import 'package:archive/archive_io.dart'
+    show Archive, ArchiveFile, GZipEncoder, TarEncoder, ZipEncoder;
 
 import 'package:cbl/src/install.dart';
 import 'package:cbl/src/install/utils.dart';
