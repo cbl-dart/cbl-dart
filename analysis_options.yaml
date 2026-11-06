@@ -16,3 +16,8 @@ linter:
     public_member_api_docs: false
     require_trailing_commas: false
     avoid_redundant_argument_values: false
+    # Newer SDKs report these in code that is not changed on this branch.
+    avoid_classes_with_only_static_members: false
+    avoid_slow_async_io: false
+    parameter_assignments: false
+    use_super_parameters: false

@@ -4,3 +4,4 @@ analyzer:
   errors:
     # TODO(blaugold): migrate to new analyzer element model
     deprecated_member_use: ignore
+    experimental_member_use: ignore
