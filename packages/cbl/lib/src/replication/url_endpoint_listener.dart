@@ -458,9 +458,14 @@ final class FfiUrlEndpointListener implements UrlEndpointListener, Finalizable {
   }
 
   static Future<FfiUrlEndpointListener> create(
-    UrlEndpointListenerConfiguration config,
+    UrlEndpointListenerConfiguration configuration,
   ) async {
     requireEnterprise('Peer-to-peer sync');
+
+    // Copy the configuration before the first await, so that the native
+    // listener and this object see the same configuration, even if the caller
+    // changes it while the listener is being created.
+    final config = UrlEndpointListenerConfiguration.from(configuration);
 
     final pointer = await _create(
       collections: config.collections
