@@ -304,10 +304,16 @@ final class ReplicatorBindings {
   static Pointer<cblite.CBLEndpoint> createEndpointWithUrl(Uri url) {
     ensureInitializedForCurrentIsolate();
     // Couchbase Lite C 4.1.2 aborts the process on Windows (std::bad_alloc)
-    // while reporting an invalid URL scheme, so the scheme is checked here.
+    // while reporting an invalid URL, so the scheme and host are checked here.
     if (!url.isScheme('ws') && !url.isScheme('wss')) {
       throw DatabaseException(
         'Invalid replication URL $url: the scheme must be ws or wss.',
+        DatabaseErrorCode.invalidParameter,
+      );
+    }
+    if (url.host.isEmpty) {
+      throw DatabaseException(
+        'Invalid replication URL $url: the URL must have a host.',
         DatabaseErrorCode.invalidParameter,
       );
     }

@@ -405,6 +405,14 @@ b17aolOOq/6xfP6QIc9I6pOoPhEFY18mCqVCKrF3YCQjVC3P7Ac1m2x5iMXL+fXF
           );
           expect(await keyPair.publicKeyDigest, isNull);
         });
+
+        test('public key becomes available after a failure', () async {
+          final delegate = FailingOnceExternalKeyPairDelegate(
+            PointycastleExternalKeyPairDelegate(),
+          );
+          final keyPair = await KeyPair.fromExternal(delegate);
+          expect(await keyPair.publicKeyDigest, isNotEmpty);
+        });
       });
 
       test('publicKeyDigest', () async {
@@ -690,6 +698,36 @@ final class ExceptionExternalKeyPairDelegate extends ExternalKeyPairDelegate {
   Future<Uint8List?> sign(SignatureDigestAlgorithm? algorithm, Uint8List data) {
     throw UnimplementedError('ExceptionExternalKeyPairDelegate.sign');
   }
+}
+
+/// Delegates to [inner], but fails the first call to [publicKeyData].
+final class FailingOnceExternalKeyPairDelegate extends ExternalKeyPairDelegate {
+  FailingOnceExternalKeyPairDelegate(this.inner);
+
+  final ExternalKeyPairDelegate inner;
+
+  var _failed = false;
+
+  @override
+  int get keySizeInBits => inner.keySizeInBits;
+
+  @override
+  Future<DerData?> publicKeyData() {
+    if (!_failed) {
+      _failed = true;
+      throw StateError('Keystore temporarily unavailable');
+    }
+    return inner.publicKeyData();
+  }
+
+  @override
+  Future<Uint8List?> decrypt(Uint8List data) => inner.decrypt(data);
+
+  @override
+  Future<Uint8List?> sign(
+    SignatureDigestAlgorithm? algorithm,
+    Uint8List data,
+  ) => inner.sign(algorithm, data);
 }
 
 final class PointycastleExternalKeyPairDelegate

@@ -971,21 +971,21 @@ abstract final class KeyPair {
 }
 
 final class FfiKeyPair implements KeyPair, Finalizable {
-  FfiKeyPair._(this.pointer, {bool adopt = false, bool hasPublicKey = true})
-    : _hasPublicKey = hasPublicKey {
+  FfiKeyPair._(
+    this.pointer, {
+    bool adopt = false,
+    ExternalKeyPairDelegate? externalDelegate,
+    bool hasPublicKey = true,
+  }) : _externalDelegate = externalDelegate,
+       _hasPublicKey = hasPublicKey {
     bindCBLRefCountedToDartObject(this, pointer: pointer, adopt: adopt);
   }
 
   static Future<FfiKeyPair> fromPointer(
     Pointer<CBLKeyPair> pointer, {
     bool adopt = false,
-    bool hasPublicKey = true,
   }) async {
-    final keyPair = FfiKeyPair._(
-      pointer,
-      adopt: adopt,
-      hasPublicKey: hasPublicKey,
-    );
+    final keyPair = FfiKeyPair._(pointer, adopt: adopt);
 
     // Cache the public key digest immediately to ensure it is available for
     // toString.
@@ -1008,11 +1008,18 @@ final class FfiKeyPair implements KeyPair, Finalizable {
       sign: delegate._signCallable.nativeFunction,
     );
 
-    return FfiKeyPair.fromPointer(
+    final keyPair = FfiKeyPair._(
       pointer,
       adopt: true,
+      externalDelegate: delegate,
       hasPublicKey: hasPublicKey,
     );
+
+    // Cache the public key digest immediately to ensure it is available for
+    // toString. Without a public key, this needs no native call.
+    await keyPair.publicKeyDigest;
+
+    return keyPair;
   }
 
   static Future<FfiKeyPair> fromPrivateKey(
@@ -1032,17 +1039,31 @@ final class FfiKeyPair implements KeyPair, Finalizable {
 
   final Pointer<CBLKeyPair> pointer;
 
-  /// Whether this key pair has a public key.
+  final ExternalKeyPairDelegate? _externalDelegate;
+
+  /// Whether this key pair had a public key when last checked.
   ///
   /// Only external key pairs can lack one; see
   /// [ExternalKeyPairDelegate._providesPublicKey].
-  final bool _hasPublicKey;
+  bool _hasPublicKey;
 
   String? _publicKeyDigest;
 
+  /// Whether this key pair has a public key.
+  ///
+  /// An external delegate that did not provide one is asked again, so that a
+  /// temporary failure, such as a locked keystore, does not stick.
+  Future<bool> _checkPublicKey() async {
+    final delegate = _externalDelegate;
+    if (!_hasPublicKey && delegate != null) {
+      _hasPublicKey = await delegate._providesPublicKey();
+    }
+    return _hasPublicKey;
+  }
+
   /// Throws if this key pair has no public key, before it is passed to
   /// Couchbase Lite C, which would fail on it.
-  void _checkHasPublicKey() {
+  void _requirePublicKey() {
     if (!_hasPublicKey) {
       throw DatabaseException(
         'The external key pair does not provide a public key.',
@@ -1053,7 +1074,7 @@ final class FfiKeyPair implements KeyPair, Finalizable {
 
   @override
   Future<String?> get publicKeyDigest async {
-    if (!_hasPublicKey) {
+    if (!await _checkPublicKey()) {
       return _publicKeyDigest = null;
     }
     final pointer = this.pointer;
@@ -1064,7 +1085,7 @@ final class FfiKeyPair implements KeyPair, Finalizable {
 
   @override
   Future<DerData?> get publicKeyData async {
-    if (!_hasPublicKey) {
+    if (!await _checkPublicKey()) {
       return null;
     }
     final pointer = this.pointer;
@@ -1230,7 +1251,7 @@ final class FfiTlsIdentity implements TlsIdentity, Finalizable {
   }) {
     requireEnterprise('TLS identities');
 
-    final ffiKeyPair = (keyPair as FfiKeyPair).._checkHasPublicKey();
+    final ffiKeyPair = (keyPair as FfiKeyPair).._requirePublicKey();
     final keyPairPointer = ffiKeyPair.pointer;
     final certificateChainPointer = FfiCertificate.combined(
       certificates,
@@ -1270,7 +1291,11 @@ final class FfiTlsIdentity implements TlsIdentity, Finalizable {
     final validityDuration = expiration.toUtc().difference(
       DateTime.now().toUtc(),
     );
-    final ffiKeyPair = (keyPair as FfiKeyPair?)?.._checkHasPublicKey();
+    final ffiKeyPair = keyPair as FfiKeyPair?;
+    if (ffiKeyPair != null) {
+      await ffiKeyPair._checkPublicKey();
+      ffiKeyPair._requirePublicKey();
+    }
     final keyPairPointer = ffiKeyPair?.pointer;
 
     return FfiTlsIdentity.fromPointer(
