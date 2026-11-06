@@ -1,3 +1,7 @@
+## 3.3.6
+
+ - **FIX**(cbl_flutter): compile against Android API 34. ([9e6730b4](https://github.com/cbl-dart/cbl-dart/commit/9e6730b4b44196f82201245a4ebc93e8b25bee4c))
+
 ## 3.3.5
 
  - Update a dependency to the latest release.

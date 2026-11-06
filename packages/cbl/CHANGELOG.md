@@ -1,3 +1,10 @@
+## 3.6.1
+
+ - **FIX**(cbl): pass fullSync to native and zero-initialize outbound FFI structs. ([fa2e5ac2](https://github.com/cbl-dart/cbl-dart/commit/fa2e5ac2cdbb089fabb9af365bd3041da5780569))
+ - **FIX**(cbl): add reachability fence for collections in replicator creation. ([8280d4b7](https://github.com/cbl-dart/cbl-dart/commit/8280d4b768537ea665849502b969d90c8be6c103))
+ - **FIX**(cbl): avoid ArchiveFormat conflict with archive 4.6. ([07705fc8](https://github.com/cbl-dart/cbl-dart/commit/07705fc8565786052fdea6d1fe78c53f5d6e141a))
+ - **FIX**(cbl): backport safe framework symlink extraction and cache recovery. ([14b78a2f](https://github.com/cbl-dart/cbl-dart/commit/14b78a2ff4b4336b0da0f92e355e4f1e0efa6470))
+
 ## 3.6.0+2
 
 ## 3.6.0+1

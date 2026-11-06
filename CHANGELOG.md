@@ -3,6 +3,57 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2026-11-06
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`cbl` - `v3.6.1`](#cbl---v361)
+ - [`cbl_flutter` - `v3.3.6`](#cbl_flutter---v336)
+ - [`cbl_sentry` - `v2.1.9`](#cbl_sentry---v219)
+ - [`cbl_flutter_install` - `v0.1.0+7`](#cbl_flutter_install---v0107)
+ - [`cbl_flutter_platform_interface` - `v3.1.7`](#cbl_flutter_platform_interface---v317)
+ - [`cbl_dart` - `v3.5.2`](#cbl_dart---v352)
+ - [`cbl_generator` - `v0.3.1+8`](#cbl_generator---v0318)
+ - [`cbl_flutter_ce` - `v3.5.2`](#cbl_flutter_ce---v352)
+ - [`cbl_flutter_ee` - `v3.5.2`](#cbl_flutter_ee---v352)
+
+Packages with dependency updates only:
+
+> Packages listed below depend on other packages in this workspace that have had changes. Their versions have been incremented to bump the minimum dependency versions of the packages they depend upon in this project.
+
+ - `cbl_flutter_install` - `v0.1.0+7`
+ - `cbl_flutter_platform_interface` - `v3.1.7`
+ - `cbl_dart` - `v3.5.2`
+ - `cbl_generator` - `v0.3.1+8`
+ - `cbl_flutter_ce` - `v3.5.2`
+ - `cbl_flutter_ee` - `v3.5.2`
+
+---
+
+#### `cbl` - `v3.6.1`
+
+ - **FIX**(cbl): pass fullSync to native and zero-initialize outbound FFI structs. ([fa2e5ac2](https://github.com/cbl-dart/cbl-dart/commit/fa2e5ac2cdbb089fabb9af365bd3041da5780569))
+ - **FIX**(cbl): add reachability fence for collections in replicator creation. ([8280d4b7](https://github.com/cbl-dart/cbl-dart/commit/8280d4b768537ea665849502b969d90c8be6c103))
+ - **FIX**(cbl): avoid ArchiveFormat conflict with archive 4.6. ([07705fc8](https://github.com/cbl-dart/cbl-dart/commit/07705fc8565786052fdea6d1fe78c53f5d6e141a))
+ - **FIX**(cbl): backport safe framework symlink extraction and cache recovery. ([14b78a2f](https://github.com/cbl-dart/cbl-dart/commit/14b78a2ff4b4336b0da0f92e355e4f1e0efa6470))
+
+#### `cbl_flutter` - `v3.3.6`
+
+ - **FIX**(cbl_flutter): compile against Android API 34. ([9e6730b4](https://github.com/cbl-dart/cbl-dart/commit/9e6730b4b44196f82201245a4ebc93e8b25bee4c))
+
+#### `cbl_sentry` - `v2.1.9`
+
+ - **FIX**(cbl_sentry): allow sentry 9. ([1cad4e22](https://github.com/cbl-dart/cbl-dart/commit/1cad4e226d551c369ec3d3e999621eef73d7441e))
+
+
 ## 2025-08-03
 
 ### Changes

@@ -1,3 +1,7 @@
+## 2.1.9
+
+ - **FIX**(cbl_sentry): allow sentry 9. ([1cad4e22](https://github.com/cbl-dart/cbl-dart/commit/1cad4e226d551c369ec3d3e999621eef73d7441e))
+
 ## 2.1.8
 
  - Update a dependency to the latest release.
