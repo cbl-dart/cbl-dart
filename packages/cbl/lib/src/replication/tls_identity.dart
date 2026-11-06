@@ -1286,17 +1286,19 @@ final class FfiTlsIdentity implements TlsIdentity, Finalizable {
       }
     }
 
-    final cblKeyUsages = keyUsages.map((usage) => usage._toCbl()).toSet();
-    final attributesMap = attributes._toAttributesMap();
-    final validityDuration = expiration.toUtc().difference(
-      DateTime.now().toUtc(),
-    );
     final ffiKeyPair = keyPair as FfiKeyPair?;
     if (ffiKeyPair != null) {
       await ffiKeyPair._checkPublicKey();
       ffiKeyPair._requirePublicKey();
     }
     final keyPairPointer = ffiKeyPair?.pointer;
+
+    final cblKeyUsages = keyUsages.map((usage) => usage._toCbl()).toSet();
+    final attributesMap = attributes._toAttributesMap();
+    // Computed after the last await, so that the validity ends at expiration.
+    final validityDuration = expiration.toUtc().difference(
+      DateTime.now().toUtc(),
+    );
 
     return FfiTlsIdentity.fromPointer(
       await Isolate.run(
