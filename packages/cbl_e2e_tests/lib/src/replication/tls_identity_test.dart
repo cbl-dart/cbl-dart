@@ -627,30 +627,38 @@ b17aolOOq/6xfP6QIc9I6pOoPhEFY18mCqVCKrF3YCQjVC3P7Ac1m2x5iMXL+fXF
       await expectLater(deleteFuture, completes);
     });
 
-    test('retrieve non-persisted identity by certificates', () async {
-      final identity = await TlsIdentity.createIdentity(
-        keyUsages: {KeyUsage.serverAuth},
-        attributes: const CertificateAttributes(commonName: 'Test'),
-        expiration: futureExpiration,
-      );
-      final certificate = identity.certificates;
-      final identityFuture = Future(
-        () => TlsIdentity.identityWithCertificates(certificate),
-      );
+    test(
+      'retrieve non-persisted identity by certificates',
+      // TODO: Re-enable on Windows once Couchbase Lite C no longer aborts with
+      // std::bad_alloc while reporting the missing private key (4.1.2).
+      skip: Platform.isWindows
+          ? 'CBL C 4.1.2 crashes on Windows when reporting this error'
+          : null,
+      () async {
+        final identity = await TlsIdentity.createIdentity(
+          keyUsages: {KeyUsage.serverAuth},
+          attributes: const CertificateAttributes(commonName: 'Test'),
+          expiration: futureExpiration,
+        );
+        final certificate = identity.certificates;
+        final identityFuture = Future(
+          () => TlsIdentity.identityWithCertificates(certificate),
+        );
 
-      if (await expectPersistedIdentityUnsupported(identityFuture)) {
-        return;
-      }
+        if (await expectPersistedIdentityUnsupported(identityFuture)) {
+          return;
+        }
 
-      expect(
-        identityFuture,
-        throwsA(
-          isDatabaseException
-              .havingCode(DatabaseErrorCode.crypto)
-              .havingMessage('No matching private key in keystore'),
-        ),
-      );
-    });
+        expect(
+          identityFuture,
+          throwsA(
+            isDatabaseException
+                .havingCode(DatabaseErrorCode.crypto)
+                .havingMessage('No matching private key in keystore'),
+          ),
+        );
+      },
+    );
   });
 }
 
