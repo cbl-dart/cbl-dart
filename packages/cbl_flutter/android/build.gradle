@@ -18,7 +18,7 @@ android {
         namespace = "com.terwesten.gabriel.cbl_flutter"
     }
 
-    compileSdk = 33
+    compileSdk = 34
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
