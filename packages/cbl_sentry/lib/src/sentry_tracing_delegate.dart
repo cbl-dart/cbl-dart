@@ -244,6 +244,9 @@ final class SentryTracingDelegate extends TracingDelegate {
             'CBLWorker',
             operation.debugName(isInWorker: _isWorkerDelegate),
             parentTraceHeader,
+            // copyWith is deprecated in sentry 9 but the replacement is not
+            // available in sentry 8, which is still supported.
+            // ignore: deprecated_member_use
           ).copyWith(description: operation.debugDescription),
         );
       }
