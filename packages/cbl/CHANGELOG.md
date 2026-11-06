@@ -1,3 +1,12 @@
+## 4.0.0
+
+ - **FEAT**(cbl): upgrade to Couchbase Lite C 4.1.2 ([#999](https://github.com/cbl-dart/cbl-dart/issues/999)). ([029c3763](https://github.com/cbl-dart/cbl-dart/commit/029c3763eb301441b36c76d31e6c31477325691a))
+   - `Database.copy` and `Database.copySync` throw a `DatabaseException` while the source database is open. Close the database before copying it.
+   - `UrlEndpoint` rejects URLs without a host or with a scheme other than `ws` or `wss` with `DatabaseErrorCode.invalidParameter`.
+   - Known issue on Windows: `TlsIdentity.identityWithCertificates` aborts the process instead of throwing when no matching private key is found.
+ - **FIX**(cbl): avoid ArchiveFormat conflict with archive 4.6 ([#992](https://github.com/cbl-dart/cbl-dart/issues/992)). ([a3200565](https://github.com/cbl-dart/cbl-dart/commit/a3200565106018b068f6f31ac4082ca0542dd5f5))
+ - Graduate package to a stable release. See pre-releases prior to this version for changelog entries.
+
 ## 4.0.0-dev.10
 
  - **FIX**(cbl): support hooks and code_assets 2 ([#985](https://github.com/cbl-dart/cbl-dart/issues/985)). ([97b54e5a](https://github.com/cbl-dart/cbl-dart/commit/97b54e5aad08ac48c2afb04ce850e2cccb9aeb80))

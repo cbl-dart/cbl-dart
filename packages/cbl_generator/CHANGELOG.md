@@ -1,3 +1,11 @@
+## 0.4.0
+
+ - **FIX**(cbl_generator): keep annotated class name as default document type value ([#997](https://github.com/cbl-dart/cbl-dart/issues/997)). ([08f0959b](https://github.com/cbl-dart/cbl-dart/commit/08f0959b4475c4b744ae24c68f6f3a2141573c8c))
+   - Re-run `build_runner` to pick up the fix.
+   - Documents saved with `cbl_generator` 0.4.0-dev.5 to 0.4.0-dev.10 have the generated type name as their type value (for example `"type": "UserDocument"` for a `@TypedDocument` class `User`). After upgrading and re-running `build_runner`, these documents no longer match their type, and loading them throws a `TypedDataException` with `TypedDataErrorCode.typeMatchingConflict`. Either migrate the stored documents to the annotated class name (`"type": "User"`), or keep the old value with `@TypedDocument(typeMatcher: ValueTypeMatcher(value: 'UserDocument'))`. Documents saved with cbl 3.x are not affected.
+ - Update the cbl dependency to ^4.0.0.
+ - Graduate package to a stable release. See pre-releases prior to this version for changelog entries.
+
 ## 0.4.0-dev.10
 
  - **FIX**: restore CI compatibility with Flutter 3.47 ([#981](https://github.com/cbl-dart/cbl-dart/issues/981)). ([ec7ec8c1](https://github.com/cbl-dart/cbl-dart/commit/ec7ec8c146ab27f888d3675da3fa24c84a199c71))
