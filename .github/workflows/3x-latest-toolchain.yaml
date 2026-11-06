@@ -1,0 +1,35 @@
+name: 3.x with latest toolchains
+
+# CI on release/3.x uses pinned Flutter and Dart versions. This workflow runs
+# that CI weekly with the newest stable releases, so that incompatibilities of
+# the 3.x packages with new toolchains show up as a failure here. Scheduled
+# workflows only run on the default branch, which is why it lives on main.
+
+on:
+  schedule:
+    # Every Monday at 03:00 UTC.
+    - cron: "0 3 * * 1"
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  run-3x-ci:
+    name: Run 3.x CI with latest toolchains
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Start CI on release/3.x
+        id: start
+        run: |
+          url="$(gh workflow run ci.yaml --ref release/3.x -f toolchain=latest)"
+          echo "Started $url"
+          echo "run-id=${url##*/}" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for CI result
+        run: gh run watch '${{ steps.start.outputs.run-id }}' --exit-status --interval 60
