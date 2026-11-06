@@ -34,9 +34,12 @@ class MockHub implements Hub {
 
   @override
   Future<SentryId> captureException(
-    Object? throwable, {
-    Object? stackTrace,
-    Object? hint,
+    // ignore: avoid_annotating_with_dynamic
+    dynamic throwable, {
+    // ignore: avoid_annotating_with_dynamic
+    dynamic stackTrace,
+    Hint? hint,
+    SentryMessage? message,
     ScopeCallback? withScope,
   }) async => const SentryId.empty();
 
@@ -53,12 +56,9 @@ class MockHub implements Hub {
   @override
   Future<SentryId> captureTransaction(
     SentryTransaction transaction, {
+    Hint? hint,
     SentryTraceContextHeader? traceContext,
   }) async => const SentryId.empty();
-
-  @override
-  // ignore: deprecated_member_use
-  Future<void> captureUserFeedback(SentryUserFeedback userFeedback) async {}
 
   @override
   Hub clone() => this;
