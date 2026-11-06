@@ -4,6 +4,10 @@ on:
   push:
     tags:
       - "cbl*-v[0-9]+.[0-9]+.[0-9]+*"
+      # `cbd release` publishes the API packages itself before pushing their
+      # tags.
+      - "!cbl_libcblite_api-v*"
+      - "!cbl_libcblitedart_api-v*"
 
 jobs:
   extract-package:
