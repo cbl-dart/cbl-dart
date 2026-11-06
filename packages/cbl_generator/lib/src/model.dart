@@ -49,10 +49,6 @@ final class TypedDataObjectModel {
 
   /// The name of the class annotated by the user (e.g., 'User' for both
   /// 'UserDocument' and the companion 'UserDictionary').
-  ///
-  /// This is the default value of a [ValueTypeMatcher] without an explicit
-  /// value, so that documents keep the same type value regardless of the
-  /// generated types through which they are accessed.
   String get annotatedClassName =>
       companionParentClassName ?? classNames.declaringClassName;
 
