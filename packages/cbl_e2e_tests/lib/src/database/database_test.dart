@@ -426,7 +426,7 @@ void main() {
           await db.saveDocument(doc);
           final updatedDoc = ((await db.document(doc.id))!.toMutable())
             ..setValue('b', key: 'a');
-          db.saveDocument(updatedDoc);
+          await db.saveDocument(updatedDoc);
 
           final SaveConflictHandler handler = expectAsync2((
             documentBeingSaved,

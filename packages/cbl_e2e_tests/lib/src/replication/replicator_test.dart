@@ -910,7 +910,7 @@ Future<void> autoPurgeTest({required bool enableAutoPurge}) async {
 
   // Remove document from the user's channel.
   doc['channels'].value = null;
-  db.saveDocument(doc);
+  await db.saveDocument(doc);
 
   await documentAccessRemoved.future;
 
