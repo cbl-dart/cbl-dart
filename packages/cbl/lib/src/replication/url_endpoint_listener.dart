@@ -458,14 +458,9 @@ final class FfiUrlEndpointListener implements UrlEndpointListener, Finalizable {
   }
 
   static Future<FfiUrlEndpointListener> create(
-    UrlEndpointListenerConfiguration configuration,
+    UrlEndpointListenerConfiguration config,
   ) async {
     requireEnterprise('Peer-to-peer sync');
-
-    // Copy the configuration before the first await, so that the native
-    // listener and this object see the same configuration, even if the caller
-    // changes it while the listener is being created.
-    final config = UrlEndpointListenerConfiguration.from(configuration);
 
     final pointer = await _create(
       collections: config.collections
@@ -526,20 +521,7 @@ final class FfiUrlEndpointListener implements UrlEndpointListener, Finalizable {
   int? get port => UrlEndpointListenerBindings.port(_pointer);
 
   @override
-  List<Uri>? get urls {
-    final urls = UrlEndpointListenerBindings.urls(_pointer);
-    if (urls == null || _config.disableTls) {
-      return urls;
-    }
-
-    // Couchbase Lite C 4.1.2 reports `ws` URLs even when the listener uses
-    // TLS. Replicators connecting to such a URL fail the TLS handshake, so the
-    // scheme is corrected here. 4.0.3 reported `wss` URLs.
-    return [
-      for (final url in urls)
-        if (url.scheme == 'ws') url.replace(scheme: 'wss') else url,
-    ];
-  }
+  List<Uri>? get urls => UrlEndpointListenerBindings.urls(_pointer);
 
   @override
   TlsIdentity? get tlsIdentity => UrlEndpointListenerBindings.tlsIdentity(

@@ -341,8 +341,8 @@ void main() {
           .subtract(const Duration(minutes: 1))
           .copyWith(millisecond: 0, microsecond: 0);
       expect(
-        created.difference(expected).inSeconds.abs(),
-        lessThanOrEqualTo(2),
+        created,
+        isCloseToDateTime(expected, tolerance: const Duration(seconds: 2)),
       );
     });
 
@@ -621,11 +621,6 @@ b17aolOOq/6xfP6QIc9I6pOoPhEFY18mCqVCKrF3YCQjVC3P7Ac1m2x5iMXL+fXF
 
     test(
       'retrieve non-persisted identity by certificates',
-      // TODO: Re-enable on Windows once Couchbase Lite C no longer aborts with
-      // std::bad_alloc while reporting the missing private key (4.1.2).
-      skip: Platform.isWindows
-          ? 'CBL C 4.1.2 crashes on Windows when reporting this error'
-          : null,
       () async {
         final identity = await TlsIdentity.createIdentity(
           keyUsages: {KeyUsage.serverAuth},
@@ -650,6 +645,11 @@ b17aolOOq/6xfP6QIc9I6pOoPhEFY18mCqVCKrF3YCQjVC3P7Ac1m2x5iMXL+fXF
           ),
         );
       },
+      // TODO: Re-enable on Windows once Couchbase Lite C no longer aborts with
+      // std::bad_alloc while reporting the missing private key (4.1.2).
+      skip: Platform.isWindows
+          ? 'CBL C 4.1.2 crashes on Windows when reporting this error'
+          : null,
     );
   });
 }
@@ -803,11 +803,3 @@ class _PassThroughDigest implements Digest {
   @override
   void updateByte(int inp) {}
 }
-
-Matcher isCloseToDateTime(
-  DateTime expected, {
-  Duration tolerance = const Duration(seconds: 5),
-}) => predicate<DateTime>(
-  (actual) => actual.difference(expected).abs() <= tolerance,
-  'within $tolerance of $expected',
-);

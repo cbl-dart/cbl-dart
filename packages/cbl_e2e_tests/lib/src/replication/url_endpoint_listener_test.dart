@@ -161,18 +161,6 @@ void main() {
       expect(listener.port, isNotNull);
       expect(listener.urls, isNotNull);
       expect(listener.urls, isNotEmpty);
-    });
-
-    test('urls use wss scheme when TLS is enabled', () async {
-      final db = await openAsyncTestDatabase();
-      final listener = await UrlEndpointListener.create(
-        UrlEndpointListenerConfiguration(
-          collections: [await db.defaultCollection],
-        ),
-      );
-      await listener.start();
-      addTearDown(listener.stop);
-
       expect(listener.urls!.map((url) => url.scheme), everyElement('wss'));
     });
 

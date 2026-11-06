@@ -759,6 +759,29 @@ abstract base class ExternalKeyPairDelegate {
       NativeCallable<CBLDartExternalKeySignFunction>.listener(_sign)
         ..keepIsolateAlive = false;
 
+  void _logException(String method, Object error, StackTrace stackTrace) {
+    LoggingBindings.logMessage(
+      CBLLogDomain.listener,
+      CBLLogLevel.error,
+      'Exception in ExternalKeyPairDelegate.$method:\n$error\n$stackTrace',
+    );
+  }
+
+  /// Whether this delegate provides a public key.
+  ///
+  /// Couchbase Lite C 4.1.2 aborts the process on Windows (std::bad_alloc) when
+  /// it reports a failed `publicKeyData` callback. Key pairs therefore ask the
+  /// delegate once, when they are created, and handle a missing public key
+  /// without the native error path.
+  Future<bool> _providesPublicKey() async {
+    try {
+      return await publicKeyData() != null;
+    } on Object catch (error, stackTrace) {
+      _logException('publicKeyData', error, stackTrace);
+      return false;
+    }
+  }
+
   /// The size of this key in bits (e.g. 2048 or 4096).
   int get keySizeInBits;
 
@@ -828,13 +851,7 @@ abstract base class ExternalKeyPairDelegate {
       outputLen.value = data.length;
       success = true;
     } on Object catch (error, stackTrace) {
-      LoggingBindings.logMessage(
-        CBLLogDomain.listener,
-        CBLLogLevel.error,
-        'Exception in ExternalKeyPairDelegate.publicKeyData:\n'
-        '$error\n'
-        '$stackTrace',
-      );
+      _logException('publicKeyData', error, stackTrace);
     } finally {
       BaseBindings.completeCompleterWithBool(completer, success);
     }
@@ -870,13 +887,7 @@ abstract base class ExternalKeyPairDelegate {
 
       success = true;
     } on Object catch (error, stackTrace) {
-      LoggingBindings.logMessage(
-        CBLLogDomain.listener,
-        CBLLogLevel.error,
-        'Exception in ExternalKeyPairDelegate.decrypt:\n'
-        '$error\n'
-        '$stackTrace',
-      );
+      _logException('decrypt', error, stackTrace);
     } finally {
       BaseBindings.completeCompleterWithBool(completer, success);
     }
@@ -913,13 +924,7 @@ abstract base class ExternalKeyPairDelegate {
 
       success = true;
     } on Object catch (error, stackTrace) {
-      LoggingBindings.logMessage(
-        CBLLogDomain.listener,
-        CBLLogLevel.error,
-        'Exception in ExternalKeyPairDelegate.sign:\n'
-        '$error\n'
-        '$stackTrace',
-      );
+      _logException('sign', error, stackTrace);
     } finally {
       BaseBindings.completeCompleterWithBool(completer, success);
     }
@@ -966,23 +971,20 @@ abstract final class KeyPair {
 }
 
 final class FfiKeyPair implements KeyPair, Finalizable {
-  FfiKeyPair._(
-    this.pointer, {
-    bool adopt = false,
-    ExternalKeyPairDelegate? externalDelegate,
-  }) : _externalDelegate = externalDelegate {
+  FfiKeyPair._(this.pointer, {bool adopt = false, bool hasPublicKey = true})
+    : _hasPublicKey = hasPublicKey {
     bindCBLRefCountedToDartObject(this, pointer: pointer, adopt: adopt);
   }
 
   static Future<FfiKeyPair> fromPointer(
     Pointer<CBLKeyPair> pointer, {
     bool adopt = false,
-    ExternalKeyPairDelegate? externalDelegate,
+    bool hasPublicKey = true,
   }) async {
     final keyPair = FfiKeyPair._(
       pointer,
       adopt: adopt,
-      externalDelegate: externalDelegate,
+      hasPublicKey: hasPublicKey,
     );
 
     // Cache the public key digest immediately to ensure it is available for
@@ -992,9 +994,12 @@ final class FfiKeyPair implements KeyPair, Finalizable {
     return keyPair;
   }
 
-  static Future<FfiKeyPair> fromExternal(ExternalKeyPairDelegate delegate) {
+  static Future<FfiKeyPair> fromExternal(
+    ExternalKeyPairDelegate delegate,
+  ) async {
     requireEnterprise('TLS key pairs');
 
+    final hasPublicKey = await delegate._providesPublicKey();
     final pointer = TlsIdentityBindings.keyPairCreateWithExternalKey(
       keySizeInBits: delegate.keySizeInBits,
       delegate: delegate,
@@ -1006,7 +1011,7 @@ final class FfiKeyPair implements KeyPair, Finalizable {
     return FfiKeyPair.fromPointer(
       pointer,
       adopt: true,
-      externalDelegate: delegate,
+      hasPublicKey: hasPublicKey,
     );
   }
 
@@ -1027,39 +1032,28 @@ final class FfiKeyPair implements KeyPair, Finalizable {
 
   final Pointer<CBLKeyPair> pointer;
 
-  final ExternalKeyPairDelegate? _externalDelegate;
+  /// Whether this key pair has a public key.
+  ///
+  /// Only external key pairs can lack one; see
+  /// [ExternalKeyPairDelegate._providesPublicKey].
+  final bool _hasPublicKey;
 
   String? _publicKeyDigest;
 
-  /// Whether the external delegate of this key pair, if any, provides a public
-  /// key.
-  ///
-  /// Couchbase Lite C 4.1.2 aborts the process on Windows (std::bad_alloc) when
-  /// it reports a failed `publicKeyData` callback. The delegate is therefore
-  /// asked directly first, so that a missing public key is handled without the
-  /// native error path.
-  Future<bool> _externalPublicKeyIsAvailable() async {
-    final delegate = _externalDelegate;
-    if (delegate == null) {
-      return true;
-    }
-    try {
-      return await delegate.publicKeyData() != null;
-    } on Object catch (error, stackTrace) {
-      LoggingBindings.logMessage(
-        CBLLogDomain.listener,
-        CBLLogLevel.error,
-        'Exception in ExternalKeyPairDelegate.publicKeyData:\n'
-        '$error\n'
-        '$stackTrace',
+  /// Throws if this key pair has no public key, before it is passed to
+  /// Couchbase Lite C, which would fail on it.
+  void _checkHasPublicKey() {
+    if (!_hasPublicKey) {
+      throw DatabaseException(
+        'The external key pair does not provide a public key.',
+        DatabaseErrorCode.crypto,
       );
-      return false;
     }
   }
 
   @override
   Future<String?> get publicKeyDigest async {
-    if (!await _externalPublicKeyIsAvailable()) {
+    if (!_hasPublicKey) {
       return _publicKeyDigest = null;
     }
     final pointer = this.pointer;
@@ -1070,7 +1064,7 @@ final class FfiKeyPair implements KeyPair, Finalizable {
 
   @override
   Future<DerData?> get publicKeyData async {
-    if (!await _externalPublicKeyIsAvailable()) {
+    if (!_hasPublicKey) {
       return null;
     }
     final pointer = this.pointer;
@@ -1190,6 +1184,9 @@ abstract class TlsIdentity {
   /// The [KeyPair] will be looked up by the first [Certificate] in the chain.
   ///
   /// Persisted identities are _not supported_ on Android or Linux.
+  ///
+  /// On Windows, Couchbase Lite C 4.1.2 aborts the process instead of throwing
+  /// when no matching private key is stored for the certificate.
   static Future<TlsIdentity> identityWithCertificates(
     List<Certificate> certificates,
   ) => FfiTlsIdentity.identityWithCertificates(certificates.cast());
@@ -1233,7 +1230,8 @@ final class FfiTlsIdentity implements TlsIdentity, Finalizable {
   }) {
     requireEnterprise('TLS identities');
 
-    final keyPairPointer = (keyPair as FfiKeyPair).pointer;
+    final ffiKeyPair = (keyPair as FfiKeyPair).._checkHasPublicKey();
+    final keyPairPointer = ffiKeyPair.pointer;
     final certificateChainPointer = FfiCertificate.combined(
       certificates,
     ).pointer;
@@ -1272,7 +1270,8 @@ final class FfiTlsIdentity implements TlsIdentity, Finalizable {
     final validityDuration = expiration.toUtc().difference(
       DateTime.now().toUtc(),
     );
-    final keyPairPointer = (keyPair as FfiKeyPair?)?.pointer;
+    final ffiKeyPair = (keyPair as FfiKeyPair?)?.._checkHasPublicKey();
+    final keyPairPointer = ffiKeyPair?.pointer;
 
     return FfiTlsIdentity.fromPointer(
       await Isolate.run(
