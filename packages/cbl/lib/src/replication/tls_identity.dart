@@ -966,15 +966,24 @@ abstract final class KeyPair {
 }
 
 final class FfiKeyPair implements KeyPair, Finalizable {
-  FfiKeyPair._(this.pointer, {bool adopt = false}) {
+  FfiKeyPair._(
+    this.pointer, {
+    bool adopt = false,
+    ExternalKeyPairDelegate? externalDelegate,
+  }) : _externalDelegate = externalDelegate {
     bindCBLRefCountedToDartObject(this, pointer: pointer, adopt: adopt);
   }
 
   static Future<FfiKeyPair> fromPointer(
     Pointer<CBLKeyPair> pointer, {
     bool adopt = false,
+    ExternalKeyPairDelegate? externalDelegate,
   }) async {
-    final keyPair = FfiKeyPair._(pointer, adopt: adopt);
+    final keyPair = FfiKeyPair._(
+      pointer,
+      adopt: adopt,
+      externalDelegate: externalDelegate,
+    );
 
     // Cache the public key digest immediately to ensure it is available for
     // toString.
@@ -994,7 +1003,11 @@ final class FfiKeyPair implements KeyPair, Finalizable {
       sign: delegate._signCallable.nativeFunction,
     );
 
-    return FfiKeyPair.fromPointer(pointer, adopt: true);
+    return FfiKeyPair.fromPointer(
+      pointer,
+      adopt: true,
+      externalDelegate: delegate,
+    );
   }
 
   static Future<FfiKeyPair> fromPrivateKey(
@@ -1014,10 +1027,34 @@ final class FfiKeyPair implements KeyPair, Finalizable {
 
   final Pointer<CBLKeyPair> pointer;
 
+  final ExternalKeyPairDelegate? _externalDelegate;
+
   String? _publicKeyDigest;
+
+  /// Whether the external delegate of this key pair, if any, provides a public
+  /// key.
+  ///
+  /// Couchbase Lite C 4.1.2 aborts the process on Windows (std::bad_alloc) when
+  /// it reports a failed `publicKeyData` callback. The delegate is therefore
+  /// asked directly first, so that a missing public key is handled without the
+  /// native error path.
+  Future<bool> _externalPublicKeyIsAvailable() async {
+    final delegate = _externalDelegate;
+    if (delegate == null) {
+      return true;
+    }
+    try {
+      return await delegate.publicKeyData() != null;
+    } on Object {
+      return false;
+    }
+  }
 
   @override
   Future<String?> get publicKeyDigest async {
+    if (!await _externalPublicKeyIsAvailable()) {
+      return _publicKeyDigest = null;
+    }
     final pointer = this.pointer;
     return _publicKeyDigest = await Isolate.run(
       () => TlsIdentityBindings.keyPairPublicKeyDigest(pointer),
@@ -1026,6 +1063,9 @@ final class FfiKeyPair implements KeyPair, Finalizable {
 
   @override
   Future<DerData?> get publicKeyData async {
+    if (!await _externalPublicKeyIsAvailable()) {
+      return null;
+    }
     final pointer = this.pointer;
     final data = await Isolate.run(
       () => TlsIdentityBindings.keyPairPublicKeyData(pointer),
