@@ -11,12 +11,6 @@ runners:
     image: ubuntu22-full-x64
     extras: s3-cache
 
-  ubuntu22-2cpu-benchmark:
-    cpu: 2
-    family: m7a
-    image: ubuntu22-full-x64
-    extras: s3-cache
-
   windows22-2cpu:
     cpu: 2
     family: [m7, c7, m8, c8]

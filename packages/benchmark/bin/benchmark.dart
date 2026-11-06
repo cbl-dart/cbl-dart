@@ -5,7 +5,6 @@ import 'dart:io';
 import 'package:benchmark/parameter.dart';
 import 'package:benchmark/result.dart';
 import 'package:benchmark/runner.dart';
-import 'package:benchmark/utils.dart';
 import 'package:pool/pool.dart';
 
 void main() async {
@@ -35,21 +34,10 @@ void main() async {
     Platform.numberOfProcessors,
   ).forEach(benchmarks, (benchmark) => benchmark.setupAllRuns()).drain<void>();
 
-  const runs = 3;
-
-  final runResults = <BenchmarkResults>[];
-
-  for (var i = 0; i < runs; i++) {
-    print('Run ${i + 1} of $runs ...');
-
-    var results = BenchmarkResults();
-    for (final benchmark in benchmarks) {
-      results = results.merge(await benchmark.run());
-    }
-    runResults.add(results);
+  final results = <String, BenchmarkResult>{};
+  for (final benchmark in benchmarks) {
+    results.addAll(await benchmark.run());
   }
 
-  final results = BenchmarkResults.combine(runResults, statistic: average);
-
-  File('results.json').writeAsStringSync(jsonEncodePretty(results.toJson()));
+  print(formatResults(results));
 }
