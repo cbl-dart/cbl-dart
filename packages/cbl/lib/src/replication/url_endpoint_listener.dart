@@ -521,7 +521,20 @@ final class FfiUrlEndpointListener implements UrlEndpointListener, Finalizable {
   int? get port => UrlEndpointListenerBindings.port(_pointer);
 
   @override
-  List<Uri>? get urls => UrlEndpointListenerBindings.urls(_pointer);
+  List<Uri>? get urls {
+    final urls = UrlEndpointListenerBindings.urls(_pointer);
+    if (urls == null || _config.disableTls) {
+      return urls;
+    }
+
+    // Couchbase Lite C 4.1.2 reports `ws` URLs even when the listener uses
+    // TLS. Replicators connecting to such a URL fail the TLS handshake, so the
+    // scheme is corrected here. 4.0.3 reported `wss` URLs.
+    return [
+      for (final url in urls)
+        if (url.scheme == 'ws') url.replace(scheme: 'wss') else url,
+    ];
+  }
 
   @override
   TlsIdentity? get tlsIdentity => UrlEndpointListenerBindings.tlsIdentity(
