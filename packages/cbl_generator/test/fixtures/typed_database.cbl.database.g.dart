@@ -46,13 +46,13 @@ class DocWithIdDatabase extends $DocWithIdDatabase {
         dartName: 'DocWithIdDocument',
         factory: ImmutableDocWithId.internal,
         mutableFactory: MutableDocWithId.internal,
-        typeMatcher: const ValueTypeMatcher(path: ['type']),
+        typeMatcher: const ValueTypeMatcher(path: ['type'], value: 'DocWithId'),
       ),
       TypedDictionaryMetadata<DocWithIdDictionary, MutableDocWithIdDictionary>(
         dartName: 'DocWithIdDictionary',
         factory: ImmutableDocWithIdDictionary.internal,
         mutableFactory: MutableDocWithIdDictionary.internal,
-        typeMatcher: const ValueTypeMatcher(path: ['type']),
+        typeMatcher: const ValueTypeMatcher(path: ['type'], value: 'DocWithId'),
       ),
     ],
   );

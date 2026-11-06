@@ -47,6 +47,11 @@ final class TypedDataObjectModel {
   late final typedInterfaceName =
       documentInterfaceName ?? classNames.declaringClassName;
 
+  /// The name of the class annotated by the user (e.g., 'User' for both
+  /// 'UserDocument' and the companion 'UserDictionary').
+  String get annotatedClassName =>
+      companionParentClassName ?? classNames.declaringClassName;
+
   late final metadataFields = fields
       .whereType<TypedDataMetadataField>()
       .toList();

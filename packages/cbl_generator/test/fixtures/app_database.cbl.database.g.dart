@@ -30,13 +30,13 @@ class AppDatabase extends $AppDatabase {
         dartName: 'UserDocument',
         factory: ImmutableUser.internal,
         mutableFactory: MutableUser.internal,
-        typeMatcher: const ValueTypeMatcher(path: ['type']),
+        typeMatcher: const ValueTypeMatcher(path: ['type'], value: 'User'),
       ),
       TypedDictionaryMetadata<UserDictionary, MutableUserDictionary>(
         dartName: 'UserDictionary',
         factory: ImmutableUserDictionary.internal,
         mutableFactory: MutableUserDictionary.internal,
-        typeMatcher: const ValueTypeMatcher(path: ['type']),
+        typeMatcher: const ValueTypeMatcher(path: ['type'], value: 'User'),
       ),
       TypedDictionaryMetadata<PersonalName, MutablePersonalName>(
         dartName: 'PersonalName',

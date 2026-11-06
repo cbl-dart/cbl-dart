@@ -63,6 +63,59 @@ class A extends $A {
       },
     );
   });
+
+  test('database with typed document uses class name as type value', () async {
+    await runGeneratorTestBuilder(
+      TypedDatabaseBuilder(),
+      {
+        _testLibId: _testLibContent(r'''
+@TypedDocument()
+abstract class Doc with _$Doc {
+  factory Doc() = MutableDoc;
+}
+
+@TypedDatabase(types: {Doc})
+class $A {
+}
+'''),
+      },
+      label: 'typed_database database with typed document',
+      readerWriter: readerWriter,
+      outputs: {
+        _genPartId: _typedDatabaseGeneratorContent(r'''
+class A extends $A {
+  static Future<AsyncDatabase> openAsync(
+    String name, [
+    DatabaseConfiguration? config,
+  ]) =>
+      // ignore: invalid_use_of_internal_member
+      AsyncDatabase.openInternal(name, config, _adapter);
+
+  static SyncDatabase openSync(String name, [DatabaseConfiguration? config]) =>
+      // ignore: invalid_use_of_internal_member
+      SyncDatabase.internal(name, config, _adapter);
+
+  static final _adapter = TypedDataRegistry(
+    types: [
+      TypedDocumentMetadata<DocDocument, MutableDoc>(
+        dartName: 'DocDocument',
+        factory: ImmutableDoc.internal,
+        mutableFactory: MutableDoc.internal,
+        typeMatcher: const ValueTypeMatcher(path: ['type'], value: 'Doc'),
+      ),
+      TypedDictionaryMetadata<DocDictionary, MutableDocDictionary>(
+        dartName: 'DocDictionary',
+        factory: ImmutableDocDictionary.internal,
+        mutableFactory: MutableDocDictionary.internal,
+        typeMatcher: const ValueTypeMatcher(path: ['type'], value: 'Doc'),
+      ),
+    ],
+  );
+}
+'''),
+      },
+    );
+  });
 }
 
 const _testPkg = 'pkg';
