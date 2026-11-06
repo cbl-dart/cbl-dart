@@ -3,6 +3,52 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2026-11-06
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - [`cbl` - `v4.0.0`](#cbl---v400)
+ - [`cbl_sentry` - `v3.0.0`](#cbl_sentry---v300)
+
+Packages with other changes:
+
+ - [`cbl_generator` - `v0.4.0`](#cbl_generator---v040)
+
+Packages graduated to a stable release (see pre-releases prior to the stable version for changelog entries):
+
+ - `cbl` - `v4.0.0`
+ - `cbl_generator` - `v0.4.0`
+ - `cbl_sentry` - `v3.0.0`
+
+---
+
+#### `cbl` - `v4.0.0`
+
+ - **FEAT**(cbl): upgrade to Couchbase Lite C 4.1.2 ([#999](https://github.com/cbl-dart/cbl-dart/issues/999)). ([029c3763](https://github.com/cbl-dart/cbl-dart/commit/029c3763eb301441b36c76d31e6c31477325691a))
+   - `Database.copy` and `Database.copySync` throw a `DatabaseException` while the source database is open. Close the database before copying it.
+   - `UrlEndpoint` rejects URLs without a host or with a scheme other than `ws` or `wss` with `DatabaseErrorCode.invalidParameter`.
+   - Known issue on Windows: `TlsIdentity.identityWithCertificates` aborts the process instead of throwing when no matching private key is found.
+ - **FIX**(cbl): avoid ArchiveFormat conflict with archive 4.6 ([#992](https://github.com/cbl-dart/cbl-dart/issues/992)). ([a3200565](https://github.com/cbl-dart/cbl-dart/commit/a3200565106018b068f6f31ac4082ca0542dd5f5))
+ - Graduate package to a stable release. See pre-releases prior to this version for changelog entries.
+
+#### `cbl_sentry` - `v3.0.0`
+
+ - Update the cbl dependency to ^4.0.0.
+ - Graduate package to a stable release. See pre-releases prior to this version for changelog entries.
+
+#### `cbl_generator` - `v0.4.0`
+
+ - **FIX**(cbl_generator): keep annotated class name as default document type value ([#997](https://github.com/cbl-dart/cbl-dart/issues/997)). ([08f0959b](https://github.com/cbl-dart/cbl-dart/commit/08f0959b4475c4b744ae24c68f6f3a2141573c8c))
+   - Re-run `build_runner` to pick up the fix.
+   - Documents saved with `cbl_generator` 0.4.0-dev.5 to 0.4.0-dev.10 have the generated type name as their type value (for example `"type": "UserDocument"` for a `@TypedDocument` class `User`). After upgrading and re-running `build_runner`, these documents no longer match their type, and loading them throws a `TypedDataException` with `TypedDataErrorCode.typeMatchingConflict`. Either migrate the stored documents to the annotated class name (`"type": "User"`), or keep the old value with `@TypedDocument(typeMatcher: ValueTypeMatcher(value: 'UserDocument'))`. Documents saved with cbl 3.x are not affected.
+ - Update the cbl dependency to ^4.0.0.
+ - Graduate package to a stable release. See pre-releases prior to this version for changelog entries.
+
+
 ## 2026-10-23
 
 ### Changes

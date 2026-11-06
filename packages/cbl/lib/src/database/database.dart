@@ -119,6 +119,8 @@ abstract interface class Database implements ClosableResource {
   /// The new database will be created at the directory specified in [config].
   /// If [config] is omitted, a default [DatabaseConfiguration] is used.
   ///
+  /// The database at [from] must not be open. Close it before copying it.
+  ///
   /// {@macro cbl.Database.defaultDirectoryBehavior}
   /// {@endtemplate}
   static Future<void> copy({
@@ -133,6 +135,8 @@ abstract interface class Database implements ClosableResource {
   ///
   /// The new database will be created at the directory specified in [config].
   /// If [config] is omitted, a default [DatabaseConfiguration] is used.
+  ///
+  /// The database at [from] must not be open. Close it before copying it.
   ///
   /// {@macro cbl.Database.defaultDirectoryBehavior}
   /// {@endtemplate}
