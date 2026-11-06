@@ -182,7 +182,9 @@ final class LoggingBindings extends Bindings {
       return nullptr;
     }
 
-    final result = globalArena<cblite_lib.CBLLogFileConfiguration>();
+    final result = zeroedGlobalArena<cblite_lib.CBLLogFileConfiguration>(
+      sizeOf<cblite_lib.CBLLogFileConfiguration>(),
+    );
 
     result.ref
       ..level = config.level.value

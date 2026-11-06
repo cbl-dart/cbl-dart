@@ -92,6 +92,13 @@ void main() {
       expect(copy, config);
     });
 
+    test('from copies fullSync', () {
+      final config = DatabaseConfiguration(fullSync: true);
+      final copy = DatabaseConfiguration.from(config);
+
+      expect(copy.fullSync, isTrue);
+    });
+
     test('from does not copy encryptionKey', () {
       final config = DatabaseConfiguration(
         encryptionKey: EncryptionKey.key(randomRawEncryptionKey()),

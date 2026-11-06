@@ -444,7 +444,9 @@ final class ReplicatorBindings extends Bindings {
   Pointer<cblitedart_lib.CBLDart_ReplicatorConfiguration>
   _createConfigurationStruct(CBLReplicatorConfiguration config) {
     final configStruct =
-        globalArena<cblitedart_lib.CBLDart_ReplicatorConfiguration>();
+        zeroedGlobalArena<cblitedart_lib.CBLDart_ReplicatorConfiguration>(
+          sizeOf<cblitedart_lib.CBLDart_ReplicatorConfiguration>(),
+        );
 
     configStruct.ref
       ..database = config.database
@@ -472,8 +474,9 @@ final class ReplicatorBindings extends Bindings {
           nullptr;
 
     final collectionStructs =
-        globalArena<cblitedart_lib.CBLDart_ReplicationCollection>(
-          config.collections.length,
+        zeroedGlobalArena<cblitedart_lib.CBLDart_ReplicationCollection>(
+          sizeOf<cblitedart_lib.CBLDart_ReplicationCollection>() *
+              config.collections.length,
         );
 
     configStruct.ref
@@ -500,7 +503,9 @@ final class ReplicatorBindings extends Bindings {
       return nullptr;
     }
 
-    final settingsStruct = globalArena<cblite_lib.CBLProxySettings>();
+    final settingsStruct = zeroedGlobalArena<cblite_lib.CBLProxySettings>(
+      sizeOf<cblite_lib.CBLProxySettings>(),
+    );
 
     settingsStruct.ref
       ..type = settings.type.value

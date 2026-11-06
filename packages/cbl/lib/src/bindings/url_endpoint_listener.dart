@@ -51,7 +51,9 @@ final class UrlEndpointListenerBindings extends Bindings {
     required bool readOnly,
   }) => withGlobalArena(() {
     final config =
-        globalArena<cblite_lib.CBLURLEndpointListenerConfiguration>();
+        zeroedGlobalArena<cblite_lib.CBLURLEndpointListenerConfiguration>(
+          sizeOf<cblite_lib.CBLURLEndpointListenerConfiguration>(),
+        );
 
     final collectionsArray = globalArena<Pointer<CBLCollection>>(
       collections.length,
