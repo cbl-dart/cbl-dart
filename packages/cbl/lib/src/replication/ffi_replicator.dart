@@ -455,6 +455,16 @@ extension on CBLReplicatedDocument {
 extension on ReplicatorConfiguration {
   Pointer<CBLEndpoint> createEndpoint(Endpoint target) {
     if (target is UrlEndpoint) {
+      // Couchbase Lite C 4.1.2 crashes on Windows (std::bad_alloc) while
+      // reporting an invalid URL scheme, so the scheme is validated here.
+      final scheme = target.url.scheme.toLowerCase();
+      if (scheme != 'ws' && scheme != 'wss') {
+        throw DatabaseException(
+          'Invalid replication URL ${target.url}: the scheme must be ws or '
+          'wss.',
+          DatabaseErrorCode.invalidParameter,
+        );
+      }
       return ReplicatorBindings.createEndpointWithUrl(target.url.toString());
     } else if (target is DatabaseEndpoint) {
       final db = target.database as FfiDatabase;
