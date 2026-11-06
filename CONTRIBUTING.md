@@ -147,15 +147,17 @@ When that run passes, update the pinned versions in a pull request.
 Packages are published from a local checkout, not from CI. You need to be signed
 in to pub.dev with an account that can publish the `cbl` packages.
 
-1. Update the branch and prepare the workspace. The `cbd` tool is needed by the
-   pre-commit hook of `melos version`:
+1. Update the branch and prepare the workspace. The pre-commit hook of
+   `melos version` formats generated files with `daco`, in the version that CI
+   pins in `.github/workflows/ci.yaml`:
    ```shell
    git switch release/3.x && git pull
+   dart pub global activate daco 0.5.1
    melos bootstrap
-   melos run activate:cbd
    ```
-2. Bump the versions. This updates the pubspecs and changelogs, regenerates
-   `cbl_flutter_ce|ee`, commits and creates one tag per package:
+2. Bump the versions. This updates the pubspecs, changelogs and the root
+   `pubspec.lock`, regenerates `cbl_flutter_ce|ee`, commits and creates one tag
+   per package:
    ```shell
    melos version
    ```
@@ -165,8 +167,12 @@ in to pub.dev with an account that can publish the `cbl` packages.
    melos publish
    melos publish --no-dry-run
    ```
-   If a package fails because a dependency it needs was published seconds
-   earlier and is not resolvable yet, run the last command again.
+   The check reports `cbl`, `cbl_dart` and `cbl_flutter_ce|ee` as failed,
+   because their dependencies on `cbl_libcblite_api`, `cbl_libcblitedart_api`
+   and `cbl_flutter_install` are pinned to exact versions. These pins are
+   intended, and the real publish goes through. If a package fails because a
+   dependency it needs was published seconds earlier and is not resolvable yet,
+   run the last command again.
 4. Push the release commit and its tags:
    ```shell
    git push --follow-tags

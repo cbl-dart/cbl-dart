@@ -20,13 +20,17 @@ command:
     hooks:
       preCommit:
         description:
-          Pre-commit hook for the version command to update the
-          `cbl_flutter_ce|ee` packages.
+          Pre-commit hook for the version command to regenerate the
+          `cbl_flutter_ce|ee` packages and `version_info.dart`, format them and
+          update the root lockfile to the new versions.
         run: |
           melos build:cbl_flutter_prebuilt && \
-          git add packages/cbl_flutter_ee packages/cbl_flutter_ce && \
           melos build:cbl_dart:version_info && \
-          git add packages/cbl_dart/lib/src/version_info.dart
+          daco format packages/cbl_flutter_ce/lib packages/cbl_flutter_ee/lib \
+            packages/cbl_dart/lib/src/version_info.dart && \
+          dart pub get && \
+          git add packages/cbl_flutter_ce packages/cbl_flutter_ee \
+            packages/cbl_dart/lib/src/version_info.dart pubspec.lock
 
 scripts:
   activate:cbd:
