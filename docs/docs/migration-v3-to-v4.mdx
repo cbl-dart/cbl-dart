@@ -527,6 +527,90 @@ If you were using `TracingDelegate` directly, remove any references to it. The
 `cbl_sentry` package continues to provide Sentry integration for Couchbase Lite
 operations and does not require any changes.
 
+## Typed documents
+
+With `cbl_generator` 0.4, the class you annotate with `api|TypedDocument` is the
+common interface of two generated types, and the typed APIs take those generated
+types instead of your class. If you pass your class directly, for example
+`collection.typedDocument<User>(id)`, the analyzer reports:
+
+```text
+'User' doesn't conform to the bound 'TypedDocumentObject<Object>' of the type parameter 'D'.
+```
+
+For a `@TypedDocument` class `User`, the generator creates:
+
+| Type             | Use it for                                                             |
+| ---------------- | ---------------------------------------------------------------------- |
+| `UserDocument`   | Documents loaded from a collection, e.g. `typedDocument<UserDocument>` |
+| `MutableUser`    | New and mutable documents (unchanged)                                  |
+| `UserDictionary` | Query results, e.g. `allTypedResults<UserDictionary>()`                |
+| `User`           | Code that works with both documents and query results                  |
+
+Your class declarations and the `types` of `api|TypedDatabase` stay the same:
+
+```dart
+@TypedDocument()
+abstract class User with _$User {
+  factory User({
+    @DocumentId() String? id,
+    required String username,
+  }) = MutableUser;
+}
+
+@TypedDatabase(types: {User})
+abstract class $AppDatabase {}
+```
+
+To migrate, upgrade `cbl_generator` to 0.4, run `dart run build_runner build` to
+regenerate the code, and replace your class with the generated type wherever it
+is a type argument of a typed API:
+
+```dart
+// Before (v3)
+final User? user = await collection.typedDocument<User>(id);
+
+// After (v4)
+final UserDocument? user = await collection.typedDocument<UserDocument>(id);
+```
+
+The same applies to every other API that takes a typed document type, such as
+`api|td:TypedSaveConflictHandler`, which becomes
+`TypedSaveConflictHandler<UserDocument, MutableUser>`. Code that only reads
+properties can keep using `User`, which both `UserDocument` and `UserDictionary`
+implement:
+
+```dart
+String describe(User user) => '${user.username} (${user.id})';
+```
+
+To read typed documents from query results, use `UserDictionary` with
+`api|ResultSet.allTypedResults` or `api|ResultSet.asTypedStream`. The query has
+to select the properties of `User` at the top level of each result, including
+the document ID under the name of the `@DocumentId` property:
+
+```dart
+final query = await db.createQuery(
+  'SELECT META().id AS id, username FROM _',
+);
+final resultSet = await query.execute();
+final users = await resultSet.allTypedResults<UserDictionary>();
+```
+
+Passing `UserDocument` to these methods throws a `api|TypedDataException` with
+`api|enum:TypedDataErrorCode.documentTypeNotAllowed`, because a document can
+only be loaded from its collection.
+
+The stored data is unchanged: documents are still written with the annotated
+class name as their type (`"type": "User"`), so documents written by v3 load as
+`UserDocument`.
+
+The typed document APIs on `api|Database` and the typed filters and conflict
+resolver on `api|ReplicatorConfiguration` have moved to `api|Collection` and
+`api|CollectionConfiguration`, as described in
+[Removed deprecated Database APIs](#removed-deprecated-database-apis) and
+[Removed deprecated Replicator APIs](#removed-deprecated-replicator-apis).
+
 ## Dart SDK requirement
 
 Version 4 requires Dart SDK `^3.10.0` due to the use of Dart native assets.
@@ -600,5 +684,8 @@ No manual steps are required.
 21. **Replace `InvalidJsonException`** with `FleeceException`.
 22. **Remove `TracingDelegate` usage** — the tracing API has been removed from
     the public API.
-23. **Run your app** — native libraries will be built automatically on first
+23. **Update typed documents** — upgrade `cbl_generator` to 0.4, regenerate
+    code, and use `UserDocument` for documents and `UserDictionary` for query
+    results where you passed your `@TypedDocument` class as a type argument.
+24. **Run your app** — native libraries will be built automatically on first
     run.

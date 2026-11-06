@@ -20,9 +20,9 @@ Often though, the data is known to have a regular structure, and accessing it
 through a typed Dart API makes working with it easier and safer.
 
 With the help of the `api|cbl_generator|pkg:` package you can quickly create
-Dart classes that can be used to access data in a typed way. Theses classes can
-be used with specialized APIs of `api|Database`, `api|Query` and
-`api|Replicator`.
+Dart classes that can be used to access data in a typed way. These classes can
+be used with specialized APIs of `api|Collection`, `api|ResultSet` and
+`api|CollectionConfiguration`.
 
 ## Getting started
 
@@ -100,8 +100,6 @@ export const CblGeneratorInstallCommand = () => {
 
    ```shell
    dart run build_runner build
-   # or
-   flutter run build_runner build
    ```
 
 1. Open an instance of the typed database and use it:
@@ -110,13 +108,14 @@ export const CblGeneratorInstallCommand = () => {
    import 'app_database.cbl.database.g.dart';
    import 'user.dart';
 
-   Future<void> useTypedDatabase() {
+   Future<void> useTypedDatabase() async {
      // Use a static method on the generated typed database class to open an instance.
      final db = await AppDatabase.openAsync('app');
+     final collection = await db.defaultCollection;
 
      // Every typed data class has a mutable and immutable variant. The mutable
-     // class has the same name as the immutable class, but with the `Mutable`
-     // suffix. A mutable instance can be created by constructing it, or from
+     // class has the same name as the annotated class, but with the `Mutable`
+     // prefix. A mutable instance can be created by constructing it, or from
      // an immutable instance, through the `toMutable` method.
      final user = MutableUser(
        name: PersonalName(first: 'Alice', last: 'Green'),
@@ -129,12 +128,45 @@ export const CblGeneratorInstallCommand = () => {
      // save plain documents. `saveTypedDocument` returns an object that has methods
      // for saving the document with conflict resolution through concurrency control or
      // a custom conflict handler.
-     await database.saveTypedDocument(user).withConcurrencyControl();
+     await collection.saveTypedDocument(user).withConcurrencyControl();
 
      // To retrieve a typed document, use the `typedDocument` method and pass it the
-     // type of the requested document through the type parameter.
-     final savedUser = await database.typedDocument<User>(user.id);
+     // generated document type through the type parameter.
+     final savedUser = await collection.typedDocument<UserDocument>(user.id);
    }
    ```
+
+## Generated types
+
+For a class annotated with `api|TypedDocument`, such as `User`, the generator
+creates these types:
+
+| Type             | Use it for                                                 |
+| ---------------- | ---------------------------------------------------------- |
+| `UserDocument`   | Documents loaded from a collection                         |
+| `MutableUser`    | New documents and documents that are changed before saving |
+| `UserDictionary` | Query results                                              |
+| `User`           | Code that works with both documents and query results      |
+
+Pass `UserDocument` or `MutableUser` to APIs that load or save documents, such
+as `api|Collection.typedDocument`, and pass `UserDictionary` to
+`api|ResultSet.allTypedResults` and `api|ResultSet.asTypedStream`. Documents can
+only be loaded from their collection, so passing `UserDocument` to a query
+result method throws a `api|TypedDataException`.
+
+To read typed results from a query, select the properties of the typed class at
+the top level of each result, including the document ID under the name of the
+`api|DocumentId` property:
+
+```dart
+final query = await db.createQuery(
+  'SELECT META().id AS id, name, email, username, createdAt FROM _',
+);
+final resultSet = await query.execute();
+final users = await resultSet.allTypedResults<UserDictionary>();
+```
+
+A class annotated with `api|TypedDictionary`, such as `PersonalName`, is used
+directly, together with its `MutablePersonalName` variant.
 
 [issues]: https://github.com/cbl-dart/cbl-dart/issues
