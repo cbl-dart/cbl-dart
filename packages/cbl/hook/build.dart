@@ -7,7 +7,7 @@ import 'package:path/path.dart' as p;
 
 import '../src/install/download.dart' as dl;
 
-const _cbliteRelease = '4.0.3';
+const _cbliteRelease = '4.1.2';
 const _vectorSearchRelease = '2.0.0';
 
 void main(List<String> args) async {

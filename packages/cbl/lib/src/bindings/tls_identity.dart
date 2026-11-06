@@ -44,11 +44,11 @@ enum CBLSignatureDigestAlgorithm {
   // TODO(https://github.com/cbl-dart/cbl-dart/issues/861): Remove workaround
   // for mbedTLS 3.6.5 enum renumbering.
   //
-  // CBL 4.0.3 includes mbedTLS 3.6.5, which renumbered mbedtls_md_type_t to
-  // align with PSA crypto API values. The CBL C header still declares the old
-  // mbedTLS 2.x values, but the compiled binary passes the new 3.6.5 values
-  // through the external key callbacks. We map the actual runtime values here
-  // instead of using the header constants.
+  // CBL 4.0.3 and later include mbedTLS 3.6.5 or newer, which renumbered
+  // mbedtls_md_type_t to align with PSA crypto API values. The CBL C header
+  // still declares the old mbedTLS 2.x values, but the compiled binary passes
+  // the new values through the external key callbacks. We map the actual
+  // runtime values here instead of using the header constants.
   factory CBLSignatureDigestAlgorithm.fromValue(int value) => switch (value) {
     0 => none,
     4 => ripemd160,

@@ -433,7 +433,7 @@ typedef CBL_ENUM(uint8_t, CBLReplicatorActivityLevel) {
     accurate would require slowing down the replicator and incurring more load on the server.
     It's fine to use in a progress bar, though. */
 typedef struct {
-    float complete;             ///<Very-approximate fractional completion, from 0.0 to 1.0
+    float complete;             ///< Very-approximate fractional completion, from 0.0 to 1.0
     uint64_t documentCount;     ///< Number of documents transferred so far
 } CBLReplicatorProgress;
 
@@ -447,10 +447,18 @@ typedef struct {
 /** Returns the replicator's current status. */
 CBLReplicatorStatus CBLReplicator_Status(CBLReplicator*) CBLAPI;
 
+/** Returns the ID used to correlate the replication session with the remote endpoint.
+    This value is intended for logging and diagnostics, and is a null slice until the
+    replicator receives a correlation ID from the remote endpoint.
+    @note You are responsible for releasing the result by calling \ref FLSliceResult_Release.
+    @return The correlation ID, or a null slice if unavailable. */
+_cbl_warn_unused
+FLStringResult CBLReplicator_CorrelationID(CBLReplicator*) CBLAPI;
+
 /** Indicates which documents in the given collection have local changes that have not yet been
     pushed to the server by this replicator. This is of course a snapshot, that will go out of date
     as the replicator makes progress and/or documents are saved locally.
-    
+
     The result is, effectively, a set of document IDs: a dictionary whose keys are the IDs and
     values are `true`.
     If there are no pending documents, the dictionary is empty.

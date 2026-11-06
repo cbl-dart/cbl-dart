@@ -23,6 +23,12 @@
 
 CBL_CAPI_BEGIN
 
+/** \defgroup prediction   Prediction
+    @{
+    Registering predictive models, which integrate machine learning models into queries
+    via the query PREDICTION() function.
+    \note ENTERPRISE EDITION ONLY */
+
 /** Predictive Model  */
 typedef struct {
     /** A pointer to any external data needed by the `prediction` callback, which will receive this as its first parameter. */
@@ -51,6 +57,8 @@ void CBL_RegisterPredictiveModel(FLString name, CBLPredictiveModel model) CBLAPI
 /** Unregisters the predictive model.
     @param name  The name of the registered predictive model. */
 void CBL_UnregisterPredictiveModel(FLString name) CBLAPI;
+
+/** @} */
 
 CBL_CAPI_END
 

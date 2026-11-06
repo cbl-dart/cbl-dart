@@ -455,7 +455,7 @@ extension on CBLReplicatedDocument {
 extension on ReplicatorConfiguration {
   Pointer<CBLEndpoint> createEndpoint(Endpoint target) {
     if (target is UrlEndpoint) {
-      return ReplicatorBindings.createEndpointWithUrl(target.url.toString());
+      return ReplicatorBindings.createEndpointWithUrl(target.url);
     } else if (target is DatabaseEndpoint) {
       final db = target.database as FfiDatabase;
       return ReplicatorBindings.createEndpointWithLocalDB(db.pointer);

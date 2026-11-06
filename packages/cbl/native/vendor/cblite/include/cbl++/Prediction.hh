@@ -16,69 +16,62 @@
 // limitations under the License.
 //
 
-// VOLATILE API: Couchbase Lite C++ API is not finalized, and may change in
-// future releases.
 
 #ifdef COUCHBASE_ENTERPRISE
 
 #pragma once
 #include "cbl++/Base.hh"
 #include "cbl/CBLPrediction.h"
-#include <memory>
-#include <unordered_map>
+#include <string_view>
 
-// VOLATILE API: Couchbase Lite C++ API is not finalized, and may change in
-// future releases.
 
 CBL_ASSUME_NONNULL_BEGIN
 
 namespace cbl {
-    /** ENTERPRISE EDITION ONLY
-     
-        The PredictiveModel  that allows to integrate machine learning model
-        into queries via invoking query's PREDICTION() function.
-     
-        @note The predictive index feature is not supported by Couchbase Lite for C.
+    /** A predictive model callable that integrates a machine learning model into queries,
+        invoked via the query's PREDICTION() function. Given an input dictionary, return the
+        output dictionary.
+        \note ENTERPRISE EDITION ONLY
+        \note The predictive index feature is not supported by Couchbase Lite for C.
               The Predictive Model is currently for creating vector indexes using the PREDICTION() function,
               which will call the specified predictive model for computing the vectors. */
-    class PredictiveModel {
-    public:
-        /** Predicts and returns a mutable dictionary based on the input dictionary.
-            Override this function  for the implementation.
-            @param input The input dictionary corresponding to the input dictionary expression given in the query's PREDICTION() function
-            @return The output dictionary.
-                    - To create a new dictionary for returning, use fleece::MutableDict::newDict().
-                    - To create a null result to evaluate as MISSING, use fleece::MutableDict(). */
-        virtual fleece::MutableDict prediction(fleece::Dict input) noexcept = 0;
-        
-        virtual ~PredictiveModel() = default;
-    };
+    using PredictiveModel = std::function<fleece::MutableDict(fleece::Dict)>;
 
-    static std::unordered_map<slice, std::unique_ptr<PredictiveModel>> _sPredictiveModels;
-
-    /** Predictive Model Registation 
-        This class provides static methods to register and unregister predictive models. */
+    /** Registers/unregisters predictive models by name.
+        \note ENTERPRISE EDITION ONLY */
     class Prediction {
     public:
-        /** Registers a predictive model with the given name. */
-        static void registerModel(slice name, std::unique_ptr<PredictiveModel> model) {
-            auto prediction = [](void* context, FLDict input) {
-                auto m = (PredictiveModel*)context;
-                return FLMutableDict_Retain((FLMutableDict) m->prediction(input));
+        /** Registers a predictive model with the given name.
+            @param name  The name used to refer to the model in a query's PREDICTION() function.
+            @param model  The model implementation. Any matching callable is accepted (lambda, functor, ...). */
+        static void registerModel(std::string_view name, PredictiveModel model) {
+            auto* holder = new PredictiveModel(std::move(model));
+            CBLPredictiveModel config{};
+            config.context      = holder;
+            config.prediction   = [](void* ctx, FLDict input) -> FLMutableDict {
+                try {
+                    auto& fn = *static_cast<PredictiveModel*>(ctx);
+                    return FLMutableDict_Retain((FLMutableDict)fn(fleece::Dict(input)));
+                } catch (const cbl::Error& error) {
+                    CBL_Log(kCBLLogDomainDatabase, kCBLLogError, "Prediction function throws error %d/%d: %s",
+                            error.domain, error.code, error.what());
+                } catch (const std::exception& error) {
+                    CBL_Log(kCBLLogDomainDatabase, kCBLLogError, "Prediction function throws error %s",
+                            error.what());
+                } catch (...) {
+                    CBL_Log(kCBLLogDomainDatabase, kCBLLogError, "Prediction function throws unknown exception");
+                }
+                return FLMutableDict_New();
             };
-            
-            CBLPredictiveModel config { };
-            config.context = model.get();
-            config.prediction = prediction;
-            CBL_RegisterPredictiveModel(name, config);
-            
-            _sPredictiveModels[name] = std::move(model);
+            config.unregistered = [](void* ctx) {
+                delete static_cast<PredictiveModel*>(ctx);
+            };
+            CBL_RegisterPredictiveModel(slice(name), config);
         }
-        
-        /** Unregisters the predictive model with the given name. */
-        static void unregisterModel(slice name) {
-            CBL_UnregisterPredictiveModel(name);
-            _sPredictiveModels.erase(name);
+
+        /** Unregisters the model; LiteCore fires `unregistered` which frees the model. */
+        static void unregisterModel(std::string_view name) {
+            CBL_UnregisterPredictiveModel(slice(name));
         }
     };
 }

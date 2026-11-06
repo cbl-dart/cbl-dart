@@ -119,6 +119,24 @@ void main() {
       );
     });
 
+    apiTest('create Replicator with UrlEndpoint without host', () async {
+      final db = await openTestDatabase();
+
+      final config = ReplicatorConfiguration(
+        target: UrlEndpoint(Uri.parse('ws:///db')),
+      )..addCollection(await db.defaultCollection);
+      expect(
+        () => Replicator.create(config),
+        throwsA(
+          isA<DatabaseException>().having(
+            (exception) => exception.code,
+            'code',
+            DatabaseErrorCode.invalidParameter,
+          ),
+        ),
+      );
+    });
+
     apiTest('config returns copy', () async {
       final db = await openTestDatabase();
       final config = ReplicatorConfiguration(

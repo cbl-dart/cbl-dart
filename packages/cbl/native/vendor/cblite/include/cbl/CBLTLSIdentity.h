@@ -94,7 +94,7 @@ CBL_REFCOUNTED(CBLKeyPair*, KeyPair);
     @param outError On failure, the error will be written here.
     @return A CBLCert instance on success, or NULL on failure.
     @note PEM data might consist of a series of certificates. If so, the returned CBLCert
-          will represent only the first, and you can iterate over the next by calling \ref CBLCert_NextInChain.
+          will represent only the first, and you can iterate over the next by calling \ref CBLCert_CertNextInChain.
     @note You are responsible for releasing the returned reference. */
 _cbl_warn_unused
 CBLCert* _cbl_nullable CBLCert_CreateWithData(FLSlice certData, CBLError* _cbl_nullable outError) CBLAPI;
@@ -301,8 +301,8 @@ typedef CBL_OPTIONS(uint16_t, CBLKeyUsages) {
     @param outError On failure, the error will be written here.
     @return A CBLTLSIdentity instance on success, or NULL on failure.
     @note A non-NULL label is not supported on Linux or Android platforms. On these platforms, passing `kFLSliceNull` for the label is required.
-    @Note The Common Name (kCBLCertAttrKeyCommonName) attribute is required.
-    @Note You are responsible for releasing the returned reference. */
+    @note The Common Name (kCBLCertAttrKeyCommonName) attribute is required.
+    @note You are responsible for releasing the returned reference. */
 _cbl_warn_unused
 CBLTLSIdentity* _cbl_nullable CBLTLSIdentity_CreateIdentity(CBLKeyUsages keyUsages,
                                                             FLDict attributes,
@@ -317,8 +317,8 @@ CBLTLSIdentity* _cbl_nullable CBLTLSIdentity_CreateIdentity(CBLKeyUsages keyUsag
     @param validityInMilliseconds Certificate validity duration in milliseconds.
     @param outError On failure, the error will be written here.
     @return A CBLTLSIdentity instance on success, or NULL on failure.
-    @Note The Common Name (kCBLCertAttrKeyCommonName) attribute is required.
-    @Note You are responsible for releasig the returned reference. */
+    @note The Common Name (kCBLCertAttrKeyCommonName) attribute is required.
+    @note You are responsible for releasing the returned reference. */
 _cbl_warn_unused
 CBLTLSIdentity* _cbl_nullable CBLTLSIdentity_CreateIdentityWithKeyPair(CBLKeyUsages keyUsages,
                                                                        CBLKeyPair* keypair,
@@ -344,7 +344,7 @@ _cbl_warn_unused
  *  @param outError On failure, the error will be written here.
  *  @return A CBLTLSIdentity instance if the identity is found and successfully retrieved,
  *          or `NULL` if the identity does not exist or an error occurs.
-    @Note The Linux and Android platforms do not support this function.
+    @note The Linux and Android platforms do not support this function.
     @note You are responsible for releasing the returned reference. */
 CBLTLSIdentity* _cbl_nullable CBLTLSIdentity_IdentityWithLabel(FLString label,
                                                                CBLError* _cbl_nullable outError) CBLAPI;
@@ -371,7 +371,7 @@ CBLTLSIdentity* _cbl_nullable CBLTLSIdentity_IdentityWithKeyPairAndCerts(CBLKeyP
  *  @param cert A CBLCert instance representing the certificate chain.
  *  @param outError On failure, the error will be written here.
  *  @return A CBLTLSIdentity instance on success, or `NULL` if an error occurs.
- *  @Note The Linux and Android platforms do not support this function.
+ *  @note The Linux and Android platforms do not support this function.
  *  @note You are responsible for releasing the returned reference. */
 _cbl_warn_unused
 CBLTLSIdentity* _cbl_nullable CBLTLSIdentity_IdentityWithCerts(CBLCert* cert,

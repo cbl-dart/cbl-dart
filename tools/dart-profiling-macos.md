@@ -207,9 +207,9 @@ place it next to the binary for full internal symbolication.
 ```bash
 # URL pattern: ...-{edition}-{version}-macos-symbols.zip
 curl -L -o cblite-symbols.zip \
-  "https://packages.couchbase.com/releases/couchbase-lite-c/4.0.3/couchbase-lite-c-enterprise-4.0.3-macos-symbols.zip"
+  "https://packages.couchbase.com/releases/couchbase-lite-c/4.1.2/couchbase-lite-c-enterprise-4.1.2-macos-symbols.zip"
 unzip cblite-symbols.zip
-cp -R libcblite-4.0.3/libcblite.dylib.dSYM build/profile/bundle/lib/
+cp -R libcblite-4.1.2/libcblite.dylib.dSYM build/profile/bundle/lib/
 
 # Verify UUIDs match
 dwarfdump -u build/profile/bundle/lib/libcblite.dylib
@@ -228,9 +228,9 @@ dart build cli \
 
 # 1b. (Optional) Download dSYM for full native symbolication
 curl -L -o /tmp/cblite-symbols.zip \
-  "https://packages.couchbase.com/releases/couchbase-lite-c/4.0.3/couchbase-lite-c-enterprise-4.0.3-macos-symbols.zip"
+  "https://packages.couchbase.com/releases/couchbase-lite-c/4.1.2/couchbase-lite-c-enterprise-4.1.2-macos-symbols.zip"
 unzip -o /tmp/cblite-symbols.zip -d /tmp/cblite-symbols
-cp -R /tmp/cblite-symbols/libcblite-4.0.3/libcblite.dylib.dSYM \
+cp -R /tmp/cblite-symbols/libcblite-4.1.2/libcblite.dylib.dSYM \
   .dart_tool/benchmark-aot/profile_run/bundle/lib/
 
 # 2-4. Compile to assembly shared library

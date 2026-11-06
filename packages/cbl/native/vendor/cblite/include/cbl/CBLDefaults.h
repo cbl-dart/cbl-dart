@@ -41,9 +41,6 @@ CBL_CAPI_BEGIN
 /** [false] Full sync is off by default because the performance hit is seldom worth the benefit */
 CBL_PUBLIC extern const bool kCBLDefaultDatabaseFullSync;
 
-/** [false] Memory mapped database files are enabled by default */
-CBL_PUBLIC extern const bool kCBLDefaultDatabaseMmapDisabled;
-
 /** @} */
 
 /** \name CBLLogFileConfiguration

@@ -25,6 +25,12 @@
 
 CBL_CAPI_BEGIN
 
+/** \defgroup URLEndpointListener   URLEndpointListener
+    @{
+    URLEndpointListener listens for incoming replicator connections, serving the collections
+    of local databases over the network to enable peer-to-peer sync.
+    \note ENTERPRISE EDITION ONLY */
+
 /** An opaque object representing the listener authenticator. */
 typedef struct CBLListenerAuthenticator CBLListenerAuthenticator;
 
@@ -127,6 +133,8 @@ bool CBLURLEndpointListener_Start(CBLURLEndpointListener*, CBLError* _cbl_nullab
 
 /** Stops the listener. */
 void CBLURLEndpointListener_Stop(CBLURLEndpointListener*) CBLAPI;
+
+/** @} */
 
 CBL_CAPI_END
 

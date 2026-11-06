@@ -341,8 +341,8 @@ void main() {
           .subtract(const Duration(minutes: 1))
           .copyWith(millisecond: 0, microsecond: 0);
       expect(
-        created.difference(expected).inSeconds.abs(),
-        lessThanOrEqualTo(2),
+        created,
+        isCloseToDateTime(expected, tolerance: const Duration(seconds: 2)),
       );
     });
 
@@ -354,12 +354,9 @@ void main() {
       );
       expect(
         identity.certificates.single.expires,
-        // Certificates may expire one second before the expiration time
-        // specified when creating the identity.
-        anyOf([
-          futureExpiration,
-          futureExpiration.subtract(const Duration(seconds: 1)),
-        ]),
+        // The expiration of a created certificate can differ from the
+        // requested expiration by a few seconds.
+        isCloseToDateTime(futureExpiration),
       );
     });
 
@@ -407,6 +404,14 @@ b17aolOOq/6xfP6QIc9I6pOoPhEFY18mCqVCKrF3YCQjVC3P7Ac1m2x5iMXL+fXF
             ExceptionExternalKeyPairDelegate(),
           );
           expect(await keyPair.publicKeyDigest, isNull);
+        });
+
+        test('public key becomes available after a failure', () async {
+          final delegate = FailingOnceExternalKeyPairDelegate(
+            PointycastleExternalKeyPairDelegate(),
+          );
+          final keyPair = await KeyPair.fromExternal(delegate);
+          expect(await keyPair.publicKeyDigest, isNotEmpty);
         });
       });
 
@@ -551,12 +556,9 @@ b17aolOOq/6xfP6QIc9I6pOoPhEFY18mCqVCKrF3YCQjVC3P7Ac1m2x5iMXL+fXF
 
       expect(
         identity.expires,
-        // Certificates may expire one second before the expiration time
-        // specified when creating the identity.
-        anyOf([
-          futureExpiration,
-          futureExpiration.subtract(const Duration(seconds: 1)),
-        ]),
+        // The expiration of a created certificate can differ from the
+        // requested expiration by a few seconds.
+        isCloseToDateTime(futureExpiration),
       );
       expect(identity.certificates.single.attributes.commonName, 'Test');
     });
@@ -625,30 +627,38 @@ b17aolOOq/6xfP6QIc9I6pOoPhEFY18mCqVCKrF3YCQjVC3P7Ac1m2x5iMXL+fXF
       await expectLater(deleteFuture, completes);
     });
 
-    test('retrieve non-persisted identity by certificates', () async {
-      final identity = await TlsIdentity.createIdentity(
-        keyUsages: {KeyUsage.serverAuth},
-        attributes: const CertificateAttributes(commonName: 'Test'),
-        expiration: futureExpiration,
-      );
-      final certificate = identity.certificates;
-      final identityFuture = Future(
-        () => TlsIdentity.identityWithCertificates(certificate),
-      );
+    test(
+      'retrieve non-persisted identity by certificates',
+      () async {
+        final identity = await TlsIdentity.createIdentity(
+          keyUsages: {KeyUsage.serverAuth},
+          attributes: const CertificateAttributes(commonName: 'Test'),
+          expiration: futureExpiration,
+        );
+        final certificate = identity.certificates;
+        final identityFuture = Future(
+          () => TlsIdentity.identityWithCertificates(certificate),
+        );
 
-      if (await expectPersistedIdentityUnsupported(identityFuture)) {
-        return;
-      }
+        if (await expectPersistedIdentityUnsupported(identityFuture)) {
+          return;
+        }
 
-      expect(
-        identityFuture,
-        throwsA(
-          isDatabaseException
-              .havingCode(DatabaseErrorCode.crypto)
-              .havingMessage('No matching private key in keystore'),
-        ),
-      );
-    });
+        expect(
+          identityFuture,
+          throwsA(
+            isDatabaseException
+                .havingCode(DatabaseErrorCode.crypto)
+                .havingMessage('No matching private key in keystore'),
+          ),
+        );
+      },
+      // TODO: Re-enable on Windows once Couchbase Lite C no longer aborts with
+      // std::bad_alloc while reporting the missing private key (4.1.2).
+      skip: Platform.isWindows
+          ? 'CBL C 4.1.2 crashes on Windows when reporting this error'
+          : null,
+    );
   });
 }
 
@@ -688,6 +698,36 @@ final class ExceptionExternalKeyPairDelegate extends ExternalKeyPairDelegate {
   Future<Uint8List?> sign(SignatureDigestAlgorithm? algorithm, Uint8List data) {
     throw UnimplementedError('ExceptionExternalKeyPairDelegate.sign');
   }
+}
+
+/// Delegates to [inner], but fails the first call to [publicKeyData].
+final class FailingOnceExternalKeyPairDelegate extends ExternalKeyPairDelegate {
+  FailingOnceExternalKeyPairDelegate(this.inner);
+
+  final ExternalKeyPairDelegate inner;
+
+  var _failed = false;
+
+  @override
+  int get keySizeInBits => inner.keySizeInBits;
+
+  @override
+  Future<DerData?> publicKeyData() {
+    if (!_failed) {
+      _failed = true;
+      throw StateError('Keystore temporarily unavailable');
+    }
+    return inner.publicKeyData();
+  }
+
+  @override
+  Future<Uint8List?> decrypt(Uint8List data) => inner.decrypt(data);
+
+  @override
+  Future<Uint8List?> sign(
+    SignatureDigestAlgorithm? algorithm,
+    Uint8List data,
+  ) => inner.sign(algorithm, data);
 }
 
 final class PointycastleExternalKeyPairDelegate

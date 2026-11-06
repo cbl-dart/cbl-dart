@@ -200,3 +200,11 @@ final isTypedDataException = isA<TypedDataException>();
 final isNetworkException = isA<NetworkException>();
 
 final isHttpException = isA<HttpException>();
+
+Matcher isCloseToDateTime(
+  DateTime expected, {
+  Duration tolerance = const Duration(seconds: 5),
+}) => predicate<DateTime>(
+  (actual) => actual.difference(expected).abs() <= tolerance,
+  'within $tolerance of $expected',
+);

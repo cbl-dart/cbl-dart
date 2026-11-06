@@ -21,7 +21,7 @@
 
 CBL_CAPI_BEGIN
 
-/** \defgroup queries   Queries
+/** \addtogroup query
     @{ */
 
 /** Query languages */

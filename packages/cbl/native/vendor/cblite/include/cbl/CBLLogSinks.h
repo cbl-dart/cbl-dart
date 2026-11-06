@@ -77,7 +77,7 @@ typedef struct {
 /** Custom log sink configuration for logging to a user-defined callback. */
 typedef struct {
     CBLLogLevel level;                          ///< The minimum level of message to write (Required).
-    CBLLogSinkCallback _cbl_nullable callback;  ///< Custom log callback (Required).
+    CBLLogSinkCallback _cbl_nullable callback;  ///< Custom log callback.
     CBLLogDomainMask domains;                   ///< Bitmask for enabled log domains. Use zero for all domains.
 } CBLCustomLogSink;
 

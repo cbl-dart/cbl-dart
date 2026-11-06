@@ -22,7 +22,7 @@
 
 CBL_CAPI_BEGIN
 
-/** \defgroup index  Index 
+/** \addtogroup index
     @{ */
 
 /** \name Index Configuration

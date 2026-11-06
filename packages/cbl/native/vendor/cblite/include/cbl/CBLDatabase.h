@@ -269,7 +269,7 @@ const CBLDatabaseConfiguration CBLDatabase_Config(const CBLDatabase*) CBLAPI;
 #ifdef __APPLE__
 #pragma mark - NOTIFICATION SCHEDULING
 #endif
-/** \defgroup listeners   Listeners
+/** \addtogroup listeners
     @{ */
 /** \name  Scheduling notifications
     @{

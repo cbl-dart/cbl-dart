@@ -96,11 +96,21 @@ final class UrlEndpointListenerBindings {
 
   static List<Uri>? urls(Pointer<cblite.CBLURLEndpointListener> pointer) {
     ensureInitializedForCurrentIsolate();
+    // Couchbase Lite C 4.1.2 reports `ws` URLs even when the listener uses
+    // TLS, and replicators connecting to them fail the TLS handshake.
+    final usesTls = !cblite.CBLURLEndpointListener_Config(
+      pointer,
+    ).ref.disableTLS;
     return cblite.CBLURLEndpointListener_Urls(pointer)
         .toNullable()
         ?.let((pointer) => MutableArray.fromPointer(pointer, adopt: true))
         .let(
-          (array) => array.map((value) => Uri.parse(value.asString!)).toList(),
+          (array) => array.map((value) {
+            final url = Uri.parse(value.asString!);
+            return usesTls && url.isScheme('ws')
+                ? url.replace(scheme: 'wss')
+                : url;
+          }).toList(),
         );
   }
 

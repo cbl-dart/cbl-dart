@@ -23,25 +23,23 @@
 #include "fleece/Mutable.hh"
 #include <string>
 
-// VOLATILE API: Couchbase Lite C++ API is not finalized, and may change in
-// future releases.
 
 CBL_ASSUME_NONNULL_BEGIN
 
 namespace cbl {
     class MutableDocument;
 
-    /** Immutable Document. */
+    /** An immutable, in-memory copy of a document read from a collection. */
     class Document : protected RefCounted {
     public:
         // Metadata:
 
         /** A document's ID */
-        std::string id() const                     {return asString(CBLDocument_ID(ref()));}
+        std::string id() const                     {return internal::asString(CBLDocument_ID(ref()));}
 
         /** A document's revision ID, which is a short opaque string that's guaranteed to be unique to every change made to
             the document. If the document doesn't exist yet, this function returns an empty string.  */
-        std::string revisionID() const             {return asString(CBLDocument_RevisionID(ref()));}
+        std::string revisionID() const             {return internal::asString(CBLDocument_RevisionID(ref()));}
         
         /** The hybrid logical timestamp in nanoseconds since epoch that the revision was created. */
         uint64_t timestamp() const                 {return CBLDocument_Timestamp(ref());}
@@ -64,7 +62,7 @@ namespace cbl {
         alloc_slice propertiesAsJSON() const       {return alloc_slice(CBLDocument_CreateJSON(ref()));}
 
         /** A subscript operator to access a document's property value by key. */
-        fleece::Value operator[] (slice key) const {return properties()[key];}
+        fleece::Value operator[] (std::string_view key) const {return properties()[slice(key)];}
 
         // Operations:
         
@@ -82,7 +80,7 @@ namespace cbl {
 
         static Document adopt(const CBLDocument* _cbl_nullable d, CBLError *error) {
             if (!d && error->code != 0)
-                throw *error;
+                internal::check(false, *error);
             Document doc;
             doc._ref = (CBLRefCounted*)d;
             return doc;
@@ -91,41 +89,44 @@ namespace cbl {
         static bool checkSave(bool saveResult, CBLError &error) {
             if (saveResult)
                 return true;
-            else if (error.code == kCBLErrorConflict && error.domain == kCBLDomain)
+            else {
+                bool permittedError = (error.code == kCBLErrorConflict && error.domain == kCBLDomain);
+                internal::check(permittedError, error); // throw if not permittedError
                 return false;
-            else
-                throw error;
+            }
         }
-        
+
         CBL_REFCOUNTED_BOILERPLATE(Document, RefCounted, const CBLDocument)
     };
 
 
-    /** Mutable Document. */
+    /** A mutable document, whose properties can be modified and saved to a collection. */
     class MutableDocument : public Document {
     public:
         /** Creates a new, empty document in memory, with a randomly-generated unique ID.
             It will not be added to a database until saved. */
-        explicit MutableDocument(nullptr_t)             {_ref = (CBLRefCounted*)CBLDocument_CreateWithID(fleece::nullslice);}
-        
+        explicit MutableDocument(std::nullptr_t)        {_ref = (CBLRefCounted*)CBLDocument_CreateWithID(fleece::nullslice);}
+
         /** Creates a new, empty document in memory, with the given ID.
             It will not be added to a database until saved.
             @note If the given ID conflicts with a document already in the database, that will not
                   be apparent until this document is saved. At that time, the result depends on the
                   conflict handling mode used when saving; see the save functions for details.
             @param docID  The ID of the new document, or NULL to assign a new unique ID. */
-        explicit MutableDocument(slice docID)           {_ref = (CBLRefCounted*)CBLDocument_CreateWithID(docID);}
+        explicit MutableDocument(std::string_view docID) {
+            _ref = (CBLRefCounted*)CBLDocument_CreateWithID(slice(docID));
+        }
 
         /** Returns a mutable document's properties as a mutable dictionary.
             You may modify this dictionary and then call \ref Collection::saveDocument(MutableDocument &doc) to persist the changes.
             @note  When accessing nested collections inside the properties as a mutable collection
-                   for modification, use \ref MutableDict::getMutableDict() or \ref MutableDict::getMutableArray() */
+                   for modification, use `fleece::MutableDict::getMutableDict()` or `fleece::MutableDict::getMutableArray()` */
         fleece::MutableDict properties()                {return CBLDocument_MutableProperties(ref());}
 
         /** Sets a property key and value.
             Call \ref Collection::saveDocument(MutableDocument &doc) to persist the changes. */
         template <typename V>
-        void set(slice key, const V &val)               {properties().set(key, val);}
+        void set(std::string_view key, const V &val)    {properties().set(slice(key), val);}
         
         /** Sets a property key and value.
             Call \ref Collection::saveDocument(MutableDocument &doc) to persist the changes. */
@@ -134,8 +135,8 @@ namespace cbl {
 
         /** A subscript operator to access a document's property value by key for either getting or setting the value.
             Call \ref Collection::saveDocument(MutableDocument &doc) to persist the changes. */
-        fleece::keyref<fleece::MutableDict,fleece::slice> operator[] (slice key)
-                                                        {return properties()[key];}
+        fleece::keyref<fleece::MutableDict,fleece::slice> operator[] (std::string_view key)
+                                                        {return properties()[slice(key)];}
 
         /** Sets a mutable document's properties.
             Call \ref Collection::saveDocument(MutableDocument &doc) to persist the changes.
@@ -153,17 +154,15 @@ namespace cbl {
 
         /** Sets a mutable document's properties from a JSON Dictionary string.
             Call \ref Collection::saveDocument(MutableDocument &doc) to persist the changes.
-            @param json  A JSON Dictionaryt string */
-        void setPropertiesAsJSON(slice json) {
+            @param json  A JSON Dictionary string. */
+        void setPropertiesAsJSON(std::string_view json) {
             CBLError error;
-            if (!CBLDocument_SetJSON(ref(), json, &error))
-                throw error;
+            internal::check(CBLDocument_SetJSON(ref(), slice(json), &error), error);
         }
 
     protected:
         static MutableDocument adopt(CBLDocument* _cbl_nullable d, CBLError *error) {
-            if (!d && error->code != 0)
-                throw *error;            
+            internal::check(d != nullptr || error->code == 0, *error);
             MutableDocument doc;
             doc._ref = (CBLRefCounted*)d;
             return doc;
@@ -185,14 +184,14 @@ namespace cbl {
 
     // Collection method bodies:
 
-    inline Document Collection::getDocument(slice id) const {
+    inline Document Collection::getDocument(std::string_view id) const {
         CBLError error;
-        return Document::adopt(CBLCollection_GetDocument(ref(), id, &error), &error);
+        return Document::adopt(CBLCollection_GetDocument(ref(), slice(id), &error), &error);
     }
 
-    inline MutableDocument Collection::getMutableDocument(slice id) const {
+    inline MutableDocument Collection::getMutableDocument(std::string_view id) const {
         CBLError error;
-        return MutableDocument::adopt(CBLCollection_GetMutableDocument(ref(), id, &error), &error);
+        return MutableDocument::adopt(CBLCollection_GetMutableDocument(ref(), slice(id), &error), &error);
     }
 
     inline void Collection::saveDocument(MutableDocument &doc) {
@@ -228,8 +227,8 @@ namespace cbl {
     }
 
     inline void Collection::purgeDocument(Document &doc) {
-        CBLError error;
-        check(CBLCollection_PurgeDocument(ref(), doc.ref(), &error), error);
+        CBLError error{};
+        internal::check(CBLCollection_PurgeDocument(ref(), doc.ref(), &error), error);
     }
 }
 

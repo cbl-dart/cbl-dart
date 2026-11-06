@@ -301,10 +301,24 @@ final class ReplicatorBindings {
     cblitedart.addresses.CBLDart_CBLReplicator_Release.cast(),
   );
 
-  static Pointer<cblite.CBLEndpoint> createEndpointWithUrl(String url) {
+  static Pointer<cblite.CBLEndpoint> createEndpointWithUrl(Uri url) {
     ensureInitializedForCurrentIsolate();
+    // Couchbase Lite C 4.1.2 aborts the process on Windows (std::bad_alloc)
+    // while reporting an invalid URL, so the scheme and host are checked here.
+    if (!url.isScheme('ws') && !url.isScheme('wss')) {
+      throw DatabaseException(
+        'Invalid replication URL $url: the scheme must be ws or wss.',
+        DatabaseErrorCode.invalidParameter,
+      );
+    }
+    if (url.host.isEmpty) {
+      throw DatabaseException(
+        'Invalid replication URL $url: the URL must have a host.',
+        DatabaseErrorCode.invalidParameter,
+      );
+    }
     return runWithSingleFLString(
-      url,
+      url.toString(),
       (flUrl) =>
           cblite.CBLEndpoint_CreateWithURL(flUrl, globalCBLError).checkError(),
     );
