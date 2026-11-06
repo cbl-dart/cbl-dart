@@ -42,8 +42,8 @@ jobs:
           - Windows
     runs-on: >-
       ${{ fromJSON('{
-        "iOS":"macos-14",
-        "macOS":"macos-14",
+        "iOS":"macos-15",
+        "macOS":"macos-15",
         "Android":"ubuntu-22.04",
         "Ubuntu":"ubuntu-22.04",
         "Windows":"windows-2022"

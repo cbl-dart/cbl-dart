@@ -180,7 +180,7 @@ void main() {
         await collection.saveDocument(doc);
         final updatedDoc = ((await collection.document(doc.id))!.toMutable())
           ..setValue('b', key: 'a');
-        collection.saveDocument(updatedDoc);
+        await collection.saveDocument(updatedDoc);
 
         final SaveConflictHandler handler = expectAsync2((
           documentBeingSaved,
