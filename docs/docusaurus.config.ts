@@ -19,7 +19,9 @@ function getLatestVersionFromGitTags(
   const versions: Record<string, string> = {}
   for (const pkg of packages) {
     const tag = execSync(
-      `git tag --list '${pkg}-v*' --sort=-version:refname | head -1`,
+      // `versionsort.suffix=-` sorts prereleases before their release, so that
+      // `4.0.0` wins over `4.0.0-dev.10`.
+      `git -c versionsort.suffix=- tag --list '${pkg}-v*' --sort=-version:refname | head -1`,
       { encoding: 'utf-8' },
     ).trim()
     if (!tag) {

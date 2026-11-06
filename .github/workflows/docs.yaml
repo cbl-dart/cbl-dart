@@ -9,6 +9,9 @@ on:
       - main
     paths:
       - docs/**
+  # Redeploys the docs after release tags are pushed, so that install
+  # instructions show the new versions.
+  workflow_dispatch:
 
 jobs:
   docs:
