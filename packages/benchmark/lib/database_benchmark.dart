@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:cbl/cbl.dart';
@@ -30,12 +31,11 @@ abstract class DatabaseBenchmarkBase {
 
       final result = BenchmarkResult.workload(
         latencies: _operationDurations,
-        latencyStatistic: median,
         totalDuration: _totalDurationStopwatch.elapsed,
       );
 
       // ignore: avoid_print
-      print(jsonEncodePretty(result.toJson()));
+      print(jsonEncode(result.toJson()));
     } finally {
       await tearDown();
     }

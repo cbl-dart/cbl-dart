@@ -5,7 +5,6 @@ import 'dart:io';
 
 import 'parameter.dart';
 import 'result.dart';
-import 'utils.dart';
 
 abstract class BenchmarkRunnerBase {
   BenchmarkRunnerBase({required this.executionMode});
@@ -51,7 +50,7 @@ abstract class BenchmarkRunnerBase {
     return '$_aotBuildDir/bundle/bin/$benchmark$extension';
   }
 
-  BenchmarkResults parseResults(String stdout);
+  Map<String, BenchmarkResult> parseResults(String stdout);
 
   Future<void> setupAllRuns() async {
     if (executionMode == ExecutionMode.aot) {
@@ -74,7 +73,7 @@ abstract class BenchmarkRunnerBase {
     }
   }
 
-  Future<BenchmarkResults> run() async {
+  Future<Map<String, BenchmarkResult>> run() async {
     print('Running $invocationId ...');
 
     final runResult = switch (executionMode) {
@@ -93,12 +92,7 @@ abstract class BenchmarkRunnerBase {
       throw Exception('Failed to run benchmark: ${runResult.stderr}');
     }
 
-    final benchmarkResult = parseResults(runResult.stdout as String);
-
-    print('Completed $invocationId');
-    print(jsonEncodePretty(benchmarkResult.toJson()));
-
-    return benchmarkResult;
+    return parseResults(runResult.stdout as String);
   }
 }
 
@@ -109,14 +103,13 @@ class MicroBenchmarkRunner extends BenchmarkRunnerBase {
   final String benchmark;
 
   @override
-  BenchmarkResults parseResults(String stdout) {
+  Map<String, BenchmarkResult> parseResults(String stdout) {
     // Example output:
     // Document property lookup(RunTime): 281.6364406779661 us.
     // Document toPlainMap(RunTime): 312.2689128061145 us.
     final benchmarkResultRegExp = RegExp(r'(.+)\(RunTime\): ([\d.]+) us\.');
 
-    // Latencies by benchmark name, in nanoseconds.
-    final latencies = <String, double>{};
+    final results = <String, BenchmarkResult>{};
 
     for (final line in stdout.trim().split('\n')) {
       final match = benchmarkResultRegExp.firstMatch(line);
@@ -125,16 +118,12 @@ class MicroBenchmarkRunner extends BenchmarkRunnerBase {
         // assets).
         continue;
       }
-      final name = match.group(1)!;
-      latencies[name] = double.parse(match.group(2)!) * 1000;
+      results['${invocationId}_${match.group(1)!}'] = BenchmarkResult(
+        latency: double.parse(match.group(2)!),
+      );
     }
 
-    return BenchmarkResults({
-      for (final MapEntry(key: name, value: latency) in latencies.entries)
-        '${invocationId}_$name': BenchmarkResult(
-          measures: [Measure(name: 'latency', value: latency)],
-        ),
-    });
+    return results;
   }
 }
 
@@ -177,17 +166,17 @@ class DatabaseBenchmarkRunner extends BenchmarkRunnerBase {
   ];
 
   @override
-  BenchmarkResults parseResults(String stdout) {
+  Map<String, BenchmarkResult> parseResults(String stdout) {
     // Strip any output before the JSON object, such as "Running build hooks..."
     // printed by the Dart native assets system.
     final jsonStart = stdout.indexOf('{');
     if (jsonStart == -1) {
       throw FormatException('No JSON object found in benchmark output', stdout);
     }
-    return BenchmarkResults({
+    return {
       invocationId: BenchmarkResult.fromJson(
         jsonDecode(stdout.substring(jsonStart)) as Map<String, Object?>,
       ),
-    });
+    };
   }
 }

@@ -1,195 +1,71 @@
 import 'dart:math';
 
-import 'package:collection/collection.dart';
-
-typedef StatisticFunction = double Function(List<double> values);
-
 double median(List<double> values) {
   if (values.isEmpty) {
     throw ArgumentError.value(values, 'values', 'must not be empty');
   }
   final sorted = List.of(values)..sort();
-  final middle = sorted.length ~/ 2;
-  return sorted[middle];
+  return sorted[sorted.length ~/ 2];
 }
 
-double average(List<double> values) {
-  if (values.isEmpty) {
-    throw ArgumentError.value(values, 'values', 'must not be empty');
-  }
-  return values.reduce((a, b) => a + b) / values.length;
-}
-
-double throughput(int operations, Duration duration) =>
-    operations / (duration.inMicroseconds / Duration.microsecondsPerSecond);
-
-class Measure {
-  Measure({
-    required this.name,
-    required this.value,
-    this.upperValue,
-    this.lowerValue,
-  });
-
-  Measure.fromJson(Map<String, Object?> json)
-    : name = json['name']! as String,
-      value = (json['value']! as num).toDouble(),
-      upperValue = (json['upper_value'] as num?)?.toDouble(),
-      lowerValue = (json['lower_value'] as num?)?.toDouble();
-
-  factory Measure.combined(
-    List<Measure> measures, {
-    required StatisticFunction statistic,
-  }) {
-    final names = measures.map((measure) => measure.name).toSet();
-    if (names.length != 1) {
-      throw ArgumentError('Cannot combine different named measures');
-    }
-
-    final values = measures.map((measure) => measure.value).toList();
-
-    final upperValues = measures
-        .map((measure) => measure.upperValue)
-        .whereType<double>()
-        .toList();
-
-    if (upperValues.isNotEmpty && upperValues.length != measures.length) {
-      throw ArgumentError(
-        'Cannot combine measures because not all have upperValue',
-      );
-    }
-
-    final lowerValues = measures
-        .map((measure) => measure.lowerValue)
-        .whereType<double>()
-        .toList();
-
-    if (lowerValues.isNotEmpty && lowerValues.length != measures.length) {
-      throw ArgumentError(
-        'Cannot combine measures because not all have lowerValue',
-      );
-    }
-
-    return Measure(
-      name: measures.first.name,
-      value: statistic(values),
-      upperValue: upperValues.isNotEmpty ? statistic(upperValues) : null,
-      lowerValue: lowerValues.isNotEmpty ? statistic(lowerValues) : null,
-    );
-  }
-
-  factory Measure.combinedLatency(
-    List<Duration> latencies, {
-    required StatisticFunction statistic,
-  }) {
-    final latenciesInNanoseconds = latencies
-        .map((duration) => duration.inMicroseconds * 1000.0)
-        .toList();
-    return Measure(
-      name: 'latency',
-      value: statistic(latenciesInNanoseconds),
-      upperValue: latenciesInNanoseconds.reduce(max),
-      lowerValue: latenciesInNanoseconds.reduce(min),
-    );
-  }
-
-  factory Measure.throughput({
-    required int operations,
-    required Duration totalDuration,
-  }) =>
-      Measure(name: 'throughput', value: throughput(operations, totalDuration));
-
-  final String name;
-  final double value;
-  final double? upperValue;
-  final double? lowerValue;
-
-  Map<String, Object?> toJson() => {
-    'name': name,
-    'value': value,
-    if (upperValue != null) 'upper_value': upperValue,
-    if (lowerValue != null) 'lower_value': lowerValue,
-  };
-}
-
+/// Result of a single benchmark.
 class BenchmarkResult {
-  BenchmarkResult({required this.measures});
+  BenchmarkResult({required this.latency, this.throughput});
 
-  BenchmarkResult.fromJson(Map<String, Object?> json)
-    : measures = (json.entries
-          .map(
-            (entry) => Measure.fromJson(entry.value! as Map<String, Object?>),
-          )
-          .toList());
-
-  factory BenchmarkResult.combine(
-    List<BenchmarkResult> results, {
-    required StatisticFunction statistic,
-  }) => BenchmarkResult(
-    measures: results
-        .expand((result) => result.measures)
-        .groupListsBy((measure) => measure.name)
-        .values
-        .map((measures) => Measure.combined(measures, statistic: statistic))
-        .toList(),
-  );
-
+  /// Creates the result of a workload from the [latencies] of its operations
+  /// and the [totalDuration] it took to complete them.
   factory BenchmarkResult.workload({
     required List<Duration> latencies,
-    required StatisticFunction latencyStatistic,
     required Duration totalDuration,
   }) => BenchmarkResult(
-    measures: [
-      Measure.combinedLatency(latencies, statistic: latencyStatistic),
-      Measure.throughput(
-        operations: latencies.length,
-        totalDuration: totalDuration,
-      ),
-    ],
+    latency: median([
+      for (final latency in latencies) latency.inMicroseconds.toDouble(),
+    ]),
+    throughput:
+        latencies.length /
+        (totalDuration.inMicroseconds / Duration.microsecondsPerSecond),
   );
 
-  final List<Measure> measures;
+  BenchmarkResult.fromJson(Map<String, Object?> json)
+    : latency = (json['latency']! as num).toDouble(),
+      throughput = (json['throughput'] as num?)?.toDouble();
+
+  /// Latency of a single operation, in microseconds.
+  final double latency;
+
+  /// Number of operations per second, if measured.
+  final double? throughput;
 
   Map<String, Object?> toJson() => {
-    for (final measure in measures) measure.name: measure.toJson(),
+    'latency': latency,
+    if (throughput != null) 'throughput': throughput,
   };
 }
 
-class BenchmarkResults {
-  BenchmarkResults([this.results = const {}]);
+/// Formats [results] as a plain text table.
+String formatResults(Map<String, BenchmarkResult> results) {
+  final header = ['Benchmark', 'Latency (us)', 'Throughput (ops/s)'];
+  final rows = [
+    header,
+    for (final MapEntry(key: name, value: result) in results.entries)
+      [
+        name,
+        result.latency.toStringAsFixed(2),
+        result.throughput?.toStringAsFixed(0) ?? '-',
+      ],
+  ];
+  final widths = [
+    for (var column = 0; column < header.length; column++)
+      rows.map((row) => row[column].length).reduce(max),
+  ];
 
-  factory BenchmarkResults.combine(
-    List<BenchmarkResults> results, {
-    required StatisticFunction statistic,
-  }) => BenchmarkResults(
-    results
-        .expand((result) => result.results.entries)
-        .groupListsBy((entry) => entry.key)
-        .map(
-          (key, entry) => MapEntry(
-            key,
-            BenchmarkResult.combine(
-              entry.map((entry) => entry.value).toList(),
-              statistic: statistic,
-            ),
-          ),
-        ),
-  );
-
-  BenchmarkResults.fromJson(Map<String, Object?> json)
-    : results = json.map(
-        (key, value) => MapEntry(
-          key,
-          BenchmarkResult.fromJson(value! as Map<String, Object?>),
-        ),
-      );
-
-  final Map<String, BenchmarkResult> results;
-
-  BenchmarkResults merge(BenchmarkResults other) =>
-      BenchmarkResults({...results, ...other.results});
-
-  Map<String, Object?> toJson() => {
-    for (final entry in results.entries) entry.key: entry.value.toJson(),
-  };
+  return rows
+      .map(
+        (row) => [
+          row.first.padRight(widths.first),
+          for (var column = 1; column < row.length; column++)
+            row[column].padLeft(widths[column]),
+        ].join('  '),
+      )
+      .join('\n');
 }
