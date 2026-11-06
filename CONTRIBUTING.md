@@ -115,6 +115,67 @@ integration tests. Integration tests can can be launched through the IDE or
 through `flutter test` with a specific test file in `integration_test`. By using
 `integration_test/e2e_test.dart` as the test file all tests are executed.
 
+# Maintaining 3.x
+
+The `release/3.x` branch holds the 3.x packages. Version 4 lives on `main`, so
+3.x releases are made from this branch only, and `melos version` refuses to run
+on any other branch.
+
+## Changes
+
+A fix usually lands on `main` first and is then ported in a pull request against
+`release/3.x`. Each commit uses a [conventional commits][] message, because
+`melos version` derives versions and changelog entries from them. Merge these
+pull requests with **rebase**, so that every fix keeps its own changelog entry.
+
+## Toolchains
+
+CI on this branch uses the fixed versions in the `env` block of
+`.github/workflows/ci.yaml`: Flutter, Dart, `daco` and `melos`. New Flutter and
+Dart releases therefore do not break CI for unrelated changes. To check the 3.x
+packages against the newest stable Flutter and Dart, run CI with the `latest`
+toolchain:
+
+```shell
+gh workflow run ci.yaml --ref release/3.x -f toolchain=latest
+```
+
+When that run passes, update the pinned versions in a pull request.
+
+## Releasing
+
+Packages are published from a local checkout, not from CI. You need to be signed
+in to pub.dev with an account that can publish the `cbl` packages.
+
+1. Update the branch and prepare the workspace. The `cbd` tool is needed by the
+   pre-commit hook of `melos version`:
+   ```shell
+   git switch release/3.x && git pull
+   melos bootstrap
+   melos run activate:cbd
+   ```
+2. Bump the versions. This updates the pubspecs and changelogs, regenerates
+   `cbl_flutter_ce|ee`, commits and creates one tag per package:
+   ```shell
+   melos version
+   ```
+3. Check, then publish. `melos publish` publishes the packages in dependency
+   order and skips versions that are already on pub.dev:
+   ```shell
+   melos publish
+   melos publish --no-dry-run
+   ```
+   If a package fails because a dependency it needs was published seconds
+   earlier and is not resolvable yet, run the last command again.
+4. Push the release commit and its tags:
+   ```shell
+   git push --follow-tags
+   ```
+
+The `cbl_flutter_prebuilt` E2E tests build with `cbl_flutter_install` from
+pub.dev. When a fix concerns the installer, these tests pass only after the
+release is published.
+
 [flutter]: https://flutter.dev/docs/get-started/install
 [packages]: ../packages
 [conventional commits]: https://www.conventionalcommits.org/en/v1.0.0/
