@@ -335,18 +335,26 @@ Future<BuildOutput> _runBuildHookDirect({
       ..config.setupBuild(linkingEnabled: false);
 
     if (setupCodeAssets) {
+      // code_assets 2.2 deprecates `targetVersion` in favor of
+      // `deploymentVersion`, which older supported versions do not have. The
+      // configs are created through `Function.apply`, so that analysis passes
+      // with both.
       CodeAssetExtension(
         linkModePreference: LinkModePreference.dynamic,
         targetArchitecture: targetArchitecture,
         targetOS: targetOS,
         iOS: targetOS == OS.iOS
-            ? IOSCodeConfig(
-                targetSdk: targetIOSSdk,
-                targetVersion: targetIOSVersion,
-              )
+            ? Function.apply(IOSCodeConfig.new, const [], {
+                    #targetSdk: targetIOSSdk,
+                    #targetVersion: targetIOSVersion,
+                  })
+                  as IOSCodeConfig
             : null,
         macOS: targetOS == OS.macOS
-            ? MacOSCodeConfig(targetVersion: targetMacOSVersion)
+            ? Function.apply(MacOSCodeConfig.new, const [], {
+                    #targetVersion: targetMacOSVersion,
+                  })
+                  as MacOSCodeConfig
             : null,
         android: targetOS == OS.android
             ? AndroidCodeConfig(targetNdkApi: targetAndroidNdkApi)
