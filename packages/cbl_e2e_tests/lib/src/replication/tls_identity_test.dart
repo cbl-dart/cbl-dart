@@ -354,11 +354,12 @@ void main() {
       );
       expect(
         identity.certificates.single.expires,
-        // Certificates may expire one second before the expiration time
-        // specified when creating the identity.
+        // Certificates may expire up to one second before or after the
+        // expiration time specified when creating the identity.
         anyOf([
-          futureExpiration,
           futureExpiration.subtract(const Duration(seconds: 1)),
+          futureExpiration,
+          futureExpiration.add(const Duration(seconds: 1)),
         ]),
       );
     });
@@ -551,11 +552,12 @@ b17aolOOq/6xfP6QIc9I6pOoPhEFY18mCqVCKrF3YCQjVC3P7Ac1m2x5iMXL+fXF
 
       expect(
         identity.expires,
-        // Certificates may expire one second before the expiration time
-        // specified when creating the identity.
+        // Certificates may expire up to one second before or after the
+        // expiration time specified when creating the identity.
         anyOf([
-          futureExpiration,
           futureExpiration.subtract(const Duration(seconds: 1)),
+          futureExpiration,
+          futureExpiration.add(const Duration(seconds: 1)),
         ]),
       );
       expect(identity.certificates.single.attributes.commonName, 'Test');
