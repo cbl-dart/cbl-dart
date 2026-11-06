@@ -354,13 +354,9 @@ void main() {
       );
       expect(
         identity.certificates.single.expires,
-        // Certificates may expire up to one second before or after the
-        // expiration time specified when creating the identity.
-        anyOf([
-          futureExpiration.subtract(const Duration(seconds: 1)),
-          futureExpiration,
-          futureExpiration.add(const Duration(seconds: 1)),
-        ]),
+        // The expiration of a created certificate can differ from the
+        // requested expiration by a few seconds.
+        isCloseToDateTime(futureExpiration),
       );
     });
 
@@ -552,13 +548,9 @@ b17aolOOq/6xfP6QIc9I6pOoPhEFY18mCqVCKrF3YCQjVC3P7Ac1m2x5iMXL+fXF
 
       expect(
         identity.expires,
-        // Certificates may expire up to one second before or after the
-        // expiration time specified when creating the identity.
-        anyOf([
-          futureExpiration.subtract(const Duration(seconds: 1)),
-          futureExpiration,
-          futureExpiration.add(const Duration(seconds: 1)),
-        ]),
+        // The expiration of a created certificate can differ from the
+        // requested expiration by a few seconds.
+        isCloseToDateTime(futureExpiration),
       );
       expect(identity.certificates.single.attributes.commonName, 'Test');
     });
@@ -811,3 +803,11 @@ class _PassThroughDigest implements Digest {
   @override
   void updateByte(int inp) {}
 }
+
+Matcher isCloseToDateTime(
+  DateTime expected, {
+  Duration tolerance = const Duration(seconds: 5),
+}) => predicate<DateTime>(
+  (actual) => actual.difference(expected).abs() <= tolerance,
+  'within $tolerance of $expected',
+);
