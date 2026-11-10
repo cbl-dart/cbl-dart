@@ -35,6 +35,27 @@ hook at `packages/cbl/hook/build.dart`:
 The edition (community/enterprise) and optional vector search extension are
 configured via `hooks.user_defines.cbl` in the workspace root `pubspec.yaml`.
 
+# Issue triage
+
+Every triaged issue has exactly one priority label. An issue without one has
+not been triaged yet.
+
+| Label | Meaning                                                                                                       |
+| ----- | ------------------------------------------------------------------------------------------------------------- |
+| `P0`  | Critical: a crash, data loss, a broken release or CI that blocks all PRs. Other work stops until it is fixed. |
+| `P1`  | High: next up and actively worked on.                                                                         |
+| `P2`  | Medium: accepted and planned, but not at the top of the list.                                                 |
+| `P3`  | Low: nice to have. Promoted when there is demand, so add a 👍 to issues you need.                             |
+
+Other labels say what an issue is about, independent of its priority:
+
+- Kind: `bug`, `feature`, `documentation`, `test`, `performance`,
+  `refactoring`, `technical debt`, `tool`
+- Area: `pkg:*` for the package, `os:*` for the platform, `flutter`,
+  `enterprise edition`
+- State: `blocked` when it depends on another issue or upstream fix,
+  `waiting-for-response` when it needs more information from the reporter
+
 # Development environment
 
 ## Requirements
