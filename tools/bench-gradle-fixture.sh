@@ -46,10 +46,10 @@ printf 'sdk.dir=%s\n' "$ANDROID_HOME" > "$fixture/local.properties"
 if [[ "$BENCH_MODE" == remote ]]; then
   rm -rf "${GRADLE_USER_HOME:-$HOME/.gradle}/caches/build-cache-1"
 fi
-cache_flag=--build-cache
-if [[ "$BENCH_MODE" == default ]]; then cache_flag=--no-build-cache; fi
+cache_flags=()
+if [[ "$BENCH_MODE" != default ]]; then cache_flags+=(--build-cache); fi
 start_ns=$(date +%s%N)
-gradle -p "$fixture" --info --console=plain --no-daemon --no-configuration-cache "$cache_flag" :app:compileDebugJavaWithJavac 2>&1 | tee "$results/gradle.log"
+gradle -p "$fixture" --info --console=plain --no-daemon --no-configuration-cache "${cache_flags[@]}" :app:compileDebugJavaWithJavac 2>&1 | tee "$results/gradle.log"
 end_ns=$(date +%s%N)
 export BENCH_ELAPSED_MS=$(((end_ns-start_ns)/1000000))
 python3 - <<'PY'
