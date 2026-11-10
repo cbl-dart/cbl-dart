@@ -33,11 +33,15 @@ void main() {
   });
 
   apiTest('register model in separate isolate', () async {
+    // Wait until the spawned isolate has registered the model, before the
+    // query uses it.
+    final registered = isolate.ReceivePort();
     final modelIsolate = await isolate.Isolate.spawn(
       uppercaseModelIsolate,
-      null,
+      registered.sendPort,
     );
     addTearDown(modelIsolate.kill);
+    await registered.first;
 
     final db = await openTestDatabase();
     final users = await db.createCollection('users');
@@ -93,8 +97,9 @@ void registerModelForTest(String name, PredictiveModel model) {
   addTearDown(() => Database.prediction.unregisterModel(name));
 }
 
-void uppercaseModelIsolate(Object? _) {
+void uppercaseModelIsolate(isolate.SendPort registered) {
   Database.prediction.registerModel('uppercase', UppercaseModel());
+  registered.send(null);
 }
 
 class UppercaseModel implements PredictiveModel {

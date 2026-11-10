@@ -114,6 +114,52 @@ Future<void> _purgeSyncGatewayDatabase() async {
   );
 }
 
+/// Returns the last sequence of the Sync Gateway changes feed.
+Future<String> syncGatewayLastSequence() async {
+  final response = await syncGatewayRequest(
+    Uri.parse('$syncGatewayDatabase/_changes?since=0'),
+    admin: true,
+  );
+  final changes = jsonDecode(response) as Map<String, Object?>;
+  return changes['last_seq'].toString();
+}
+
+/// Waits until the Sync Gateway changes feed contains a change of the document
+/// with [documentId] after the sequence [since].
+///
+/// Sync Gateway accepts a pushed revision before it shows up in the changes
+/// feed, which pulling replicators read. A pull that starts in between misses
+/// the revision.
+Future<void> waitForSyncGatewayChange(
+  String documentId, {
+  required String since,
+  Duration timeout = const Duration(seconds: 10),
+}) async {
+  final deadline = DateTime.now().add(timeout);
+  while (true) {
+    final response = await syncGatewayRequest(
+      Uri(
+        path: '$syncGatewayDatabase/_changes',
+        queryParameters: {'since': since},
+      ),
+      admin: true,
+    );
+    final changes = jsonDecode(response) as Map<String, Object?>;
+    final results = (changes['results']! as List<Object?>)
+        .cast<Map<String, Object?>>();
+    if (results.any((result) => result['id'] == documentId)) {
+      return;
+    }
+    if (DateTime.now().isAfter(deadline)) {
+      throw TimeoutException(
+        'Change of document $documentId did not appear in the Sync Gateway '
+        'changes feed within ${timeout.inSeconds}s.',
+      );
+    }
+    await Future<void>.delayed(const Duration(milliseconds: 100));
+  }
+}
+
 Future<void> deleteDocumentByAdmin(Document doc) async {
   await syncGatewayRequest(
     Uri(
@@ -340,6 +386,15 @@ extension ReplicatorUtilsExtension on Replicator {
         rethrow;
       }
     }
+  }
+
+  /// Like [replicateOneShot], but also waits until the change of the document
+  /// with [documentId] is visible to other replicators that pull from Sync
+  /// Gateway.
+  Future<void> replicateOneShotAndAwaitChangesFeed(String documentId) async {
+    final since = await syncGatewayLastSequence();
+    await replicateOneShot();
+    await waitForSyncGatewayChange(documentId, since: since);
   }
 
   /// Starts a one shot replicator and completes when it has stopped.
