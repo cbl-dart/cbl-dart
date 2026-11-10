@@ -65,6 +65,88 @@ function requireOption() {
 
 # === Command implementations =================================================
 
+function runWithTimeout() {
+    local timeoutDuration="$1"
+    shift
+
+    if command -v timeout >/dev/null 2>&1; then
+        timeout "$timeoutDuration" "$@"
+    elif command -v gtimeout >/dev/null 2>&1; then
+        gtimeout "$timeoutDuration" "$@"
+    else
+        "$@"
+    fi
+}
+
+function waitForBootProperty() {
+    local property="$1"
+    local expected="$2"
+    local timeoutSeconds="$3"
+    local elapsed=0
+
+    echo "Waiting for $property to become $expected..."
+
+    while [[ $elapsed -lt $timeoutSeconds ]]; do
+        local value
+        value="$(runWithTimeout 10s \
+            "$ANDROID_HOME/platform-tools/adb" -s "$serialName" shell getprop "$property" \
+            2>/dev/null | tr -d '\r' || true)"
+
+        if [[ "$value" == "$expected" ]]; then
+            echo "$property is $expected"
+            return 0
+        fi
+
+        sleep 2
+        elapsed=$((elapsed + 2))
+    done
+
+    echo "Timed out waiting for $property to become $expected"
+    return 1
+}
+
+function waitForPackageManager() {
+    local timeoutSeconds="$1"
+    local elapsed=0
+
+    echo "Waiting for Android package manager..."
+
+    while [[ $elapsed -lt $timeoutSeconds ]]; do
+        if runWithTimeout 10s \
+            "$ANDROID_HOME/platform-tools/adb" -s "$serialName" shell cmd package list packages \
+            >/dev/null 2>&1; then
+            echo "Android package manager is ready"
+            return 0
+        fi
+
+        sleep 2
+        elapsed=$((elapsed + 2))
+    done
+
+    echo "Timed out waiting for Android package manager"
+    return 1
+}
+
+function waitForEmulatorReady() {
+    echo "Waiting for emulator to become ready..."
+    runWithTimeout 180s "$ANDROID_HOME/platform-tools/adb" -s "$serialName" wait-for-device &&
+        waitForBootProperty sys.boot_completed 1 180 &&
+        waitForBootProperty dev.bootcomplete 1 180 &&
+        waitForPackageManager 180 || {
+        echo "Emulator did not become ready"
+        echo "::group::Emulator output"
+        cat ./emulator-logs.txt || true
+        echo "::endgroup::"
+        "$ANDROID_HOME/platform-tools/adb" devices -l || true
+        return 1
+    }
+    runWithTimeout 10s \
+        "$ANDROID_HOME/platform-tools/adb" -s "$serialName" shell input keyevent 82 \
+        >/dev/null 2>&1 || true
+    "$ANDROID_HOME/platform-tools/adb" devices -l
+    echo "Emulator is ready"
+}
+
 function createAndStart() {
     local apiLevel=""
     local device=""
@@ -123,16 +205,14 @@ function createAndStart() {
         -no-window \
         -no-audio \
         -no-boot-anim \
+        -no-metrics \
         -partition-size 4096 \
         >./emulator-logs.txt 2>&1 &
 
     sleep 10
     cat ./emulator-logs.txt
 
-    # Wait for emulator to become ready.
-    echo "Waiting for emulator to become ready..."
-    "$ANDROID_HOME/platform-tools/adb" -s "$serialName" wait-for-device
-    echo "Emulator is ready"
+    waitForEmulatorReady
 }
 
 function setupReversePort() {
@@ -141,7 +221,8 @@ function setupReversePort() {
     requireOption -p PORT "$port"
 
     echo "Setting up reverse socket connect for port $port"
-    "$ANDROID_HOME/platform-tools/adb" -s "$serialName" reverse "tcp:$1" "tcp:$1"
+    runWithTimeout 10s \
+        "$ANDROID_HOME/platform-tools/adb" -s "$serialName" reverse "tcp:$1" "tcp:$1"
 }
 
 function bugreport() {
