@@ -1,55 +1,101 @@
-name: RunsOn v3 smoke
+name: RunsOn Android SDK cache benchmark
 
 on:
   workflow_dispatch:
+    inputs:
+      phase:
+        type: choice
+        options: [cold, warm]
+        default: cold
+      profile:
+        type: choice
+        options: [both, unit, e2e]
+        default: both
 
 permissions:
   contents: read
 
 concurrency:
-  group: runs-on-v3-smoke-${{ github.ref }}
-  cancel-in-progress: true
+  group: bench-android-sdk-${{ github.ref }}-${{ inputs.profile }}
+  cancel-in-progress: false
 
 jobs:
-  smoke:
-    name: Native round trip and cache - ${{ matrix.runner }}
-    timeout-minutes: 20
+  sdk:
+    name: SDK files - ${{ matrix.profile }} - ${{ inputs.phase }}
     strategy:
       fail-fast: false
       matrix:
-        runner: [ubuntu22-2cpu, ubuntu22-4cpu]
+        include: ${{ fromJSON(inputs.profile == 'unit' && '[{"profile":"unit","runner":"ubuntu22-2cpu"}]' || inputs.profile == 'e2e' && '[{"profile":"e2e","runner":"ubuntu22-4cpu"}]' || '[{"profile":"unit","runner":"ubuntu22-2cpu"},{"profile":"e2e","runner":"ubuntu22-4cpu"}]') }}
     runs-on: runs-on=${{ github.run_id }}/runner=${{ matrix.runner }}/env=production
+    timeout-minutes: 15
     steps:
       - uses: runs-on/action@v2
       - uses: actions/checkout@v6
-      - uses: dart-lang/setup-dart@v1
+      - name: Setup Java
+        uses: actions/setup-java@v5
         with:
-          sdk: stable
-      - name: Verify workspace and host
-        shell: bash
-        run: |
-          test "$RUNNER_OS" = Linux
-          test "$RUNNER_ARCH" = X64
-          printf 'Workspace: %s\n' "$GITHUB_WORKSPACE"
-          df -h .
-      - name: Restore smoke cache
+          distribution: temurin
+          java-version: '17'
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+      - name: Restore Android package files
         id: cache
-        uses: actions/cache@v5
+        uses: actions/cache/restore@v5
         with:
-          path: .migration-cache
-          key: runs-on-v3-smoke-${{ matrix.runner }}-${{ hashFiles('pubspec.lock') }}
-      - name: Verify or initialize cache
-        shell: bash
+          path: |
+            ${{ env.ANDROID_HOME }}/ndk
+            ${{ env.ANDROID_HOME }}/cmake
+            ${{ env.ANDROID_HOME }}/platforms
+          key: bench-v3-android-sdk-20261110a-${{ runner.os }}-${{ runner.arch }}-${{ matrix.profile }}-${{ hashFiles('tools/android-sdk.sh') }}
+      - name: Install and validate exact package versions
         env:
+          PROFILE: ${{ matrix.profile }}
+          PHASE: ${{ inputs.phase }}
           CACHE_HIT: ${{ steps.cache.outputs.cache-hit }}
-        run: |
-          mkdir -p .migration-cache
-          if [[ "$CACHE_HIT" == true ]]; then
-            test "$(cat .migration-cache/probe)" = runs-on-v3
-          else
-            printf 'runs-on-v3\n' > .migration-cache/probe
-          fi
-          printf 'Cache hit: %s\n' "$CACHE_HIT"
-      - name: Build native assets and exercise database
         shell: bash
-        run: bash tools/test-hook-compatibility.sh latest
+        run: |
+          set -euo pipefail
+          if [[ "$PHASE" == cold && "$CACHE_HIT" == true ]]; then
+            echo 'Cold benchmark unexpectedly found an existing cache' >&2
+            exit 1
+          fi
+          if [[ "$PHASE" == warm && "$CACHE_HIT" != true ]]; then
+            echo 'Warm benchmark did not restore a cache' >&2
+            exit 1
+          fi
+          start=$(date +%s%N)
+          ./tools/android-sdk.sh installNativeToolchain
+          if [[ "$PROFILE" == e2e ]]; then
+            ./tools/android-sdk.sh installAppBuildDeps
+          fi
+          end=$(date +%s%N)
+          test -x "$ANDROID_HOME/ndk/28.0.13004108/toolchains/llvm/prebuilt/linux-x86_64/bin/clang"
+          "$ANDROID_HOME/ndk/28.0.13004108/toolchains/llvm/prebuilt/linux-x86_64/bin/clang" --version
+          "$ANDROID_HOME/cmake/3.18.1/bin/cmake" --version
+          if [[ "$PROFILE" == e2e ]]; then
+            test -x "$ANDROID_HOME/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/bin/clang"
+            test -f "$ANDROID_HOME/platforms/android-33/android.jar"
+            test -f "$ANDROID_HOME/platforms/android-36/android.jar"
+          fi
+          paths=("$ANDROID_HOME/ndk" "$ANDROID_HOME/cmake")
+          if [[ "$PROFILE" == e2e ]]; then
+            paths+=("$ANDROID_HOME/platforms")
+          fi
+          bytes=$(du -sb "${paths[@]}" | awk '{s+=$1} END {print s}')
+          mkdir -p benchmark-results
+          printf '{"profile":"%s","phase":"%s","cache_hit":"%s","workload_ms":%s,"bytes":%s}\n' "$PROFILE" "$PHASE" "$CACHE_HIT" "$(((end-start)/1000000))" "$bytes" | tee benchmark-results/summary.json
+      - name: Save Android package files
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v5
+        with:
+          path: |
+            ${{ env.ANDROID_HOME }}/ndk
+            ${{ env.ANDROID_HOME }}/cmake
+            ${{ env.ANDROID_HOME }}/platforms
+          key: ${{ steps.cache.outputs.cache-primary-key }}
+      - uses: actions/upload-artifact@v7
+        with:
+          name: android-sdk-${{ matrix.profile }}-${{ inputs.phase }}
+          path: benchmark-results
