@@ -1,55 +1,79 @@
-name: RunsOn v3 smoke
+name: Real Flutter setup and formatting cache canary
 
 on:
   workflow_dispatch:
+    inputs:
+      phase:
+        type: choice
+        required: true
+        options: [seed, warm]
 
 permissions:
   contents: read
 
-concurrency:
-  group: runs-on-v3-smoke-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
-  smoke:
-    name: Native round trip and cache - ${{ matrix.runner }}
-    timeout-minutes: 20
+  canary:
+    name: ${{ matrix.backend }} real setup and formatting - ${{ inputs.phase }}
+    timeout-minutes: 12
     strategy:
       fail-fast: false
       matrix:
-        runner: [ubuntu22-2cpu, ubuntu22-4cpu]
-    runs-on: runs-on=${{ github.run_id }}/runner=${{ matrix.runner }}/env=production
+        backend: [s3, sticky]
+    runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu/family=c7a.large/env=production/extras=s3-cache${{ matrix.backend == 'sticky' && '/sticky=bench-real-flutter-20261110:20gb:lazy-init' || '' }}
+    env:
+      BENCH_BACKEND: ${{ matrix.backend }}
+      BENCH_PHASE: ${{ inputs.phase }}
+      CI: "true"
+      FLUTTER_SUPPRESS_ANALYTICS: "true"
+      DART_SUPPRESS_ANALYTICS: "true"
     steps:
       - uses: runs-on/action@v2
+        id: disk
+        with:
+          sticky_cache: ${{ matrix.backend == 'sticky' && format('custom,path={0}/flutter,path=~/.pub-cache', runner.tool_cache) || '' }}
+          sticky_save: true
+          sticky_wait_timeout: 3m
       - uses: actions/checkout@v6
-      - uses: dart-lang/setup-dart@v1
+
+      - name: Resolve production Flutter setup paths
+        id: configuration
+        uses: ./.github/actions/setup-flutter
         with:
-          sdk: stable
-      - name: Verify workspace and host
-        shell: bash
-        run: |
-          test "$RUNNER_OS" = Linux
-          test "$RUNNER_ARCH" = X64
-          printf 'Workspace: %s\n' "$GITHUB_WORKSPACE"
-          df -h .
-      - name: Restore smoke cache
-        id: cache
-        uses: actions/cache@v5
-        with:
-          path: .migration-cache
-          key: runs-on-v3-smoke-${{ matrix.runner }}-${{ hashFiles('pubspec.lock') }}
-      - name: Verify or initialize cache
-        shell: bash
+          channel: stable
+          flutter-version: "3.47.9"
+          cache: false
+          dry-run: true
+
+      - name: Validate completion seal and select fallback
+        id: guard
         env:
-          CACHE_HIT: ${{ steps.cache.outputs.cache-hit }}
-        run: |
-          mkdir -p .migration-cache
-          if [[ "$CACHE_HIT" == true ]]; then
-            test "$(cat .migration-cache/probe)" = runs-on-v3
-          else
-            printf 'runs-on-v3\n' > .migration-cache/probe
-          fi
-          printf 'Cache hit: %s\n' "$CACHE_HIT"
-      - name: Build native assets and exercise database
-        shell: bash
-        run: bash tools/test-hook-compatibility.sh latest
+          DISK_CACHE_HIT: ${{ steps.disk.outputs.cache-hit }}
+          CONFIG_SDK_PATH: ${{ steps.configuration.outputs['CACHE-PATH'] }}
+          CONFIG_PUB_PATH: ${{ steps.configuration.outputs['PUB-CACHE-PATH'] }}
+          CONFIG_SDK_KEY: ${{ steps.configuration.outputs['CACHE-KEY'] }}
+        run: python3 tools/bench-real-flutter.py guard
+
+      - name: Actual production Setup Flutter action
+        id: setup
+        uses: ./.github/actions/setup-flutter
+        with:
+          channel: ${{ steps.configuration.outputs.CHANNEL }}
+          flutter-version: ${{ steps.configuration.outputs.VERSION }}
+          architecture: ${{ steps.configuration.outputs.ARCHITECTURE }}
+          cache-path: ${{ steps.configuration.outputs['CACHE-PATH'] }}
+          pub-cache-path: ${{ steps.configuration.outputs['PUB-CACHE-PATH'] }}
+          cache: ${{ matrix.backend == 's3' || steps.guard.outputs.trusted != 'true' }}
+          pub-cache-hash-pattern: pubspec.lock
+
+      - name: Exact formatting job workload and completion seal
+        env:
+          SDK_ACTION_CACHE_HIT: ${{ steps.setup.outputs['CACHE-HIT'] }}
+          PUB_ACTION_CACHE_HIT: ${{ steps.setup.outputs['PUB-CACHE-HIT'] }}
+        run: python3 tools/bench-real-flutter.py workload
+
+      - name: Upload canary evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: real-flutter-${{ matrix.backend }}-${{ inputs.phase }}
+          path: ${{ runner.temp }}/bench-real-flutter*.json
