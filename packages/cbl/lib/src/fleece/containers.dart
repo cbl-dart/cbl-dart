@@ -185,6 +185,19 @@ final class Value implements Finalizable {
   /// returned as 0.
   int get asInt => ValueBindings.asInt(pointer);
 
+  /// Returns this value as an [int], [BigInt] or [double].
+  ///
+  /// Integers >= 2^63 are returned as a [BigInt].
+  Object get asNumber {
+    if (!isInteger) {
+      return asDouble;
+    }
+    final asInt = this.asInt;
+    return asInt < 0 && ValueBindings.isUnsigned(pointer)
+        ? uint64BitsToBigInt(asInt)
+        : asInt;
+  }
+
   /// Returns a value coerced to a 64-bit floating point number. True and false
   /// are returned as 1.0 and 0.0, and integers are converted to float. All
   /// other types are returned as 0.0.
@@ -223,7 +236,7 @@ final class Value implements Finalizable {
       case .boolean:
         return asBool;
       case .number:
-        return isInteger ? asInt : asDouble;
+        return asNumber;
       case .string:
         return asString;
       case .array:
@@ -668,7 +681,8 @@ final class _DefaultSlotSetter implements SlotSetter {
       value is Uint8List ||
       value is Iterable<Object?> ||
       value is Map<String, Object?> ||
-      value is Value;
+      value is Value ||
+      value is BigInt;
 
   @override
   void setSlotValue(FLSlot slot, Object? value) {
@@ -689,6 +703,12 @@ final class _DefaultSlotSetter implements SlotSetter {
       SlotBindings.setData(slot, value.toData());
     } else if (value is Value) {
       SlotBindings.setValue(slot, value.pointer);
+    } else if (value is BigInt) {
+      if (value.isValidInt) {
+        SlotBindings.setInt(slot, value.toInt());
+      } else {
+        SlotBindings.setUIntBits(slot, bigIntToUint64Bits(value));
+      }
     }
   }
 

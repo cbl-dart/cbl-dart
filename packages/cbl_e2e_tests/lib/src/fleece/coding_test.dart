@@ -5,6 +5,7 @@ import 'package:cbl/src/fleece/decoder.dart';
 import 'package:cbl/src/fleece/encoder.dart';
 
 import '../../test_binding_impl.dart';
+import '../fixtures/values.dart';
 import '../test_binding.dart';
 import '../utils/fleece_coding.dart';
 
@@ -182,6 +183,30 @@ void main() {
           {'a': true},
           [true],
         ]);
+      });
+
+      test('writes and reads BigInt', () {
+        final decoder = testFleeceDecoder();
+        final data = fleeceEncode([maxUint64, BigInt.one, minInt64]);
+
+        expect(decoder.convert(data), [maxUint64, 1, minInt64.toInt()]);
+        expect(RecursiveFleeceDecoder().convert(data), [
+          maxUint64,
+          1,
+          minInt64.toInt(),
+        ]);
+        expect(decoder.convert(fleeceEncodeJson('[$maxUint64, $maxInt64]')), [
+          maxUint64,
+          maxInt64,
+        ]);
+        expect(
+          () => fleeceEncode([maxUint64 + BigInt.one]),
+          throwsArgumentError,
+        );
+        expect(
+          () => fleeceEncode([minInt64 - BigInt.one]),
+          throwsArgumentError,
+        );
       });
 
       test('write values', () {

@@ -44,6 +44,15 @@ final class _DefaultCblConversions implements CblConversions {
       return object;
     }
 
+    if (object is BigInt) {
+      if (object.isValidInt) {
+        return object.toInt();
+      }
+      // Validate the range when the value is set, not when it is saved.
+      bigIntToUint64Bits(object);
+      return object;
+    }
+
     if (object is Map<String, Object?>) {
       if (Blob.isBlob(object)) {
         return BlobImpl.fromProperties(object);
@@ -146,7 +155,7 @@ final class CblMDelegate extends MDelegate {
       case .boolean:
         return flValue.asBool;
       case .number:
-        return flValue.isInteger ? flValue.asInt : flValue.asDouble;
+        return flValue.asNumber;
       case .string:
         return parent.context.sharedStringsTable.decode(.value);
       case .data:
@@ -203,7 +212,8 @@ final class CblMDelegate extends MDelegate {
         native is String ||
         native is num ||
         native is bool ||
-        native is Uint8List) {
+        native is Uint8List ||
+        native is BigInt) {
       encoder.writeDartObject(native);
     } else if (native is DateTime) {
       encoder.writeString(native.toIso8601String());
@@ -267,10 +277,26 @@ T? coerceObject<T>(Object? object, {required bool coerceNull}) {
     if (object is num) {
       return object.toInt() as T;
     }
+    if (object is BigInt) {
+      return object.toInt() as T;
+    }
   }
   if (T == double) {
     if (object is num) {
       return object.toDouble() as T;
+    }
+    if (object is BigInt) {
+      return object.toDouble() as T;
+    }
+  }
+  if (T == num) {
+    if (object is BigInt) {
+      return object.toDouble() as T;
+    }
+  }
+  if (T == BigInt) {
+    if (object is num && object.isFinite) {
+      return BigInt.from(object) as T;
     }
   }
   if (T == DateTime) {

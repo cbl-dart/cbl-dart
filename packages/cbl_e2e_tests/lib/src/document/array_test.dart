@@ -319,6 +319,34 @@ void main() {
         ]);
       });
 
+      test('addBigInteger', () {
+        final array = MutableArray()..addBigInteger(maxUint64);
+        expect(array.value(0), maxUint64);
+        expect(
+          () => array.addBigInteger(minInt64 - BigInt.one),
+          throwsArgumentError,
+        );
+      });
+
+      test('insertBigInteger', () {
+        final array = MutableArray([1])..insertBigInteger(maxUint64, at: 0);
+        expect(array.toPlainList(), [maxUint64, 1]);
+      });
+
+      test('setBigInteger', () {
+        final array = MutableArray([1])..setBigInteger(BigInt.two, at: 0);
+        expect(array.value(0), 2);
+      });
+
+      test('read BigInt', () {
+        final array = MutableArray([maxUint64, 1]);
+        expect(array.bigInteger(0), maxUint64);
+        expect(array.bigInteger(1), BigInt.one);
+        expect(array[0].bigInteger, maxUint64);
+        expect(array.integer(0), maxInt64);
+        expect(array.number(0), maxUint64.toDouble());
+      });
+
       test('setData', () {
         final array = MutableArray()
           ..setData([

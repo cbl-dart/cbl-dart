@@ -98,9 +98,9 @@ final class FleeceEncoder implements Finalizable {
 
   /// Writes a Dart object to this encoder.
   ///
-  /// [value] must be `null` or of type [bool], [int], [double], [String],
-  /// [TypedData], [Iterable] or [Map]. The values of an [Iterable] or [Map]
-  /// must satisfy this requirement as well. The keys of a [Map] must be
+  /// [value] must be `null` or of type [bool], [int], [BigInt], [double],
+  /// [String], [TypedData], [Iterable] or [Map]. The values of an [Iterable] or
+  /// [Map] must satisfy this requirement as well. The keys of a [Map] must be
   /// [String]s.
   void writeDartObject(Object? value) {
     if (value == null) {
@@ -127,6 +127,8 @@ final class FleeceEncoder implements Finalizable {
         writeDartObject(entry.value);
       }
       endDict();
+    } else if (value is BigInt) {
+      writeBigInt(value);
     } else {
       throw ArgumentError.value(
         value,
@@ -154,6 +156,17 @@ final class FleeceEncoder implements Finalizable {
 
   /// Writes the [int] [value] to this encoder.
   void writeInt(int value) => FleeceEncoderBindings.writeInt(_pointer, value);
+
+  /// Writes the [BigInt] [value] to this encoder.
+  ///
+  /// [value] must be in the range -2^63 to 2^64 - 1.
+  void writeBigInt(BigInt value) {
+    if (value.isValidInt) {
+      writeInt(value.toInt());
+    } else {
+      FleeceEncoderBindings.writeUIntBits(_pointer, bigIntToUint64Bits(value));
+    }
+  }
 
   /// Writes the [double] [value] to this encoder.
   void writeDouble(double value) =>

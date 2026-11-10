@@ -54,6 +54,13 @@ abstract interface class ArrayInterface implements ArrayFragment {
   /// {@macro cbl.ArrayInterface.typedNullableGetter}
   num? number(int index);
 
+  /// Returns the element at the given [index] as a [BigInt].
+  ///
+  /// {@macro cbl.bigIntegerGetter}
+  ///
+  /// {@macro cbl.ArrayInterface.typedNullableGetter}
+  BigInt? bigInteger(int index);
+
   /// Returns the element at the given [index] as a [bool].
   ///
   /// {@macro cbl.ArrayInterface.typedDefaultedGetter}
@@ -136,6 +143,13 @@ abstract interface class MutableArrayInterface
   /// {@macro cbl.MutableArrayInterface.setter}
   void setNumber(num? value, {required int at});
 
+  /// Sets a [BigInt] [at] the given index.
+  ///
+  /// {@macro cbl.bigIntegerSetter}
+  ///
+  /// {@macro cbl.MutableArrayInterface.setter}
+  void setBigInteger(BigInt? value, {required int at});
+
   /// Sets an integer number [at] the given index.
   ///
   /// {@macro cbl.MutableArrayInterface.setter}
@@ -185,6 +199,11 @@ abstract interface class MutableArrayInterface
   /// Adds a [num] at the end of this array.
   void addNumber(num? value);
 
+  /// Adds a [BigInt] at the end of this array.
+  ///
+  /// {@macro cbl.bigIntegerSetter}
+  void addBigInteger(BigInt? value);
+
   /// Adds an integer number at the end of this array.
   void addInteger(int value);
 
@@ -227,6 +246,13 @@ abstract interface class MutableArrayInterface
   ///
   /// {@macro cbl.MutableArrayInterface.inserter}
   void insertNumber(num? value, {required int at});
+
+  /// Inserts a [BigInt] [at] the given index.
+  ///
+  /// {@macro cbl.bigIntegerSetter}
+  ///
+  /// {@macro cbl.MutableArrayInterface.inserter}
+  void insertBigInteger(BigInt? value, {required int at});
 
   /// Inserts an integer number [at] the given index.
   ///
@@ -299,7 +325,8 @@ abstract final class MutableArray implements Array, MutableArrayInterface {
   ///
   /// {@template cbl.MutableArray.allowedValueTypes}
   /// Allowed value types are [Iterable], [Array], [Blob], [DateTime],
-  /// [Map<String, Object?>], [Dictionary], `null`, number types, and [String].
+  /// [Map<String, Object?>], [Dictionary], `null`, number types, [BigInt], and
+  /// [String].
   ///
   /// The collections must contain only the above types.
   /// {@endtemplate}
@@ -339,6 +366,9 @@ mixin ArrayInterfaceMixin implements ArrayInterface {
 
   @override
   num? number(int index) => _valueAs(index);
+
+  @override
+  BigInt? bigInteger(int index) => _valueAs(index);
 
   @override
   bool boolean(int index) => _valueAsWithDefault(index, false);
@@ -456,6 +486,10 @@ final class MutableArrayImpl extends ArrayImpl implements MutableArray {
   void setNumber(num? value, {required int at}) => setValue(value, at: at);
 
   @override
+  void setBigInteger(BigInt? value, {required int at}) =>
+      setValue(value, at: at);
+
+  @override
   void setBoolean(bool value, {required int at}) => setValue(value, at: at);
 
   @override
@@ -488,6 +522,9 @@ final class MutableArrayImpl extends ArrayImpl implements MutableArray {
 
   @override
   void addNumber(num? value) => addValue(value);
+
+  @override
+  void addBigInteger(BigInt? value) => addValue(value);
 
   @override
   void addBoolean(bool value) => addValue(value);
@@ -527,6 +564,10 @@ final class MutableArrayImpl extends ArrayImpl implements MutableArray {
 
   @override
   void insertNumber(num? value, {required int at}) =>
+      insertValue(value, at: at);
+
+  @override
+  void insertBigInteger(BigInt? value, {required int at}) =>
       insertValue(value, at: at);
 
   @override

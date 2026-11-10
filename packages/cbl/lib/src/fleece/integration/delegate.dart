@@ -45,7 +45,7 @@ final class SimpleMDelegate extends MDelegate {
       case .boolean:
         return flValue.asBool;
       case .number:
-        return flValue.isInteger ? flValue.asInt : flValue.asDouble;
+        return flValue.asNumber;
       case .string:
         cacheIt();
         return parent.context.sharedStringsTable.decode(.value);
@@ -73,7 +73,8 @@ final class SimpleMDelegate extends MDelegate {
         native is String ||
         native is num ||
         native is bool ||
-        native is TypedData) {
+        native is TypedData ||
+        native is BigInt) {
       encoder.writeDartObject(native);
     } else if (native is MCollection) {
       native.encodeTo(encoder);

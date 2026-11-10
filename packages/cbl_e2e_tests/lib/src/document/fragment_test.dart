@@ -112,6 +112,18 @@ void main() {
     expect(dictionary['x'].dictionary, isNull);
   });
 
+  test('bigInteger getter and setter', () {
+    final array = MutableArray([null]);
+    array[0].bigInteger = maxUint64;
+    expect(array[0].bigInteger, maxUint64);
+    expect(array[1].bigInteger, isNull);
+
+    final dictionary = MutableDictionary();
+    dictionary['a'].bigInteger = maxUint64;
+    expect(dictionary['a'].bigInteger, maxUint64);
+    expect(dictionary['x'].bigInteger, isNull);
+  });
+
   test('setters for index in array set value', () {
     final array = MutableArray([null]);
 

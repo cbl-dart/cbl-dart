@@ -219,6 +219,10 @@ final class SlotBindings {
     cblite.FLSlot_SetInt(slot, value);
   }
 
+  static void setUIntBits(cblite.FLSlot slot, int bits) {
+    cblite.FLSlot_SetUInt(slot, bits);
+  }
+
   static void setDouble(cblite.FLSlot slot, double value) {
     cblite.FLSlot_SetDouble(slot, value);
   }
@@ -359,6 +363,9 @@ final class ValueBindings {
   static bool asBool(cblite.FLValue value) => cblite.FLValue_AsBool(value);
 
   static int asInt(cblite.FLValue value) => cblite.FLValue_AsInt(value);
+
+  static bool isUnsigned(cblite.FLValue value) =>
+      cblite.FLValue_IsUnsigned(value);
 
   static double asDouble(cblite.FLValue value) =>
       cblite.FLValue_AsDouble(value);
@@ -560,6 +567,33 @@ String decodeFLString(Pointer<Void> buf, int size) =>
 // ignore: camel_case_extensions
 extension CBLDart_LoadedFLValueExt on cblitedart.CBLDart_LoadedFLValue {
   FLValueType get typeEnum => FLValueType.fromValue(type);
+
+  /// The value of this number as an [int], [BigInt] or [double].
+  ///
+  /// Integers >= 2^63 are returned as a [BigInt].
+  Object get asNumber =>
+      isInteger ? (isUnsigned ? uint64BitsToBigInt(asInt) : asInt) : asDouble;
+}
+
+/// Converts the bits of an unsigned 64-bit integer, stored in an [int], to a
+/// [BigInt].
+BigInt uint64BitsToBigInt(int bits) => BigInt.from(bits).toUnsigned(64);
+
+/// Returns the bits of [value] as an unsigned 64-bit integer, stored in an
+/// [int].
+///
+/// Must only be called for values that are not a valid [int]. Throws an
+/// [ArgumentError] if [value] is outside of the range of integers that Fleece
+/// can store: -2^63 to 2^64 - 1.
+int bigIntToUint64Bits(BigInt value) {
+  if (value.isNegative || value.bitLength > 64) {
+    throw ArgumentError.value(
+      value,
+      'value',
+      'must be in the range -2^63 to 2^64 - 1',
+    );
+  }
+  return value.toSigned(64).toInt();
 }
 
 final class FleeceDecoderBindings {
@@ -734,6 +768,10 @@ final class FleeceEncoderBindings {
 
   static void writeInt(cblite.FLEncoder encoder, int value) {
     _checkError(encoder, cblite.FLEncoder_WriteInt(encoder, value));
+  }
+
+  static void writeUIntBits(cblite.FLEncoder encoder, int bits) {
+    _checkError(encoder, cblite.FLEncoder_WriteUInt(encoder, bits));
   }
 
   static void writeDouble(cblite.FLEncoder encoder, double value) {

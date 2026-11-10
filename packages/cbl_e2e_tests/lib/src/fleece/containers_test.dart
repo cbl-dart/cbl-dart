@@ -4,6 +4,7 @@ import 'package:cbl/cbl.dart' show FleeceException;
 import 'package:cbl/src/fleece/containers.dart';
 
 import '../../test_binding_impl.dart';
+import '../fixtures/values.dart';
 import '../test_binding.dart';
 
 /// A test value which can be used to test [Value]s with [ValueType.data].
@@ -82,6 +83,14 @@ void main() {
         final doc = Doc.fromJson('{"a": $number}');
         final value = doc.root.asDict!['a'];
         expect(value.asInt, equals(number));
+      });
+
+      test('toObject returns integers >= 2^63 as BigInt', () {
+        final doc = Doc.fromJson('{"a": $maxUint64, "b": $maxInt64, "c": 1.5}');
+        final dict = doc.root.asDict!;
+        expect(dict['a'].toObject(), maxUint64);
+        expect(dict['b'].toObject(), maxInt64);
+        expect(dict['c'].toObject(), 1.5);
       });
 
       test('asDouble returns value as double', () {
@@ -230,6 +239,12 @@ void main() {
       test('unnamed constructor creates a new empty array', () {
         final array = MutableArray();
         expect(array, isEmpty);
+      });
+
+      test('add accepts BigInt', () {
+        final array = MutableArray()..addAll([maxUint64, BigInt.one]);
+        expect(array.toObject(), [maxUint64, 1]);
+        expect(() => array.add(maxUint64 + BigInt.one), throwsArgumentError);
       });
 
       test('mutableCopy creates a copy of other array', () {

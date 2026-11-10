@@ -115,6 +115,31 @@ void main() {
       );
     });
 
+    test('stores unsigned 64-bit integers', () async {
+      final db = await openAsyncTestDatabase();
+      final doc = await savedDocument(db, {
+        'max': maxUint64,
+        'small': BigInt.two,
+      });
+
+      expect(doc.value('max'), maxUint64);
+      expect(doc.bigInteger('max'), maxUint64);
+      expect(doc.value('small'), 2);
+      expect(doc.bigInteger('small'), BigInt.two);
+      expect(doc.toPlainMap(), {'max': maxUint64, 'small': 2});
+      expect(doc.toJson(), '{"max":18446744073709551615,"small":2}');
+
+      final query = await db.createQuery('SELECT max FROM _');
+      final result = (await (await query.execute()).allResults()).single;
+      expect(result.value('max'), maxUint64);
+      expect(result.bigInteger(0), maxUint64);
+      expect(result.bigInteger('max'), maxUint64);
+
+      final mutableDoc = MutableDocument({})
+        ..setBigInteger(maxUint64, key: 'a');
+      expect(mutableDoc.bigInteger('a'), maxUint64);
+    });
+
     test('toJson', () async {
       final db = await openAsyncTestDatabase();
       final blob = Blob.fromData('contentType', Uint8List(0));

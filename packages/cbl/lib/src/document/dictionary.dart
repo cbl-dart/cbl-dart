@@ -54,6 +54,20 @@ abstract interface class DictionaryInterface implements DictionaryFragment {
   /// {@macro cbl.DictionaryInterface.typedNullableGetter}
   num? number(String key);
 
+  /// Returns the value for the given [key] as a [BigInt].
+  ///
+  /// {@template cbl.bigIntegerGetter}
+  /// Use this getter for integers that might not fit into an [int], such as
+  /// unsigned 64-bit integers. Other numbers are converted to a [BigInt],
+  /// truncating floating point numbers.
+  ///
+  /// Queries can return integers >= 2^63, but cannot compare or filter by them,
+  /// because the query engine does not support them.
+  /// {@endtemplate}
+  ///
+  /// {@macro cbl.DictionaryInterface.typedNullableGetter}
+  BigInt? bigInteger(String key);
+
   /// Returns the value for the given [key] as a [bool].
   ///
   /// {@macro cbl.DictionaryInterface.typedDefaultedGetter}
@@ -122,6 +136,14 @@ abstract interface class MutableDictionaryInterface
 
   /// Sets a [num] for the given [key].
   void setNumber(num? value, {required String key});
+
+  /// Sets a [BigInt] for the given [key].
+  ///
+  /// {@template cbl.bigIntegerSetter}
+  /// [value] must be in the range of a signed or unsigned 64-bit integer, from
+  /// -2^63 to 2^64 - 1.
+  /// {@endtemplate}
+  void setBigInteger(BigInt? value, {required String key});
 
   /// Sets a [bool] for the given [key].
   // ignore: avoid_positional_boolean_parameters
@@ -212,6 +234,9 @@ final class DictionaryImpl
 
   @override
   num? number(String key) => _getAs(key);
+
+  @override
+  BigInt? bigInteger(String key) => _getAs(key);
 
   @override
   bool boolean(String key) => _getAsWithDefault(key, false);
@@ -318,6 +343,10 @@ final class MutableDictionaryImpl extends DictionaryImpl
 
   @override
   void setFloat(double value, {required String key}) =>
+      setValue(value, key: key);
+
+  @override
+  void setBigInteger(BigInt? value, {required String key}) =>
       setValue(value, key: key);
 
   @override
