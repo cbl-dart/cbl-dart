@@ -310,6 +310,22 @@ abstract final class MutableArray implements Array, MutableArrayInterface {
     }
     return array;
   }
+
+  /// Creates a [MutableArray] from a JSON array.
+  ///
+  /// {@macro cbl.MutableArray.setJson}
+  factory MutableArray.fromJson(String json) =>
+      MutableArray(decodeJson(json, kind: 'array'));
+
+  /// Replaces the elements of this array with those of the given JSON array.
+  ///
+  /// {@template cbl.MutableArray.setJson}
+  /// Dictionaries with blob metadata are converted to [Blob]s.
+  ///
+  /// Throws a [FormatException] if [json] is not valid JSON or does not contain
+  /// a JSON array.
+  /// {@endtemplate}
+  void setJson(String json);
 }
 
 mixin ArrayInterfaceMixin implements ArrayInterface {
@@ -555,6 +571,9 @@ final class MutableArrayImpl extends ArrayImpl implements MutableArray {
     _array.clear();
     data.map(CblConversions.convertToCblObject).forEach(_array.append);
   }
+
+  @override
+  void setJson(String json) => setData(decodeJson(json, kind: 'array'));
 
   // === Remove ================================================================
 

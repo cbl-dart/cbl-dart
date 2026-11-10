@@ -348,6 +348,26 @@ void main() {
         ]);
       });
 
+      test('fromJson', () {
+        final array = MutableArray.fromJson('[null, 1, "a", [true], {"b": 2}]');
+        expect(array.toPlainList(), [
+          null,
+          1,
+          'a',
+          [true],
+          {'b': 2},
+        ]);
+        expect(() => MutableArray.fromJson('['), throwsFormatException);
+        expect(() => MutableArray.fromJson('{}'), throwsFormatException);
+      });
+
+      test('setJson', () {
+        final array = MutableArray(['a'])..setJson('[1.5]');
+        expect(array.toPlainList(), [1.5]);
+        expect(() => array.setJson('"a"'), throwsFormatException);
+        expect(array.toPlainList(), [1.5]);
+      });
+
       test('removeValue throws when index is out of range', () {
         final array = MutableArray();
         expect(() => array.removeValue(0), throwsRangeError);

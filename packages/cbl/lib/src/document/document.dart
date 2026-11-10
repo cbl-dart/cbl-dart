@@ -70,6 +70,21 @@ abstract final class MutableDocument
   /// {@macro cbl.MutableArray.allowedValueTypes}
   factory MutableDocument(Map<String, Object?> data, {String? id}) =>
       MutableDelegateDocument(data, id: id);
+
+  /// Creates a new [MutableDocument] from a JSON object, optionally with a
+  /// given [id].
+  ///
+  /// If no [id] is provided, a random UUID will be assigned.
+  ///
+  /// {@macro cbl.MutableDictionary.setJson}
+  factory MutableDocument.fromJson(String json, {String? id}) =>
+      MutableDelegateDocument(decodeJson(json, kind: 'object'), id: id);
+
+  /// Replaces the properties of this document with those of the given JSON
+  /// object.
+  ///
+  /// {@macro cbl.MutableDictionary.setJson}
+  void setJson(String json);
 }
 
 /// An interface to abstract over the differences between the documents of the
@@ -418,6 +433,9 @@ final class MutableDelegateDocument extends DelegateDocument
 
   @override
   void setData(Map<String, Object?> data) => _mutableProperties.setData(data);
+
+  @override
+  void setJson(String json) => _mutableProperties.setJson(json);
 
   @override
   void removeValue(String key) => _mutableProperties.removeValue(key);

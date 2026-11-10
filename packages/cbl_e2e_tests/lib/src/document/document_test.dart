@@ -318,6 +318,41 @@ void main() {
         expect(doc.toPlainMap(), data);
       });
 
+      test('fromJson', () {
+        final doc = MutableDocument.fromJson(
+          id: 'id',
+          '{"a": [1, {"b": null}]}',
+        );
+        expect(doc.id, 'id');
+        expect(doc.toPlainMap(), {
+          'a': [
+            1,
+            {'b': null},
+          ],
+        });
+        expect(() => MutableDocument.fromJson('[]'), throwsFormatException);
+      });
+
+      test('setJson', () {
+        final doc = MutableDocument({'a': 'b'})..setJson('{"c": true}');
+        expect(doc.toPlainMap(), {'c': true});
+        expect(() => doc.setJson('{'), throwsFormatException);
+      });
+
+      test('fromJson converts blob metadata to blob', () async {
+        final db = await openAsyncTestDatabase();
+        final blob = Blob.fromData('text/plain', Uint8List.fromList([1, 2]));
+        await db.saveBlob(blob);
+
+        final doc = MutableDocument.fromJson('{"blob": ${blob.toJson()}}');
+        expect(doc.blob('blob'), blob);
+
+        final collection = await db.defaultCollection;
+        await collection.saveDocument(doc);
+        final savedDoc = (await collection.document(doc.id))!;
+        expect(await savedDoc.blob('blob')!.content(), [1, 2]);
+      });
+
       test('add child collection to two documents', () {
         final docA = MutableDocument({});
         final docB = MutableDocument({});

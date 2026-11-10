@@ -295,6 +295,27 @@ void main() {
         });
       });
 
+      test('fromJson', () {
+        final dictionary = MutableDictionary.fromJson(
+          '{"a": null, "b": 1, "c": [true], "d": {"e": "f"}}',
+        );
+        expect(dictionary.toPlainMap(), {
+          'a': null,
+          'b': 1,
+          'c': [true],
+          'd': {'e': 'f'},
+        });
+        expect(() => MutableDictionary.fromJson('{'), throwsFormatException);
+        expect(() => MutableDictionary.fromJson('[]'), throwsFormatException);
+      });
+
+      test('setJson', () {
+        final dictionary = MutableDictionary({'a': 'b'})..setJson('{"c": 1.5}');
+        expect(dictionary.toPlainMap(), {'c': 1.5});
+        expect(() => dictionary.setJson('1'), throwsFormatException);
+        expect(dictionary.toPlainMap(), {'c': 1.5});
+      });
+
       group('from immutable', () {
         test('share child collection', () {
           final a = immutableDictionary({
