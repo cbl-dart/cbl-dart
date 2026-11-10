@@ -41,7 +41,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
@@ -72,7 +72,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Check formatting
         uses: jidicula/clang-format-action@v4.14.0
@@ -88,7 +88,7 @@ jobs:
         dart: [stable]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -136,7 +136,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -225,7 +225,7 @@ jobs:
         }')[matrix.embedder] }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup CMake and Ninja
         uses: lukka/get-cmake@latest
@@ -283,7 +283,7 @@ jobs:
         run: ./tools/ci-steps.sh startVirtualDevices
 
       - name: Run tests
-        uses: nick-fields/retry@v3
+        uses: nick-fields/retry@v4
         with:
           shell: bash
           timeout_minutes: 20
@@ -297,7 +297,7 @@ jobs:
 
       - name: Upload test results
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: test-results-${{ matrix.os }}-${{ matrix.embedder }}
           path: test-results
@@ -342,7 +342,7 @@ jobs:
       TEST_PACKAGE: cbl_flutter_prebuilt_e2e_tests
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Select Java 17
         if: ${{ matrix.os == 'Android' }}
@@ -378,7 +378,7 @@ jobs:
         run: ./tools/ci-steps.sh startVirtualDevices
 
       - name: Run tests
-        uses: nick-fields/retry@v3
+        uses: nick-fields/retry@v4
         with:
           shell: bash
           timeout_minutes: 20
@@ -392,7 +392,7 @@ jobs:
 
       - name: Upload test results
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: test-results-cbl_flutter_prebuilt-${{ matrix.os }}
           path: test-results
@@ -428,7 +428,7 @@ jobs:
       }')[matrix.os] }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -487,7 +487,7 @@ jobs:
       }')[matrix.os] }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Get CMake and Ninja
         uses: lukka/get-cmake@latest
