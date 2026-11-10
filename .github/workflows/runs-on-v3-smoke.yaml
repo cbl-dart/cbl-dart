@@ -7,6 +7,11 @@ on:
         type: choice
         required: true
         options: [cold, warm]
+      backend:
+        type: choice
+        required: true
+        default: all
+        options: [all, s3, sticky]
 
 permissions:
   contents: read
@@ -18,8 +23,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        backend: [s3, sticky]
-    runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu/env=production/extras=s3-cache${{ matrix.backend == 'sticky' && '/sticky=bench-native-20261110:20gb' || '' }}
+        backend: ${{ fromJSON(inputs.backend == 'all' && '["s3","sticky"]' || format('["{0}"]', inputs.backend)) }}
+    runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu/env=production/extras=s3-cache${{ matrix.backend == 'sticky' && '/sticky=bench-native-20261110-v2:20gb' || '' }}
     env:
       ANDROID_HOME: /home/runner/.android/sdk
       ANDROID_SDK_ROOT: /home/runner/.android/sdk
@@ -42,7 +47,7 @@ jobs:
         uses: runs-on/action@v2
         with:
           sticky_cache: |
-            custom,path=~/.android/sdk/ndk/28.0.13004108,path=~/.android/sdk/cmake/3.18.1
+            custom,path=~/.android/sdk/ndk,path=~/.android/sdk/cmake
           sticky_save: ${{ inputs.phase == 'cold' }}
           sticky_wait_timeout: 3m
 
