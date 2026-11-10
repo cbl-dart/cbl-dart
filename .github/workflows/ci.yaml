@@ -215,11 +215,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
+      # Only the cbl tests cross-compile native code for Linux arm64.
       - name: Install Linux cross-compilation toolchain
-        if: runner.os == 'Linux'
+        if: runner.os == 'Linux' && matrix.package == 'cbl'
+        timeout-minutes: 5
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+          apt_opts=(-o Acquire::Retries=3 -o Acquire::http::Timeout=30)
+          sudo apt-get "${apt_opts[@]}" update -qq
+          sudo apt-get "${apt_opts[@]}" install -y --no-install-recommends gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
 
       - name: Setup Java
         if: runner.os == 'Linux' && matrix.package == 'cbl'
