@@ -22,8 +22,15 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-tags: true
+      - name: Cache npm downloads
+        uses: actions/cache@v5
+        with:
+          path: ${{ runner.temp }}/docs-npm-download-cache
+          key: docs-npm-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('docs/package-lock.json') }}
       - name: Install and build website
         working-directory: docs
+        env:
+          npm_config_cache: ${{ runner.temp }}/docs-npm-download-cache
         run: |
           npm ci
           npm run check
