@@ -19,6 +19,22 @@ if [[ -z "${ANDROID_HOME}" ]]; then
     esac
 fi
 
+# Newer command-line tools store AVDs under $XDG_CONFIG_HOME when it is set,
+# while the emulator looks in $HOME/.android/avd. Pin one location for both.
+export ANDROID_AVD_HOME="${ANDROID_AVD_HOME:-$HOME/.android/avd}"
+mkdir -p "$ANDROID_AVD_HOME"
+
+# Use the newest installed command-line tools, preferring "latest".
+cmdlineToolsBin=""
+for dir in "$ANDROID_HOME"/cmdline-tools/*/bin; do
+    if [[ -x "$dir/sdkmanager" ]]; then
+        cmdlineToolsBin="$dir"
+        if [[ "$dir" == */latest/* ]]; then
+            break
+        fi
+    fi
+done
+
 emulatorName="cbl-dart"
 emulatorPort=5554
 serialName="emulator-$emulatorPort"
@@ -199,28 +215,28 @@ function createAndStart() {
     sudo apt-get update -qq
     sudo apt-get install -y --no-install-recommends libpulse0
 
-    yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses
+    yes | "$cmdlineToolsBin/sdkmanager" --licenses
 
     # Install emulator if not already present.
     if [[ ! -d "$ANDROID_HOME/emulator" ]]; then
         echo "Installing emulator..."
-        "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" emulator
+        "$cmdlineToolsBin/sdkmanager" emulator
     fi
 
     # Install system image.
     systemImage="system-images;android-$apiLevel;default;x86_64"
     echo "Installing system image '$systemImage' ..."
-    "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "$systemImage"
+    "$cmdlineToolsBin/sdkmanager" "$systemImage"
 
     # Install platform tools if not already present.
     if [[ ! -d "$ANDROID_HOME/platform-tools" ]]; then
         echo "Installing platform tools..."
-        "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" platform-tools
+        "$cmdlineToolsBin/sdkmanager" platform-tools
     fi
 
     # Create emulator.
     echo "Creating emulator..."
-    "$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager" create avd \
+    "$cmdlineToolsBin/avdmanager" create avd \
         --name "$emulatorName" \
         --package "$systemImage" \
         --device "$device"
