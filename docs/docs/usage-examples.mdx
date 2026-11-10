@@ -235,8 +235,9 @@ start/stop the replicator. The current status of the replicator is available in
 `api|ReplicatorStatus.activity`.
 
 ```dart
-final config = ReplicatorConfiguration(target: UrlEndpoint('http://localhost:4984/my-database'))
-  ..addCollection(collection);
+final config = ReplicatorConfiguration(
+  target: UrlEndpoint(Uri.parse('ws://localhost:4984/my-database')),
+)..addCollection(collection);
 final replicator = await Replicator.create(config);
 
 await replicator.addChangeListener((change) {
