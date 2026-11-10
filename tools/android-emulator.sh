@@ -198,6 +198,7 @@ function createAndStart() {
     sudo udevadm control --reload-rules
     sudo udevadm trigger --name-match=kvm
 
+    sudo apt-get update -qq
     sudo apt-get install -y --no-install-recommends libpulse0
 
     yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses
