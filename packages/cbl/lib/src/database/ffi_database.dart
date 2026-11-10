@@ -2,8 +2,6 @@ import 'dart:async';
 import 'dart:ffi';
 import 'dart:io';
 
-import 'package:path/path.dart' as path_lib;
-
 import '../bindings.dart';
 import '../document/blob.dart';
 import '../document/document.dart';
@@ -85,20 +83,10 @@ final class FfiDatabase
     required String name,
     DatabaseConfiguration? config,
   }) => DatabaseBindings.copyDatabase(
-    _formatCopyFromPath(from),
+    from,
     name,
     (config ?? DatabaseConfiguration()).toCBLDatabaseConfiguration(),
   );
-
-  /// Ensures that the path ends with a separator to signal that it is a
-  /// directory.
-  ///
-  /// This is currently required by the native implementation.
-  ///
-  /// https://github.com/cbl-dart/cbl-dart/issues/444
-  // TODO(blaugold): remove workaround once the CBL C SDK is fixed
-  static String _formatCopyFromPath(String from) =>
-      path_lib.normalize(from) + path_lib.separator;
 
   final Pointer<CBLDatabase> pointer;
 
