@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:ffi';
 import 'dart:typed_data';
 
@@ -12,6 +13,18 @@ import '../fleece/integration/integration.dart';
 import 'array.dart';
 import 'blob.dart';
 import 'dictionary.dart';
+
+/// Decodes [json], which must contain a JSON value of type [T].
+///
+/// Throws a [FormatException] if [json] is not valid JSON or does not contain a
+/// JSON [kind].
+T decodeJson<T extends Object>(String json, {required String kind}) {
+  final value = jsonDecode(json);
+  if (value is! T) {
+    throw FormatException('Expected a JSON $kind.', json);
+  }
+  return value;
+}
 
 abstract interface class CblConversions {
   Object? toPlainObject();

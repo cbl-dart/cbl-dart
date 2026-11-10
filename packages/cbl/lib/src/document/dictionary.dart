@@ -197,6 +197,23 @@ abstract final class MutableDictionary
     }
     return dictionary;
   }
+
+  /// Creates a [MutableDictionary] from a JSON object.
+  ///
+  /// {@macro cbl.MutableDictionary.setJson}
+  factory MutableDictionary.fromJson(String json) =>
+      MutableDictionary(decodeJson<Map<String, Object?>>(json, kind: 'object'));
+
+  /// Replaces the entries of this dictionary with those of the given JSON
+  /// object.
+  ///
+  /// {@template cbl.MutableDictionary.setJson}
+  /// Dictionaries with blob metadata are converted to [Blob]s.
+  ///
+  /// Throws a [FormatException] if [json] is not valid JSON or does not contain
+  /// a JSON object.
+  /// {@endtemplate}
+  void setJson(String json);
 }
 
 final class DictionaryImpl
@@ -381,6 +398,10 @@ final class MutableDictionaryImpl extends DictionaryImpl
       _dict.set(entry.key, CblConversions.convertToCblObject(entry.value));
     }
   }
+
+  @override
+  void setJson(String json) =>
+      setData(decodeJson<Map<String, Object?>>(json, kind: 'object'));
 
   // === Remove ================================================================
 
