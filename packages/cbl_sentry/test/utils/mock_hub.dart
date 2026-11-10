@@ -1,5 +1,4 @@
 import 'package:sentry/sentry.dart';
-import 'package:sentry/src/profiling.dart';
 
 import 'mock_span.dart';
 
@@ -12,10 +11,6 @@ class MockHub implements Hub {
 
   @override
   SentryOptions get options => SentryOptions();
-
-  @override
-  // ignore: invalid_use_of_internal_member
-  SentryProfilerFactory? profilerFactory;
 
   @override
   Future<void> addBreadcrumb(Breadcrumb crumb, {Object? hint}) async =>
