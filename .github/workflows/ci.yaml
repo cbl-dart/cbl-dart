@@ -313,7 +313,7 @@ jobs:
        || fromJSON(format('{{
         "iOS":"warp-macos-15-arm64-6x",
         "macOS":"macos-15",
-        "Android":"blacksmith-4vcpu-ubuntu-2204",
+        "Android":"runs-on={0}/family=m8i.xlarge/image=ubuntu22-full-x64/nested-virt",
         "Ubuntu":"runs-on={0}/runner=ubuntu22-4cpu",
         "Windows":"windows-2025"
       }}', github.run_id))[matrix.os] }}
