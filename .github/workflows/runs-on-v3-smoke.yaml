@@ -9,7 +9,7 @@ on:
         default: cold
       profile:
         type: choice
-        options: [both, unit, e2e]
+        options: [both, unit, e2e, docs]
         default: both
 
 permissions:
@@ -21,6 +21,7 @@ concurrency:
 
 jobs:
   sdk:
+    if: inputs.profile != 'docs'
     name: SDK files - ${{ matrix.profile }} - ${{ inputs.phase }}
     strategy:
       fail-fast: false
@@ -98,4 +99,55 @@ jobs:
       - uses: actions/upload-artifact@v7
         with:
           name: android-sdk-${{ matrix.profile }}-${{ inputs.phase }}
+          path: benchmark-results
+
+  npm:
+    if: inputs.profile == 'docs'
+    name: npm files - ${{ inputs.phase }}
+    runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu/env=production
+    timeout-minutes: 10
+    steps:
+      - uses: runs-on/action@v2
+      - uses: actions/checkout@v6
+      - name: Record npm and Node versions
+        run: |
+          node --version
+          npm --version
+      - name: Restore npm downloads
+        id: cache
+        uses: actions/cache/restore@v5
+        with:
+          path: ${{ runner.temp }}/npm-download-cache
+          key: bench-v3-npm-downloads-20261110a-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('docs/package-lock.json') }}
+      - name: Install docs dependencies only
+        working-directory: docs
+        env:
+          npm_config_cache: ${{ runner.temp }}/npm-download-cache
+          PHASE: ${{ inputs.phase }}
+          CACHE_HIT: ${{ steps.cache.outputs.cache-hit }}
+        run: |
+          set -euo pipefail
+          if [[ "$PHASE" == cold && "$CACHE_HIT" == true ]]; then
+            echo 'Cold benchmark unexpectedly found a cache' >&2
+            exit 1
+          fi
+          if [[ "$PHASE" == warm && "$CACHE_HIT" != true ]]; then
+            echo 'Warm benchmark did not restore its cache' >&2
+            exit 1
+          fi
+          start=$(date +%s%N)
+          npm ci
+          end=$(date +%s%N)
+          bytes=$(du -sb "$npm_config_cache" | awk '{print $1}')
+          mkdir -p ../benchmark-results
+          printf '{"profile":"docs-npm","phase":"%s","cache_hit":"%s","workload_ms":%s,"bytes":%s}\n' "$PHASE" "$CACHE_HIT" "$(((end-start)/1000000))" "$bytes" | tee ../benchmark-results/summary.json
+      - name: Save npm downloads
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v5
+        with:
+          path: ${{ runner.temp }}/npm-download-cache
+          key: ${{ steps.cache.outputs.cache-primary-key }}
+      - uses: actions/upload-artifact@v7
+        with:
+          name: npm-downloads-${{ inputs.phase }}
           path: benchmark-results
