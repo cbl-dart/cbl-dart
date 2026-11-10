@@ -26,4 +26,14 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           RUN_ID: ${{ github.event.workflow_run.id }}
-        run: gh run rerun "$RUN_ID" --failed
+          BRANCH: ${{ github.event.workflow_run.head_branch }}
+        # A re-run joins the CI concurrency group of its ref and would cancel a
+        # newer run for the same ref, so only retry the latest run.
+        run: |
+          latest=$(gh run list --workflow ci.yaml --branch "$BRANCH" \
+            --limit 1 --json databaseId --jq '.[0].databaseId')
+          if [ "$latest" != "$RUN_ID" ]; then
+            echo "Skipping: run $latest is newer than $RUN_ID."
+            exit 0
+          fi
+          gh run rerun "$RUN_ID" --failed
