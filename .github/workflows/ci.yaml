@@ -264,6 +264,15 @@ jobs:
         with:
           packages: platform-tools
 
+      - name: Cache Android native toolchain
+        if: runner.os == 'Linux' && matrix.package == 'cbl'
+        uses: actions/cache@v5
+        with:
+          path: |
+            ${{ env.ANDROID_HOME }}/ndk
+            ${{ env.ANDROID_HOME }}/cmake
+          key: android-native-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('tools/android-sdk.sh') }}
+
       - name: Install Android NDK
         if: runner.os == 'Linux' && matrix.package == 'cbl'
         run: ./tools/android-sdk.sh installNativeToolchain
@@ -379,6 +388,16 @@ jobs:
         uses: android-actions/setup-android@v3
         with:
           packages: platform-tools
+
+      - name: Cache Android build SDK packages
+        if: matrix.os == 'Android'
+        uses: actions/cache@v5
+        with:
+          path: |
+            ${{ env.ANDROID_HOME }}/ndk
+            ${{ env.ANDROID_HOME }}/cmake
+            ${{ env.ANDROID_HOME }}/platforms
+          key: android-e2e-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('tools/android-sdk.sh') }}
 
       - name: Install Android Native Toolchain
         if: ${{ matrix.os == 'Android' }}
