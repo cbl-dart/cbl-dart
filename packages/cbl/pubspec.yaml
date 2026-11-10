@@ -17,7 +17,7 @@ topics:
   - full-text-search
 
 environment:
-  sdk: ^3.10.0
+  sdk: ^3.11.0
 
 resolution: workspace
 
