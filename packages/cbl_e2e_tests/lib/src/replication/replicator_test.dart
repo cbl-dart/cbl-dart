@@ -793,6 +793,7 @@ void main() {
 
         // DB-A modifies first (earlier timestamp).
         await dbA.writeTestDocument('DB-A-2');
+        await _ensureLaterTimestamp();
         // DB-B modifies second (later timestamp).
         await dbB.writeTestDocument('DB-B-1');
 
@@ -826,6 +827,7 @@ void main() {
 
         // DB-B modifies first (earlier timestamp).
         await dbB.writeTestDocument('DB-B-1');
+        await _ensureLaterTimestamp();
         // DB-A modifies second (later timestamp).
         await dbA.writeTestDocument('DB-A-2');
 
@@ -1334,3 +1336,10 @@ final testAdapter = TypedDataRegistry(
     ),
   ],
 );
+
+/// Waits long enough that the next write gets a strictly later revision
+/// timestamp than the previous one, even on platforms with a coarse clock.
+///
+/// Tests of the default conflict resolver depend on which side wrote last.
+Future<void> _ensureLaterTimestamp() =>
+    Future<void>.delayed(const Duration(milliseconds: 50));
