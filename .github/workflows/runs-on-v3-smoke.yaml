@@ -1,55 +1,94 @@
-name: RunsOn v3 smoke
+name: Sticky versus S3 native SDK benchmark
 
 on:
   workflow_dispatch:
+    inputs:
+      phase:
+        type: choice
+        required: true
+        options: [cold, warm]
 
 permissions:
   contents: read
 
-concurrency:
-  group: runs-on-v3-smoke-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
-  smoke:
-    name: Native round trip and cache - ${{ matrix.runner }}
-    timeout-minutes: 20
+  benchmark:
+    name: ${{ matrix.backend }} native toolchain - ${{ inputs.phase }}
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
-        runner: [ubuntu22-2cpu, ubuntu22-4cpu]
-    runs-on: runs-on=${{ github.run_id }}/runner=${{ matrix.runner }}/env=production
+        backend: [s3, sticky]
+    runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu/env=production/extras=s3-cache${{ matrix.backend == 'sticky' && '/sticky=bench-native-20261110:20gb' || '' }}
+    env:
+      ANDROID_HOME: /home/runner/.android/sdk
+      ANDROID_SDK_ROOT: /home/runner/.android/sdk
+      BENCH_BACKEND: ${{ matrix.backend }}
+      BENCH_PHASE: ${{ inputs.phase }}
     steps:
-      - uses: runs-on/action@v2
       - uses: actions/checkout@v6
-      - uses: dart-lang/setup-dart@v1
+      - uses: actions/setup-java@v5
         with:
-          sdk: stable
-      - name: Verify workspace and host
-        shell: bash
-        run: |
-          test "$RUNNER_OS" = Linux
-          test "$RUNNER_ARCH" = X64
-          printf 'Workspace: %s\n' "$GITHUB_WORKSPACE"
-          df -h .
-      - name: Restore smoke cache
-        id: cache
-        uses: actions/cache@v5
+          distribution: temurin
+          java-version: "17"
+      - uses: android-actions/setup-android@v3
         with:
-          path: .migration-cache
-          key: runs-on-v3-smoke-${{ matrix.runner }}-${{ hashFiles('pubspec.lock') }}
-      - name: Verify or initialize cache
-        shell: bash
+          packages: platform-tools
+          log-accepted-android-sdk-licenses: false
+
+      - name: Map sticky SDK cache
+        if: matrix.backend == 'sticky'
+        id: sticky
+        uses: runs-on/action@v2
+        with:
+          sticky_cache: |
+            custom,path=~/.android/sdk/ndk/28.0.13004108,path=~/.android/sdk/cmake/3.18.1
+          sticky_save: ${{ inputs.phase == 'cold' }}
+          sticky_wait_timeout: 3m
+
+      - uses: runs-on/action@v2
+        if: matrix.backend == 's3'
+      - name: Restore S3 SDK cache
+        if: matrix.backend == 's3'
+        id: s3
+        uses: actions/cache/restore@v5
+        with:
+          path: |
+            /home/runner/.android/sdk/ndk/28.0.13004108
+            /home/runner/.android/sdk/cmake/3.18.1
+          key: bench-sticky-compare-20261110-native-${{ runner.os }}-${{ runner.arch }}-ndk28.0.13004108-cmake3.18.1-v1
+
+      - name: Check cache phase
         env:
-          CACHE_HIT: ${{ steps.cache.outputs.cache-hit }}
+          CACHE_HIT: ${{ steps.sticky.outputs.cache-hit || steps.s3.outputs.cache-hit }}
         run: |
-          mkdir -p .migration-cache
-          if [[ "$CACHE_HIT" == true ]]; then
-            test "$(cat .migration-cache/probe)" = runs-on-v3
+          printf 'Backend=%s Phase=%s CacheHit=%s\n' "$BENCH_BACKEND" "$BENCH_PHASE" "$CACHE_HIT"
+          if [[ "$BENCH_PHASE" == cold ]]; then
+            test "$CACHE_HIT" != true
           else
-            printf 'runs-on-v3\n' > .migration-cache/probe
+            test "$CACHE_HIT" = true
           fi
-          printf 'Cache hit: %s\n' "$CACHE_HIT"
-      - name: Build native assets and exercise database
-        shell: bash
-        run: bash tools/test-hook-compatibility.sh latest
+          if [[ "$BENCH_BACKEND" == sticky ]]; then
+            test -f "$RUNS_ON_STICKYDISK_READY_FILE"
+            mountpoint "$RUNS_ON_STICKYDISK_DIR"
+          fi
+
+      - name: Install and exercise native toolchain
+        env:
+          CACHE_HIT: ${{ steps.sticky.outputs.cache-hit || steps.s3.outputs.cache-hit }}
+        run: python3 tools/bench-sticky-sdk.py
+
+      - name: Save S3 SDK cache
+        if: matrix.backend == 's3' && inputs.phase == 'cold'
+        uses: actions/cache/save@v5
+        with:
+          path: |
+            /home/runner/.android/sdk/ndk/28.0.13004108
+            /home/runner/.android/sdk/cmake/3.18.1
+          key: bench-sticky-compare-20261110-native-${{ runner.os }}-${{ runner.arch }}-ndk28.0.13004108-cmake3.18.1-v1
+
+      - name: Upload measurements
+        uses: actions/upload-artifact@v7
+        with:
+          name: sticky-benchmark-${{ matrix.backend }}-${{ inputs.phase }}
+          path: ${{ runner.temp }}/sticky-benchmark-result.json
