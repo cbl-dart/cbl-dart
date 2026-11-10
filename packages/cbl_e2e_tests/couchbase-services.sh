@@ -187,13 +187,18 @@ function waitForCouchbaseQueryService() {
 }
 
 function waitForCouchbaseQueryBucketDdl() {
-    local maxAttempts=30
+    # Building an index is asynchronous, and on slow runners the indexer can
+    # take a while to pick up a deferred build. Poll the index state and only
+    # create or build the probe index when it is missing or still deferred,
+    # instead of re-running both statements in every attempt.
+    local maxAttempts=90
     local delayBetweenAttempts=2
     local attempt=0
     local probeIndex="sg_ci_query_ready_probe"
-    local createResponse
-    local buildResponse
-    local stateResponse
+    local state
+    local createResponse=""
+    local buildResponse=""
+    local stateResponse=""
     local dropResponse
 
     echo "::group::Wait for Couchbase Query bucket DDL"
@@ -201,41 +206,47 @@ function waitForCouchbaseQueryBucketDdl() {
     couchbaseQueryRequest "DROP INDEX \`${couchbaseServerBucket}\`.\`${probeIndex}\` USING GSI;" >/dev/null 2>&1 || true
 
     while true; do
-        echo "Attempt $attempt to create and build a probe index through Query"
-
-        createResponse="$(
-            couchbaseQueryRequest "CREATE INDEX \`${probeIndex}\` ON \`${couchbaseServerBucket}\`(META().id) USING GSI WITH {\"num_replica\":0,\"defer_build\":true};" 2>&1 || true
+        stateResponse="$(
+            couchbaseQueryRequest "SELECT RAW state FROM system:indexes WHERE keyspace_id = \"${couchbaseServerBucket}\" AND name = \"${probeIndex}\" LIMIT 1;" 2>&1 || true
         )"
-        buildResponse=""
-        stateResponse=""
+        state="$(echo "$stateResponse" | grep -Eo '"(online|deferred|building|pending|scheduled for creation|error)"' | head -1 | tr -d '"' || true)"
 
-        if echo "$createResponse" | grep -Eq '"status"[[:space:]]*:[[:space:]]*"success"' ||
-            echo "$createResponse" | grep -Fq "already exist"; then
+        echo "Attempt $attempt: probe index state is '${state:-missing}'"
+
+        case "$state" in
+        online)
+            break
+            ;;
+        deferred)
             buildResponse="$(
                 couchbaseQueryRequest "BUILD INDEX ON \`${couchbaseServerBucket}\`(\`${probeIndex}\`) USING GSI;" 2>&1 || true
             )"
-            stateResponse="$(
-                couchbaseQueryRequest "SELECT RAW state FROM system:indexes WHERE keyspace_id = \"${couchbaseServerBucket}\" AND name = \"${probeIndex}\" LIMIT 1;" 2>&1 || true
-            )"
-
-            if echo "$stateResponse" | grep -Eq '"online"'; then
-                break
+            ;;
+        "")
+            if echo "$stateResponse" | grep -Eq '"status"[[:space:]]*:[[:space:]]*"success"'; then
+                createResponse="$(
+                    couchbaseQueryRequest "CREATE INDEX \`${probeIndex}\` ON \`${couchbaseServerBucket}\`(META().id) USING GSI WITH {\"num_replica\":0,\"defer_build\":true};" 2>&1 || true
+                )"
             fi
-        fi
+            ;;
+        *)
+            # building, pending or another transient state: keep waiting.
+            ;;
+        esac
 
         attempt=$((attempt + 1))
         if ((attempt == maxAttempts)); then
             echo "Couchbase Query bucket DDL was not ready after $maxAttempts attempts"
             if [ -n "$createResponse" ]; then
-                echo "-- create index response --"
+                echo "-- last create index response --"
                 echo "$createResponse"
             fi
             if [ -n "$buildResponse" ]; then
-                echo "-- build index response --"
+                echo "-- last build index response --"
                 echo "$buildResponse"
             fi
             if [ -n "$stateResponse" ]; then
-                echo "-- index state response --"
+                echo "-- last index state response --"
                 echo "$stateResponse"
             fi
             dumpCouchbaseServerDiagnostics
