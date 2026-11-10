@@ -74,12 +74,23 @@ function startSyncGatewayWindows {
 
     echo "::group::Install Sync Gateway"
 
-    curl "$syncGatewayUrl" -o "$syncGatewayMsi"
+    curl --fail --retry 3 --retry-delay 10 "$syncGatewayUrl" -o "$syncGatewayMsi"
 
     powershell.exe -Command "Start-Process msiexec.exe -Wait -ArgumentList '/i $syncGatewayMsi /passive'"
 
-    # Stop the service which was started during installation.
-    sc.exe stop SyncGateway || true
+    # Stop the service which was started during installation and wait until
+    # it has fully released its process and ports before launching the test
+    # instance with our custom config.
+    powershell.exe -Command "\
+        \$service = Get-Service -Name 'SyncGateway' -ErrorAction SilentlyContinue; \
+        if (\$null -ne \$service) { \
+            if (\$service.Status -ne 'Stopped') { \
+                Stop-Service -Name 'SyncGateway' -Force -ErrorAction SilentlyContinue; \
+                \$service.WaitForStatus('Stopped', [TimeSpan]::FromMinutes(2)); \
+            } \
+        }; \
+        Get-Process sync_gateway -ErrorAction SilentlyContinue | Stop-Process -Force; \
+        Start-Sleep -Seconds 2"
 
     rm "$syncGatewayMsi"
 

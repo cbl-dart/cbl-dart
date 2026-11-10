@@ -67,8 +67,14 @@ function startCouchbaseServices() {
         ./packages/cbl_e2e_tests/couchbase-services.sh waitForSyncGateway
         ;;
     MINGW64* | MSYS* | CYGWIN*)
-        ./packages/cbl_e2e_tests/couchbase-services.sh startSyncGatewayWindows &>/dev/null &
-        ./packages/cbl_e2e_tests/couchbase-services.sh waitForSyncGateway
+        local syncGatewayLogFile="${RUNNER_TEMP:-/tmp}/sync-gateway-windows.log"
+        ./packages/cbl_e2e_tests/couchbase-services.sh startSyncGatewayWindows &>"$syncGatewayLogFile" &
+        if ! ./packages/cbl_e2e_tests/couchbase-services.sh waitForSyncGateway; then
+            echo "::group::Sync Gateway output"
+            tail -n 200 "$syncGatewayLogFile" || true
+            echo "::endgroup::"
+            exit 1
+        fi
         ;;
     *)
         ./packages/cbl_e2e_tests/couchbase-services.sh setupDocker
