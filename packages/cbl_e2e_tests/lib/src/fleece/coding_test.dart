@@ -190,6 +190,11 @@ void main() {
         final data = fleeceEncode([maxUint64, BigInt.one, minInt64]);
 
         expect(decoder.convert(data), [maxUint64, 1, minInt64.toInt()]);
+        expect(RecursiveFleeceDecoder().convert(data), [
+          maxUint64,
+          1,
+          minInt64.toInt(),
+        ]);
         expect(decoder.convert(fleeceEncodeJson('[$maxUint64, $maxInt64]')), [
           maxUint64,
           maxInt64,

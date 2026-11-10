@@ -133,6 +133,11 @@ void main() {
       final result = (await (await query.execute()).allResults()).single;
       expect(result.value('max'), maxUint64);
       expect(result.bigInteger(0), maxUint64);
+      expect(result.bigInteger('max'), maxUint64);
+
+      final mutableDoc = MutableDocument({})
+        ..setBigInteger(maxUint64, key: 'a');
+      expect(mutableDoc.bigInteger('a'), maxUint64);
     });
 
     test('toJson', () async {
