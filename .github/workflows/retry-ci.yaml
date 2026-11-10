@@ -1,0 +1,43 @@
+name: Retry CI
+
+# Re-runs the failed and cancelled jobs of a failed CI run once, to absorb
+# infrastructure flakes such as macOS runners that are never acquired or hung
+# package downloads. A real failure fails again in the second attempt.
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+
+permissions:
+  actions: write
+
+jobs:
+  rerun-failed-jobs:
+    name: Re-run failed jobs
+    if: >-
+      github.event.workflow_run.conclusion == 'failure' &&
+      github.event.workflow_run.run_attempt == 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Re-run failed jobs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          BRANCH: ${{ github.event.workflow_run.head_branch }}
+          EVENT: ${{ github.event.workflow_run.event }}
+          HEAD_REPO: ${{ github.event.workflow_run.head_repository.full_name }}
+        # A re-run joins the CI concurrency group of its ref and would cancel a
+        # newer run for the same ref, so only retry the latest run. Runs of
+        # the same ref share the branch, event and head repository.
+        run: |
+          latest=$(gh api -X GET "repos/$GH_REPO/actions/workflows/ci.yaml/runs" \
+            -f branch="$BRANCH" -f event="$EVENT" -F per_page=20 \
+            --jq "[.workflow_runs[] | select(.head_repository.full_name == \"$HEAD_REPO\")][0].id")
+          if [ "$latest" != "$RUN_ID" ]; then
+            echo "Skipping: run $latest is newer than $RUN_ID."
+            exit 0
+          fi
+          gh run rerun "$RUN_ID" --failed
