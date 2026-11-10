@@ -1,8 +1,6 @@
 name: RunsOn v3 smoke
 
 on:
-  push:
-    branches: [codex/runs-on-v3-canary]
   workflow_dispatch:
 
 permissions:
@@ -20,7 +18,7 @@ jobs:
       fail-fast: false
       matrix:
         runner: [ubuntu22-2cpu, ubuntu22-4cpu]
-    runs-on: runs-on=${{ github.run_id }}/runner=${{ matrix.runner }}/env=migration-v3
+    runs-on: runs-on=${{ github.run_id }}/runner=${{ matrix.runner }}/env=production
     steps:
       - uses: runs-on/action@v2
       - uses: actions/checkout@v6

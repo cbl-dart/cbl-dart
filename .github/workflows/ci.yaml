@@ -21,7 +21,7 @@ jobs:
   formatting-dart:
     name: Formatting - Dart
     timeout-minutes: 10
-    runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu/env=migration-v3
+    runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu/env=production
     steps:
       - uses: runs-on/action@v2
       - name: Checkout repository
@@ -53,7 +53,7 @@ jobs:
   formatting-clang:
     name: Formatting - Clang
     timeout-minutes: 10
-    runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu/env=migration-v3
+    runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu/env=production
     steps:
       - uses: runs-on/action@v2
       - name: Checkout repository
@@ -68,7 +68,7 @@ jobs:
   analyze-dart:
     name: Analyze Dart code
     timeout-minutes: 10
-    runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu/env=migration-v3
+    runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu/env=production
     steps:
       - uses: runs-on/action@v2
       - name: Checkout repository
@@ -104,7 +104,7 @@ jobs:
             pub-command: downgrade
           - name: highest
             pub-command: upgrade
-    runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu/env=migration-v3
+    runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu/env=production
     steps:
       - uses: runs-on/action@v2
       - name: Checkout repository
@@ -137,7 +137,7 @@ jobs:
       matrix:
         sdk: [3.11.0, stable]
         dependencies: [legacy, hooks2, code2, latest]
-    runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu/env=migration-v3
+    runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu/env=production
     steps:
       - uses: runs-on/action@v2
       - uses: actions/checkout@v6
@@ -154,7 +154,7 @@ jobs:
       fail-fast: false
       matrix:
         package: [cbl, cbl_sentry, cbl_generator]
-    runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu/env=migration-v3
+    runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu/env=production
     steps:
       - uses: runs-on/action@v2
       - name: Checkout repository
@@ -205,7 +205,7 @@ jobs:
       TEST_PACKAGE: ${{ matrix.package }}
     runs-on: >-
       ${{ fromJSON(format('{{
-        "Ubuntu":"runs-on={0}/runner=ubuntu22-2cpu/env=migration-v3",
+        "Ubuntu":"runs-on={0}/runner=ubuntu22-2cpu/env=production",
         "macOS":"macos-15",
         "Windows":"windows-2025"
       }}', github.run_id))[matrix.os] }}
@@ -314,7 +314,7 @@ jobs:
         "iOS":"warp-macos-15-arm64-6x",
         "macOS":"macos-15",
         "Android":"blacksmith-4vcpu-ubuntu-2204",
-        "Ubuntu":"runs-on={0}/runner=ubuntu22-4cpu/env=migration-v3",
+        "Ubuntu":"runs-on={0}/runner=ubuntu22-4cpu/env=production",
         "Windows":"windows-2025"
       }}', github.run_id))[matrix.os] }}
     env:
@@ -478,7 +478,7 @@ jobs:
           (needs.test-dart-unit.result == 'success' && needs.test-e2e.result == 'success')
         )
       }}
-    runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu/env=migration-v3
+    runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu/env=production
     env:
       CODECOV_BRANCH: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository && github.event.pull_request.head.label || github.head_ref || github.ref_name }}
     steps:
