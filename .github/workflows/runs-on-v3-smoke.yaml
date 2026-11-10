@@ -1,55 +1,64 @@
-name: RunsOn v3 smoke
+name: Isolated Docker pull cache benchmark
 
 on:
   workflow_dispatch:
+    inputs:
+      backend:
+        type: choice
+        options: [direct, ecr]
+        default: direct
+        required: true
+      sample:
+        description: Benchmark sample label
+        type: string
+        default: direct-1
+        required: true
+      ecr_prefix:
+        description: ECR pull-through prefix (without registry hostname)
+        type: string
+        default: runson-bench-docker-hub
+        required: true
 
 permissions:
   contents: read
 
 concurrency:
-  group: runs-on-v3-smoke-${{ github.ref }}
-  cancel-in-progress: true
+  group: ecr-bench-${{ github.ref }}-${{ inputs.backend }}-${{ inputs.sample }}
+  cancel-in-progress: false
 
 jobs:
-  smoke:
-    name: Native round trip and cache - ${{ matrix.runner }}
-    timeout-minutes: 20
+  pull:
+    name: ${{ inputs.backend }} / ${{ inputs.sample }} / ${{ matrix.label }}
+    timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
-        runner: [ubuntu22-2cpu, ubuntu22-4cpu]
-    runs-on: runs-on=${{ github.run_id }}/runner=${{ matrix.runner }}/env=production
+        include:
+          - label: couchbase-server
+            image: couchbase/server:enterprise-7.6.9
+          - label: sync-gateway
+            image: couchbase/sync-gateway:4.0.3-community
+    runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu/env=production
     steps:
       - uses: runs-on/action@v2
       - uses: actions/checkout@v6
-      - uses: dart-lang/setup-dart@v1
-        with:
-          sdk: stable
-      - name: Verify workspace and host
-        shell: bash
-        run: |
-          test "$RUNNER_OS" = Linux
-          test "$RUNNER_ARCH" = X64
-          printf 'Workspace: %s\n' "$GITHUB_WORKSPACE"
-          df -h .
-      - name: Restore smoke cache
-        id: cache
-        uses: actions/cache@v5
-        with:
-          path: .migration-cache
-          key: runs-on-v3-smoke-${{ matrix.runner }}-${{ hashFiles('pubspec.lock') }}
-      - name: Verify or initialize cache
-        shell: bash
+      - name: Authenticate ECR
+        if: inputs.backend == 'ecr'
         env:
-          CACHE_HIT: ${{ steps.cache.outputs.cache-hit }}
-        run: |
-          mkdir -p .migration-cache
-          if [[ "$CACHE_HIT" == true ]]; then
-            test "$(cat .migration-cache/probe)" = runs-on-v3
-          else
-            printf 'runs-on-v3\n' > .migration-cache/probe
-          fi
-          printf 'Cache hit: %s\n' "$CACHE_HIT"
-      - name: Build native assets and exercise database
-        shell: bash
-        run: bash tools/test-hook-compatibility.sh latest
+          ECR_REGISTRY: 020676528030.dkr.ecr.eu-central-1.amazonaws.com
+        run: aws ecr get-login-password --region eu-central-1 | docker login --username AWS --password-stdin "$ECR_REGISTRY"
+      - name: Measure fresh-daemon image pull
+        env:
+          BENCH_BACKEND: ${{ inputs.backend }}
+          BENCH_SAMPLE: ${{ inputs.sample }}
+          BENCH_LABEL: ${{ matrix.label }}
+          BENCH_IMAGE: ${{ matrix.image }}
+          BENCH_ECR_PREFIX: ${{ inputs.ecr_prefix }}
+        run: python3 .github/benchmarks/ecr/pull.py
+      - name: Upload timings and pull log
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: ecr-benchmark-${{ inputs.backend }}-${{ inputs.sample }}-${{ matrix.label }}
+          path: .benchmark-ecr
+          retention-days: 3
