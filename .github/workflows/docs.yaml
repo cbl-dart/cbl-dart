@@ -15,7 +15,7 @@ on:
 
 jobs:
   docs:
-    runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu/env=production
+    runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu/env=migration-v3
     steps:
       - uses: runs-on/action@v2
       - name: Checkout repository
