@@ -4,7 +4,7 @@ on:
     inputs:
       phase:
         type: choice
-        options: [both, cold, warm]
+        options: [both, cold, warm, dart]
         default: both
       epoch:
         default: native-20261110-a
@@ -13,7 +13,7 @@ permissions:
   contents: read
 jobs:
   cold:
-    if: inputs.phase != 'warm'
+    if: inputs.phase == 'cold' || inputs.phase == 'both'
     strategy:
       fail-fast: false
       max-parallel: 2
@@ -97,3 +97,106 @@ jobs:
         with:
           name: native-sdk-warm-${{ matrix.target }}-${{ matrix.mode }}
           path: benchmark-result.json
+  dart-cold:
+    if: inputs.phase == 'dart'
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [linux-x64, android-x64]
+    timeout-minutes: 10
+    runs-on: runs-on=${{ github.run_id }}/family=c7i.large/image=ubuntu22-full-x64/env=production/extras=s3-cache/volume=40gb:gp3:400mbps:3000iops
+    env:
+      BENCH_TARGET: ${{ matrix.target }}
+      BENCH_PHASE: cold
+      BENCH_EPOCH: ${{ inputs.epoch }}
+    steps:
+      - uses: runs-on/action@v2
+      - uses: actions/checkout@v6
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - name: Prepare original downloader fixture
+        id: manifest
+        run: python3 .bench/native-sdk/prepare_dart_probe.py
+      - name: Resolve exact decoder dependencies
+        run: |
+          cd "$FIXTURE"
+          dart pub get
+          dart --version
+          dart pub deps --style=compact
+          sha256sum "$GITHUB_WORKSPACE/packages/cbl/src/install/download.dart"
+      - name: Restore immutable SDK cache
+        id: cache
+        uses: actions/cache/restore@v5
+        with:
+          path: ${{ steps.manifest.outputs.path }}
+          key: ${{ steps.manifest.outputs.key }}
+      - name: Run original production downloader
+        env:
+          CACHE_HIT: ${{ steps.cache.outputs.cache-hit }}
+        run: |
+          cd "$FIXTURE"
+          dart run main.dart
+      - name: Save immutable SDK cache
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v5
+        with:
+          path: ${{ steps.manifest.outputs.path }}
+          key: ${{ steps.manifest.outputs.key }}
+      - name: Upload measurements
+        uses: actions/upload-artifact@v7
+        with:
+          name: real-dart-loader-cold-${{ matrix.target }}
+          path: dart-loader-result.json
+  dart-warm:
+    needs: dart-cold
+    if: inputs.phase == 'dart'
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [linux-x64, android-x64]
+    timeout-minutes: 10
+    runs-on: runs-on=${{ github.run_id }}/family=c7i.large/image=ubuntu22-full-x64/env=production/extras=s3-cache/volume=40gb:gp3:400mbps:3000iops
+    env:
+      BENCH_TARGET: ${{ matrix.target }}
+      BENCH_PHASE: warm
+      BENCH_EPOCH: ${{ inputs.epoch }}
+    steps:
+      - uses: runs-on/action@v2
+      - uses: actions/checkout@v6
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - name: Prepare original downloader fixture
+        id: manifest
+        run: python3 .bench/native-sdk/prepare_dart_probe.py
+      - name: Resolve exact decoder dependencies
+        run: |
+          cd "$FIXTURE"
+          dart pub get
+          dart --version
+          dart pub deps --style=compact
+          sha256sum "$GITHUB_WORKSPACE/packages/cbl/src/install/download.dart"
+      - name: Restore immutable SDK cache
+        id: cache
+        uses: actions/cache/restore@v5
+        with:
+          path: ${{ steps.manifest.outputs.path }}
+          key: ${{ steps.manifest.outputs.key }}
+      - name: Run original production downloader
+        env:
+          CACHE_HIT: ${{ steps.cache.outputs.cache-hit }}
+        run: |
+          cd "$FIXTURE"
+          dart run main.dart
+      - name: Save immutable SDK cache
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v5
+        with:
+          path: ${{ steps.manifest.outputs.path }}
+          key: ${{ steps.manifest.outputs.key }}
+      - name: Upload measurements
+        uses: actions/upload-artifact@v7
+        with:
+          name: real-dart-loader-warm-${{ matrix.target }}
+          path: dart-loader-result.json
