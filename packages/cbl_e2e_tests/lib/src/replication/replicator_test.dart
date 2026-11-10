@@ -17,7 +17,7 @@ import '../utils/utils.dart';
 void main() {
   setupTestBinding();
 
-  group('Replicator', skip: skipReplicationTests, () {
+  group('Replicator', () {
     setupTestDocument();
 
     setUp(flushDatabaseByAdmin);

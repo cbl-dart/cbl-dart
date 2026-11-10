@@ -30,7 +30,6 @@ dev_dependencies:
   path: ^1.9.1
 
 dependency_overrides:
-  meta: ^1.18.0
   # `dart test -p vm-asan` is first supported by package:test 1.31.0.
   # Keep the entire workspace on that test runner so the standalone sanitizer
   # CI leg can resolve compatible dependencies without carving Flutter out of

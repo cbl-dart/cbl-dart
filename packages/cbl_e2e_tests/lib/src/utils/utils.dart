@@ -3,11 +3,6 @@ import 'dart:io';
 
 import 'package:crypto/crypto.dart' as crypto;
 
-/// Returns a skip reason when replication tests should be skipped on the
-/// current platform, or `null` if they should run.
-String? get skipReplicationTests =>
-    Platform.isAndroid ? 'Version vector clock issues on Android' : null;
-
 // TODO: Fix peer-to-peer tests on macOS + Flutter + CI and iOS.
 // On iOS, the listener URLs use the machine's hostname which can't be resolved
 // from the iOS simulator.

@@ -53,17 +53,13 @@ final class FfiReplicator
     // ignore: parameter_assignments
     config = ReplicatorConfiguration.from(config);
 
-    // TODO(blaugold): Use record destructuring once issue in Dart is fixed
-    // https://github.com/dart-lang/sdk/issues/54414
-    final replicatorCollections =
+    final (database, collections) =
         resolveReplicatorCollections<
           SyncDatabase,
           SyncCollection,
           FfiDatabase,
           FfiCollection
         >(config);
-    final database = replicatorCollections.$1;
-    final collections = replicatorCollections.$2;
 
     var target = config.target;
     if (target is DatabaseEndpoint) {
