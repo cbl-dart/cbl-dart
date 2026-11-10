@@ -57,13 +57,6 @@ abstract final class Parameters {
   /// {@macro cbl.Parameters.parameterDefinition}
   void setNumber(num? value, {required String name});
 
-  /// Set a [BigInt] to the query parameter referenced by the given [name].
-  ///
-  /// {@macro cbl.bigIntegerSetter}
-  ///
-  /// {@macro cbl.Parameters.parameterDefinition}
-  void setBigInteger(BigInt? value, {required String name});
-
   /// Set a [bool] to the query parameter referenced by the given [name].
   ///
   /// {@macro cbl.Parameters.parameterDefinition}
@@ -133,10 +126,6 @@ final class ParametersImpl implements Parameters, FleeceEncodable {
 
   @override
   void setNumber(num? value, {required String name}) =>
-      setValue(value, name: name);
-
-  @override
-  void setBigInteger(BigInt? value, {required String name}) =>
       setValue(value, name: name);
 
   @override

@@ -60,6 +60,9 @@ abstract interface class DictionaryInterface implements DictionaryFragment {
   /// Use this getter for integers that might not fit into an [int], such as
   /// unsigned 64-bit integers. Other numbers are converted to a [BigInt],
   /// truncating floating point numbers.
+  ///
+  /// Queries can return integers >= 2^63, but cannot compare or filter by them,
+  /// because the query engine does not support them.
   /// {@endtemplate}
   ///
   /// {@macro cbl.DictionaryInterface.typedNullableGetter}
