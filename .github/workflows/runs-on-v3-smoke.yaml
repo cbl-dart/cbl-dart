@@ -38,7 +38,7 @@ jobs:
             image: couchbase/server:enterprise-7.6.9
           - label: sync-gateway
             image: couchbase/sync-gateway:4.0.3-community
-    runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu/env=production
+    runs-on: runs-on=${{ github.run_id }}/family=c7a.large/image=ubuntu22-full-x64/volume=40gb:gp3:400mbps:3000iops/extras=s3-cache/env=production
     steps:
       - uses: runs-on/action@v2
       - uses: actions/checkout@v6
@@ -61,4 +61,5 @@ jobs:
         with:
           name: ecr-benchmark-${{ inputs.backend }}-${{ inputs.sample }}-${{ matrix.label }}
           path: .benchmark-ecr
+          include-hidden-files: true
           retention-days: 3
