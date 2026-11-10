@@ -27,11 +27,15 @@ jobs:
           GH_REPO: ${{ github.repository }}
           RUN_ID: ${{ github.event.workflow_run.id }}
           BRANCH: ${{ github.event.workflow_run.head_branch }}
+          EVENT: ${{ github.event.workflow_run.event }}
+          HEAD_REPO: ${{ github.event.workflow_run.head_repository.full_name }}
         # A re-run joins the CI concurrency group of its ref and would cancel a
-        # newer run for the same ref, so only retry the latest run.
+        # newer run for the same ref, so only retry the latest run. Runs of
+        # the same ref share the branch, event and head repository.
         run: |
-          latest=$(gh run list --workflow ci.yaml --branch "$BRANCH" \
-            --limit 1 --json databaseId --jq '.[0].databaseId')
+          latest=$(gh api -X GET "repos/$GH_REPO/actions/workflows/ci.yaml/runs" \
+            -f branch="$BRANCH" -f event="$EVENT" -F per_page=20 \
+            --jq "[.workflow_runs[] | select(.head_repository.full_name == \"$HEAD_REPO\")][0].id")
           if [ "$latest" != "$RUN_ID" ]; then
             echo "Skipping: run $latest is newer than $RUN_ID."
             exit 0
