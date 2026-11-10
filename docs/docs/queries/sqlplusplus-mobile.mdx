@@ -1068,10 +1068,10 @@ boolean value rules.
 
 <Table id={5} title="Logical Operators">
 
-| Op    | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Example                                                |
-| ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
-| `AND` | Returns `TRUE` if the operand expressions evaluate to `TRUE`; otherwise `FALSE`.<br/><br/>If an operand is `MISSING` and the other is `TRUE` returns `MISSING`, if the other operand is `FALSE` it returns `FALSE`.<br/><br/>If an operand is `NULL` it returns `FALSE`.                                                                                                                                                                                          | `WHERE city = 'San Francisco' AND status = TRUE`       |
-| `OR`  | Returns `TRUE` if one of the operand expressions is evaluated to `TRUE`; otherwise returns `FALSE`<br/><br/>If an operand is `MISSING`, the operation will result in `MISSING` if the other operand is `FALSE` or `TRUE` if the other operand is `TRUE`.<br/><br/>If an operand is `NULL`, the operation will result in `FALSE` if the other operand is `FALSE` or `NULL`, `MISSING` if the other operand is `MISSING`, or `TRUE` if the other operand is `TRUE`. | `WHERE city = 'San Francisco' OR city = 'Santa Clara'` |
+| Op    | Description                                                                                     | Example                                                |
+| ----- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| `AND` | Returns `TRUE` if both operands are `TRUE`. See [Table 6](#table-6) for all combinations.       | `WHERE city = 'San Francisco' AND status = TRUE`       |
+| `OR`  | Returns `TRUE` if at least one operand is `TRUE`. See [Table 6](#table-6) for all combinations. | `WHERE city = 'San Francisco' OR city = 'Santa Clara'` |
 
 </Table>
 
