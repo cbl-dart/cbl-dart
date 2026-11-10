@@ -25,7 +25,7 @@ jobs:
     env:
       BENCH_TARGET: ${{ matrix.target }}
       BENCH_MODE: ${{ matrix.mode }}
-      BENCH_cold: cold
+      BENCH_PHASE: cold
       BENCH_EPOCH: ${{ inputs.epoch }}
     steps:
       - uses: runs-on/action@v2
@@ -68,7 +68,7 @@ jobs:
     env:
       BENCH_TARGET: ${{ matrix.target }}
       BENCH_MODE: ${{ matrix.mode }}
-      BENCH_warm: warm
+      BENCH_PHASE: warm
       BENCH_EPOCH: ${{ inputs.epoch }}
     steps:
       - uses: runs-on/action@v2
