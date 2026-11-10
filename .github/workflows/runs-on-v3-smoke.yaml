@@ -1,55 +1,99 @@
-name: RunsOn v3 smoke
-
+name: Native SDK cache benchmark
 on:
   workflow_dispatch:
-
+    inputs:
+      phase:
+        type: choice
+        options: [both, cold, warm]
+        default: both
+      epoch:
+        default: native-20261110-a
+        type: string
 permissions:
   contents: read
-
-concurrency:
-  group: runs-on-v3-smoke-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
-  smoke:
-    name: Native round trip and cache - ${{ matrix.runner }}
-    timeout-minutes: 20
+  cold:
+    if: inputs.phase != 'warm'
     strategy:
       fail-fast: false
+      max-parallel: 2
       matrix:
-        runner: [ubuntu22-2cpu, ubuntu22-4cpu]
-    runs-on: runs-on=${{ github.run_id }}/runner=${{ matrix.runner }}/env=production
+        target: [linux-x64, android-x64]
+        mode: [archive, tree]
+    timeout-minutes: 10
+    runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu/env=production/extras=s3-cache
+    env:
+      BENCH_TARGET: ${{ matrix.target }}
+      BENCH_MODE: ${{ matrix.mode }}
+      BENCH_cold: cold
+      BENCH_EPOCH: ${{ inputs.epoch }}
     steps:
       - uses: runs-on/action@v2
       - uses: actions/checkout@v6
-      - uses: dart-lang/setup-dart@v1
-        with:
-          sdk: stable
-      - name: Verify workspace and host
-        shell: bash
-        run: |
-          test "$RUNNER_OS" = Linux
-          test "$RUNNER_ARCH" = X64
-          printf 'Workspace: %s\n' "$GITHUB_WORKSPACE"
-          df -h .
-      - name: Restore smoke cache
+      - name: Prepare exact SDK manifest
+        id: manifest
+        run: python3 .bench/native-sdk/benchmark.py prepare
+      - name: Restore immutable SDK cache
         id: cache
-        uses: actions/cache@v5
+        uses: actions/cache/restore@v5
         with:
-          path: .migration-cache
-          key: runs-on-v3-smoke-${{ matrix.runner }}-${{ hashFiles('pubspec.lock') }}
-      - name: Verify or initialize cache
-        shell: bash
+          path: ${{ steps.manifest.outputs.path }}
+          key: ${{ steps.manifest.outputs.key }}
+      - name: Download, extract and verify SDKs
         env:
           CACHE_HIT: ${{ steps.cache.outputs.cache-hit }}
-        run: |
-          mkdir -p .migration-cache
-          if [[ "$CACHE_HIT" == true ]]; then
-            test "$(cat .migration-cache/probe)" = runs-on-v3
-          else
-            printf 'runs-on-v3\n' > .migration-cache/probe
-          fi
-          printf 'Cache hit: %s\n' "$CACHE_HIT"
-      - name: Build native assets and exercise database
-        shell: bash
-        run: bash tools/test-hook-compatibility.sh latest
+        run: python3 .bench/native-sdk/benchmark.py run
+      - name: Save immutable SDK cache
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v5
+        with:
+          path: ${{ steps.manifest.outputs.path }}
+          key: ${{ steps.manifest.outputs.key }}
+      - name: Upload measurements
+        uses: actions/upload-artifact@v7
+        with:
+          name: native-sdk-cold-${{ matrix.target }}-${{ matrix.mode }}
+          path: benchmark-result.json
+  warm:
+    needs: cold
+    if: always() && (inputs.phase == 'warm' || (inputs.phase == 'both' && needs.cold.result == 'success'))
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        target: [linux-x64, android-x64]
+        mode: [archive, tree]
+    timeout-minutes: 10
+    runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu/env=production/extras=s3-cache
+    env:
+      BENCH_TARGET: ${{ matrix.target }}
+      BENCH_MODE: ${{ matrix.mode }}
+      BENCH_warm: warm
+      BENCH_EPOCH: ${{ inputs.epoch }}
+    steps:
+      - uses: runs-on/action@v2
+      - uses: actions/checkout@v6
+      - name: Prepare exact SDK manifest
+        id: manifest
+        run: python3 .bench/native-sdk/benchmark.py prepare
+      - name: Restore immutable SDK cache
+        id: cache
+        uses: actions/cache/restore@v5
+        with:
+          path: ${{ steps.manifest.outputs.path }}
+          key: ${{ steps.manifest.outputs.key }}
+      - name: Download, extract and verify SDKs
+        env:
+          CACHE_HIT: ${{ steps.cache.outputs.cache-hit }}
+        run: python3 .bench/native-sdk/benchmark.py run
+      - name: Save immutable SDK cache
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v5
+        with:
+          path: ${{ steps.manifest.outputs.path }}
+          key: ${{ steps.manifest.outputs.key }}
+      - name: Upload measurements
+        uses: actions/upload-artifact@v7
+        with:
+          name: native-sdk-warm-${{ matrix.target }}-${{ matrix.mode }}
+          path: benchmark-result.json
