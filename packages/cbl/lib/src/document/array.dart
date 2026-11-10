@@ -315,7 +315,7 @@ abstract final class MutableArray implements Array, MutableArrayInterface {
   ///
   /// {@macro cbl.MutableArray.setJson}
   factory MutableArray.fromJson(String json) =>
-      MutableArray(decodeJson(json, kind: 'array'));
+      MutableArray(decodeJson<List<Object?>>(json, kind: 'array'));
 
   /// Replaces the elements of this array with those of the given JSON array.
   ///
@@ -573,7 +573,8 @@ final class MutableArrayImpl extends ArrayImpl implements MutableArray {
   }
 
   @override
-  void setJson(String json) => setData(decodeJson(json, kind: 'array'));
+  void setJson(String json) =>
+      setData(decodeJson<List<Object?>>(json, kind: 'array'));
 
   // === Remove ================================================================
 

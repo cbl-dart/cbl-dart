@@ -331,6 +331,7 @@ void main() {
           ],
         });
         expect(() => MutableDocument.fromJson('[]'), throwsFormatException);
+        expect(() => MutableDocument.fromJson('null'), throwsFormatException);
       });
 
       test('setJson', () {

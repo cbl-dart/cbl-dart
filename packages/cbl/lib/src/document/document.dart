@@ -78,7 +78,10 @@ abstract final class MutableDocument
   ///
   /// {@macro cbl.MutableDictionary.setJson}
   factory MutableDocument.fromJson(String json, {String? id}) =>
-      MutableDelegateDocument(decodeJson(json, kind: 'object'), id: id);
+      MutableDelegateDocument(
+        decodeJson<Map<String, Object?>>(json, kind: 'object'),
+        id: id,
+      );
 
   /// Replaces the properties of this document with those of the given JSON
   /// object.

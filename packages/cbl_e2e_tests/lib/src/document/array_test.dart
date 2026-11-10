@@ -359,6 +359,7 @@ void main() {
         ]);
         expect(() => MutableArray.fromJson('['), throwsFormatException);
         expect(() => MutableArray.fromJson('{}'), throwsFormatException);
+        expect(() => MutableArray.fromJson('null'), throwsFormatException);
       });
 
       test('setJson', () {

@@ -307,6 +307,7 @@ void main() {
         });
         expect(() => MutableDictionary.fromJson('{'), throwsFormatException);
         expect(() => MutableDictionary.fromJson('[]'), throwsFormatException);
+        expect(() => MutableDictionary.fromJson('null'), throwsFormatException);
       });
 
       test('setJson', () {

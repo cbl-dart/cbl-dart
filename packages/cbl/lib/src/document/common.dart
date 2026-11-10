@@ -18,7 +18,7 @@ import 'dictionary.dart';
 ///
 /// Throws a [FormatException] if [json] is not valid JSON or does not contain a
 /// JSON [kind].
-T decodeJson<T>(String json, {required String kind}) {
+T decodeJson<T extends Object>(String json, {required String kind}) {
   final value = jsonDecode(json);
   if (value is! T) {
     throw FormatException('Expected a JSON $kind.', json);

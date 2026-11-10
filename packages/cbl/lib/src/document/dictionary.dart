@@ -180,7 +180,7 @@ abstract final class MutableDictionary
   ///
   /// {@macro cbl.MutableDictionary.setJson}
   factory MutableDictionary.fromJson(String json) =>
-      MutableDictionary(decodeJson(json, kind: 'object'));
+      MutableDictionary(decodeJson<Map<String, Object?>>(json, kind: 'object'));
 
   /// Replaces the entries of this dictionary with those of the given JSON
   /// object.
@@ -371,7 +371,8 @@ final class MutableDictionaryImpl extends DictionaryImpl
   }
 
   @override
-  void setJson(String json) => setData(decodeJson(json, kind: 'object'));
+  void setJson(String json) =>
+      setData(decodeJson<Map<String, Object?>>(json, kind: 'object'));
 
   // === Remove ================================================================
 
