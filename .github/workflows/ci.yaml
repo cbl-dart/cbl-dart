@@ -54,10 +54,37 @@ jobs:
     name: Formatting - Clang
     timeout-minutes: 10
     runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu/env=production
+    env:
+      # Pin the cached image so a warm run uses the same formatter as a cold run.
+      CLANG_FORMAT_IMAGE: ghcr.io/jidicula/clang-format
+      CLANG_FORMAT_IMAGE_DIGEST: sha256:c420b3968afa3885a2a640b6385c202b8d11fb81fa6b336d2d2f70481cddecc2
+      CLANG_FORMAT_IMAGE_ID: sha256:7c499d9026d68f8a0ce9509628d6def07677abe7df77f4f0c06444c597dc7556
     steps:
       - uses: runs-on/action@v2
       - name: Checkout repository
         uses: actions/checkout@v6
+
+      - name: Cache Clang formatter image
+        id: clang-image-cache
+        uses: actions/cache@v5
+        with:
+          path: ${{ runner.temp }}/clang-format-image
+          key: clang-format-image-${{ runner.os }}-${{ runner.arch }}-${{ env.CLANG_FORMAT_IMAGE_DIGEST }}
+
+      - name: Load or download Clang formatter image
+        env:
+          IMAGE_CACHE_HIT: ${{ steps.clang-image-cache.outputs.cache-hit }}
+          CLANG_FORMAT_CACHE_DIR: ${{ runner.temp }}/clang-format-image
+        run: |
+          if [[ "$IMAGE_CACHE_HIT" == true ]]; then
+            docker load --input "$CLANG_FORMAT_CACHE_DIR/image.tar"
+          else
+            docker pull "$CLANG_FORMAT_IMAGE@$CLANG_FORMAT_IMAGE_DIGEST"
+            docker tag "$CLANG_FORMAT_IMAGE@$CLANG_FORMAT_IMAGE_DIGEST" "$CLANG_FORMAT_IMAGE:21"
+            mkdir -p "$CLANG_FORMAT_CACHE_DIR"
+            docker save --output "$CLANG_FORMAT_CACHE_DIR/image.tar" "$CLANG_FORMAT_IMAGE:21"
+          fi
+          test "$(docker image inspect --format '{{.Id}}' "$CLANG_FORMAT_IMAGE:21")" = "$CLANG_FORMAT_IMAGE_ID"
 
       - name: Check formatting
         uses: jidicula/clang-format-action@v4.17.0
@@ -314,7 +341,7 @@ jobs:
         "iOS":"warp-macos-15-arm64-6x",
         "macOS":"macos-15",
         "Android":"runs-on={0}/family=m8i.xlarge/image=ubuntu22-full-x64/extras=s3-cache/volume=80gb:gp3:400mbps:3000iops/nested-virt/env=production",
-        "Ubuntu":"runs-on={0}/runner=ubuntu22-4cpu/env=production",
+        "Ubuntu":"runs-on={0}/runner=ubuntu22-4cpu/env=production/extras=s3-cache+apt-cache",
         "Windows":"windows-2025"
       }}', github.run_id))[matrix.os] }}
     env:
@@ -367,18 +394,18 @@ jobs:
         with:
           cache-read-only: false
 
-      - name: Cache apt packages
-        if: matrix.os == 'Ubuntu' && matrix.embedder == 'flutter'
-        uses: actions/cache@v5
-        with:
-          path: /var/cache/apt/archives
-          key: apt-flutter-linux-desktop-${{ runner.os }}
-
       - name: Install Flutter Linux Desktop dependencies
         if: matrix.os == 'Ubuntu' && matrix.embedder == 'flutter'
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends clang cmake ninja-build pkg-config libgtk-3-dev lld llvm
+
+      - name: Report apt cache statistics
+        if: matrix.os == 'Ubuntu' && matrix.embedder == 'flutter'
+        run: |
+          if ! curl --fail --silent --show-error --max-time 5 http://127.0.0.1:6871/_runs-on/apt-cache/stats; then
+            echo "::warning::APT cache statistics are unavailable; package installation already succeeded."
+          fi
 
       - name: Setup Flutter
         uses: ./.github/actions/setup-flutter
