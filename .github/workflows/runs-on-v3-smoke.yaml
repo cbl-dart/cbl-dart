@@ -29,7 +29,7 @@ jobs:
       fail-fast: false
       matrix:
         backend: ${{ fromJSON(inputs.backend == 'all' && '["s3","sticky"]' || format('["{0}"]', inputs.backend)) }}
-    runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu/env=production/extras=s3-cache${{ matrix.backend == 'sticky' && format('/sticky=bench-flutter3479-20261110:20gb{0}', inputs.initialization == 'lazy' && ':lazy-init' || '') || '' }}
+    runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu/family=c7a.large/env=production/extras=s3-cache${{ matrix.backend == 'sticky' && format('/sticky=bench-flutter3479-20261110:20gb{0}', inputs.initialization == 'lazy' && ':lazy-init' || '') || '' }}
     env:
       BENCH_BACKEND: ${{ matrix.backend }}
       BENCH_PHASE: ${{ inputs.phase }}
