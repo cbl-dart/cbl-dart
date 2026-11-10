@@ -19,6 +19,11 @@ if [[ -z "${ANDROID_HOME}" ]]; then
     esac
 fi
 
+# Newer command-line tools store AVDs under $XDG_CONFIG_HOME when it is set,
+# while the emulator looks in $HOME/.android/avd. Pin one location for both.
+export ANDROID_AVD_HOME="${ANDROID_AVD_HOME:-$HOME/.android/avd}"
+mkdir -p "$ANDROID_AVD_HOME"
+
 # Use the newest installed command-line tools, preferring "latest".
 cmdlineToolsBin=""
 for dir in "$ANDROID_HOME"/cmdline-tools/*/bin; do
