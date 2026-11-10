@@ -616,11 +616,11 @@ void main() {
       addTearDown(replicatorB.close);
 
       await dbA.writeTestDocument('DB-A-1');
-      await replicatorA.replicateOneShot();
+      await replicatorA.replicateOneShotAndAwaitChangesFeed(testDocumentId!);
       await replicatorB.replicateOneShot();
       await dbA.writeTestDocument('DB-A-2');
       await dbB.writeTestDocument('DB-B-1');
-      await replicatorB.replicateOneShot();
+      await replicatorB.replicateOneShotAndAwaitChangesFeed(testDocumentId!);
       await replicatorA.replicateOneShot();
 
       expect(await dbA.getTestDocumentOrNull(), isTestDocument('DB-B-1'));
@@ -695,11 +695,11 @@ void main() {
       addTearDown(replicatorB.close);
 
       await dbA.writeTestDocument('DB-A-1', type: 'TestTypedDoc');
-      await replicatorA.replicateOneShot();
+      await replicatorA.replicateOneShotAndAwaitChangesFeed(testDocumentId!);
       await replicatorB.replicateOneShot();
       await dbA.writeTestDocument('DB-A-2', type: 'TestTypedDoc');
       await dbB.writeTestDocument('DB-B-1', type: 'TestTypedDoc');
-      await replicatorB.replicateOneShot();
+      await replicatorB.replicateOneShotAndAwaitChangesFeed(testDocumentId!);
       await replicatorA.replicateOneShot();
 
       expect(await dbA.getTestDocumentOrNull(), isTestDocument('DB-B-1'));
@@ -752,11 +752,11 @@ void main() {
         addTearDown(replicatorB.close);
 
         await dbA.writeTestDocument('DB-A-1', type: 'TestTypedDoc');
-        await replicatorA.replicateOneShot();
+        await replicatorA.replicateOneShotAndAwaitChangesFeed(testDocumentId!);
         await replicatorB.replicateOneShot();
         await dbA.writeTestDocument('DB-A-2', type: 'TestTypedDoc');
         await dbB.writeTestDocument('DB-B-1', type: 'TestTypedDoc');
-        await replicatorB.replicateOneShot();
+        await replicatorB.replicateOneShotAndAwaitChangesFeed(testDocumentId!);
         await replicatorA.replicateOneShot();
 
         expect(await dbA.getTestDocumentOrNull(), isTestDocument('DB-B-1'));
@@ -788,16 +788,17 @@ void main() {
 
         // Create doc in DB-A and sync to both databases.
         await dbA.writeTestDocument('DB-A-1');
-        await replicatorA.replicateOneShot();
+        await replicatorA.replicateOneShotAndAwaitChangesFeed(testDocumentId!);
         await replicatorB.replicateOneShot();
 
         // DB-A modifies first (earlier timestamp).
         await dbA.writeTestDocument('DB-A-2');
+        await _ensureLaterTimestamp();
         // DB-B modifies second (later timestamp).
         await dbB.writeTestDocument('DB-B-1');
 
         // DB-B pushes, then DB-A pulls => conflict.
-        await replicatorB.replicateOneShot();
+        await replicatorB.replicateOneShotAndAwaitChangesFeed(testDocumentId!);
         await replicatorA.replicateOneShot();
 
         // Remote (DB-B) has the later timestamp, so it should win.
@@ -821,16 +822,17 @@ void main() {
 
         // Create doc in DB-A and sync to both databases.
         await dbA.writeTestDocument('DB-A-1');
-        await replicatorA.replicateOneShot();
+        await replicatorA.replicateOneShotAndAwaitChangesFeed(testDocumentId!);
         await replicatorB.replicateOneShot();
 
         // DB-B modifies first (earlier timestamp).
         await dbB.writeTestDocument('DB-B-1');
+        await _ensureLaterTimestamp();
         // DB-A modifies second (later timestamp).
         await dbA.writeTestDocument('DB-A-2');
 
         // DB-B pushes, then DB-A pulls => conflict.
-        await replicatorB.replicateOneShot();
+        await replicatorB.replicateOneShotAndAwaitChangesFeed(testDocumentId!);
         await replicatorA.replicateOneShot();
 
         // Local (DB-A) has the later timestamp, so it should win.
@@ -851,7 +853,7 @@ void main() {
 
         // Create doc and sync to both databases.
         await dbA.writeTestDocument('DB-A-1');
-        await replicatorA.replicateOneShot();
+        await replicatorA.replicateOneShotAndAwaitChangesFeed(testDocumentId!);
         await replicatorB.replicateOneShot();
 
         // DB-A deletes the document locally.
@@ -860,7 +862,7 @@ void main() {
 
         // DB-B modifies the document and pushes.
         await dbB.writeTestDocument('DB-B-1');
-        await replicatorB.replicateOneShot();
+        await replicatorB.replicateOneShotAndAwaitChangesFeed(testDocumentId!);
 
         // DB-A pulls => conflict: local=deleted, remote=present => delete.
         await replicatorA.replicateOneShot();
@@ -882,12 +884,14 @@ void main() {
 
         // Create doc and sync to both databases.
         await dbA.writeTestDocument('DB-A-1');
-        await replicatorA.replicateOneShot();
+        await replicatorA.replicateOneShotAndAwaitChangesFeed(testDocumentId!);
         await replicatorB.replicateOneShot();
 
         // Delete the document on the server (simulating remote deletion).
         final docB = (await dbB.getTestDocumentOrNull())!;
+        final since = await syncGatewayLastSequence();
         await deleteDocumentByAdmin(docB);
+        await waitForSyncGatewayChange(testDocumentId!, since: since);
 
         // DB-A modifies the document locally.
         await dbA.writeTestDocument('DB-A-2');
@@ -916,11 +920,15 @@ void main() {
           addTearDown(replicatorB.close);
 
           await dbA.writeTestDocument('DB-A-1');
-          await replicatorA.replicateOneShot();
+          await replicatorA.replicateOneShotAndAwaitChangesFeed(
+            testDocumentId!,
+          );
           await replicatorB.replicateOneShot();
           await dbA.writeTestDocument('DB-A-2');
           await dbB.writeTestDocument('DB-B-1');
-          await replicatorB.replicateOneShot();
+          await replicatorB.replicateOneShotAndAwaitChangesFeed(
+            testDocumentId!,
+          );
           await replicatorA.replicateOneShot();
         },
         (error, _) {
@@ -1334,3 +1342,10 @@ final testAdapter = TypedDataRegistry(
     ),
   ],
 );
+
+/// Waits long enough that the next write gets a strictly later revision
+/// timestamp than the previous one, even on platforms with a coarse clock.
+///
+/// Tests of the default conflict resolver depend on which side wrote last.
+Future<void> _ensureLaterTimestamp() =>
+    Future<void>.delayed(const Duration(milliseconds: 50));

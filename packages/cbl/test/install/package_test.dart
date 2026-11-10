@@ -1,3 +1,8 @@
+// These tests download native library packages, which can take longer than the
+// default timeout on slow CI runners.
+@Timeout(Duration(minutes: 5))
+library;
+
 import 'dart:io';
 
 import 'package:cbl/src/install/package.dart';
