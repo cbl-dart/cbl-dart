@@ -67,44 +67,6 @@ more about the differences between the Community and Enterprise editions, see
 
 :::
 
-## Licenses
-
-The `api|cbl|pkg:` package itself is licensed under Apache 2.0. The native
-Couchbase Lite libraries that it bundles into your app are licensed separately:
-
-| Edition    | License of the bundled libraries                                     |
-| ---------- | -------------------------------------------------------------------- |
-| Community  | Couchbase Community Edition License Agreement                        |
-| Enterprise | Couchbase License Agreement                                          |
-| Both       | Third-party licenses of the components that Couchbase Lite C bundles |
-
-Flutter's license page only lists the licenses of Dart packages, so it does not
-show these licenses on its own. The texts ship as `LICENSE.txt` (edition
-license) and `notices.txt` (third-party licenses) in every Couchbase Lite C
-release archive, for example
-`https://packages.couchbase.com/releases/couchbase-lite-c/4.1.2/couchbase-lite-c-community-4.1.2-macos.zip`.
-Use the edition you configured and the release that matches your `cbl` version;
-the [`cbl` changelog] names it.
-
-To show them in a Flutter app, add both files as assets and register them at
-startup:
-
-```dart
-import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
-
-void registerCouchbaseLiteLicenses() {
-  LicenseRegistry.addLicense(() async* {
-    for (final file in ['LICENSE.txt', 'notices.txt']) {
-      yield LicenseEntryWithLineBreaks(
-        ['Couchbase Lite'],
-        await rootBundle.loadString('assets/licenses/couchbase-lite/$file'),
-      );
-    }
-  });
-}
-```
-
 ## Use Couchbase Lite
 
 ```dart
@@ -190,6 +152,39 @@ Future<void> run() async {
 
   // Close the database.
   await database.close();
+}
+```
+
+## Licenses
+
+The `api|cbl|pkg:` package itself is licensed under Apache 2.0. The prebuilt
+native Couchbase Lite libraries that it bundles into your app are licensed under
+the Couchbase Community Edition License Agreement or the Couchbase License
+Agreement, depending on the edition, and include third-party components with
+their own licenses.
+
+Flutter's license page doesn't include these licenses automatically. Their texts
+ship as `LICENSE.txt` (edition license) and `notices.txt` (third-party licenses)
+in each Couchbase Lite C release archive under
+`https://packages.couchbase.com/releases/couchbase-lite-c/<version>/`. The
+[`cbl` changelog] names the version that your `cbl` version bundles.
+
+To show them in a Flutter app, add both files as assets and register them before
+`runApp`:
+
+```dart
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
+
+void registerCouchbaseLiteLicenses() {
+  LicenseRegistry.addLicense(() async* {
+    for (final file in ['LICENSE.txt', 'notices.txt']) {
+      yield LicenseEntryWithLineBreaks(
+        ['Couchbase Lite'],
+        await rootBundle.loadString('assets/licenses/couchbase-lite/$file'),
+      );
+    }
+  });
 }
 ```
 
