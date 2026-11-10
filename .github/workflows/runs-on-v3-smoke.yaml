@@ -12,24 +12,30 @@ on:
         required: true
         default: all
         options: [all, s3, sticky]
+      initialization:
+        type: choice
+        required: true
+        default: provisioned
+        options: [provisioned, lazy]
 
 permissions:
   contents: read
 
 jobs:
   benchmark:
-    name: ${{ matrix.backend }} native toolchain - ${{ inputs.phase }}
+    name: ${{ matrix.backend }} native toolchain - ${{ inputs.phase }} - ${{ inputs.initialization }}
     timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
         backend: ${{ fromJSON(inputs.backend == 'all' && '["s3","sticky"]' || format('["{0}"]', inputs.backend)) }}
-    runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu/env=production/extras=s3-cache${{ matrix.backend == 'sticky' && '/sticky=bench-native-20261110-v2:20gb' || '' }}
+    runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu/family=c7i-flex.large/env=production/extras=s3-cache${{ matrix.backend == 'sticky' && format('/sticky=bench-native-20261110-v2:20gb{0}', inputs.initialization == 'lazy' && ':lazy-init' || '') || '' }}
     env:
       ANDROID_HOME: /home/runner/.android/sdk
       ANDROID_SDK_ROOT: /home/runner/.android/sdk
       BENCH_BACKEND: ${{ matrix.backend }}
       BENCH_PHASE: ${{ inputs.phase }}
+      BENCH_INITIALIZATION: ${{ inputs.initialization }}
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-java@v5

@@ -45,6 +45,7 @@ for path in (ndk, cmake):
 result = {
     "backend": os.environ["BENCH_BACKEND"],
     "phase": os.environ["BENCH_PHASE"],
+    "initialization": os.environ.get("BENCH_INITIALIZATION", "provisioned"),
     "cache_hit": os.environ.get("CACHE_HIT", ""),
     "install_ms": install_ms,
     "probe_ms": probe_ms,
