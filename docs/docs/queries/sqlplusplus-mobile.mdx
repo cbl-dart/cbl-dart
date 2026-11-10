@@ -970,13 +970,13 @@ WHERE (value1 = value2)
 
 <Table id={2} title="Maths Operators">
 
-| Op  | Description    | Example               |
-| --- | -------------- | --------------------- |
-| `+` | Add            | `WHERE v1 + v2 = 10`  |
-| `-` | Subtract       | `WHERE v1 - v2 = 10`  |
-| `*` | Multiply       | `WHERE v1 \* v2 = 10` |
-| `/` | Divide - see 1 | `WHERE v1 / v2 = 10`  |
-| `%` | Modulus        | `WHERE v1 % v2 = 0`   |
+| Op  | Description    | Example              |
+| --- | -------------- | -------------------- |
+| `+` | Add            | `WHERE v1 + v2 = 10` |
+| `-` | Subtract       | `WHERE v1 - v2 = 10` |
+| `*` | Multiply       | `WHERE v1 * v2 = 10` |
+| `/` | Divide - see 1 | `WHERE v1 / v2 = 10` |
+| `%` | Modulus        | `WHERE v1 % v2 = 0`  |
 
 1. If both operands are integers, integer division is used, but if one is a
    floating number, then float division is used. This differs from SQL++ for
@@ -994,24 +994,24 @@ specify the condition on which to match documents.
 
 <Table id={3} title="Comparison Operators">
 
-| Op                | Description                                                                                                                                                              | Example                                                                                                                                                                                                                                              |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `=` or `==`       | Equals                                                                                                                                                                   | `WHERE v1 = v2<br/> WHERE v1 == v2`                                                                                                                                                                                                                  |
-| `!=` or &#60&#62  | Not Equal to                                                                                                                                                             | `WHERE v1 != v2<br/> WHERE v1 &#60&#62 v2`                                                                                                                                                                                                           |
-| `>`               | Greater than                                                                                                                                                             | `WHERE v1 > v2`                                                                                                                                                                                                                                      |
-| `>=`              | Greater than or equal to                                                                                                                                                 | `WHERE v1 >= v2`                                                                                                                                                                                                                                     |
-| `<`               | Less than                                                                                                                                                                | `WHERE v1 < v2`                                                                                                                                                                                                                                      |
-| `<=`              | Less than or equal to                                                                                                                                                    | `WHERE v1 <= v2`                                                                                                                                                                                                                                     |
-| `IN`              | Returns `TRUE` if the value is in the list or array of values specified by the right hand side expression; Otherwise returns `FALSE`.                                    | `WHERE 'James' IN contactsList`                                                                                                                                                                                                                      |
-| `LIKE`            | String wildcard pattern matching, comparison - see 2. Two wildchards are supported: <br/> • `%` Matches zero or more characters. <br/> • \_` Matches a single character. | `WHERE name LIKE 'a%'` <br/> `WHERE name LIKE '%a'` <br/> `WHERE name LIKE '%or%'` <br/> `WHERE name LIKE 'a%o%'` <br/> `WHERE name LIKE '%_r%'` <br/> `WHERE name LIKE '%a_%'` <br/> `WHERE name LIKE '%a__%'` <br/> `WHERE name LIKE 'aldo'` <br/> |
-| `MATCH`           | String matching using FTS                                                                                                                                                | `WHERE v1-index MATCH "value"`                                                                                                                                                                                                                       |
-| `BETWEEN`         | Logically equivalent to `v1 >= start AND v1 <= end`                                                                                                                      | `WHERE v1 BETWEEN 10 AND 100`                                                                                                                                                                                                                        |
-| `IS NULL` - see 3 | Equal to `null`                                                                                                                                                          | `WHERE v1 IS NULL`                                                                                                                                                                                                                                   |
-| `IS NOT NULL`     | Not equal to `null`                                                                                                                                                      | `WHERE v1 IS NOT NULL`                                                                                                                                                                                                                               |
-| `IS MISSING`      | Equal to MISSING                                                                                                                                                         | `WHERE v1 IS MISSING`                                                                                                                                                                                                                                |
-| `IS NOT MISSING`  | Not equal to MISSING                                                                                                                                                     | `WHERE v1 IS NOT MISSING`                                                                                                                                                                                                                            |
-| `IS VALUED`       | Logically equivalent to `IS NOT NULL AND MISSING`                                                                                                                        | `WHERE v1 IS VALUED`                                                                                                                                                                                                                                 |
-| `IS NOT VALUED`   | Logically equivalent to `IS NULL OR MISSING`                                                                                                                             | `WHERE v1 IS NOT VALUED`                                                                                                                                                                                                                             |
+| Op                | Description                                                                                                                                                             | Example                                                                                                                                                                                                                                        |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `=` or `==`       | Equals                                                                                                                                                                  | `WHERE v1 = v2` <br/> `WHERE v1 == v2`                                                                                                                                                                                                         |
+| `!=` or `<>`      | Not Equal to                                                                                                                                                            | `WHERE v1 != v2` <br/> `WHERE v1 <> v2`                                                                                                                                                                                                        |
+| `>`               | Greater than                                                                                                                                                            | `WHERE v1 > v2`                                                                                                                                                                                                                                |
+| `>=`              | Greater than or equal to                                                                                                                                                | `WHERE v1 >= v2`                                                                                                                                                                                                                               |
+| `<`               | Less than                                                                                                                                                               | `WHERE v1 < v2`                                                                                                                                                                                                                                |
+| `<=`              | Less than or equal to                                                                                                                                                   | `WHERE v1 <= v2`                                                                                                                                                                                                                               |
+| `IN`              | Returns `TRUE` if the value is in the list or array of values specified by the right hand side expression; Otherwise returns `FALSE`.                                   | `WHERE 'James' IN contactsList`                                                                                                                                                                                                                |
+| `LIKE`            | String wildcard pattern matching, comparison - see 2. Two wildcards are supported: <br/> • `%` Matches zero or more characters. <br/> • `_` Matches a single character. | `WHERE name LIKE 'a%'` <br/> `WHERE name LIKE '%a'` <br/> `WHERE name LIKE '%or%'` <br/> `WHERE name LIKE 'a%o%'` <br/> `WHERE name LIKE '%_r%'` <br/> `WHERE name LIKE '%a_%'` <br/> `WHERE name LIKE '%a__%'` <br/> `WHERE name LIKE 'aldo'` |
+| `MATCH`           | String matching using FTS                                                                                                                                               | `WHERE v1-index MATCH "value"`                                                                                                                                                                                                                 |
+| `BETWEEN`         | Logically equivalent to `v1 >= start AND v1 <= end`                                                                                                                     | `WHERE v1 BETWEEN 10 AND 100`                                                                                                                                                                                                                  |
+| `IS NULL` - see 3 | Equal to `null`                                                                                                                                                         | `WHERE v1 IS NULL`                                                                                                                                                                                                                             |
+| `IS NOT NULL`     | Not equal to `null`                                                                                                                                                     | `WHERE v1 IS NOT NULL`                                                                                                                                                                                                                         |
+| `IS MISSING`      | Equal to MISSING                                                                                                                                                        | `WHERE v1 IS MISSING`                                                                                                                                                                                                                          |
+| `IS NOT MISSING`  | Not equal to MISSING                                                                                                                                                    | `WHERE v1 IS NOT MISSING`                                                                                                                                                                                                                      |
+| `IS VALUED`       | Logically equivalent to `IS NOT NULL AND IS NOT MISSING`                                                                                                                | `WHERE v1 IS VALUED`                                                                                                                                                                                                                           |
+| `IS NOT VALUED`   | Logically equivalent to `IS NULL OR IS MISSING`                                                                                                                         | `WHERE v1 IS NOT VALUED`                                                                                                                                                                                                                       |
 
 2. Matching is case-insensitive for ASCII characters, case-sensitive for
    non-ASCII.
@@ -1068,10 +1068,10 @@ boolean value rules.
 
 <Table id={5} title="Logical Operators">
 
-| Op    | Description                                                                                                                                                                                                                                                                                                                                                                                              | Example                                                |
-| ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
-| `AND` | Returns `TRUE` if the operand expressions evaluate to `TRUE`; otherwise `FALSE`.<br/><br/>If an operand is `MISSING` and the other is `TRUE` returns `MISSING`, if the other operand is `FALSE` it returns `FALSE`.<br/><br/>If an operand is `NULL` and the other is `TRUE` returns `NULL`, if the other operand is `FALSE` it returns `FALSE`.                                                         | `WHERE city = 'San Francisco' AND status = TRUE`       |
-| `OR`  | Returns `TRUE` if one of the operand expressions is evaluated to `TRUE`; otherwise returns `FALSE`<br/><br/>If an operand is `MISSING`, the operation will result in `MISSING` if the other operand is `FALSE` or `TRUE` if the other operand is `TRUE`.<br/><br/>If an operand is `NULL`, the operation will result in `NULL` if the other operand is `FALSE` or `TRUE` if the other operand is `TRUE`. | `WHERE city = 'San Francisco' OR city = 'Santa Clara'` |
+| Op    | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Example                                                |
+| ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| `AND` | Returns `TRUE` if the operand expressions evaluate to `TRUE`; otherwise `FALSE`.<br/><br/>If an operand is `MISSING` and the other is `TRUE` returns `MISSING`, if the other operand is `FALSE` it returns `FALSE`.<br/><br/>If an operand is `NULL` it returns `FALSE`.                                                                                                                                                                                          | `WHERE city = 'San Francisco' AND status = TRUE`       |
+| `OR`  | Returns `TRUE` if one of the operand expressions is evaluated to `TRUE`; otherwise returns `FALSE`<br/><br/>If an operand is `MISSING`, the operation will result in `MISSING` if the other operand is `FALSE` or `TRUE` if the other operand is `TRUE`.<br/><br/>If an operand is `NULL`, the operation will result in `FALSE` if the other operand is `FALSE` or `NULL`, `MISSING` if the other operand is `MISSING`, or `TRUE` if the other operand is `TRUE`. | `WHERE city = 'San Francisco' OR city = 'Santa Clara'` |
 
 </Table>
 
@@ -1112,9 +1112,9 @@ A single string operator is provided. It enables string concatenation.
 
 <Table id={7} title="String Operators">
 
-| Op           | Description   | Example                                                    |
-| ------------ | ------------- | ---------------------------------------------------------- |
-| `&#124&#124` | Concatenating | `SELECT firstName &#124&#124 lastName AS fullName FROM db` |
+| Op     | Description   | Example                                              |
+| ------ | ------------- | ---------------------------------------------------- |
+| `\|\|` | Concatenating | `SELECT firstName \|\| lastName AS fullName FROM db` |
 
 </Table>
 
@@ -1146,7 +1146,7 @@ unaryOperator = ( + | - | NOT ) _ expression
 
 8. The `NOT` operator is often used in conjunction with operators such as `IN`,
    `LIKE`, `MATCH`, and `BETWEEN` operators.
-   - `NOT` operation on `NULL` value returns `NULL`.
+   - `NOT` operation on `NULL` value returns `TRUE`.
    - `NOT` operation on `MISSING` value returns `MISSING`.
 
 </Table>
@@ -1157,7 +1157,7 @@ unaryOperator = ( + | - | NOT ) _ expression
 | --------- | --------- |
 | `TRUE`    | `FALSE`   |
 | `FALSE`   | `TRUE`    |
-| `NULL`    | `FALSE`   |
+| `NULL`    | `TRUE`    |
 | `MISSING` | `MISSING` |
 
 </Table>
@@ -1275,8 +1275,6 @@ FROM user;
 ```
 
 </CodeExample>
-
-#### Examples
 
 <CodeExample id={49} title="Searched Case">
 
