@@ -341,7 +341,7 @@ jobs:
         "iOS":"warp-macos-15-arm64-6x",
         "macOS":"macos-15",
         "Android":"runs-on={0}/family=m8i.xlarge/image=ubuntu22-full-x64/extras=s3-cache/volume=80gb:gp3:400mbps:3000iops/nested-virt/env=production",
-        "Ubuntu":"runs-on={0}/runner=ubuntu22-4cpu/env=production",
+        "Ubuntu":"runs-on={0}/runner=ubuntu22-4cpu/env=production/extras=s3-cache+apt-cache",
         "Windows":"windows-2025"
       }}', github.run_id))[matrix.os] }}
     env:

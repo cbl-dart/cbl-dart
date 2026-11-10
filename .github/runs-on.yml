@@ -3,14 +3,14 @@ runners:
     cpu: 2
     family: [m7, c7, m8, c8]
     image: ubuntu22-full-x64
-    extras: s3-cache+apt-cache
+    extras: s3-cache
     volume: 40gb:gp3:400mbps:3000iops
 
   ubuntu22-4cpu:
     cpu: 4
     family: [m7, c7, m8, c8]
     image: ubuntu22-full-x64
-    extras: s3-cache+apt-cache
+    extras: s3-cache
     volume: 40gb:gp3:400mbps:3000iops
 
   windows22-2cpu:
