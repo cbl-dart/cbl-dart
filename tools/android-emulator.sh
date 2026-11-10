@@ -82,11 +82,11 @@ function waitForBootProperty() {
     local property="$1"
     local expected="$2"
     local timeoutSeconds="$3"
-    local elapsed=0
+    local deadline=$((SECONDS + timeoutSeconds))
 
     echo "Waiting for $property to become $expected..."
 
-    while [[ $elapsed -lt $timeoutSeconds ]]; do
+    while ((SECONDS < deadline)); do
         local value
         value="$(runWithTimeout 10s \
             "$ANDROID_HOME/platform-tools/adb" -s "$serialName" shell getprop "$property" \
@@ -98,7 +98,6 @@ function waitForBootProperty() {
         fi
 
         sleep 2
-        elapsed=$((elapsed + 2))
     done
 
     echo "Timed out waiting for $property to become $expected"
@@ -107,11 +106,11 @@ function waitForBootProperty() {
 
 function waitForPackageManager() {
     local timeoutSeconds="$1"
-    local elapsed=0
+    local deadline=$((SECONDS + timeoutSeconds))
 
     echo "Waiting for Android package manager..."
 
-    while [[ $elapsed -lt $timeoutSeconds ]]; do
+    while ((SECONDS < deadline)); do
         if runWithTimeout 10s \
             "$ANDROID_HOME/platform-tools/adb" -s "$serialName" shell cmd package list packages \
             >/dev/null 2>&1; then
@@ -120,7 +119,6 @@ function waitForPackageManager() {
         fi
 
         sleep 2
-        elapsed=$((elapsed + 2))
     done
 
     echo "Timed out waiting for Android package manager"
