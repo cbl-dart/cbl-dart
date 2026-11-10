@@ -128,7 +128,7 @@ for index, item in enumerate(FILES):
     if item['library'] == 'cblite':
         triple = 'x86_64-linux-gnu' if OS == 'linux' else 'x86_64-linux-android'
         library = package_dir / f'libcblite-{CBL}' / 'lib' / triple / 'libcblite.so'
-        assert (package_dir / f'libcblite-{CBL}' / 'include/cbl/CBL.h').is_file()
+        assert (package_dir / f'libcblite-{CBL}' / 'include/cbl/CouchbaseLite.h').is_file()
     else:
         library = package_dir / 'lib' / ('CouchbaseLiteVectorSearch.so' if OS == 'linux' else 'libCouchbaseLiteVectorSearch.so')
     elf = library.read_bytes()[:20]
