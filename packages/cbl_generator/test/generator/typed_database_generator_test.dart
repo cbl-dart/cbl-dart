@@ -143,6 +143,7 @@ ${TypedDatabaseBuilder.ignoreForFile}
 
 import 'package:cbl/cbl.dart';
 import 'package:cbl/src/typed_data_internal.dart';
+
 import '$_testLibFileName';
 
 $content''';

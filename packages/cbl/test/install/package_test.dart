@@ -31,42 +31,38 @@ void main() {
       await Future.wait(packageConfigs.map(loader.load));
     });
 
-    test(
-      'preserves versioned xcframework links from a fresh cache',
-      () async {
-        final cache = tempTestDirectory();
-        final package = await RemotePackageLoader(cacheDir: cache.path).load(
-          VectorSearchPackageConfig(
-            os: OS.iOS,
-            architectures: [Architecture.arm64, Architecture.x64],
-            release: '1.0.0',
-          ),
+    test('preserves versioned xcframework links from a fresh cache', () async {
+      final cache = tempTestDirectory();
+      final package = await RemotePackageLoader(cacheDir: cache.path).load(
+        VectorSearchPackageConfig(
+          os: OS.iOS,
+          architectures: [Architecture.arm64, Architecture.x64],
+          release: '1.0.0',
+        ),
+      );
+      for (final slice in [
+        'macos-arm64_x86_64',
+        'ios-arm64_x86_64-maccatalyst',
+      ]) {
+        final framework =
+            '${package.appleFrameworkDir}/$slice/'
+            'CouchbaseLiteVectorSearch.framework';
+        expect(Link('$framework/Versions/Current').targetSync(), 'A');
+        expect(
+          Link('$framework/CouchbaseLiteVectorSearch').targetSync(),
+          'Versions/Current/CouchbaseLiteVectorSearch',
         );
-        for (final slice in [
-          'macos-arm64_x86_64',
-          'ios-arm64_x86_64-maccatalyst',
-        ]) {
-          final framework =
-              '${package.appleFrameworkDir}/$slice/'
-              'CouchbaseLiteVectorSearch.framework';
-          expect(Link('$framework/Versions/Current').targetSync(), 'A');
-          expect(
-            Link('$framework/CouchbaseLiteVectorSearch').targetSync(),
-            'Versions/Current/CouchbaseLiteVectorSearch',
-          );
-          expect(
-            Link('$framework/Resources').targetSync(),
-            'Versions/Current/Resources',
-          );
-          expect(
-            File('$framework/CouchbaseLiteVectorSearch').lengthSync(),
-            greaterThan(0),
-          );
-          expect(File('$framework/Resources/Info.plist').existsSync(), isTrue);
-        }
-      },
-      skip: Platform.isWindows,
-    );
+        expect(
+          Link('$framework/Resources').targetSync(),
+          'Versions/Current/Resources',
+        );
+        expect(
+          File('$framework/CouchbaseLiteVectorSearch').lengthSync(),
+          greaterThan(0),
+        );
+        expect(File('$framework/Resources/Info.plist').existsSync(), isTrue);
+      }
+    }, skip: Platform.isWindows);
 
     test(
       'does not reuse legacy vector-search xcframework extractions',

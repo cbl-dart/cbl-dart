@@ -290,26 +290,18 @@ void main() {
 
   group('platform integration', () {
     group('macOS', () {
-      test(
-        'in a Flutter app, resolves to Application Support/<bundleId>',
-        () {
-          final result = resolveAppFilesDirectory();
+      test('in a Flutter app, resolves to Application Support/<bundleId>', () {
+        final result = resolveAppFilesDirectory();
 
-          expect(result, isNotNull);
-          expect(result, contains('/Library/Application Support'));
-        },
-        skip: isFlutterApp() ? null : 'Only in a Flutter app',
-      );
+        expect(result, isNotNull);
+        expect(result, contains('/Library/Application Support'));
+      }, skip: isFlutterApp() ? null : 'Only in a Flutter app');
 
-      test(
-        'outside a Flutter app, returns null',
-        () {
-          final result = resolveAppFilesDirectory();
+      test('outside a Flutter app, returns null', () {
+        final result = resolveAppFilesDirectory();
 
-          expect(result, isNull);
-        },
-        skip: !isFlutterApp() ? null : 'Only outside a Flutter app',
-      );
+        expect(result, isNull);
+      }, skip: !isFlutterApp() ? null : 'Only outside a Flutter app');
     }, skip: Platform.isMacOS ? null : 'Requires macOS');
 
     group('iOS', () {
@@ -339,47 +331,31 @@ void main() {
     }, skip: Platform.isAndroid ? null : 'Requires Android');
 
     group('Linux', () {
-      test(
-        'in a Flutter app, resolves to a non-null path',
-        () {
-          final result = resolveAppFilesDirectory();
+      test('in a Flutter app, resolves to a non-null path', () {
+        final result = resolveAppFilesDirectory();
 
-          expect(result, isNotNull);
-        },
-        skip: isFlutterApp() ? null : 'Only in a Flutter app',
-      );
+        expect(result, isNotNull);
+      }, skip: isFlutterApp() ? null : 'Only in a Flutter app');
 
-      test(
-        'outside a Flutter app, returns null',
-        () {
-          final result = resolveAppFilesDirectory();
+      test('outside a Flutter app, returns null', () {
+        final result = resolveAppFilesDirectory();
 
-          expect(result, isNull);
-        },
-        skip: !isFlutterApp() ? null : 'Only outside a Flutter app',
-      );
+        expect(result, isNull);
+      }, skip: !isFlutterApp() ? null : 'Only outside a Flutter app');
     }, skip: Platform.isLinux ? null : 'Requires Linux');
 
     group('Windows', () {
-      test(
-        'in a Flutter app, resolves to a non-null path',
-        () {
-          final result = resolveAppFilesDirectory();
+      test('in a Flutter app, resolves to a non-null path', () {
+        final result = resolveAppFilesDirectory();
 
-          expect(result, isNotNull);
-        },
-        skip: isFlutterApp() ? null : 'Only in a Flutter app',
-      );
+        expect(result, isNotNull);
+      }, skip: isFlutterApp() ? null : 'Only in a Flutter app');
 
-      test(
-        'outside a Flutter app, returns null',
-        () {
-          final result = resolveAppFilesDirectory();
+      test('outside a Flutter app, returns null', () {
+        final result = resolveAppFilesDirectory();
 
-          expect(result, isNull);
-        },
-        skip: !isFlutterApp() ? null : 'Only outside a Flutter app',
-      );
+        expect(result, isNull);
+      }, skip: !isFlutterApp() ? null : 'Only outside a Flutter app');
     }, skip: Platform.isWindows ? null : 'Requires Windows');
   });
 }

@@ -21,8 +21,8 @@ environment:
 resolution: workspace
 
 dependencies:
-  analyzer: ^10.0.0
-  build: ^4.0.4
+  analyzer: ">=10.0.0 <15.0.0"
+  build: ">=4.0.4 <6.0.0"
   cbl: ^4.0.0
   collection: ^1.15.0
   meta: ^1.7.0
