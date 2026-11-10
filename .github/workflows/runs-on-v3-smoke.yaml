@@ -1,55 +1,65 @@
-name: RunsOn v3 smoke
+name: Gradle cache benchmark
 
 on:
   workflow_dispatch:
+    inputs:
+      phase:
+        type: choice
+        options: [cold, warm]
+        default: cold
+      batch:
+        type: string
+        default: "20261110-g1"
+      modes:
+        type: string
+        default: '["default","local","remote","both"]'
 
 permissions:
   contents: read
 
 concurrency:
-  group: runs-on-v3-smoke-${{ github.ref }}
-  cancel-in-progress: true
+  group: gradle-bench-${{ github.run_id }}
+  cancel-in-progress: false
 
 jobs:
-  smoke:
-    name: Native round trip and cache - ${{ matrix.runner }}
-    timeout-minutes: 20
+  gradle:
+    name: Gradle cache - ${{ matrix.mode }}
+    timeout-minutes: 12
     strategy:
       fail-fast: false
       matrix:
-        runner: [ubuntu22-2cpu, ubuntu22-4cpu]
-    runs-on: runs-on=${{ github.run_id }}/runner=${{ matrix.runner }}/env=production
+        mode: ${{ fromJSON(inputs.modes) }}
+    runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu/env=production/extras=s3-cache
+    env:
+      BENCH_MODE: ${{ matrix.mode }}
+      BENCH_PHASE: ${{ inputs.phase }}
+      BENCH_BATCH: ${{ inputs.batch }}
     steps:
       - uses: runs-on/action@v2
+        with:
+          remote_cache: ${{ (matrix.mode == 'remote' || matrix.mode == 'both') && 'gradle' || '' }}
       - uses: actions/checkout@v6
-      - uses: dart-lang/setup-dart@v1
+      - uses: actions/setup-java@v5
         with:
-          sdk: stable
-      - name: Verify workspace and host
-        shell: bash
-        run: |
-          test "$RUNNER_OS" = Linux
-          test "$RUNNER_ARCH" = X64
-          printf 'Workspace: %s\n' "$GITHUB_WORKSPACE"
-          df -h .
-      - name: Restore smoke cache
-        id: cache
-        uses: actions/cache@v5
+          distribution: temurin
+          java-version: "17"
+      - uses: android-actions/setup-android@v3
         with:
-          path: .migration-cache
-          key: runs-on-v3-smoke-${{ matrix.runner }}-${{ hashFiles('pubspec.lock') }}
-      - name: Verify or initialize cache
-        shell: bash
-        env:
-          CACHE_HIT: ${{ steps.cache.outputs.cache-hit }}
-        run: |
-          mkdir -p .migration-cache
-          if [[ "$CACHE_HIT" == true ]]; then
-            test "$(cat .migration-cache/probe)" = runs-on-v3
-          else
-            printf 'runs-on-v3\n' > .migration-cache/probe
-          fi
-          printf 'Cache hit: %s\n' "$CACHE_HIT"
-      - name: Build native assets and exercise database
-        shell: bash
-        run: bash tools/test-hook-compatibility.sh latest
+          packages: platform-tools
+      - name: Install bounded Android compile tools
+        run: sdkmanager "platforms;android-36" "build-tools;35.0.0"
+      - name: Setup Gradle and restore file caches
+        id: gradle-setup
+        uses: gradle/actions/setup-gradle@v5
+        with:
+          gradle-version: "8.14"
+          cache-read-only: false
+          cache-write-only: ${{ inputs.phase == 'cold' }}
+          cache-exclude-patterns: ${{ matrix.mode == 'remote' && 'caches/build-cache-1/**' || '' }}
+      - name: Compile bounded Android fixture
+        run: bash tools/bench-gradle-fixture.sh
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: gradle-${{ matrix.mode }}-${{ inputs.phase }}
+          path: bench-results
