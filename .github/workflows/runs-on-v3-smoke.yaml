@@ -1,4 +1,4 @@
-name: RunsOn v3 smoke
+name: APT-only cache benchmark
 
 on:
   workflow_dispatch:
@@ -7,49 +7,73 @@ permissions:
   contents: read
 
 concurrency:
-  group: runs-on-v3-smoke-${{ github.ref }}
-  cancel-in-progress: true
+  group: bench-apt-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
-  smoke:
-    name: Native round trip and cache - ${{ matrix.runner }}
-    timeout-minutes: 20
+  baseline:
+    name: APT baseline - ${{ matrix.workload }}
+    timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
-        runner: [ubuntu22-2cpu, ubuntu22-4cpu]
-    runs-on: runs-on=${{ github.run_id }}/runner=${{ matrix.runner }}/env=production
+        workload: [cross, desktop]
+    runs-on: runs-on=${{ github.run_id }}/family=c7i.large/image=ubuntu22-full-x64/env=production/extras=s3-cache/volume=40gb:gp3:400mbps:3000iops
     steps:
       - uses: runs-on/action@v2
       - uses: actions/checkout@v6
-      - uses: dart-lang/setup-dart@v1
-        with:
-          sdk: stable
-      - name: Verify workspace and host
-        shell: bash
-        run: |
-          test "$RUNNER_OS" = Linux
-          test "$RUNNER_ARCH" = X64
-          printf 'Workspace: %s\n' "$GITHUB_WORKSPACE"
-          df -h .
-      - name: Restore smoke cache
-        id: cache
-        uses: actions/cache@v5
-        with:
-          path: .migration-cache
-          key: runs-on-v3-smoke-${{ matrix.runner }}-${{ hashFiles('pubspec.lock') }}
-      - name: Verify or initialize cache
-        shell: bash
+      - name: Benchmark apt workload
         env:
-          CACHE_HIT: ${{ steps.cache.outputs.cache-hit }}
-        run: |
-          mkdir -p .migration-cache
-          if [[ "$CACHE_HIT" == true ]]; then
-            test "$(cat .migration-cache/probe)" = runs-on-v3
-          else
-            printf 'runs-on-v3\n' > .migration-cache/probe
-          fi
-          printf 'Cache hit: %s\n' "$CACHE_HIT"
-      - name: Build native assets and exercise database
-        shell: bash
-        run: bash tools/test-hook-compatibility.sh latest
+          WORKLOAD: ${{ matrix.workload }}
+          MODE: baseline
+        run: python3 tools/benchmarks/apt.py
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: apt-baseline-${{ matrix.workload }}
+          path: benchmark-results
+
+  cached-first:
+    name: APT first cache observation - ${{ matrix.workload }}
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        workload: [cross, desktop]
+    runs-on: runs-on=${{ github.run_id }}/family=c7i.large/image=ubuntu22-full-x64/env=production/extras=s3-cache+apt-cache/volume=40gb:gp3:400mbps:3000iops
+    steps:
+      - uses: runs-on/action@v2
+      - uses: actions/checkout@v6
+      - name: Benchmark apt workload
+        env:
+          WORKLOAD: ${{ matrix.workload }}
+          MODE: cached-first
+        run: python3 tools/benchmarks/apt.py
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: apt-cached-first-${{ matrix.workload }}
+          path: benchmark-results
+
+  cached-warm:
+    name: APT warm cache - ${{ matrix.workload }}
+    needs: cached-first
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        workload: [cross, desktop]
+    runs-on: runs-on=${{ github.run_id }}/family=c7i.large/image=ubuntu22-full-x64/env=production/extras=s3-cache+apt-cache/volume=40gb:gp3:400mbps:3000iops
+    steps:
+      - uses: runs-on/action@v2
+      - uses: actions/checkout@v6
+      - name: Benchmark apt workload
+        env:
+          WORKLOAD: ${{ matrix.workload }}
+          MODE: cached-warm
+        run: python3 tools/benchmarks/apt.py
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: apt-cached-warm-${{ matrix.workload }}
+          path: benchmark-results
