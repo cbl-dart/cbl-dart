@@ -55,7 +55,8 @@ jobs:
           gradle-version: "8.14"
           cache-read-only: false
           cache-write-only: ${{ inputs.phase == 'cold' }}
-          cache-exclude-patterns: ${{ matrix.mode == 'remote' && 'caches/build-cache-1/**' || '' }}
+          gradle-home-cache-excludes: ${{ matrix.mode == 'remote' && 'caches/build-cache-1/**' || '' }}
+          gradle-home-cache-strict-match: true
       - name: Compile bounded Android fixture
         run: bash tools/bench-gradle-fixture.sh
       - uses: actions/upload-artifact@v7

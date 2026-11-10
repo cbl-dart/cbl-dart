@@ -9,7 +9,7 @@ python3 - <<'PY'
 import hashlib, os
 from pathlib import Path
 p=Path(os.environ['BENCH_FIXTURE'])
-seed=int(hashlib.sha256(os.environ['BENCH_BATCH'].encode()).hexdigest()[:7],16)
+seed=int(hashlib.sha256((os.environ['BENCH_BATCH']+os.environ['BENCH_MODE']).encode()).hexdigest()[:7],16)
 for i in range(200):
     (p/f'app/src/main/java/bench/cache/Value{i}.java').write_text(f'package bench.cache; public class Value{i} {{ public static int value(int x) {{ return x * {i+1} + {seed}; }} }}\n')
 PY
