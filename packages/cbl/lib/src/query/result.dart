@@ -70,6 +70,13 @@ abstract final class Result
   /// {@macro cbl.Result.typedNullableGetter}
   num? number(Object nameOrIndex);
 
+  /// Returns the column at the given [nameOrIndex] as a [BigInt].
+  ///
+  /// {@macro cbl.bigIntegerGetter}
+  ///
+  /// {@macro cbl.Result.typedNullableGetter}
+  BigInt? bigInteger(Object nameOrIndex);
+
   /// Returns the column at the given [nameOrIndex] as a [bool].
   ///
   /// {@macro cbl.Result.typedDefaultedGetter}
@@ -178,6 +185,15 @@ final class ResultImpl with IterableMixin<String> implements Result {
       return _array.number(nameOrIndex);
     }
     return _dictionary.number(nameOrIndex as String);
+  }
+
+  @override
+  BigInt? bigInteger(Object nameOrIndex) {
+    _checkNameOrIndex(nameOrIndex);
+    if (nameOrIndex is int) {
+      return _array.bigInteger(nameOrIndex);
+    }
+    return _dictionary.bigInteger(nameOrIndex as String);
   }
 
   @override

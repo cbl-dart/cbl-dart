@@ -29,6 +29,11 @@ abstract interface class FragmentInterface {
   /// The value of this fragment as a [num].
   num? get number;
 
+  /// The value of this fragment as a [BigInt].
+  ///
+  /// {@macro cbl.bigIntegerGetter}
+  BigInt? get bigInteger;
+
   /// The value of this fragment as a [bool].
   bool get boolean;
 
@@ -60,6 +65,9 @@ abstract interface class MutableFragmentInterface implements FragmentInterface {
   set integer(int value);
   set float(double value);
   set number(num? value);
+
+  /// {@macro cbl.bigIntegerSetter}
+  set bigInteger(BigInt? value);
   set boolean(bool value);
   set date(DateTime? value);
   set blob(Blob? value);
@@ -216,6 +224,16 @@ final class FragmentImpl implements Fragment {
       return (_parent as DictionaryInterface?)?.number(_key!);
     } else if (_isValidIndex()) {
       return (_parent as ArrayInterface?)?.number(_index);
+    }
+    return null;
+  }
+
+  @override
+  BigInt? get bigInteger {
+    if (_key != null) {
+      return (_parent as DictionaryInterface?)?.bigInteger(_key!);
+    } else if (_isValidIndex()) {
+      return (_parent as ArrayInterface?)?.bigInteger(_index);
     }
     return null;
   }
@@ -391,6 +409,17 @@ final class MutableFragmentImpl extends FragmentImpl
       (_parent as MutableDictionary).setNumber(value, key: _key!);
     } else {
       (_parent as MutableArray).setNumber(value, at: _index);
+    }
+  }
+
+  @override
+  set bigInteger(BigInt? value) {
+    _checkHasParent();
+
+    if (_key != null) {
+      (_parent as MutableDictionary).setBigInteger(value, key: _key!);
+    } else {
+      (_parent as MutableArray).setBigInteger(value, at: _index);
     }
   }
 

@@ -42,6 +42,8 @@ struct CBLDart_LoadedFLValue {
   bool exists;
   int8_t type;
   bool isInteger;
+  bool isUnsigned;  // Whether the integer is >= 2^63. In this case asInt
+                    // holds the bits of the uint64_t value.
   uint32_t collectionSize;
   bool asBool;
   int64_t asInt;

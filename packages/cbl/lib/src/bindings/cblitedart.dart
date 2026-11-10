@@ -542,6 +542,9 @@ final class CBLDart_LoadedFLValue extends ffi.Struct {
   @ffi.Bool()
   external bool isInteger;
 
+  @ffi.Bool()
+  external bool isUnsigned;
+
   @ffi.Uint32()
   external int collectionSize;
 
@@ -568,6 +571,7 @@ final class CBLDart_LoadedFLValue extends ffi.Struct {
     required bool exists,
     required int type,
     required bool isInteger,
+    required bool isUnsigned,
     required int collectionSize,
     required bool asBool,
     required int asInt,
@@ -580,6 +584,7 @@ final class CBLDart_LoadedFLValue extends ffi.Struct {
     ..ref.exists = exists
     ..ref.type = type
     ..ref.isInteger = isInteger
+    ..ref.isUnsigned = isUnsigned
     ..ref.collectionSize = collectionSize
     ..ref.asBool = asBool
     ..ref.asInt = asInt

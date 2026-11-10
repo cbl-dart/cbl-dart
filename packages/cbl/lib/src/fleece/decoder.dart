@@ -325,7 +325,7 @@ class RecursiveFleeceDecoder extends Converter<Data, Object?> {
       case .boolean:
         return value.asBool;
       case .number:
-        return value.isInteger ? value.asInt : value.asDouble;
+        return value.asNumber;
       case .string:
         return sharedStringsTable.decode(.value);
       case .data:
@@ -365,7 +365,7 @@ Never _throwUndefinedDartRepresentation() =>
 abstract final class _FleeceListener {
   void handleString(String value) {}
   void handleData(Uint8List value) {}
-  void handleNumber(num value) {}
+  void handleNumber(Object value) {}
   // ignore: avoid_positional_boolean_parameters
   void handleBool(bool value) {}
   void handleUndefined() {}
@@ -421,9 +421,7 @@ final class _FleeceListenerDecoder {
             _listener.handleBool(value.asBool);
             _currentLoader.handleValue();
           case .number:
-            _listener.handleNumber(
-              value.isInteger ? value.asInt : value.asDouble,
-            );
+            _listener.handleNumber(value.asNumber);
             _currentLoader.handleValue();
           case .string:
             _listener.handleString(_sharedStringsTable.decode(.value));
@@ -616,7 +614,7 @@ final class _BuildDartObjectListener extends _FleeceListener {
   }
 
   @override
-  void handleNumber(num value) {
+  void handleNumber(Object value) {
     _value = value;
   }
 

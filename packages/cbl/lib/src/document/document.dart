@@ -294,6 +294,9 @@ final class DelegateDocument with IterableMixin<String> implements Document {
   num? number(String key) => _properties.number(key);
 
   @override
+  BigInt? bigInteger(String key) => _properties.bigInteger(key);
+
+  @override
   bool boolean(String key) => _properties.boolean(key);
 
   @override
@@ -395,6 +398,10 @@ final class MutableDelegateDocument extends DelegateDocument
   @override
   void setNumber(num? value, {required String key}) =>
       _mutableProperties.setNumber(value, key: key);
+
+  @override
+  void setBigInteger(BigInt? value, {required String key}) =>
+      _mutableProperties.setBigInteger(value, key: key);
 
   @override
   void setBoolean(bool value, {required String key}) =>

@@ -95,6 +95,8 @@ void CBLDart_GetLoadedFLValue(FLValue value, CBLDart_LoadedFLValue* out) {
       out->isInteger = isInteger;
       if (isInteger) {
         out->asInt = FLValue_AsInt(value);
+        // For integers >= 2^63, FLValue_AsInt returns the bits of the uint64_t.
+        out->isUnsigned = out->asInt < 0 && FLValue_IsUnsigned(value);
       } else {
         out->asDouble = FLValue_AsDouble(value);
       }

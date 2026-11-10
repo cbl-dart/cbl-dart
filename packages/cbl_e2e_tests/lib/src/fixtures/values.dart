@@ -8,3 +8,12 @@ final testBlob = BlobImpl.fromProperties({
 });
 
 final testDate = DateTime.now();
+
+/// The largest integer that Couchbase Lite can store.
+final maxUint64 = (BigInt.one << 64) - BigInt.one;
+
+/// The smallest integer that Couchbase Lite can store.
+final minInt64 = -(BigInt.one << 63);
+
+/// The largest value of an [int].
+const maxInt64 = 9223372036854775807;

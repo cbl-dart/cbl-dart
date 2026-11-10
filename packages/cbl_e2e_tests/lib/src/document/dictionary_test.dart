@@ -266,6 +266,22 @@ void main() {
         );
       });
 
+      test('setBigInteger', () {
+        final dictionary = MutableDictionary()
+          ..setBigInteger(maxUint64, key: 'a')
+          ..setBigInteger(BigInt.from(-1), key: 'b')
+          ..setInteger(3, key: 'c');
+
+        expect(dictionary.bigInteger('a'), maxUint64);
+        expect(dictionary.value('b'), -1);
+        expect(dictionary.bigInteger('c'), BigInt.from(3));
+        expect(dictionary['a'].bigInteger, maxUint64);
+        expect(
+          () => dictionary.setBigInteger(maxUint64 + BigInt.one, key: 'd'),
+          throwsArgumentError,
+        );
+      });
+
       test('setData', () {
         final dictionary = MutableDictionary()
           ..setData({
