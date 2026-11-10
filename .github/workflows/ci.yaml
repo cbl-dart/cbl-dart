@@ -135,7 +135,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        sdk: [3.10.0, stable]
+        sdk: [3.11.0, stable]
         dependencies: [legacy, hooks2, code2, latest]
     runs-on: runs-on=${{ github.run_id }}/runner=ubuntu22-2cpu
     steps:

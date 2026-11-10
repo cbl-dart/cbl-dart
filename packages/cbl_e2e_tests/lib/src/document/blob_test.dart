@@ -285,9 +285,7 @@ void main() {
 }
 
 const contentType = 'application/octet-stream';
-// TODO(blaugold): Remove ignore when Dart 3.2 is a minimum requirement.
-// ignore: unnecessary_cast
-final fixedTestContent = utf8.encode('content') as Uint8List;
+final fixedTestContent = utf8.encode('content');
 
 Blob blobFromData() => .fromData(contentType, fixedTestContent);
 

@@ -39,7 +39,7 @@ configured via `hooks.user_defines.cbl` in the workspace root `pubspec.yaml`.
 
 ## Requirements
 
-- Dart SDK `^3.10.0`
+- Dart SDK `^3.11.0`
 - Flutter (stable)
 - melos
   ```shell

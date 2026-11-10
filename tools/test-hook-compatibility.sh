@@ -37,7 +37,7 @@ trap 'rm -rf "$app_dir"' EXIT
 cat > "$app_dir/pubspec.yaml" <<EOF
 name: cbl_hook_compatibility
 environment:
-  sdk: ^3.10.0
+  sdk: ^3.11.0
 dependencies:
   cbl:
     path: '$repo_dir/packages/cbl'
