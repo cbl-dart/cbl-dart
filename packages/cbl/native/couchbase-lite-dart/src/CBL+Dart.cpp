@@ -10,6 +10,7 @@
 #include "AsyncCallback.h"
 #include "CBL+Dart.h"
 #include "CpuSupport.h"
+#include "LinuxUnwinder.h"
 #include "Utils.h"
 #include "dart/dart_api.h"
 
@@ -35,6 +36,10 @@ CBLDartInitializeResult CBLDart_Initialize(void* dartInitializeDlData,
     // Only initialize libraries once.
     return CBLDartInitializeResult_kSuccess;
   }
+
+  // Must happen before any call into libcblite that can throw a C++
+  // exception internally.
+  CBLDart::EnsureGccUnwinderBinding();
 
 #ifdef __ANDROID__
   // Initialize the Couchbase Lite library.
@@ -469,6 +474,9 @@ CBLDatabase* CBLDart_CBLDatabase_Open(FLString name,
                         : CBLDatabaseConfiguration_Default();
 
   auto database = CBLDatabase_Open(name, &config_, errorOut);
+
+  // Opening a database can load extensions, such as vector search.
+  CBLDart::EnsureGccUnwinderBinding();
 
   if (database) {
     CBLDart_RegisterOpenDatabase(database);

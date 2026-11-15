@@ -89,13 +89,18 @@ Future<void> buildHook(BuildInput input, BuildOutputBuilder output) async {
       'native/couchbase-lite-dart/src/AsyncCallback.cpp',
       'native/couchbase-lite-dart/src/Utils.cpp',
       'native/couchbase-lite-dart/src/CpuSupport.cpp',
+      'native/couchbase-lite-dart/src/LinuxUnwinder.cpp',
       'native/couchbase-lite-dart/src/dart_api_dl.cpp',
     ],
     includes: [
       'native/vendor/dart/include',
       'native/couchbase-lite-dart/include',
     ],
-    libraries: [if (targetOS != OS.iOS) 'cblite'],
+    libraries: [
+      if (targetOS != OS.iOS) 'cblite',
+      // dlopen, dlsym and dladdr live in libdl before glibc 2.34.
+      if (targetOS == OS.linux) 'dl',
+    ],
     libraryDirectories: [if (targetOS != OS.iOS) libDir],
     flags: [
       if (targetOS != OS.windows) '-fvisibility=hidden',
