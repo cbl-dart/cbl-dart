@@ -11,10 +11,10 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <cstring>
 #include <mutex>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include "cbl/CouchbaseLite.h"
@@ -31,58 +31,84 @@ constexpr uint32_t kJumpSlotReloc = R_AARCH64_JUMP_SLOT;
 constexpr uint32_t kGlobDatReloc = R_AARCH64_GLOB_DAT;
 #endif
 
-constexpr const char* kUnwindPrefix = "_Unwind_";
-constexpr size_t kUnwindPrefixLength = 8;
-
-struct LoadedObject {
-  std::string name;
-  ElfW(Addr) base;
-  const ElfW(Phdr) * phdrs;
-  ElfW(Half) phnum;
+// The unwinder API of libgcc_s.
+constexpr const char* kUnwindFunctions[] = {
+    "_Unwind_Backtrace",
+    "_Unwind_DeleteException",
+    "_Unwind_FindEnclosingFunction",
+    "_Unwind_Find_FDE",
+    "_Unwind_ForcedUnwind",
+    "_Unwind_GetCFA",
+    "_Unwind_GetDataRelBase",
+    "_Unwind_GetGR",
+    "_Unwind_GetIP",
+    "_Unwind_GetIPInfo",
+    "_Unwind_GetLanguageSpecificData",
+    "_Unwind_GetRegionStart",
+    "_Unwind_GetTextRelBase",
+    "_Unwind_RaiseException",
+    "_Unwind_Resume",
+    "_Unwind_Resume_or_Rethrow",
+    "_Unwind_SetGR",
+    "_Unwind_SetIP",
 };
 
-int CollectLoadedObject(dl_phdr_info* info, size_t, void* data) {
-  static_cast<std::vector<LoadedObject>*>(data)->push_back(
-      {info->dlpi_name ? info->dlpi_name : "", info->dlpi_addr, info->dlpi_phdr,
-       info->dlpi_phnum});
-  return 0;
-}
+struct Definitions {
+  void* conflicting;
+  void* libgcc;
+};
 
 /// Rewrites the `_Unwind_*` relocations of loaded objects, which are bound to
 /// the conflicting object, to the definitions in libgcc_s.
+///
+/// Objects are processed from within the dl_iterate_phdr callback, while the
+/// loader prevents them from being unloaded. The callback must not call into
+/// the loader (dlsym, dladdr, ...), since that can deadlock.
 class UnwindRebinder {
  public:
-  UnwindRebinder(void* libgcc, const void* conflictingBase)
-      : libgcc_(libgcc), conflictingBase_(conflictingBase) {}
+  UnwindRebinder(ElfW(Addr) conflictingLoadAddress,
+                 std::unordered_map<std::string, Definitions> definitions)
+      : conflictingLoadAddress_(conflictingLoadAddress),
+        definitions_(std::move(definitions)),
+        pageSize_(static_cast<ElfW(Addr)>(sysconf(_SC_PAGESIZE))) {}
 
-  void rebind(const LoadedObject& object) {
+  static int Rebind(dl_phdr_info* info, size_t, void* data) {
+    static_cast<UnwindRebinder*>(data)->rebind(*info);
+    return 0;
+  }
+
+  int reboundCount() const { return reboundCount_; }
+
+  const std::string& problems() const { return problems_; }
+
+ private:
+  void rebind(const dl_phdr_info& object) {
+    // The conflicting object keeps using its own unwinder.
+    if (object.dlpi_addr == conflictingLoadAddress_) {
+      return;
+    }
+
     const ElfW(Phdr)* dynamicPhdr = nullptr;
     const ElfW(Phdr)* relroPhdr = nullptr;
-    for (ElfW(Half) i = 0; i < object.phnum; i++) {
-      if (object.phdrs[i].p_type == PT_DYNAMIC) {
-        dynamicPhdr = &object.phdrs[i];
-      } else if (object.phdrs[i].p_type == PT_GNU_RELRO) {
-        relroPhdr = &object.phdrs[i];
+    for (ElfW(Half) i = 0; i < object.dlpi_phnum; i++) {
+      if (object.dlpi_phdr[i].p_type == PT_DYNAMIC) {
+        dynamicPhdr = &object.dlpi_phdr[i];
+      } else if (object.dlpi_phdr[i].p_type == PT_GNU_RELRO) {
+        relroPhdr = &object.dlpi_phdr[i];
       }
     }
     if (!dynamicPhdr) {
       return;
     }
 
+    auto base = object.dlpi_addr;
     auto dynamic =
-        reinterpret_cast<const ElfW(Dyn)*>(object.base + dynamicPhdr->p_vaddr);
-
-    // The conflicting object keeps using its own unwinder.
-    Dl_info objectInfo;
-    if (dladdr(dynamic, &objectInfo) &&
-        objectInfo.dli_fbase == conflictingBase_) {
-      return;
-    }
+        reinterpret_cast<const ElfW(Dyn)*>(base + dynamicPhdr->p_vaddr);
 
     // glibc rewrites these entries to absolute addresses in memory, unless
     // the dynamic section is read-only (e.g. the vDSO).
     auto toAddress = [&](ElfW(Addr) pointer) {
-      return pointer < object.base ? pointer + object.base : pointer;
+      return pointer < base ? pointer + base : pointer;
     };
 
     ElfW(Addr) symtab = 0, strtab = 0, rela = 0, jmprel = 0;
@@ -126,6 +152,18 @@ class UnwindRebinder {
       return;
     }
 
+    // RELRO pages are read-only after relocation. glibc protects the range
+    // rounded down to page boundaries at both ends.
+    ElfW(Addr) relroStart = 0, relroEnd = 0;
+    if (relroPhdr) {
+      relroStart = (base + relroPhdr->p_vaddr) & ~(pageSize_ - 1);
+      relroEnd =
+          (base + relroPhdr->p_vaddr + relroPhdr->p_memsz) & ~(pageSize_ - 1);
+    }
+    auto isInRelro = [&](ElfW(Addr) address) {
+      return address >= relroStart && address < relroEnd;
+    };
+
     std::vector<std::pair<ElfW(Addr), void*>> writes;
     auto collectWrites = [&](ElfW(Addr) table, size_t size) {
       if (!table || !size) {
@@ -149,22 +187,27 @@ class UnwindRebinder {
         if (strsz && nameOffset >= strsz) {
           continue;
         }
-        auto name = strings + nameOffset;
-        if (strncmp(name, kUnwindPrefix, kUnwindPrefixLength) != 0) {
+        auto definitions = definitions_.find(strings + nameOffset);
+        if (definitions == definitions_.end()) {
           continue;
         }
-        auto target = resolveLibgccDefinition(name);
-        if (!target) {
-          continue;
-        }
-        auto slot = object.base + relocs[i].r_offset;
+        auto slot = base + relocs[i].r_offset;
         if (!isMapped(object, slot, sizeof(void*), PF_W)) {
-          addProblem(object, std::string("slot of ") + name + " not writable");
+          addProblem(object, std::string("slot of ") + definitions->first +
+                                 " not writable");
           continue;
         }
-        if (*reinterpret_cast<void* const*>(slot) != target) {
-          writes.emplace_back(slot, target);
+        auto current = *reinterpret_cast<void* const*>(slot);
+        if (current == definitions->second.libgcc) {
+          continue;
         }
+        // Only touch RELRO slots once the loader has bound them, so that we
+        // never change the protection of an object that is still being
+        // relocated by a concurrent dlopen.
+        if (isInRelro(slot) && current != definitions->second.conflicting) {
+          continue;
+        }
+        writes.emplace_back(slot, definitions->second.libgcc);
       }
     };
     collectWrites(rela, relasz);
@@ -178,18 +221,9 @@ class UnwindRebinder {
       return;
     }
 
-    // RELRO pages are read-only after relocation. glibc protects the range
-    // rounded down to page boundaries at both ends.
-    ElfW(Addr) relroStart = 0, relroEnd = 0;
-    if (relroPhdr) {
-      auto pageSize = static_cast<ElfW(Addr)>(sysconf(_SC_PAGESIZE));
-      relroStart = (object.base + relroPhdr->p_vaddr) & ~(pageSize - 1);
-      relroEnd = (object.base + relroPhdr->p_vaddr + relroPhdr->p_memsz) &
-                 ~(pageSize - 1);
-    }
     bool needsUnprotect = false;
     for (auto& write : writes) {
-      if (write.first >= relroStart && write.first < relroEnd) {
+      if (isInRelro(write.first)) {
         needsUnprotect = true;
       }
     }
@@ -206,8 +240,7 @@ class UnwindRebinder {
     }
 
     for (auto& write : writes) {
-      bool inRelro = write.first >= relroStart && write.first < relroEnd;
-      if (inRelro && !relroWritable) {
+      if (isInRelro(write.first) && !relroWritable) {
         continue;
       }
       __atomic_store_n(reinterpret_cast<void**>(write.first), write.second,
@@ -220,37 +253,15 @@ class UnwindRebinder {
     }
   }
 
-  int reboundCount() const { return reboundCount_; }
-
-  const std::string& problems() const { return problems_; }
-
- private:
-  void* resolveLibgccDefinition(const char* name) {
-    auto cached = definitions_.find(name);
-    if (cached != definitions_.end()) {
-      return cached->second;
-    }
-
-    void* result = nullptr;
-    Dl_info info;
-    auto defaultDefinition = dlsym(RTLD_DEFAULT, name);
-    if (defaultDefinition && dladdr(defaultDefinition, &info) &&
-        info.dli_fbase == conflictingBase_) {
-      result = dlsym(libgcc_, name);
-    }
-    definitions_.emplace(name, result);
-    return result;
-  }
-
-  static bool isMapped(const LoadedObject& object, ElfW(Addr) address,
+  static bool isMapped(const dl_phdr_info& object, ElfW(Addr) address,
                        size_t size, ElfW(Word) requiredFlags = 0) {
-    for (ElfW(Half) i = 0; i < object.phnum; i++) {
-      auto& phdr = object.phdrs[i];
+    for (ElfW(Half) i = 0; i < object.dlpi_phnum; i++) {
+      auto& phdr = object.dlpi_phdr[i];
       if (phdr.p_type != PT_LOAD ||
           (phdr.p_flags & requiredFlags) != requiredFlags) {
         continue;
       }
-      auto start = object.base + phdr.p_vaddr;
+      auto start = object.dlpi_addr + phdr.p_vaddr;
       auto end = start + phdr.p_memsz;
       if (address >= start && address <= end && size <= end - address) {
         return true;
@@ -259,17 +270,18 @@ class UnwindRebinder {
     return false;
   }
 
-  void addProblem(const LoadedObject& object, const std::string& problem) {
+  void addProblem(const dl_phdr_info& object, const std::string& problem) {
     if (!problems_.empty()) {
       problems_ += "; ";
     }
     problems_ +=
-        (object.name.empty() ? "<main>" : object.name) + ": " + problem;
+        (object.dlpi_name && object.dlpi_name[0] ? object.dlpi_name : "<main>");
+    problems_ += ": " + problem;
   }
 
-  void* libgcc_;
-  const void* conflictingBase_;
-  std::unordered_map<std::string, void*> definitions_;
+  ElfW(Addr) conflictingLoadAddress_;
+  std::unordered_map<std::string, Definitions> definitions_;
+  ElfW(Addr) pageSize_;
   int reboundCount_ = 0;
   std::string problems_;
 };
@@ -308,16 +320,28 @@ void RebindUnwinder() {
 
   auto libgccRaise = dlsym(libgcc, "_Unwind_RaiseException");
   Dl_info defaultInfo, libgccInfo;
-  if (libgccRaise && dladdr(defaultRaise, &defaultInfo) &&
-      dladdr(libgccRaise, &libgccInfo) &&
+  link_map* conflictingMap = nullptr;
+  if (libgccRaise &&
+      dladdr1(defaultRaise, &defaultInfo,
+              reinterpret_cast<void**>(&conflictingMap), RTLD_DL_LINKMAP) &&
+      conflictingMap && dladdr(libgccRaise, &libgccInfo) &&
       defaultInfo.dli_fbase != libgccInfo.dli_fbase) {
-    std::vector<LoadedObject> objects;
-    dl_iterate_phdr(CollectLoadedObject, &objects);
-
-    UnwindRebinder rebinder(libgcc, defaultInfo.dli_fbase);
-    for (auto& object : objects) {
-      rebinder.rebind(object);
+    // Resolve everything up front, since the rebinder must not call into the
+    // loader.
+    std::unordered_map<std::string, Definitions> definitions;
+    for (auto name : kUnwindFunctions) {
+      auto conflicting = dlsym(RTLD_DEFAULT, name);
+      auto gcc = dlsym(libgcc, name);
+      Dl_info info;
+      if (conflicting && gcc && dladdr(conflicting, &info) &&
+          info.dli_fbase == defaultInfo.dli_fbase) {
+        definitions.emplace(name, Definitions{conflicting, gcc});
+      }
     }
+    dlerror();
+
+    UnwindRebinder rebinder(conflictingMap->l_addr, std::move(definitions));
+    dl_iterate_phdr(UnwindRebinder::Rebind, &rebinder);
 
     auto conflictingName =
         defaultInfo.dli_fname ? defaultInfo.dli_fname : "<unknown>";
