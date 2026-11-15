@@ -170,7 +170,7 @@ packages:
     source: hosted
     version: "0.2.0"
   cli_launcher:
-    dependency: transitive
+    dependency: "direct dev"
     description:
       name: cli_launcher
       sha256: ff37bcc6d5fa25ab7ddcf255a60900b28e4e1712d34495e5f7952e0982933913
@@ -458,6 +458,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.2"
+  listen:
+    dependency: transitive
+    description:
+      name: listen
+      sha256: "47501a08016a43fcad79252439d723f50f14f88fa7bfd8a177e0a417e5c9e1f2"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.1"
   logging:
     dependency: transitive
     description:

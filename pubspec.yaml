@@ -25,6 +25,8 @@ workspace:
 dev_dependencies:
   cbd:
     path: tool
+  # Required for melos to find its entry point on Dart 3.14+.
+  cli_launcher: ^0.3.4+1
   daco: ^0.5.2+1
   melos: 7.8.1
   path: ^1.9.1
