@@ -25,7 +25,10 @@ Starting with Flutter 3.50, the Linux Flutter engine exports its own C++
 unwinder. Without a workaround, Couchbase Lite can abort with
 `terminate called after throwing an instance of 'litecore::error'` when it
 handles an internal error. To avoid this, link `libgcc_s` before the Flutter
-library in your app's `linux/CMakeLists.txt`:
+library in your app's `linux/runner/CMakeLists.txt` (or `linux/CMakeLists.txt`
+for projects created before the runner was split into its own directory). The
+new line must come before
+`target_link_libraries(${BINARY_NAME} PRIVATE flutter)`:
 
 ```cmake
 apply_standard_settings(${BINARY_NAME})
