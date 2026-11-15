@@ -228,7 +228,6 @@ final class BuiltinScalarType extends TypedDataType {
   BuiltinScalarType({required super.dartType, super.isNullable = false})
     : super(mutableDartType: dartType, isCached: false);
 
-  // ignore: avoid_positional_boolean_parameters
   BuiltinScalarType withNullability(bool isNullable) =>
       BuiltinScalarType(dartType: dartType, isNullable: isNullable);
 }

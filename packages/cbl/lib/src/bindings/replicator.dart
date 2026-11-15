@@ -252,11 +252,7 @@ final class CBLReplicatedDocument {
 }
 
 final class DocumentReplicationsCallbackMessage {
-  DocumentReplicationsCallbackMessage(
-    // ignore: avoid_positional_boolean_parameters
-    this.isPush,
-    this.documents,
-  );
+  DocumentReplicationsCallbackMessage(this.isPush, this.documents);
 
   DocumentReplicationsCallbackMessage.fromArguments(List<Object?> arguments)
     : this(

@@ -1300,7 +1300,7 @@ Future<void> autoPurgeTest({required bool enableAutoPurge}) async {
 
   // Remove document from the user's channel.
   doc['channels'].value = null;
-  collection.saveDocument(doc);
+  await collection.saveDocument(doc);
 
   await documentAccessRemoved.future;
 

@@ -210,7 +210,6 @@ final class SlotBindings {
     cblite.FLSlot_SetNull(slot);
   }
 
-  // ignore: avoid_positional_boolean_parameters
   static void setBool(cblite.FLSlot slot, bool value) {
     cblite.FLSlot_SetBool(slot, value);
   }
@@ -761,7 +760,6 @@ final class FleeceEncoderBindings {
     _checkError(encoder, cblite.FLEncoder_WriteNull(encoder));
   }
 
-  // ignore: avoid_positional_boolean_parameters
   static void writeBool(cblite.FLEncoder encoder, bool value) {
     _checkError(encoder, cblite.FLEncoder_WriteBool(encoder, value));
   }

@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_positional_boolean_parameters
-
 import 'package:cbl/cbl.dart';
 
 part 'builtin_types.cbl.type.g.dart';

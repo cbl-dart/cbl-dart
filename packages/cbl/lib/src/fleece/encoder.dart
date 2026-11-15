@@ -150,7 +150,6 @@ final class FleeceEncoder implements Finalizable {
   void writeNull() => FleeceEncoderBindings.writeNull(_pointer);
 
   /// Writes the [bool] [value] to this encoder.
-  // ignore: avoid_positional_boolean_parameters
   void writeBool(bool value) =>
       FleeceEncoderBindings.writeBool(_pointer, value);
 

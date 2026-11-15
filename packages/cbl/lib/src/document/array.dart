@@ -163,7 +163,6 @@ abstract interface class MutableArrayInterface
   /// Sets a [bool] [at] the given index.
   ///
   /// {@macro cbl.MutableArrayInterface.setter}
-  // ignore: avoid_positional_boolean_parameters
   void setBoolean(bool value, {required int at});
 
   /// Sets a [DateTime] [at] the given index.
@@ -214,7 +213,6 @@ abstract interface class MutableArrayInterface
   void addBlob(Blob? value);
 
   /// Adds a [bool] at the end of this array.
-  // ignore: avoid_positional_boolean_parameters
   void addBoolean(bool value);
 
   /// Adds a [DateTime] at the end of this array.
@@ -267,7 +265,6 @@ abstract interface class MutableArrayInterface
   /// Inserts a [bool] [at] the given index.
   ///
   /// {@macro cbl.MutableArrayInterface.inserter}
-  // ignore: avoid_positional_boolean_parameters
   void insertBoolean(bool value, {required int at});
 
   /// Inserts a [DateTime] [at] the given index.
