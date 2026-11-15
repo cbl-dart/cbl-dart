@@ -14,6 +14,7 @@
 #include <mutex>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -61,14 +62,18 @@ struct Definitions {
 /// Rewrites the `_Unwind_*` relocations of loaded objects, which are bound to
 /// the conflicting object, to the definitions in libgcc_s.
 ///
-/// Objects are processed from within the dl_iterate_phdr callback, while the
-/// loader prevents them from being unloaded. The callback must not call into
-/// the loader (dlsym, dladdr, ...), since that can deadlock.
+/// Objects are processed from within the dl_iterate_phdr callback. The
+/// callback must not call into the loader (dlsym, dladdr, ...), since that
+/// can deadlock. Only pinned objects are processed: objects that a concurrent
+/// dlopen is still relocating are also visible to dl_iterate_phdr and must
+/// not be touched.
 class UnwindRebinder {
  public:
   UnwindRebinder(ElfW(Addr) conflictingLoadAddress,
+                 std::unordered_set<ElfW(Addr)> pinnedLoadAddresses,
                  std::unordered_map<std::string, Definitions> definitions)
       : conflictingLoadAddress_(conflictingLoadAddress),
+        pinnedLoadAddresses_(std::move(pinnedLoadAddresses)),
         definitions_(std::move(definitions)),
         pageSize_(static_cast<ElfW(Addr)>(sysconf(_SC_PAGESIZE))) {}
 
@@ -84,7 +89,8 @@ class UnwindRebinder {
  private:
   void rebind(const dl_phdr_info& object) {
     // The conflicting object keeps using its own unwinder.
-    if (object.dlpi_addr == conflictingLoadAddress_) {
+    if (object.dlpi_addr == conflictingLoadAddress_ ||
+        !pinnedLoadAddresses_.count(object.dlpi_addr)) {
       return;
     }
 
@@ -201,12 +207,6 @@ class UnwindRebinder {
         if (current == definitions->second.libgcc) {
           continue;
         }
-        // Only touch RELRO slots once the loader has bound them, so that we
-        // never change the protection of an object that is still being
-        // relocated by a concurrent dlopen.
-        if (isInRelro(slot) && current != definitions->second.conflicting) {
-          continue;
-        }
         writes.emplace_back(slot, definitions->second.libgcc);
       }
     };
@@ -280,11 +280,18 @@ class UnwindRebinder {
   }
 
   ElfW(Addr) conflictingLoadAddress_;
+  std::unordered_set<ElfW(Addr)> pinnedLoadAddresses_;
   std::unordered_map<std::string, Definitions> definitions_;
   ElfW(Addr) pageSize_;
   int reboundCount_ = 0;
   std::string problems_;
 };
+
+int CollectName(dl_phdr_info* info, size_t, void* data) {
+  static_cast<std::vector<std::string>*>(data)->emplace_back(
+      info->dlpi_name ? info->dlpi_name : "");
+  return 0;
+}
 
 struct LoadCounters {
   bool available;
@@ -340,8 +347,34 @@ void RebindUnwinder() {
     }
     dlerror();
 
-    UnwindRebinder rebinder(conflictingMap->l_addr, std::move(definitions));
+    // Pin all loaded objects. dlopen waits for a concurrent dlopen or dlclose
+    // to finish, so pinned objects are fully relocated and stay loaded.
+    std::vector<std::string> names;
+    dl_iterate_phdr(CollectName, &names);
+    std::vector<void*> handles;
+    std::unordered_set<ElfW(Addr)> pinnedLoadAddresses;
+    for (auto& name : names) {
+      auto handle = dlopen(name.empty() ? nullptr : name.c_str(),
+                           RTLD_LAZY | RTLD_NOLOAD);
+      if (!handle) {
+        continue;
+      }
+      handles.push_back(handle);
+      link_map* map = nullptr;
+      if (dlinfo(handle, RTLD_DI_LINKMAP, &map) == 0 && map) {
+        pinnedLoadAddresses.insert(map->l_addr);
+      }
+    }
+    dlerror();
+
+    UnwindRebinder rebinder(conflictingMap->l_addr,
+                            std::move(pinnedLoadAddresses),
+                            std::move(definitions));
     dl_iterate_phdr(UnwindRebinder::Rebind, &rebinder);
+
+    for (auto handle : handles) {
+      dlclose(handle);
+    }
 
     auto conflictingName =
         defaultInfo.dli_fname ? defaultInfo.dli_fname : "<unknown>";
