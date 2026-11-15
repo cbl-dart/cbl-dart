@@ -52,6 +52,11 @@ add_executable(${BINARY_NAME}
   "${FLUTTER_MANAGED_DIR}/generated_plugin_registrant.cc"
 )
 apply_standard_settings(${BINARY_NAME})
+# Flutter >= 3.50 exports LLVM libunwind's _Unwind_* symbols from
+# libflutter_linux_gtk.so. Load libgcc_s first so that C++ exceptions thrown by
+# libstdc++-based native libraries (such as libcblite) use the matching
+# unwinder; otherwise they abort with std::terminate.
+target_link_libraries(${BINARY_NAME} PRIVATE "-Wl,--no-as-needed" gcc_s "-Wl,--as-needed")
 target_link_libraries(${BINARY_NAME} PRIVATE flutter)
 target_link_libraries(${BINARY_NAME} PRIVATE PkgConfig::GTK)
 add_dependencies(${BINARY_NAME} flutter_assemble)
