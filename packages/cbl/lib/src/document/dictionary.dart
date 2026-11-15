@@ -146,7 +146,6 @@ abstract interface class MutableDictionaryInterface
   void setBigInteger(BigInt? value, {required String key});
 
   /// Sets a [bool] for the given [key].
-  // ignore: avoid_positional_boolean_parameters
   void setBoolean(bool value, {required String key});
 
   /// Sets a [DateTime] for the given [key].

@@ -60,7 +60,6 @@ abstract final class Parameters {
   /// Set a [bool] to the query parameter referenced by the given [name].
   ///
   /// {@macro cbl.Parameters.parameterDefinition}
-  // ignore: avoid_positional_boolean_parameters
   void setBoolean(bool? value, {required String name});
 
   /// Set a [DateTime] to the query parameter referenced by the given [name].

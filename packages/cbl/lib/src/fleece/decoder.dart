@@ -366,7 +366,6 @@ abstract final class _FleeceListener {
   void handleString(String value) {}
   void handleData(Uint8List value) {}
   void handleNumber(Object value) {}
-  // ignore: avoid_positional_boolean_parameters
   void handleBool(bool value) {}
   void handleUndefined() {}
   void handleNull() {}

@@ -546,7 +546,6 @@ final class BaseBindings {
 
   static void completeCompleterWithBool(
     cblitedart.CBLDart_Completer completer,
-    // ignore: avoid_positional_boolean_parameters
     bool result,
   ) {
     cblitedart.CBLDart_Completer_Complete(completer, result ? 1 : 0);

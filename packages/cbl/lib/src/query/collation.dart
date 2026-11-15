@@ -37,7 +37,6 @@ abstract final class AsciiCollation implements CollationInterface {
   ///
   /// Case-sensitive collation will treat ASCII uppercase and lowercase letters
   /// as equivalent.
-  // ignore: avoid_positional_boolean_parameters
   AsciiCollation ignoreCase(bool ignoreCase);
 }
 
@@ -54,11 +53,9 @@ abstract final class UnicodeCollation implements CollationInterface {
   ///
   /// Case-insensitive collation will treat uppercase and lowercase letters as
   /// equivalent.
-  // ignore: avoid_positional_boolean_parameters
   UnicodeCollation ignoreCase(bool ignoreCase);
 
   /// Specifies whether the collation ignores accents and diacritics.
-  // ignore: avoid_positional_boolean_parameters
   UnicodeCollation ignoreAccents(bool ignoreAccents);
 
   /// Specifies the [locale] for which the collation will compare strings

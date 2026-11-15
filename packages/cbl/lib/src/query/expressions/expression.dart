@@ -137,7 +137,6 @@ abstract final class Expression {
   static ExpressionInterface number(num? value) => Expression.value(value);
 
   /// Creates a literal [bool] expression.
-  // ignore: avoid_positional_boolean_parameters
   static ExpressionInterface boolean(bool value) => Expression.value(value);
 
   /// Creates a literal [DateTime] expression.
